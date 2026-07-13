@@ -1,0 +1,52 @@
+How to Install-Searchable dropdown
+1. Install: npm install @ng-select/ng-select
+if version mismatch then install
+   Install: npm install @ng-select/ng-select
+
+2.Component.ts
+import { Component } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { NgSelectModule } from '@ng-select/ng-select';
+
+@Component({
+  selector: 'app-customer',
+  standalone: true,
+  imports: [
+    FormsModule,
+    NgSelectModule
+  ],
+  templateUrl: './customer.component.html'
+})
+export class CustomerComponent {
+
+  selectedCustomer: number | null = null;
+
+  customers = [
+    { id: 1, name: 'BRAC Bank' },
+    { id: 2, name: 'Dutch Bangla Bank' },
+    { id: 3, name: 'City Bank' },
+    { id: 4, name: 'Eastern Bank' },
+    { id: 5, name: 'HSBC Bangladesh' }
+  ];
+}
+
+3.Component.html
+  <div class="position-relative form-group">
+    <label>Customer</label>
+
+    <ng-select
+        [items]="customers"
+        bindLabel="name"
+        bindValue="id"
+        [(ngModel)]="selectedCustomer"
+        placeholder="Search customer..."
+        [searchable]="true"
+        [clearable]="true">
+
+    </ng-select>
+</div>
+
+4.Add to stylesheet.
+@import "@ng-select/ng-select/themes/default.theme.css";
+
+

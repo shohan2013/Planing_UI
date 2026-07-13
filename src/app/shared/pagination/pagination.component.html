@@ -1,0 +1,113 @@
+<div class="p-3 border-top">
+
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+
+    <!-- Left Section -->
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+
+      <div class="d-flex align-items-center gap-2">
+        <label class="mb-0">Rows per page:</label>
+
+        <select
+          [ngModel]="pageSize()"
+          (ngModelChange)="pageSize.set($event); pageSizeChanged.emit($event)"
+          class="form-select form-select-sm w-auto">
+          @for (item of pageSizes(); track item) {
+            <option [value]="item">{{ item }}</option>
+          }
+        </select>
+      </div>
+
+      <span class="text-muted">
+        Showing
+        <strong>{{ totalItems() === 0 ? 0 : startIndex() + 1 }}</strong>
+        to
+        <strong>{{ endIndex() }}</strong>
+        of
+        <strong>{{ totalItems() }}</strong>
+        items
+      </span>
+
+    </div>
+
+    <!-- Right Section -->
+    <nav aria-label="Pagination">
+      <ul class="pagination pagination-sm mb-0">
+
+        <!-- First -->
+        <li class="page-item" [class.disabled]="currentPage() === 1">
+          <button
+            class="page-link"
+            (click)="onFirstPage()"
+            [disabled]="currentPage() === 1">
+            <i class="fa-solid fa-angles-left"></i>
+          </button>
+        </li>
+
+        <!-- Previous -->
+        <li class="page-item" [class.disabled]="currentPage() === 1">
+          <button
+            class="page-link"
+            (click)="onPrevPage()"
+            [disabled]="currentPage() === 1">
+            <i class="fa-solid fa-angle-left"></i>
+          </button>
+        </li>
+
+        <!-- Page Numbers -->
+        @for (p of visiblePages(); track p) {
+
+          @if (p === -1 || p === -2) {
+
+            <li class="page-item disabled">
+              <span class="page-link">
+                <i class="fa-solid fa-ellipsis"></i>
+              </span>
+            </li>
+
+          } @else {
+
+            <li
+              class="page-item"
+              [class.active]="currentPage() === p">
+
+              <button
+                class="page-link"
+                (click)="onGoToPage(p)">
+                {{ p }}
+              </button>
+
+            </li>
+
+          }
+
+        }
+
+        <!-- Next -->
+        <li class="page-item"
+            [class.disabled]="currentPage() === totalPages()">
+          <button
+            class="page-link"
+            (click)="onNextPage()"
+            [disabled]="currentPage() === totalPages()">
+            <i class="fa-solid fa-angle-right"></i>
+          </button>
+        </li>
+
+        <!-- Last -->
+        <li class="page-item"
+            [class.disabled]="currentPage() === totalPages()">
+          <button
+            class="page-link"
+            (click)="onLastPage()"
+            [disabled]="currentPage() === totalPages()">
+            <i class="fa-solid fa-angles-right"></i>
+          </button>
+        </li>
+
+      </ul>
+    </nav>
+
+  </div>
+
+</div>

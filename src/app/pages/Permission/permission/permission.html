@@ -1,0 +1,66 @@
+
+  <div class="card-body">
+        <div class="col-md-12">
+    <div class="card main-card mb-3">
+      <div class="card-header">
+        <h5>CONFIGURATION</h5>
+      </div>
+      <div class="card-body">
+        <!-- Basic Tabs using Bootstrap 5 -->
+        <ul class="nav nav-tabs" id="basicTab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="basic-tab1-tab" data-bs-toggle="tab" data-bs-target="#basic-tab1" type="button" role="tab" aria-controls="basic-tab1" aria-selected="true" [class.active]="activeTab() === 'menu'"
+              (click)="onTabChange('menu')">MENU</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="basic-tab2-tab" data-bs-toggle="tab" data-bs-target="#basic-tab2" type="button" role="tab" aria-controls="basic-tab2" aria-selected="false" [class.active]="activeTab() === 'submenu'"
+              (click)="onTabChange('submenu')">SUBMENU</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="basic-tab3-tab" data-bs-toggle="tab" data-bs-target="#basic-tab3" type="button" role="tab" aria-controls="basic-tab3" aria-selected="false" [class.active]="activeTab() === 'permission'"
+              (click)="onTabChange('permission')">PERMISSION</button>
+          </li>
+           <li class="nav-item" role="presentation">
+            <button class="nav-link" id="basic-tab3-tab" data-bs-toggle="tab" data-bs-target="#basic-tab4" type="button" role="tab" aria-controls="basic-tab3" aria-selected="false" [class.active]="activeTab() === 'approval'"
+              (click)="onTabChange('approval')">APPROVAL MATRIX</button>
+          </li>
+        </ul>
+        <div class="tab-content" id="basicTabContent">
+          <div class="tab-pane fade show active" id="basic-tab1" role="tabpanel" aria-labelledby="basic-tab1-tab">
+           @if (activeTab() === 'menu') {
+              <app-menu></app-menu>
+            }
+          </div>
+          <div class="tab-pane fade" id="basic-tab2" role="tabpanel" aria-labelledby="basic-tab2-tab">
+             @if (activeTab() === 'submenu') {
+              <app-submenu></app-submenu>
+            }
+          </div>
+          <div class="tab-pane fade" id="basic-tab3" role="tabpanel" aria-labelledby="basic-tab3-tab">
+             @if (activeTab() === 'permission') {
+              <app-access-permission></app-access-permission>
+            }
+          </div>
+          <div class="tab-pane fade" id="basic-tab4" role="tabpanel" aria-labelledby="basic-tab3-tab">
+            @if (activeTab() === 'approval') {
+              <app-approvematrix></app-approvematrix>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+  

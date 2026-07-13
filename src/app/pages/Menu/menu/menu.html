@@ -1,0 +1,284 @@
+<div class="user-card">
+
+  <div class="card-header">
+    <h5>MENU CREATION</h5>
+  </div>
+
+  <div class="card-body">
+
+    <div class="d-flex gap-3">
+      <div class="flex-fill">
+        <button type="button" class="btn-shadow d-inline-flex align-items-center btn btn-success"
+          style="margin-left: 5px;" (click)="saveModal(insert)">
+          <i class="fa-solid fa-fw fa-plus" aria-hidden="true" title="plus"></i>
+          Create New
+        </button>
+      </div>
+
+      <div class="flex-fill">
+        <div class="input-group">
+          <div class="input-group-text">
+            <span class=""><i class="fa-solid fa-fw fa-earth-americas" aria-hidden="true"
+                title="earth-americas"></i></span>
+          </div>
+          <input [ngModel]="globalSearch()" (ngModelChange)="updateSearch($event)" placeholder="Search..." type="text"
+            class="form-control">
+        </div>
+      </div>
+    </div><br />
+
+
+    <div class="table-responsive position-relative">
+  <div class="table-loading-overlay" *ngIf="isLoadingdata">
+    <div class="text-center">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <div class="mt-2">Loading data...</div>
+    </div>
+  </div>
+
+
+      <table class="custom-table">
+        <thead>
+          <tr style="font-style: italic;">
+            <th class="text-center">#</th>
+            <th>MENU</th>
+            <th>CODE</th>
+            <th>SEQUENCE</th>
+            <th>CREATED BY</th>
+            <th>CREATED DATE</th>
+            <th>UPDATED BY</th>
+            <th>UPDATED DATE</th>
+            <th>STATUS</th>
+            <th>ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if(filteredItems().length === 0){
+          <tr>
+            <td colspan="100%" class="text-center py-4">
+              <i class="fas fa-folder-open fa-4x text-secondary mb-3"></i><br/>
+              <h6 class="emptymsg">No Records Found.</h6>
+            </td>
+          </tr>
+          }
+
+          @for (item of paginatedItems(); track trackById($index, item)) {
+          <tr>
+            <td>{{ $index + 1 }}</td>
+            <td>{{ item.Name }}</td>
+            <td>{{ item.Code }}</td>
+            <td>{{ item.Sequence }}</td>
+            <td>{{ item.CreatedBy }}</td>
+            <td>{{ item.CreatedDate | date: 'short' }}</td>
+            <td>{{ item.UpdatedBy }}</td>
+            <td>{{ item.UpdatedDate | date: 'short' }}</td>
+            <td>
+              <span class="g-status" [ngClass]="item.IsActive ? 'active' : 'inactive'">
+                <span class="g-dot"></span>
+                {{ item.IsActive ? 'Active' : 'Inactive' }}
+              </span>
+            <td>
+              <div class="action-buttons">
+                <button type="button" class="action-btn btn-view" title="View">
+                  <i class="fa-solid fa-magnifying-glass-plus"></i>
+                </button>
+                <button type="button" class="action-btn btn-edit" title="Edit" (click)="EditModal(update,item.Id)">
+                  <i class="fa-regular fa-pen-to-square"></i>
+                </button>
+                <button type="button" class="action-btn btn-delete" title="Delete" [disabled]="isLoading()"
+                  (click)="Delete(item.Id)">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="card-footer">
+      <div class="shrink-0">
+        <app-pagination [(currentPage)]="currentPage" [(pageSize)]="pageSize" [totalItems]="totalItems()"
+          (pageChanged)="onPageChange($event)" (pageSizeChanged)="onPageSizeChange($event)">
+        </app-pagination>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+
+
+<!-- =================================================INSERT=================================================== -->
+<ng-template #insert let-c="close" let-d="dismiss">
+  <form [formGroup]="formGroup" (ngSubmit)="Create()">
+
+    <div class="modal-header">
+      <h5 class="modal-title">CREATE NEW</h5>
+      <button type="button" class="btn-close" (click)="d('Cross click')"></button>
+    </div>
+
+    <div class="modal-body">
+      <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+        <div style="flex: 1; min-width: 0;">
+          <label style="display: block; margin-bottom: 1px;">Module Name :</label>
+          <select class="form-select" formControlName="ModuleID"
+            [ngClass]="{ 'is-invalid': submitted && f['ModuleID'].errors }" style="width: 100%;">
+            <option value="" disabled selected>Select User Type</option>
+            <option *ngFor="let list of modules" [value]="list.Id">
+              {{ list.Name }}
+            </option>
+          </select>
+          <div *ngIf="submitted && f['ModuleID'].errors" class="invalid-feedback">
+            <div *ngIf="f['ModuleID'].errors['required']">Please select module name.</div>
+          </div>
+        </div>
+
+        <div style="flex: 1; min-width: 0;">
+          <label style="display: block; margin-bottom: 1px;">Menu Name :</label>
+          <input type="text" class="form-control" formControlName="Name"
+            [ngClass]="{ 'is-invalid': submitted && f['Name'].errors }" style="width: 100%;">
+          <div *ngIf="submitted && f['Name'].errors" class="invalid-feedback">
+            <div *ngIf="f['Name'].errors['required']">Menu Name Required.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Code and Sequence Row -->
+      <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+        <div style="flex: 1; min-width: 0;">
+          <label style="display: block; margin-bottom: 1px;">Code :</label>
+          <input type="text" class="form-control" formControlName="Code"
+            [ngClass]="{ 'is-invalid': submitted && f['Code'].errors }" style="width: 100%;">
+          <div *ngIf="submitted && f['Code'].errors" class="invalid-feedback">
+            <div *ngIf="f['Code'].errors['required']">Code Required.</div>
+          </div>
+        </div>
+
+        <div style="flex: 1; min-width: 0;">
+          <label style="display: block; margin-bottom: 1px;">Sequence :</label>
+          <input type="number" class="form-control" formControlName="Sequence"
+            [ngClass]="{ 'is-invalid': submitted && f['Sequence'].errors }"
+            (input)="InputHelper.numbersOnly($event, formGroup.get('Sequence'))" style="width: 100%;">
+          <div *ngIf="submitted && f['Sequence'].errors" class="invalid-feedback">
+            <div *ngIf="f['Sequence'].errors['required']">Sequence Required.</div>
+          </div>
+        </div>
+      </div>
+      <br />
+
+
+      <div class="d-flex gap-3">
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" formControlName="IsActive">
+          <label class="form-check-label">
+            {{ formGroup.get('CanView')?.value ? 'ON' : 'OFF' }}
+          </label>
+        </div>
+
+
+      </div>
+    </div>
+
+
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="c('Close click')">
+        <i class="fa-solid fa-fw fa-xmark" aria-hidden="true" title="xmark"></i> Close
+      </button>
+      <button type="submit" class="btn btn-success">
+        <i class="fa-solid fa-fw fa-check" aria-hidden="true" title="check"></i> Save changes
+      </button>
+    </div>
+
+  </form>
+</ng-template>
+
+
+<!-- =================================================UPDATE=================================================== -->
+<ng-template #update let-c="close" let-d="dismiss">
+  <form [formGroup]="eformGroup" (ngSubmit)="Update()">
+
+    <div class="modal-header">
+      <h5 class="modal-title">EDIT</h5>
+      <button type="button" class="btn-close" (click)="d('Cross click')"></button>
+    </div>
+
+    <div class="modal-body">
+      <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+        <div style="flex: 1; min-width: 0;">
+          <label style="display: block; margin-bottom: 1px;">Module Name :</label>
+          <select class="form-select" formControlName="eModuleID"
+            [ngClass]="{ 'is-invalid': submitted && f['eModuleID'].errors }" style="width: 100%;">
+            <option value="" disabled selected>Select User Type</option>
+            <option *ngFor="let list of modules" [value]="list.Id">
+              {{ list.Name }}
+            </option>
+          </select>
+          <div *ngIf="submitted && f['eModuleID'].errors" class="invalid-feedback">
+            <div *ngIf="f['eModuleID'].errors['required']">Please select module name.</div>
+          </div>
+        </div>
+
+        <div style="flex: 1; min-width: 0;">
+          <label style="display: block; margin-bottom: 1px;">Menu Name :</label>
+          <input type="text" class="form-control" formControlName="eName"
+            [ngClass]="{ 'is-invalid': submitted && f['eName'].errors }" style="width: 100%;">
+          <div *ngIf="submitted && f['eName'].errors" class="invalid-feedback">
+            <div *ngIf="f['eName'].errors['required']">Menu Name Required.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Code and Sequence Row -->
+      <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+        <div style="flex: 1; min-width: 0;">
+          <label style="display: block; margin-bottom: 1px;">Code :</label>
+          <input type="text" class="form-control" formControlName="eCode"
+            [ngClass]="{ 'is-invalid': submitted && f['eCode'].errors }" style="width: 100%;">
+          <div *ngIf="submitted && f['eCode'].errors" class="invalid-feedback">
+            <div *ngIf="f['eCode'].errors['required']">Code Required.</div>
+          </div>
+        </div>
+
+        <div style="flex: 1; min-width: 0;">
+          <label style="display: block; margin-bottom: 1px;">Sequence :</label>
+          <input type="number" class="form-control" formControlName="eSequence"
+            [ngClass]="{ 'is-invalid': submitted && f['eSequence'].errors }"
+            (input)="InputHelper.numbersOnly($event, formGroup.get('eSequence'))" style="width: 100%;">
+          <div *ngIf="submitted && f['eSequence'].errors" class="invalid-feedback">
+            <div *ngIf="f['eSequence'].errors['required']">Sequence Required.</div>
+          </div>
+        </div>
+      </div>
+      <br />
+
+
+      <div class="d-flex gap-3">
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" formControlName="eIsActive">
+          <label class="form-check-label">
+            {{ eformGroup.get('eIsActive')?.value ? 'ON' : 'OFF' }}
+          </label>
+        </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="c('Close click')">
+        <i class="fa-solid fa-fw fa-xmark" aria-hidden="true" title="xmark"></i> Close
+      </button>
+      <button type="submit" class="btn btn-success">
+        <i class="fa-solid fa-fw fa-check" aria-hidden="true" title="check"></i> Save changes
+      </button>
+    </div>
+
+  </form>
+
+</ng-template>

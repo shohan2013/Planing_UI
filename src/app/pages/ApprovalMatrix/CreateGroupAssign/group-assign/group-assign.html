@@ -1,0 +1,169 @@
+<div class="user-card">
+
+  <div class="card-header">
+    <h5>CREATE & ASSIGN GROUP</h5>
+  </div>
+
+  <div class="card-body">
+
+    <div class="d-flex gap-3">
+      <div class="flex-fill">
+        <button type="button" class="btn-shadow d-inline-flex align-items-center btn btn-success" (click)="saveModal(insert)"
+          style="margin-left: 5px;">
+          <i class="fa-solid fa-fw fa-plus" aria-hidden="true" title="plus"></i>
+          Create New
+        </button>
+      </div>
+
+       <!-- <div class="flex-fill">
+        <select class="form-select" [(ngModel)]="selectedSubMenuId"
+        (ngModelChange)="GetApproveMatrixGroup($event)">>
+      <option value="" disabled selected>Select SubMenu</option>
+      <option *ngFor="let list of SubMenuDropdown" [value]="list.Id">
+        {{ list.Name }}
+      </option>
+    </select>
+      </div> -->
+
+      <div class="flex-fill">
+        <select class="form-select" style="width: 100%;" [(ngModel)]="selectedUnitId"
+        (ngModelChange)="GetApproveMatrixGroup($event)">
+            <option value="" disabled selected>Select Unit</option>
+            <option *ngFor="let list of UnitList" [value]="list.Id">
+              {{ list.Name }}
+            </option>
+          </select>
+      </div>
+    </div><br />
+
+
+    <div class="table-responsive">
+      <table class="custom-table">
+        <thead>
+          <tr style="font-style: italic;">
+          <th class="text-center">#</th>
+          <th>GROUP NAME</th>
+          <th>UNIT</th>
+          <th>STATUS</th>
+          <th>CREATED BY</th>
+          <th>UPDATED BY</th>
+          <th>CREATED DATE</th>
+          <th>UPDATED DATE</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if(paginatedItems.length === 0){
+          <tr>
+            <td colspan="100%" class="text-center py-4">
+                <i class="fas fa-folder-open fa-4x text-secondary mb-3"></i><br/>
+              <h6 class="emptymsg">No Records Found.</h6>
+            </td>
+          </tr>
+          }
+
+          @for (item of paginatedItems; track trackById($index, item)) {
+          <tr>
+            <td>{{$index + 1 }}</td>
+          <td>{{ item.GroupName }}</td>
+          <td>{{ item.Unit }}</td>
+          <td>
+                <div class="form-check form-switch d-flex justify-content-center align-items-center">
+                <input class="form-check-input"
+                    type="checkbox"
+                    [(ngModel)]="item.IsActive" (ngModelChange)="onToggle(item.Id, 1,item.IsActive)">
+                </div>
+          </td>
+          <td>{{ item.CreatedBy }}</td>
+          <td>{{ item.UpdatedBy }}</td>
+          <td>{{ item.CreatedDate }}</td>
+          <td>{{ item.UpdatedDate }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="card-footer">
+     
+    </div>
+
+  </div>
+</div>
+
+
+
+<ng-template #insert let-c="close" let-d="dismiss">
+  <form [formGroup]="formGroup" (ngSubmit)="Create()">
+
+    <div class="modal-header">
+      <h5 class="modal-title">CREATE GROUP</h5>
+      <button type="button" class="btn-close" (click)="d('Cross click')"></button>
+    </div>
+
+    <div class="modal-body">
+
+<div class="d-flex gap-3">
+  <div class="flex-fill">
+    <label class="form-label">Group Name :</label>
+    <input type="text" class="form-control" formControlName="GroupName"
+            [ngClass]="{ 'is-invalid': submitted && f['GroupName'].errors }" style="width: 100%;">
+          <div *ngIf="submitted && f['GroupName'].errors" class="invalid-feedback">
+            <div *ngIf="f['GroupName'].errors['required']">Group Name Required.</div>
+          </div>
+  </div>
+
+  <div class="flex-fill">
+    <label class="form-label">Select Unit :</label>
+    <select class="form-select" style="width: 100%;" formControlName="UnitId" [ngClass]="{ 'is-invalid': submitted && f['UnitId'].errors }">
+            <option value="" disabled selected>Select Unit</option>
+            <option *ngFor="let list of UnitList" [value]="list.Id">
+              {{ list.Name }}
+            </option>
+          </select>
+    <div *ngIf="submitted && f['UnitId'].errors" class="invalid-feedback">
+      <div *ngIf="f['UnitId'].errors['required']">Select Group.</div>
+    </div>
+  </div>
+
+  <div class="flex-fill">
+    <label class="form-label"></label><br/><br/>
+    <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" formControlName="IsActive">
+          <label class="form-check-label">
+            {{ formGroup.get('IsActive')?.value ? 'ON' : 'OFF' }}
+          </label>
+        </div>
+</div>
+
+</div>
+
+<div class="d-flex gap-3">
+<div class="flex-fill">
+  <label class="form-label">Select User</label>
+ @if (dropdownSettings && selectedEmployees) {
+  <ng-multiselect-dropdown
+    formControlName="EmpList"
+    [placeholder]="'Select Employees'"
+    [settings]="dropdownSettings"
+    [data]="EmpList"
+    (onSelect)="onItemSelect($event)"
+    (onDeSelect)="onItemDeSelect($event)"
+    (onSelectAll)="onSelectAll($event)"
+    (onDeSelectAll)="onDeSelectAll()"
+    >
+  </ng-multiselect-dropdown>
+}
+</div>
+</div>
+</div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="c('Close click')">
+        <i class="fa-solid fa-fw fa-xmark" aria-hidden="true" title="xmark"></i> Close
+      </button>
+      <button type="submit" class="btn btn-success">
+        <i class="fa-solid fa-fw fa-check" aria-hidden="true" title="check"></i> Save changes
+      </button>
+    </div>
+
+  </form>
+
+</ng-template>

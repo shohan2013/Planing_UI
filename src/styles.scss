@@ -1,0 +1,360 @@
+@use "assets/base";
+@import "@ng-select/ng-select/themes/default.theme.css";
+/* Fix content jumping issue */
+.app-main__inner {
+  position: relative !important;
+  // display: block !important;
+  flex: none !important;
+  min-height: calc(100vh - 120px) !important;
+}
+
+.router-outlet-container {
+  position: relative !important;
+  display: block !important;
+  min-height: inherit !important;
+  overflow: visible !important;
+}
+
+/* Stabilize tab content positioning */
+.tab-content {
+  position: relative;
+}
+
+.tab-pane {
+  position: relative;
+  top: 0;
+  left: 0;
+}
+
+/* Force immediate positioning for all routed components */
+router-outlet + *,
+.router-outlet-container > *,
+app-accordions,
+app-tabs,
+app-carousel,
+app-modals,
+app-pagination,
+app-progress-bar,
+app-tooltips-popovers {
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+  transform: none !important;
+  display: block !important;
+}
+
+/* Prevent ONLY route animations on initial load, keep sidebar transitions */
+router-outlet + * {
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+}
+
+/* Re-enable route animations after initial load */
+.animations-ready router-outlet + * {
+  animation-duration: initial !important;
+  animation-delay: initial !important;
+}
+
+
+/*=======================================================CUSTOM STYLE=================================================================*/
+
+
+/*========================================================TABLE========================================================================*/
+.custom-table {
+  width: 100%;
+  border-collapse: separate;
+  // border-spacing: 0 10px;
+   font-family: calibri;
+
+}
+
+.custom-table thead th {
+  padding: 10px;
+  font-weight: bolder;
+  text-align: left;
+  font-size: 12px;
+  text-align: center;
+  font-family: calibri;
+  background-color: #e3e1e1;
+  font-style: normal;
+  color:black
+}
+
+.custom-table tbody td {
+  // padding: 17px;
+  vertical-align: middle;
+  font-family: calibri;
+  text-align: center;
+}
+
+.custom-table tbody tr:nth-child(odd) {
+  background: rgb(247, 247, 247);
+}
+
+.custom-table tbody tr:nth-child(even) {
+  background: rgb(255, 255, 255);
+}
+
+tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.custom-table tbody tr:hover {
+  background-color: #f0f7ff;
+}
+
+.table-responsive {
+    position: relative;
+    min-height: 300px;
+}
+
+.table-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.7);
+    z-index: 1000;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading {
+    opacity: 0.4;
+    pointer-events: none;
+}
+/*==============================================================CARD========================================================================*/
+.card-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid #d7dde4;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-header h5 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: calibri;
+  // font-style: italic;
+}
+
+.card-footer {
+  border-top: 1px solid #d7dde4;
+  padding: 14px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+
+.user-card {
+  background: #fff;
+  border: 1px solid #d7dde4;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+
+/*==================================================================BUTTON=====================================================================*/
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.action-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+  font-size: 14px;
+}
+
+
+
+/* View */
+.btn-view {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+.btn-view:hover {
+  background: #0284c7;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+/* Edit */
+.btn-edit {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.btn-edit:hover {
+  background: #16a34a;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+/* Delete */
+.btn-delete {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.btn-delete:hover {
+  background: #dc2626;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.action-btn:active {
+  transform: scale(0.95);
+}
+
+.input-group-text{
+  background-color: #4daa57 !important;
+  border: #4daa57 !important;
+  color:white;
+}
+/* Remove this section - transitions are now defined in component styles */
+.btn-success{
+  background-color: #4daa57 !important;
+  border: #4daa57 !important;
+  color:white;
+}
+
+.modal-title{
+  font-weight: 600;
+  font-style: italic;
+  font-family: calibri;
+}
+
+label{
+  font-family: calibri;
+}
+
+.invalid-feedback{
+  font-family: calibri;
+  color:#dc2626;
+  font-weight: bold;
+  font-size: 11px;
+}
+
+/*===================================================TAB==========================================================*/
+/* Card styling */
+
+/* Tabs container */
+.nav-tabs {
+  border-bottom: none;
+}
+
+.nav-link{
+  font-weight: bold;
+  // font-style: italic;
+  font-family: calibri;
+}
+
+/*===============================================BADGE=============================================================*/
+.g-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  transition: all 0.25s ease-in-out;
+  cursor: default;
+  user-select: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+/* DOT */
+.g-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  position: relative;
+}
+
+/* ACTIVE */
+.g-status.active {
+  background: linear-gradient(135deg, #d1fae5, #ecfdf5);
+  color: #047857;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.g-status.active .g-dot {
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+  animation: pulseGreen 1.5s infinite;
+}
+
+/* INACTIVE */
+.g-status.inactive {
+  background: linear-gradient(135deg, #fee2e2, #fff1f2);
+  color: #be123c;
+  border: 1px solid rgba(244, 63, 94, 0.25);
+}
+
+.g-status.inactive .g-dot {
+  background: #ef4444;
+  box-shadow: 0 0 8px #ef4444;
+  animation: pulseRed 1.5s infinite;
+}
+
+/* HOVER EFFECT */
+.g-status:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+/* ANIMATIONS */
+@keyframes pulseGreen {
+  0% { box-shadow: 0 0 0 0 rgba(16,185,129,0.5); }
+  70% { box-shadow: 0 0 0 6px rgba(16,185,129,0); }
+  100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+}
+
+@keyframes pulseRed {
+  0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); }
+  70% { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+  100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+}
+
+.form-switch .form-check-input:checked{
+  border:none;
+  background-color: #4daa57 !important;
+}
+
+.emptymsg{
+color:red;
+font-weight: bold;
+}
+
+.row {
+  display: flex !important;
+}
+
+
+/*==============================================sidebar css========================================*/
+.v-sidebar-menu .vsm-link{
+  font-family: calibri;
+  font-weight: bolder;
+}
+
+.v-sidebar-menu .vsm-list > .vsm-item .vsm-link{
+  font-weight: bolder;
+}
