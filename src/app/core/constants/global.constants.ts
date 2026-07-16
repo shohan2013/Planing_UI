@@ -37,6 +37,8 @@ export const GlobalConstant={
       SubMenuList:'Common/submenus',
       EnrollList:'Common/enrolllist',
       ApproveMatrixGroupTypeList:'Common/approvalmatrixgrouplist',
+      SideBar: 'SideBar',
+      UserMenuPermission: 'UserMenuPermission',
     },
     
     URL: {API_URL : 'https://localhost:7111/api/'}

@@ -5,6 +5,9 @@ import { ConfigService } from '../../../ThemeOptions/store/config.service';
 import { ConfigState } from '../../../ThemeOptions/store/config.state';
 import {ActivatedRoute} from '@angular/router';
 
+import { SideBarService } from 'src/app/core/services/SideBar/side-bar-service';
+import { ISideBarMenu } from 'src/app/core/model/SideBar/SideBar';
+
 @Component({
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
@@ -33,11 +36,33 @@ import {ActivatedRoute} from '@angular/router';
     .vsm-item.has-sub.vsm-open .vsm-arrow {
       transform: rotate(360deg) !important;  /* Point down */
     }
+
+    .submenu-link {
+      display: flex !important;
+      align-items: center !important;
+    }
+
+    .submenu-icon {
+      position: static !important;
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      min-width: 28px;
+      margin-right: 10px;
+      font-size: 24px;
+    }
+
+
+
   `]
 })
 export class SidebarComponent implements OnInit {
   public extraParameter: string | undefined;
   public openMenus: string[] = [];
+
+
+  public sideBarMenus: ISideBarMenu[] = [];
   
   // Supported menu types: dashboardsMenu, pagesMenu, elementsMenu, componentsMenu, 
   // tablesMenu, formsMenu, chartsMenu, widgetsMenu
@@ -47,7 +72,8 @@ export class SidebarComponent implements OnInit {
   constructor(
     public globals: ThemeOptions,
     private activatedRoute: ActivatedRoute,
-    private configService: ConfigService
+    private configService: ConfigService,
+      private sideBarService: SideBarService
   ) {
     this.config$ = this.configService.config$;
 
@@ -71,6 +97,7 @@ export class SidebarComponent implements OnInit {
   }
 
   onSidebarMouseEnter() {
+    console.log("Hello world!");
     if (this.globals.toggleSidebar()) {
       this.globals.sidebarHover.set(true);
     }
@@ -82,15 +109,54 @@ export class SidebarComponent implements OnInit {
     }
   }
 
-  ngOnInit() {
-    // Get the extraParameter from the route to determine which menu should be open
-    this.extraParameter = this.activatedRoute.snapshot.firstChild?.data['extraParameter'];
+  // ngOnInit() {
+  //   // Get the extraParameter from the route to determine which menu should be open
+  //   this.extraParameter = this.activatedRoute.snapshot.firstChild?.data['extraParameter'];
 
-    // Initialize open menus based on current route
-    if (this.extraParameter) {
-      this.openMenus = [this.extraParameter];
-    }
+  //   // Initialize open menus based on current route
+  //   if (this.extraParameter) {
+  //     this.openMenus = [this.extraParameter];
+  //   }
+  // }
+
+
+  ngOnInit(): void {
+  this.extraParameter =
+    this.activatedRoute.snapshot.firstChild?.data['extraParameter'];
+
+  if (this.extraParameter) {
+    this.openMenus = [this.extraParameter];
   }
+
+  this.getSideBarData();
+}
+
+
+
+getSideBarData(): void {
+  const enroll = Number(localStorage.getItem('Enroll'));
+
+  if (!enroll) {
+    this.sideBarMenus = [];
+    return;
+  }
+
+  this.sideBarService.GetSideBarData(enroll).subscribe({
+    next: (data) => {
+      this.sideBarMenus = data;
+      console.log('Sidebar API response:', this.sideBarMenus);
+    },
+    error: (error) => {
+      console.log('Sidebar data error:', error);
+      this.sideBarMenus = [];
+    }
+  });
+}
+
+
+
+
+
 
   toggleSubmenu(menuId: string) {
     // Toggle submenu: close if open, open if closed (and close all others)
