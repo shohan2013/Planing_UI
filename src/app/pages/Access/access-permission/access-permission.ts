@@ -97,14 +97,14 @@ export class AccessPermission {
       });
     }
 
-    onToggle(id: number,submenuid:number,type:number,status:boolean) {
-     this.permissionservice.PermissionByType(type, id,submenuid,this.selectedUser, status).pipe(takeUntil(this.destroy$)).subscribe({
-                next: (response) => {
-                    
-                },
-                error: (error) => {
-                    
-                }
-            });
+  onToggle(id: number,submenuid:number,type:number,status:boolean) {
+    this.permissionservice.PermissionByType(type, id,submenuid,this.selectedUser, status).pipe(takeUntil(this.destroy$)).subscribe({
+              next: (response) => {
+                  
+              },
+              error: (error) => {
+                  
+              }
+          });
   }
 }

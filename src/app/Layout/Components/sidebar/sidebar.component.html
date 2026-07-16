@@ -58,6 +58,10 @@
   <div class="app-sidebar-content">
     <div class="app-sidebar-scroll">
       <div class="sidebar-scrollbar">
+
+
+
+<ng-template>
         <div class="v-sidebar-menu vsm-default">
           <div class="vsm-list">
             <div class="vsm-header">Navigation</div>
@@ -304,6 +308,85 @@
 
           </div>
         </div>
+</ng-template>
+
+
+
+
+<div class="v-sidebar-menu vsm-default">
+  <div class="vsm-list">
+
+    <div class="vsm-header">Navigation</div>
+
+    <!-- Dashboard remains static -->
+    <div class="vsm-item"
+         [class.vsm-active]="extraParameter === 'dashboardsMenu'">
+
+      <a routerLink="/dashboards/analytics"
+         routerLinkActive="active-item"
+         class="vsm-link"
+         (click)="onNavigate()">
+
+        <i class="vsm-icon pe-7s-rocket"></i>
+        <span class="vsm-title">Dashboard</span>
+      </a>
+    </div>
+
+    <!-- Dynamic menus -->
+    @for (menu of sideBarMenus; track menu.MenuId) {
+
+      <div class="vsm-item has-sub"
+           [class.vsm-open]="openMenus.includes(menu.MenuId.toString())">
+
+        <a href="javascript:void(0);"
+           class="vsm-link"
+           (click)="toggleSubmenu(menu.MenuId.toString())">
+
+            @if (menu.Icon) {
+                  <i [class]="'vsm-icon ' + menu.Icon"></i>
+                }
+          <span class="vsm-title">{{ menu.MenuName }}</span>
+          <i class="vsm-arrow"></i>
+        </a>
+
+        <div class="vsm-dropdown"
+             [class.vsm-dropdown-show]="openMenus.includes(menu.MenuId.toString())">
+
+          <div class="vsm-list">
+
+            @for (submenu of menu.SubMenus; track submenu.SubMenuId) {
+
+              <div class="vsm-item">
+
+                <a [routerLink]="'/' + submenu.RouterLink"
+                  routerLinkActive="active-item"
+                  class="vsm-link submenu-link"
+                  (click)="onNavigate()">
+
+                  @if (submenu.Icon) {
+                    <span class="submenu-icon">
+                      <i [class]="submenu.Icon"></i>
+                    </span>
+                  }
+
+                  <span class="vsm-title">
+                    {{ submenu.SubMenuName }}
+                  </span>
+                </a>
+
+              </div>
+            }
+
+          </div>
+        </div>
+      </div>
+    }
+
+  </div>
+</div>
+
+
+
       </div>
     </div>
   </div>
