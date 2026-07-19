@@ -1,0 +1,39 @@
+<div class="type-searchbox">
+
+  <input
+    type="text"
+    class="form-control"
+    [formControl]="searchControl"
+    [placeholder]="placeholder"
+    [ngbTypeahead]="search"
+    [resultFormatter]="itemFormatter"
+    [inputFormatter]="itemFormatter"
+    placement="bottom-start"
+    container="body"
+    autocomplete="off"
+    (selectItem)="selectItem($event)"
+    (keydown.arrowdown)="scrollActiveItem()"
+    (keydown.arrowup)="scrollActiveItem()"
+    (blur)="markTouched()">
+
+  <div class="search-status">
+
+    <span *ngIf="isSearching" class="text-primary">
+      <span class="spinner-border spinner-border-sm me-1"></span>
+      Searching...
+    </span>
+
+    <span
+      *ngIf="searchCompleted && !hasResults && !searchFailed"
+      class="text-muted">
+
+      No matching records found.
+    </span>
+
+    <span *ngIf="searchFailed" class="text-danger">
+      Search failed. Please try again.
+    </span>
+
+  </div>
+
+</div>

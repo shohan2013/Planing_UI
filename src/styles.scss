@@ -358,3 +358,40 @@ font-weight: bold;
 .v-sidebar-menu .vsm-list > .vsm-item .vsm-link{
   font-weight: bolder;
 }
+
+
+
+/*==============================================search bar========================================*/
+
+
+.requisition-fullscreen-modal .modal-content {
+  min-height: 100vh;
+  background-color: #ffffff;
+}
+
+.requisition-fullscreen-modal .modal-body {
+  background-color: #ffffff;
+  overflow-y: auto;
+}
+
+.requisition-fullscreen-modal .modal-footer {
+  background-color: #ffffff;
+}
+
+ngb-typeahead-window.dropdown-menu {
+  z-index: 2000 !important;
+  max-height: 280px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+ngb-typeahead-window .dropdown-item {
+  color: #495057 !important;
+  background-color: #ffffff !important;
+}
+
+ngb-typeahead-window .dropdown-item:hover,
+ngb-typeahead-window .dropdown-item.active {
+  color: #212529 !important;
+  background-color: #e9ecef !important;
+}

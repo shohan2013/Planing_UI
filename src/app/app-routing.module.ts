@@ -60,9 +60,10 @@ const routes: Routes = [
 
 
       {path: 'permission', loadComponent:() => import('./pages/Permission/permission/permission').then(m=>m.Permission)},
-      {path: 'groupassign', loadComponent:()=>import('./pages/ApprovalMatrix/CreateGroupAssign/group-assign/group-assign').then(m=>m.GroupAssign)},
+      {path: 'groupassign', loadComponent:()=> import('./pages/ApprovalMatrix/CreateGroupAssign/group-assign/group-assign').then(m=>m.GroupAssign)},
      
-     
+     {path: 'requisition', loadComponent: () => import('./pages/Requisition/requisition').then(m => m.Requisition)},
+
       // Elements
       {path: 'elements/buttons-standard', component: StandardComponent, data: {extraParameter: 'elementsMenu'}},
       {path: 'elements/dropdowns', component: DropdownsComponent, data: {extraParameter: 'elementsMenu'}},

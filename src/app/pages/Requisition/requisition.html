@@ -1,0 +1,457 @@
+<div class="user-card">
+
+  <div class="card-header">
+    <h5>REQUISITION</h5>
+  </div>
+
+  <div class="card-body">
+
+    <button
+      type="button"
+      class="btn-shadow d-inline-flex align-items-center btn btn-success"
+      (click)="openCreateModal(requisitionModal)">
+
+      <i class="fa-solid fa-fw fa-plus"></i>
+      Create New
+    </button>
+
+  </div>
+
+</div>
+
+
+<ng-template #requisitionModal let-c="close" let-d="dismiss">
+
+  <form [formGroup]="formGroup" (ngSubmit)="Create()">
+
+    <div class="modal-header">
+
+      <h5 class="modal-title">CREATE REQUISITION</h5>
+
+      <button
+        type="button"
+        class="btn-close"
+        (click)="d('Cross click')">
+      </button>
+
+    </div>
+
+
+    <div class="modal-body">
+
+      <div class="row g-3">
+
+        <div class="col-md-6">
+
+          <label class="form-label">Unit :</label>
+
+          <select
+            class="form-select"
+            formControlName="UnitId"
+            (change)="onUnitChange()"
+            [ngClass]="{
+              'is-invalid': submitted && f['UnitId'].errors
+            }">
+
+            <option value="" disabled>Select Unit</option>
+
+            <option *ngFor="let unit of units" [value]="unit.Id">
+              {{ unit.Name }}
+            </option>
+
+          </select>
+
+          <div
+            *ngIf="submitted && f['UnitId'].errors"
+            class="invalid-feedback">
+
+            Please select Unit.
+          </div>
+
+        </div>
+
+
+        <div class="col-md-6">
+
+          <label class="form-label">Business :</label>
+
+          <select
+            class="form-select"
+            formControlName="BusinessId"
+            [ngClass]="{
+              'is-invalid': submitted && f['BusinessId'].errors
+            }">
+
+            <option value="" disabled>Select Business</option>
+
+            <option
+              *ngFor="let business of filteredBusinesses"
+              [value]="business.Id">
+
+              {{ business.Name }}
+            </option>
+
+          </select>
+
+          <div
+            *ngIf="submitted && f['BusinessId'].errors"
+            class="invalid-feedback">
+
+            Please select Business.
+          </div>
+
+        </div>
+
+
+        <div class="col-md-6">
+
+          <label class="form-label">Requisition Date :</label>
+
+          <input
+            type="date"
+            class="form-control"
+            formControlName="ReqDate"
+            [ngClass]="{
+              'is-invalid': submitted && f['ReqDate'].errors
+            }">
+
+          <div
+            *ngIf="submitted && f['ReqDate'].errors"
+            class="invalid-feedback">
+
+            Requisition Date is required.
+          </div>
+
+        </div>
+
+
+        <div class="col-md-6">
+
+          <label class="form-label">Product Type :</label>
+
+          <select
+            class="form-select"
+            formControlName="ProductTypeId"
+            [ngClass]="{
+              'is-invalid': submitted && f['ProductTypeId'].errors
+            }">
+
+            <option value="" disabled>Select Product Type</option>
+
+            <option
+              *ngFor="let productType of productTypes"
+              [value]="productType.Id">
+
+              {{ productType.Name }}
+            </option>
+
+          </select>
+
+          <div
+            *ngIf="submitted && f['ProductTypeId'].errors"
+            class="invalid-feedback">
+
+            Please select Product Type.
+          </div>
+
+        </div>
+
+
+        <div class="col-12">
+
+          <label class="form-label">Remarks :</label>
+
+          <textarea
+            class="form-control"
+            formControlName="Remarks"
+            rows="2"
+            placeholder="Enter remarks, if required">
+          </textarea>
+
+        </div>
+
+      </div>
+
+
+
+
+
+
+
+
+      <hr class="my-4">
+
+      <h6>Add Product</h6>
+      
+      <div [formGroup]="lineFormGroup">
+
+        <table class="custom-table">
+
+          <colgroup>
+            <col style="width: 8%;">
+            <col style="width: 40%;">
+            <col style="width: 14%;">
+            <col style="width: 13%;">
+            <col style="width: 25%;">
+          </colgroup>
+
+          <thead>
+            <tr>
+              <th>ADD</th>
+              <th>ITEM</th>
+              <th>UOM</th>
+              <th>QUANTITY</th>
+              <th>REMARKS</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr>
+
+              <td>
+                <button
+                  type="button"
+                  class="btn btn-success"
+                  [disabled]="!canAddLine"
+                  title="Add Line"
+                  (click)="addLine()">
+
+                  <i class="fa-solid fa-plus"></i>
+                  Add
+                </button>
+              </td>
+
+
+              <td>
+
+                <input
+                  type="text"
+                  class="form-control"
+                  formControlName="ItemSearch"
+                  placeholder="Type at least 2 characters"
+                  autocomplete="off"
+                  [ngbTypeahead]="searchItems"
+                  placement="bottom-start"
+                  container="body"
+                  [resultFormatter]="itemFormatter"
+                  [inputFormatter]="itemFormatter"
+                  (selectItem)="onItemSelect($event)"
+                  [ngClass]="{
+                    'is-invalid':
+                      lineSubmitted &&
+                      (
+                        lf['ItemSearch'].errors ||
+                        lf['ItemId'].errors
+                      )
+                  }">
+
+                <div class="invalid-feedback">
+                  Please search and select a valid Item.
+                </div>
+
+                <div
+                  *ngIf="isItemSearching"
+                  class="small text-primary mt-1">
+
+                  <span
+                    class="spinner-border spinner-border-sm me-1"
+                    aria-hidden="true">
+                  </span>
+
+                  Searching...
+                </div>
+
+                <div
+                  *ngIf="
+                    itemSearchCompleted &&
+                    !itemSearchHasResults &&
+                    !itemSearchFailed
+                  "
+                  class="small text-muted mt-1">
+
+                  No matching Items found.
+                </div>
+
+                <div
+                  *ngIf="itemSearchFailed"
+                  class="small text-danger mt-1">
+
+                  Item search failed. Please try again.
+                </div>
+
+              </td>
+
+
+              <td>
+
+                <select
+                  class="form-select"
+                  formControlName="UOMId"
+                  [ngClass]="{
+                    'is-invalid':
+                      lineSubmitted && lf['UOMId'].errors
+                  }">
+
+                  <option value="" disabled>Select UOM</option>
+
+                  <option *ngFor="let uom of uoms" [value]="uom.Id">
+                    {{ uom.Name }}
+                  </option>
+
+                </select>
+
+                <div class="invalid-feedback">
+                  Please select UOM.
+                </div>
+
+              </td>
+
+
+              <td>
+
+                <input
+                  type="number"
+                  class="form-control"
+                  formControlName="Quantity"
+                  min="1"
+                  [ngClass]="{
+                    'is-invalid':
+                      lineSubmitted && lf['Quantity'].errors
+                  }">
+
+                <div class="invalid-feedback">
+                  Please enter a valid Quantity.
+                </div>
+
+              </td>
+
+
+              <td>
+
+                <input
+                  type="text"
+                  class="form-control"
+                  formControlName="Remarks"
+                  placeholder="Optional">
+
+              </td>
+
+            </tr>
+          </tbody>
+
+        </table>
+
+      </div>
+
+
+
+
+
+
+
+
+
+      <div
+        *ngIf="!canAddLine"
+        class="text-muted mt-2">
+
+        Please select a Unit before searching for an Item.
+      </div>
+
+
+
+
+
+      <hr class="my-4">
+
+      <div
+        *ngIf="submitted && lines.length === 0"
+        class="alert alert-danger py-2 mt-3">
+
+        At least one Requisition Line is required.
+      </div>
+
+
+      <div class="table-responsive mt-3" *ngIf="lines.length > 0">
+
+        <table class="custom-table">
+
+          <colgroup>
+            <col style="width: 5%;">
+            <col style="width: 50%;">
+            <col style="width: 14%;">
+            <col style="width: 10%;">
+            <col style="width: 16%;">
+            <col style="width: 5%;">
+          </colgroup>
+
+          <tbody>
+
+            <tr *ngFor="let line of lines.controls; let i = index">
+
+              <td class="text-center">
+                {{ i + 1 }}
+              </td>
+
+              <td>
+                {{ line.get('ItemName')?.value }}
+              </td>
+
+              <td>
+                {{ line.get('UOMName')?.value }}
+              </td>
+
+              <td>
+                {{ line.get('Quantity')?.value }}
+              </td>
+
+              <td>
+                {{ line.get('Remarks')?.value || '-' }}
+              </td>
+
+              <td class="text-end">
+
+                <button
+                  type="button"
+                  class="action-btn btn-delete"
+                  title="Delete Line"
+                  (click)="removeLine(i)">
+
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+
+    <div class="modal-footer">
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="c('Close click')">
+
+        <i class="fa-solid fa-fw fa-xmark"></i>
+        Close
+      </button>
+
+      <button type="submit" class="btn btn-success">
+
+        <i class="fa-solid fa-fw fa-check"></i>
+        Save
+      </button>
+
+    </div>
+
+  </form>
+
+</ng-template>

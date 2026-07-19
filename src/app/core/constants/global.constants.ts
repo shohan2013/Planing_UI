@@ -39,6 +39,15 @@ export const GlobalConstant={
       ApproveMatrixGroupTypeList:'Common/approvalmatrixgrouplist',
       SideBar: 'SideBar',
       UserMenuPermission: 'UserMenuPermission',
+
+      Businesses : "Common/BusinessList",
+      ProductType : "Common/ProductTypeList",
+      Item : "Common/ItemList",
+      UOM : "Common/UOMList",
+
+
+
+
     },
     
     URL: {API_URL : 'https://localhost:7111/api/'}
