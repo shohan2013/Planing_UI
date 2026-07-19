@@ -16,7 +16,9 @@ import { IUOM } from '../../model/Common/UOM/UOM';
 
 import { IApproveMatrixGroup } from '../../model/Common/ApproveMatrixGroup/ApproveMatrixGroup';
 import { IEnroll } from '../../model/Common/Enroll/Enroll';
+
 import { IApproveMatrixGroupList } from '../../model/Common/ApproveMatrixGroupList/ApproveMatrixGroupList';
+
 
 @Injectable({
   providedIn: 'root',
@@ -45,7 +47,6 @@ export class CommonService {
       return this.http.get<IApproveMatrixGroup[]>(`${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.approvalgroups}`);
     }
 
-    //
     GetApproveMatrixGroupTypeList() : Observable<IApproveMatrixGroupList[]> {
       return this.http.get<IApproveMatrixGroupList[]>(`${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.ApproveMatrixGroupTypeList}`);
     }
@@ -91,3 +92,4 @@ GetItemList(unitId:number,searchText:string): Observable<IItem[]> {
       return this.http.get<IEnroll[]>(`${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.EnrollList}`);
     }
 }
+
