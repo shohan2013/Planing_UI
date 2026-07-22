@@ -6,3 +6,31 @@
 .requisition-line:last-child {
   border-bottom: none;
 }
+
+
+.modal-body .form-label,
+.modal-body h6 {
+  font-weight: 700;
+}
+
+::ng-deep .requisition-item-dropdown {
+  z-index: 2000 !important;
+  max-height: min(420px, 45vh);
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+}
+
+.empty-requisition-lines {
+  min-height: 360px;
+}
+
+.page-header {
+  font-size: 20px;
+  font-weight: 1700  !important;
+  margin: 20px 0 0px 20px;
+}
+
+.user-card .card-body {
+  padding: 20px;
+}

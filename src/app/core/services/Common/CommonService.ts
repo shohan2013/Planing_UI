@@ -12,6 +12,7 @@ import { IUnit } from '../../model/Common/Unit/Unit';
 import { IBusiness } from '../../model/Common/BusinessType/BusinessType';
 import { IProductType } from '../../model/Common/ProductType/ProductType';
 import { IItem } from '../../model/Common/Items/Item';
+import { IRequisitionItemName } from '../../model/Common/RequisitionItemName/RequisitionItemName';
 import { IUOM } from '../../model/Common/UOM/UOM';
 
 import { IApproveMatrixGroup } from '../../model/Common/ApproveMatrixGroup/ApproveMatrixGroup';
@@ -70,6 +71,12 @@ export class CommonService {
 GetItemList(unitId:number,searchText:string): Observable<IItem[]> {
   return this.http.get<IItem[]>(
     `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.Item}?unitId=${unitId}&searchText=${encodeURIComponent(searchText)}`
+  );
+}
+GetRequisitionItemNames(model: IRequisitionItemName[]): Observable<IRequisitionItemName[]> {
+  return this.http.post<IRequisitionItemName[]>(
+    `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.RequisitionItemNames}`,
+    model
   );
 }
 

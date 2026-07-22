@@ -5,6 +5,7 @@ import {
   FormArray,
   FormControl,
   FormGroup,
+  FormsModule,
   ReactiveFormsModule,
   Validators
 } from '@angular/forms';
@@ -18,6 +19,7 @@ import {
   debounceTime,
   distinctUntilChanged,
   finalize,
+  map,
   Observable,
   of,
   Subject,
@@ -30,24 +32,39 @@ import { IUnit } from 'src/app/core/model/Common/Unit/Unit';
 import { IBusiness } from 'src/app/core/model/Common/BusinessType/BusinessType';
 import { IProductType } from 'src/app/core/model/Common/ProductType/ProductType';
 import { IItem } from 'src/app/core/model/Common/Items/Item';
+import { IRequisitionItemName } from 'src/app/core/model/Common/RequisitionItemName/RequisitionItemName';
 import { IUOM } from 'src/app/core/model/Common/UOM/UOM';
 import { CommonService } from 'src/app/core/services/Common/CommonService';
+
+import { RequisitionService } from 'src/app/core/services/Requisition/requisition.service';
+import { IRequisition } from 'src/app/core/model/Requisition/Requisition';
+
+import { ServerQueryRequest, ServerQueryResponse } from 'src/app/core/model/Common/Pagination/ServerQueryRequest';
+import { ServerSideFilteredPaginatedComponent } from 'src/app/core/server-side-filtered-paginated/server-side-filtered-paginated.component';
+import { PaginationComponent } from 'src/app/shared/pagination/pagination.component';
+
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-requisition',
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     ReactiveFormsModule,
-    NgbTypeaheadModule
+    NgbTypeaheadModule,
+    PaginationComponent
   ],
   templateUrl: './requisition.html',
   styleUrl: './requisition.scss'
 })
-export class Requisition implements OnDestroy {
+export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisition> implements OnDestroy {
 
   submitted = false;
   lineSubmitted = false;
+  selectedRequisition: IRequisition | null = null;
+  isViewLoading = false;
+  
 
   units: IUnit[] = [];
   businesses: IBusiness[] = [];
@@ -69,12 +86,12 @@ export class Requisition implements OnDestroy {
       new Date().toISOString().split('T')[0],
       Validators.required
     ),
-    ProductTypeId: new FormControl('',Validators.required),
     Remarks: new FormControl(''),
     Lines: new FormArray([])
   });
 
   lineFormGroup: FormGroup = new FormGroup({
+    ProductTypeId: new FormControl(2,Validators.required),
     ItemSearch: new FormControl('',Validators.required),
     ItemId: new FormControl('',Validators.required),
     ItemName: new FormControl(''),
@@ -88,10 +105,19 @@ export class Requisition implements OnDestroy {
 
   constructor(
     private commonService: CommonService,
-    private modalService: NgbModal
+    private modalService: NgbModal,
+    private requisitionService: RequisitionService,
+    private toastr: ToastrService
   ) {
+    super();
     this.loadCommonData();
     this.watchItemInput();
+    this.watchProductType();
+  }
+
+
+  protected override fetchData(request: ServerQueryRequest): Observable<ServerQueryResponse<IRequisition>> {
+    return this.requisitionService.GetRequisition(request);
   }
 
   get f(): { [key: string]: AbstractControl } {
@@ -113,6 +139,28 @@ export class Requisition implements OnDestroy {
   get canAddLine(): boolean {
     return this.selectedUnitId > 0;
   }
+
+  get selectedLineProductTypeId(): number {
+    return Number(this.lineFormGroup.get('ProductTypeId')?.value);
+  }
+
+
+  getUnitName(unitId: number): string {
+    return this.units.find(x => Number(x.Id) === Number(unitId))?.Name ?? '-';
+  }
+
+  getBusinessName(businessId: number): string {
+    return this.businesses.find(x => Number(x.Id) === Number(businessId))?.Name ?? '-';
+  }
+
+  getProductTypeName(productTypeId: number): string {
+    return this.productTypes.find(x => Number(x.Id) === Number(productTypeId))?.Name ?? '-';
+  }
+
+  getUOMName(uomId: number): string {
+    return this.uoms.find(x => Number(x.Id) === Number(uomId))?.Name ?? '-';
+  }
+
 
   loadCommonData(): void {
     this.commonService.GetUnitList()
@@ -148,7 +196,7 @@ export class Requisition implements OnDestroy {
     this.lineFormGroup.get('ItemSearch')?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe(value => {
-        if (typeof value === 'string') {
+        if (this.selectedLineProductTypeId === 2 && typeof value === 'string') {
           this.lineFormGroup.patchValue({
             ItemId: '',
             ItemName: ''
@@ -156,6 +204,53 @@ export class Requisition implements OnDestroy {
             emitEvent: false
           });
         }
+      });
+  }
+
+  watchProductType(): void {
+    this.lineFormGroup.get('ProductTypeId')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(value => {
+        const productTypeId = Number(value);
+        const itemSearchControl = this.lineFormGroup.get('ItemSearch');
+        const itemIdControl = this.lineFormGroup.get('ItemId');
+        const itemNameControl = this.lineFormGroup.get('ItemName');
+
+        this.lineFormGroup.patchValue({
+          ItemSearch: '',
+          ItemId: '',
+          ItemName: ''
+        },{
+          emitEvent: false
+        });
+
+        if (productTypeId === 1) {
+          itemSearchControl?.clearValidators();
+          itemIdControl?.clearValidators();
+          itemNameControl?.setValidators([
+            Validators.required,
+            Validators.maxLength(200)
+          ]);
+        }
+        else if (productTypeId === 2) {
+          itemSearchControl?.setValidators(Validators.required);
+          itemIdControl?.setValidators(Validators.required);
+          itemNameControl?.clearValidators();
+        }
+        else {
+          itemSearchControl?.clearValidators();
+          itemIdControl?.clearValidators();
+          itemNameControl?.clearValidators();
+        }
+
+        itemSearchControl?.updateValueAndValidity({ emitEvent: false });
+        itemIdControl?.updateValueAndValidity({ emitEvent: false });
+        itemNameControl?.updateValueAndValidity({ emitEvent: false });
+
+        this.isItemSearching = false;
+        this.itemSearchCompleted = false;
+        this.itemSearchHasResults = true;
+        this.itemSearchFailed = false;
       });
   }
 
@@ -171,7 +266,11 @@ export class Requisition implements OnDestroy {
         this.itemSearchHasResults = true;
         this.itemSearchFailed = false;
 
-        if (!this.selectedUnitId || text.length < 2) {
+        if (
+          this.selectedLineProductTypeId !== 2 ||
+          !this.selectedUnitId ||
+          text.length < 2
+        ) {
           this.isItemSearching = false;
           return of([]);
         }
@@ -207,6 +306,37 @@ export class Requisition implements OnDestroy {
 
     return item ? `${item.Name} (${item.Id})` : '';
   };
+
+  scrollActiveItem(): void {
+    setTimeout(() => {
+      const dropdown = document.querySelector(
+        // 'ngb-typeahead-window.dropdown-menu'
+        '.requisition-item-dropdown'
+      ) as HTMLElement | null;
+
+      const activeItem = dropdown?.querySelector(
+        '.dropdown-item.active'
+      ) as HTMLElement | null;
+
+      if (!dropdown || !activeItem) {
+        return;
+      }
+
+      const itemTop = activeItem.offsetTop;
+      const itemBottom = itemTop + activeItem.offsetHeight;
+      const visibleTop = dropdown.scrollTop;
+      const visibleBottom = visibleTop + dropdown.clientHeight;
+
+      if (itemTop < visibleTop) {
+        dropdown.scrollTop = itemTop;
+      }
+      else if (itemBottom > visibleBottom) {
+        dropdown.scrollTop = itemBottom - dropdown.clientHeight;
+      }
+    });
+  }
+
+
 
   onItemSelect(event: NgbTypeaheadSelectItemEvent): void {
     const item = event.item as IItem;
@@ -252,6 +382,7 @@ export class Requisition implements OnDestroy {
     }
 
     const lineValue = this.lineFormGroup.getRawValue();
+    const productTypeId = Number(lineValue.ProductTypeId);
 
     const selectedUOM = this.uoms.find(
       uom => Number(uom.Id) === Number(lineValue.UOMId)
@@ -260,8 +391,15 @@ export class Requisition implements OnDestroy {
     const newLine = new FormGroup({
       ID: new FormControl(0),
       ReqID: new FormControl(0),
-      ItemId: new FormControl(Number(lineValue.ItemId)),
-      ItemName: new FormControl(lineValue.ItemName),
+      ProductTypeId: new FormControl(productTypeId),
+      ItemId: new FormControl(
+        productTypeId === 1 ? 0 : Number(lineValue.ItemId)
+      ),
+      ItemName: new FormControl(
+        productTypeId === 1
+          ? lineValue.ItemName?.trim() ?? ''
+          : lineValue.ItemName
+      ),
       UOMId: new FormControl(Number(lineValue.UOMId)),
       UOMName: new FormControl(selectedUOM?.Name ?? ''),
       Quantity: new FormControl(Number(lineValue.Quantity)),
@@ -271,12 +409,13 @@ export class Requisition implements OnDestroy {
 
     this.lines.push(newLine);
 
-    this.resetLineInput();
+    this.resetLineInput(productTypeId);
     this.lineSubmitted = false;
   }
 
-  resetLineInput(): void {
+  resetLineInput(productTypeId: number = 2): void {
     this.lineFormGroup.reset({
+      ProductTypeId: productTypeId,
       ItemSearch: '',
       ItemId: '',
       ItemName: '',
@@ -294,6 +433,43 @@ export class Requisition implements OnDestroy {
   removeLine(index:number): void {
     this.lines.removeAt(index);
   }
+
+
+openViewModal(content:any,requisition:IRequisition): void {
+  const activeLines = requisition.Lines.filter(x => x.IsActive);
+
+  this.loadItemNames(activeLines).subscribe(lines => {
+    this.selectedRequisition = {
+      Header: requisition.Header,
+      Lines: lines
+    };
+
+    this.modalService.open(content,{
+      size: 'xl'
+    });
+  });
+}
+loadItemNames(lines:any[]): Observable<any[]> {
+  const items = lines.map(line => ({
+    Type: Number(line.ProductTypeId),
+    Id: Number(line.ItemId),
+    Name: ''
+  }));
+
+  return this.commonService.GetRequisitionItemNames(items).pipe(
+    map(result => {
+      return lines.map(line => ({
+        ...line,
+        ItemName: result.find(x =>
+          Number(x.Type) === Number(line.ProductTypeId) &&
+          Number(x.Id) === Number(line.ItemId)
+        )?.Name ?? ''
+      }));
+    })
+  );
+}
+
+
 
   openCreateModal(content:any): void {
     this.resetCreateForm();
@@ -313,7 +489,6 @@ export class Requisition implements OnDestroy {
       UnitId: '',
       BusinessId: '',
       ReqDate: new Date().toISOString().split('T')[0],
-      ProductTypeId: '',
       Remarks: ''
     });
 
@@ -329,7 +504,7 @@ export class Requisition implements OnDestroy {
   this.formGroup.markAllAsTouched();
 
   if (this.formGroup.invalid || this.lines.length === 0) {
-    console.warn('Requisition validation failed.',{
+    console.warn('Requisition validation failed.', {
       headerValid: this.formGroup.valid,
       lineCount: this.lines.length
     });
@@ -338,21 +513,33 @@ export class Requisition implements OnDestroy {
   }
 
   const formValue = this.formGroup.getRawValue();
+  const enroll = Number(localStorage.getItem('Enroll'));
+  const currentDate = new Date();
 
-  const requisitionData = {
+  const requisitionData: IRequisition = {
     Header: {
       ReqID: 0,
       RequisitionNumber: '',
       UnitId: Number(formValue.UnitId),
       BusinessId: Number(formValue.BusinessId),
-      ReqDate: formValue.ReqDate,
-      ProductTypeId: Number(formValue.ProductTypeId),
-      Remarks: formValue.Remarks?.trim() ?? ''
+      ReqDate: new Date(formValue.ReqDate),
+      Remarks: formValue.Remarks?.trim() ?? '',
+      IsActive: true,
+      CREATEDBY: enroll,
+      UPDATEDBY: enroll,
+      CREATEDDATE: currentDate,
+      UPDATEDDATE: currentDate
     },
-    Lines: this.lines.getRawValue().map((line:any) => ({
+    Lines: this.lines.getRawValue().map((line: any) => ({
       ID: 0,
       ReqID: 0,
-      ItemId: Number(line.ItemId),
+      ProductTypeId: Number(line.ProductTypeId),
+      ItemId: Number(line.ProductTypeId) === 1
+        ? 0
+        : Number(line.ItemId),
+      ItemName: Number(line.ProductTypeId) === 1
+        ? line.ItemName?.trim() ?? ''
+        : null,
       UOMId: Number(line.UOMId),
       Quantity: Number(line.Quantity),
       Remarks: line.Remarks?.trim() ?? '',
@@ -360,13 +547,31 @@ export class Requisition implements OnDestroy {
     }))
   };
 
-  console.log('Requisition object:',requisitionData);
-  console.log(
-    'Requisition API payload:',
-    JSON.stringify(requisitionData,null,2)
-  );
-  console.table(requisitionData.Lines);
-}
+  console.log('Requisition API payload:', requisitionData);
+
+  this.requisitionService.addData(requisitionData)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: response => {
+        if (response.Status) {
+          this.toastr.success(response.Message);
+          this.resetCreateForm();
+          this.modalService.dismissAll();
+          this.currentPage.set(1);
+          this.retry();
+        } else {
+          this.toastr.warning(
+            response.Message || 'Unable to save the requisition.'
+          );
+        }
+      },
+      error: () => {
+        this.toastr.error(
+          'Something went wrong while saving the requisition.'
+        );
+      }
+    });
+    }
 
 ngOnDestroy(): void {
   this.destroy$.next();

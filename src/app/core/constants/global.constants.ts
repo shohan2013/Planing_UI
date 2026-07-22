@@ -26,6 +26,10 @@ export const GlobalConstant={
       ProvideApproveMatrix:'ApproveMatrix/approvematrixpermissionbytype',
       
       ApproveMatrixGroup:'ApprovalMatrixGroup',
+
+/*===========================REQUISITION===================================== */  
+      addRequisition : 'Requisition/save',
+      getRequisition: 'Requisition',
       
 /*===========================COMMON===================================== */  
       Common:'Common',
@@ -43,6 +47,7 @@ export const GlobalConstant={
       Businesses : "Common/BusinessList",
       ProductType : "Common/ProductTypeList",
       Item : "Common/ItemList",
+      RequisitionItemNames: 'Common/RequisitionItemNames',
       UOM : "Common/UOMList",
 
 

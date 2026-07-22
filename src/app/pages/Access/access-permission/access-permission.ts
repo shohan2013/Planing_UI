@@ -37,6 +37,9 @@ export class AccessPermission {
    }
    
     ngOnInit(): void {
+
+    this.selectedUser = Number(localStorage.getItem('Enroll'));
+
     this.GetEmpInfo();
     this.GetPermissionData(localStorage.getItem('Enroll'));
   }
