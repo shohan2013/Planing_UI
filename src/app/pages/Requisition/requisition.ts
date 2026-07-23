@@ -412,8 +412,7 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
       ID: new FormControl(0),
       ReqID: new FormControl(0),
       ProductTypeId: new FormControl(productTypeId),
-      ItemId: new FormControl(
-        productTypeId === 1 ? 0 : Number(lineValue.ItemId)
+      ItemId: new FormControl(productTypeId === 1 ? 0 : Number(lineValue.ItemId)
       ),
       ItemName: new FormControl(
         productTypeId === 1

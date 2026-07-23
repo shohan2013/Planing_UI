@@ -29,10 +29,9 @@ export class RequisitionService {
   }
 
   updateData(model: IRequisition): Observable<any> {
-    return this.http.put(
-      environment.API_URL + GlobalConstant.API_END_POINTS.updateRequisition,
-      model
-    );
+    console.log("REQ CREATE",model);
+    return this.http.put(environment.API_URL + GlobalConstant.API_END_POINTS.updateRequisition,model);
+  
   }
 
   deleteData(reqId: number): Observable<any> {

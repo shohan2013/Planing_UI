@@ -164,21 +164,24 @@
                   {{ item.Header.CREATEDDATE | date: 'dd-MMM-yyyy h:mm a' }}
                 </td>
 
+
+
                 <td>
+
+                <span
+                  class="g-status g-status-lg"
+                  [ngClass]="{
+                    'status-pending': item.Header.FileStatusId == 1,
+                    'status-approve': item.Header.FileStatusId == 2,
+                    'status-reject': item.Header.FileStatusId == 3
+                  }">
+
+                  <span class="g-dot"></span>
+
                   {{ getFileStatusName(item.Header.FileStatusId) }}
+                </span>
 
-
-                  <!-- <span
-                    class="badge rounded-pill"
-                    [ngClass]="{
-                      'bg-warning text-dark': item.Header.FileStatusId === 1,
-                      'bg-success': item.Header.FileStatusId === 2
-                    }">
-
-                    {{ getFileStatusName(item.Header.FileStatusId) }}
-                  </span> -->
-
-                </td>
+              </td>
 
                 <!-- <td>
                   {{ item.Header.UPDATEDBY }}
@@ -318,12 +321,31 @@
         </div>
 
         
-        <div class="col-md-6">
+        <!-- <div class="col-md-6">
 
           <strong>Status :</strong>
 
           {{ getFileStatusName(selectedRequisition.Header.FileStatusId) }}
-        </div>
+        </div> -->
+
+<div class="col-md-6">
+
+  <strong>Status :</strong>
+
+  <span
+    class="g-status g-status-lg ms-1"
+    [ngClass]="{
+      'status-pending': selectedRequisition.Header.FileStatusId == 1,
+      'status-approve': selectedRequisition.Header.FileStatusId == 2,
+      'status-reject': selectedRequisition.Header.FileStatusId == 3
+    }">
+
+    <span class="g-dot"></span>
+
+    {{ getFileStatusName(selectedRequisition.Header.FileStatusId) }}
+  </span>
+
+</div>
 
 
 
@@ -347,6 +369,11 @@
               <th>ITEM</th>
               <th>UOM</th>
               <th>QUANTITY</th>
+
+              <th>CURRENT QUANTITY</th> 
+              <th>REMAINING QUANTITY</th>
+              <th>STOCK</th>
+
               <th>REMARKS</th>
               <th>STATUS</th>
               <!-- <th>STATUS</th> -->
@@ -380,8 +407,32 @@
                   <td>{{ line.ItemName }}</td>
                   <td>{{ getUOMName(line.UOMId) }}</td>
                   <td>{{ line.Quantity }}</td>
+
+                  <td>0</td>
+                  <td>0</td>
+                  <td>0</td>
+
                   <td>{{ line.Remarks || '-' }}</td>
-                  <td>{{ getFileStatusName(line.FileStatusId) }}</td>
+
+
+<td>
+
+  <span
+    class="g-status g-status-lg"
+    [ngClass]="{
+      'status-pending': line.FileStatusId == 1,
+      'status-approve': line.FileStatusId == 2,
+      'status-reject': line.FileStatusId == 3
+    }">
+
+    <span class="g-dot"></span>
+
+    {{ getFileStatusName(line.FileStatusId) }}
+  </span>
+
+</td>
+
+                  <!-- <td>{{ getFileStatusName(line.FileStatusId) }}</td> -->
 
                   <!-- <td>
 
@@ -454,22 +505,32 @@
 
 
       
-      <div class="d-flex align-items-center">
+      <div class="d-flex flex-column align-items-start">
 
         <h5 class="modal-title mb-0">
           {{ isEditMode ? 'EDIT REQUISITION' : 'CREATE REQUISITION' }}
         </h5>
 
+        <!-- <span
+          class="mt-1 text-danger fw-semibold opacity-55"
+          [class.invisible]="formGroup.get('UnitId')?.value">
+
+          Note: Please select a Unit before adding a Product.
+
+        </span> -->
 
         <span
-          class="ms-4 text-muted"
-          *ngIf="!formGroup.get('UnitId')?.value">
+          class="mt-1 fw-semibold"
+          style="color: #86c592;"
+          [class.invisible]="formGroup.get('UnitId')?.value">
 
-          Please select a Unit before adding a Product.
+          Note: Please select a Unit before adding a Product.
 
         </span>
 
       </div>
+
+   
 
 
 
@@ -596,7 +657,18 @@
 
       <hr class="my-4">
 
-      <h6>&#10010; Add Product</h6>
+      
+
+<h6 class="d-inline-flex align-items-center gap-1">
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"></circle>
+    <line x1="12" y1="8" x2="12" y2="16"></line>
+    <line x1="8" y1="12" x2="16" y2="12"></line>
+  </svg>
+  Add Product
+</h6>
+
+      <!-- <h6>&#10010; Add Product</h6> -->
       
       <div [formGroup]="lineFormGroup">
 
@@ -807,7 +879,7 @@
 
 
 
-                            <td>
+              <td>
                 <button
                   type="button"
                   class="btn btn-success"
@@ -903,7 +975,7 @@
               </td>
 
               
-              <td *ngIf="isEditMode">
+              <!-- <td *ngIf="isEditMode">
                 <span
                   class="badge rounded-pill"
                   [ngClass]="{
@@ -915,7 +987,24 @@
 
                   {{ getFileStatusName(line.get('FileStatusId')?.value) }}
                 </span>
-              </td>
+              </td> -->
+
+              <td *ngIf="isEditMode">
+
+  <span
+    class="g-status g-status-sm"
+    [ngClass]="{
+      'status-pending': line.get('FileStatusId')?.value == 1,
+      'status-approve': line.get('FileStatusId')?.value == 2,
+      'status-reject': line.get('FileStatusId')?.value == 3
+    }">
+
+    <span class="g-dot"></span>
+
+    {{ getFileStatusName(line.get('FileStatusId')?.value) }}
+  </span>
+
+</td>
 
 
 
