@@ -5,6 +5,7 @@ export interface IRequisitionHeader {
   BusinessId: number;
   ReqDate: Date;
   Remarks: string;
+  FileStatusId: number;
   IsActive: boolean;
   CREATEDBY: number;
   UPDATEDBY: number;
@@ -21,10 +22,12 @@ export interface IRequisitionLine {
   UOMId: number;
   Quantity: number;
   Remarks: string | null;
+  FileStatusId: number;
   IsActive: boolean;
 }
 
 export interface IRequisition {
   Header: IRequisitionHeader;
   Lines: IRequisitionLine[];
+  DeletedLineIds: number[];
 }

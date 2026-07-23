@@ -8,6 +8,7 @@ import { Module } from '../../model/Common/Module/Module';
 import { SubMenuModel } from '../../model/Common/SubMenu/SubMenu';
 import { IPriority } from '../../model/Common/Priority/Priority';
 import { IUnit } from '../../model/Common/Unit/Unit';
+import { IDropdownBind } from '../../model/Common/dropdown-bind';
 
 import { IBusiness } from '../../model/Common/BusinessType/BusinessType';
 import { IProductType } from '../../model/Common/ProductType/ProductType';
@@ -88,7 +89,11 @@ GetRequisitionItemNames(model: IRequisitionItemName[]): Observable<IRequisitionI
 
 
 
-
+    GetDocumentStatusList(): Observable<IDropdownBind[]> {
+      return this.http.get<IDropdownBind[]>(
+        `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.DocumentStatus}`
+      );
+    }
 
 
     GetPriorityList() : Observable<IPriority[]> {

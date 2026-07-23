@@ -35,6 +35,7 @@ import { IItem } from 'src/app/core/model/Common/Items/Item';
 import { IRequisitionItemName } from 'src/app/core/model/Common/RequisitionItemName/RequisitionItemName';
 import { IUOM } from 'src/app/core/model/Common/UOM/UOM';
 import { CommonService } from 'src/app/core/services/Common/CommonService';
+import { IDropdownBind } from 'src/app/core/model/Common/dropdown-bind';
 
 import { RequisitionService } from 'src/app/core/services/Requisition/requisition.service';
 import { IRequisition } from 'src/app/core/model/Requisition/Requisition';
@@ -64,6 +65,10 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
   lineSubmitted = false;
   selectedRequisition: IRequisition | null = null;
   isViewLoading = false;
+
+  isEditMode = false;
+  editingReqID = 0;
+  deletedLineIds: number[] = [];
   
 
   units: IUnit[] = [];
@@ -71,6 +76,7 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
   filteredBusinesses: IBusiness[] = [];
   productTypes: IProductType[] = [];
   uoms: IUOM[] = [];
+  fileStatusList: IDropdownBind[] = [];
 
   isItemSearching = false;
   itemSearchCompleted = false;
@@ -161,6 +167,12 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
     return this.uoms.find(x => Number(x.Id) === Number(uomId))?.Name ?? '-';
   }
 
+  getFileStatusName(fileStatusId: number): string {
+  return this.fileStatusList.find(
+    x => Number(x.Id) === Number(fileStatusId)
+    )?.Name ?? '-';
+  }
+
 
   loadCommonData(): void {
     this.commonService.GetUnitList()
@@ -190,6 +202,14 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
       .subscribe(data => {
         this.uoms = data;
       });
+
+    this.commonService.GetDocumentStatusList()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(data => {
+        this.fileStatusList = data;
+      });
+
+
   }
 
   watchItemInput(): void {
@@ -404,6 +424,7 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
       UOMName: new FormControl(selectedUOM?.Name ?? ''),
       Quantity: new FormControl(Number(lineValue.Quantity)),
       Remarks: new FormControl(lineValue.Remarks ?? ''),
+      FileStatusId: new FormControl(1),
       IsActive: new FormControl(true)
     });
 
@@ -430,9 +451,19 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
     this.itemSearchFailed = false;
   }
 
+  // removeLine(index:number): void {
+  //   this.lines.removeAt(index);
+  // }
+
   removeLine(index:number): void {
-    this.lines.removeAt(index);
+  const lineId = Number(this.lines.at(index).get('ID')?.value);
+
+  if (this.isEditMode && lineId > 0) {
+    this.deletedLineIds.push(lineId);
   }
+
+  this.lines.removeAt(index);
+}
 
 
 openViewModal(content:any,requisition:IRequisition): void {
@@ -441,7 +472,8 @@ openViewModal(content:any,requisition:IRequisition): void {
   this.loadItemNames(activeLines).subscribe(lines => {
     this.selectedRequisition = {
       Header: requisition.Header,
-      Lines: lines
+      Lines: lines,
+      DeletedLineIds: []
     };
 
     this.modalService.open(content,{
@@ -471,6 +503,62 @@ loadItemNames(lines:any[]): Observable<any[]> {
 
 
 
+openEditModal(content:any,requisition:IRequisition): void {
+  const activeLines = requisition.Lines.filter(x => x.IsActive);
+
+  this.loadItemNames(activeLines).subscribe(lines => {
+    this.resetCreateForm();
+
+    this.isEditMode = true;
+    this.editingReqID = requisition.Header.ReqID;
+    this.deletedLineIds = [];
+
+    this.selectedRequisition = {
+      Header: requisition.Header,
+      Lines: lines,
+      DeletedLineIds: []
+    };
+
+    this.formGroup.patchValue({
+      UnitId: requisition.Header.UnitId,
+      BusinessId: requisition.Header.BusinessId,
+      ReqDate: new Date(requisition.Header.ReqDate).toISOString().split('T')[0],
+      Remarks: requisition.Header.Remarks
+    });
+
+    this.filterBusinesses();
+    this.formGroup.get('UnitId')?.disable();
+
+    lines.forEach(line => {
+      this.lines.push(new FormGroup({
+        ID: new FormControl(Number(line.ID)),
+        ReqID: new FormControl(Number(line.ReqID)),
+        ProductTypeId: new FormControl(Number(line.ProductTypeId)),
+        ItemId: new FormControl(Number(line.ItemId)),
+        ItemName: new FormControl(line.ItemName ?? ''),
+        UOMId: new FormControl(Number(line.UOMId)),
+        UOMName: new FormControl(this.getUOMName(Number(line.UOMId))),
+        Quantity: new FormControl(Number(line.Quantity)),
+        Remarks: new FormControl(line.Remarks ?? ''),
+        FileStatusId: new FormControl(Number(line.FileStatusId)),
+        IsActive: new FormControl(true)
+      }));
+    });
+
+    this.modalService.open(content,{
+      fullscreen: true,
+      backdrop: 'static',
+      keyboard: false,
+      windowClass: 'requisition-fullscreen-modal'
+    });
+  });
+}
+
+
+
+
+
+
   openCreateModal(content:any): void {
     this.resetCreateForm();
 
@@ -483,6 +571,13 @@ loadItemNames(lines:any[]): Observable<any[]> {
   }
 
   resetCreateForm(): void {
+    this.formGroup.get('UnitId')?.enable();
+
+    this.isEditMode = false;
+    this.editingReqID = 0;
+    this.deletedLineIds = [];
+    this.selectedRequisition = null;
+
     this.lines.clear();
 
     this.formGroup.reset({
@@ -524,6 +619,7 @@ loadItemNames(lines:any[]): Observable<any[]> {
       BusinessId: Number(formValue.BusinessId),
       ReqDate: new Date(formValue.ReqDate),
       Remarks: formValue.Remarks?.trim() ?? '',
+      FileStatusId: 1,
       IsActive: true,
       CREATEDBY: enroll,
       UPDATEDBY: enroll,
@@ -543,8 +639,12 @@ loadItemNames(lines:any[]): Observable<any[]> {
       UOMId: Number(line.UOMId),
       Quantity: Number(line.Quantity),
       Remarks: line.Remarks?.trim() ?? '',
+      FileStatusId: 1,
       IsActive: true
-    }))
+    })),
+
+    DeletedLineIds: []
+
   };
 
   console.log('Requisition API payload:', requisitionData);
@@ -572,6 +672,133 @@ loadItemNames(lines:any[]): Observable<any[]> {
       }
     });
     }
+
+
+
+
+
+
+Update(): void {
+  this.submitted = true;
+  this.formGroup.markAllAsTouched();
+
+  if (
+    this.formGroup.invalid ||
+    this.lines.length === 0 ||
+    !this.selectedRequisition
+  ) {
+    return;
+  }
+
+  const formValue = this.formGroup.getRawValue();
+  const enroll = Number(localStorage.getItem('Enroll'));
+  const currentDate = new Date();
+  const existingHeader = this.selectedRequisition.Header;
+
+  const requisitionData: IRequisition = {
+    Header: {
+      ReqID: this.editingReqID,
+      RequisitionNumber: existingHeader.RequisitionNumber,
+      UnitId: Number(formValue.UnitId),
+      BusinessId: Number(formValue.BusinessId),
+      ReqDate: new Date(formValue.ReqDate),
+      Remarks: formValue.Remarks?.trim() ?? '',
+      FileStatusId: existingHeader.FileStatusId,
+      IsActive: existingHeader.IsActive,
+      CREATEDBY: existingHeader.CREATEDBY,
+      UPDATEDBY: enroll,
+      CREATEDDATE: existingHeader.CREATEDDATE,
+      UPDATEDDATE: currentDate
+    },
+    Lines: this.lines.getRawValue()
+      .filter((line:any) => Number(line.ID) === 0)
+      .map((line:any) => ({
+        ID: 0,
+        ReqID: this.editingReqID,
+        ProductTypeId: Number(line.ProductTypeId),
+        ItemId: Number(line.ProductTypeId) === 1
+          ? 0
+          : Number(line.ItemId),
+        ItemName: Number(line.ProductTypeId) === 1
+          ? line.ItemName?.trim() ?? ''
+          : null,
+        UOMId: Number(line.UOMId),
+        Quantity: Number(line.Quantity),
+        Remarks: line.Remarks?.trim() ?? '',
+        FileStatusId: Number(line.FileStatusId),
+        IsActive: true
+      })),
+    DeletedLineIds: this.deletedLineIds
+  };
+
+  this.requisitionService.updateData(requisitionData)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: response => {
+        if (response.Status) {
+          this.toastr.success(response.Message);
+          this.resetCreateForm();
+          this.modalService.dismissAll();
+          this.retry();
+        }
+        else {
+          this.toastr.warning(
+            response.Message || 'Unable to update the requisition.'
+          );
+        }
+      },
+      error: () => {
+        this.toastr.error(
+          'Something went wrong while updating the requisition.'
+        );
+      }
+    });
+}
+
+
+
+
+
+
+Delete(reqId:number): void {
+
+  const isConfirmed = confirm('Are you sure you want to delete this requisition?');
+
+  if (!isConfirmed) {
+    return;
+  }
+
+  this.requisitionService.deleteData(reqId).subscribe({
+    next: (response) => {
+
+      if (response.Status) {
+        this.toastr.success(response.Message);
+        //this.currentPage.set(1);
+        this.retry();
+      }
+      else {
+        this.toastr.error(response.Message);
+      }
+
+    },
+    error: (error) => {
+
+      this.toastr.error(
+        error?.error?.Message || 'Unable to delete the requisition.'
+      );
+
+    }
+  });
+
+}
+
+
+
+
+
+
+
+
 
 ngOnDestroy(): void {
   this.destroy$.next();

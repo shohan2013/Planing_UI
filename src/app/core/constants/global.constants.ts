@@ -30,6 +30,8 @@ export const GlobalConstant={
 /*===========================REQUISITION===================================== */  
       addRequisition : 'Requisition/save',
       getRequisition: 'Requisition',
+      updateRequisition: 'Requisition/update',
+      deleteRequisition: "Requisition/",
       
 /*===========================COMMON===================================== */  
       Common:'Common',
@@ -49,6 +51,8 @@ export const GlobalConstant={
       Item : "Common/ItemList",
       RequisitionItemNames: 'Common/RequisitionItemNames',
       UOM : "Common/UOMList",
+
+      DocumentStatus: "Common/DocumentStatusList",
 
 
 

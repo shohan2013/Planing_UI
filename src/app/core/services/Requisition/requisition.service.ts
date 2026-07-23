@@ -27,4 +27,20 @@ export class RequisitionService {
       model
     );
   }
+
+  updateData(model: IRequisition): Observable<any> {
+    return this.http.put(
+      environment.API_URL + GlobalConstant.API_END_POINTS.updateRequisition,
+      model
+    );
+  }
+
+  deleteData(reqId: number): Observable<any> {
+    return this.http.delete(
+      environment.API_URL + GlobalConstant.API_END_POINTS.deleteRequisition + reqId
+    );
+  }
+
+
+
 }

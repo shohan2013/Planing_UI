@@ -3,7 +3,7 @@
   <div class="page-header">
     <h5><b>REQUISITION</b></h5>
   </div>
-
+<hr>
   <div class="card-body">
 
     <div class="d-flex gap-3 mb-3">
@@ -78,6 +78,7 @@
             <th>REMARKS</th>
             <th>CREATED BY</th>
             <th>CREATED DATE</th>
+            <th>STATUS</th>
             <!-- <th>UPDATED BY</th>
             <th>UPDATED DATE</th> -->
             <!-- <th>STATUS</th> -->
@@ -92,7 +93,7 @@
 
             <tr>
 
-              <td colspan="11" class="text-center py-4">
+              <td colspan="10" class="text-center py-4">
 
                 <span
                   class="spinner-border spinner-border-sm me-2"
@@ -108,7 +109,7 @@
 
             <tr>
 
-              <td colspan="11" class="text-center py-4">
+              <td colspan="10" class="text-center py-4">
 
                 <i class="fas fa-folder-open fa-4x text-secondary mb-3"></i>
 
@@ -163,6 +164,22 @@
                   {{ item.Header.CREATEDDATE | date: 'dd-MMM-yyyy h:mm a' }}
                 </td>
 
+                <td>
+                  {{ getFileStatusName(item.Header.FileStatusId) }}
+
+
+                  <!-- <span
+                    class="badge rounded-pill"
+                    [ngClass]="{
+                      'bg-warning text-dark': item.Header.FileStatusId === 1,
+                      'bg-success': item.Header.FileStatusId === 2
+                    }">
+
+                    {{ getFileStatusName(item.Header.FileStatusId) }}
+                  </span> -->
+
+                </td>
+
                 <!-- <td>
                   {{ item.Header.UPDATEDBY }}
                 </td>
@@ -201,7 +218,7 @@
                       type="button"
                       class="action-btn btn-edit"
                       title="Edit"
-                      disabled>
+                      (click)="openEditModal(requisitionModal,item)">
 
                       <i class="fa-regular fa-pen-to-square"></i>
                     </button>
@@ -210,9 +227,10 @@
                       type="button"
                       class="action-btn btn-delete"
                       title="Delete"
-                      disabled>
+                      (click)="Delete(item.Header.ReqID)">
 
                       <i class="fa-solid fa-trash-can"></i>
+
                     </button>
 
                   </div>
@@ -299,6 +317,16 @@
           {{ selectedRequisition.Header.ReqDate | date: 'dd-MMM-yyyy' }}
         </div>
 
+        
+        <div class="col-md-6">
+
+          <strong>Status :</strong>
+
+          {{ getFileStatusName(selectedRequisition.Header.FileStatusId) }}
+        </div>
+
+
+
       </div>
 
 
@@ -320,6 +348,7 @@
               <th>UOM</th>
               <th>QUANTITY</th>
               <th>REMARKS</th>
+              <th>STATUS</th>
               <!-- <th>STATUS</th> -->
             </tr>
 
@@ -331,7 +360,7 @@
 
               <tr>
 
-                <td colspan="5" class="text-center py-4">
+                <td colspan="6" class="text-center py-4">
                   No active Requisition Lines found.
                 </td>
 
@@ -352,6 +381,7 @@
                   <td>{{ getUOMName(line.UOMId) }}</td>
                   <td>{{ line.Quantity }}</td>
                   <td>{{ line.Remarks || '-' }}</td>
+                  <td>{{ getFileStatusName(line.FileStatusId) }}</td>
 
                   <!-- <td>
 
@@ -415,7 +445,8 @@
 <ng-template #requisitionModal let-c="close" let-d="dismiss">
 
 
-  <form [formGroup]="formGroup" (ngSubmit)="Create()">
+
+  <form [formGroup]="formGroup" (ngSubmit)="isEditMode ? Update() : Create()">
 
     <div class="modal-header">
 
@@ -425,7 +456,9 @@
       
       <div class="d-flex align-items-center">
 
-        <h5 class="modal-title mb-0">CREATE REQUISITION</h5>
+        <h5 class="modal-title mb-0">
+          {{ isEditMode ? 'EDIT REQUISITION' : 'CREATE REQUISITION' }}
+        </h5>
 
 
         <span
@@ -455,7 +488,7 @@
 
       <div class="row g-3">
 
-        <div class="col-md-6">
+        <div class="col-md-4">
 
           <label class="form-label">Unit :</label>
 
@@ -485,7 +518,7 @@
         </div>
 
 
-        <div class="col-md-6">
+        <div class="col-md-4">
 
           <label class="form-label">Business :</label>
 
@@ -517,7 +550,7 @@
         </div>
 
 
-        <div class="col-md-6">
+        <div class="col-md-4">
 
           <label class="form-label">Requisition Date :</label>
 
@@ -563,7 +596,7 @@
 
       <hr class="my-4">
 
-      <h6>Add Product</h6>
+      <h6>&#10010; Add Product</h6>
       
       <div [formGroup]="lineFormGroup">
 
@@ -748,6 +781,7 @@
                   type="number"
                   class="form-control"
                   formControlName="Quantity"
+                  placeholder="Quantity"
                   min="1"
                   [ngClass]="{
                     'is-invalid':
@@ -767,7 +801,7 @@
                   type="text"
                   class="form-control"
                   formControlName="Remarks"
-                  placeholder="Optional">
+                  placeholder="Remarks">
 
               </td>
 
@@ -835,7 +869,8 @@
             <col style="width: 34%;">
             <col style="width: 14%;">
             <col style="width: 10%;">
-            <col style="width: 16%;">
+            <col style="width: 11%;">
+            <col *ngIf="isEditMode" style="width: 10%;">
             <col style="width: 5%;">
           </colgroup>
 
@@ -866,6 +901,24 @@
               <td>
                 {{ line.get('Remarks')?.value || '-' }}
               </td>
+
+              
+              <td *ngIf="isEditMode">
+                <span
+                  class="badge rounded-pill"
+                  [ngClass]="{
+                    'bg-warning text-dark':
+                      line.get('FileStatusId')?.value == 1,
+                    'bg-success':
+                      line.get('FileStatusId')?.value == 2
+                  }">
+
+                  {{ getFileStatusName(line.get('FileStatusId')?.value) }}
+                </span>
+              </td>
+
+
+
 
               <td class="text-end">
 
@@ -905,7 +958,7 @@
       <button type="submit" class="btn btn-success">
 
         <i class="fa-solid fa-fw fa-check"></i>
-        Save
+        {{ isEditMode ? 'Update' : 'Save' }}
       </button>
 
     </div>
