@@ -81,6 +81,46 @@ GetRequisitionItemNames(model: IRequisitionItemName[]): Observable<IRequisitionI
   );
 }
 
+
+
+
+GetStockQty(fromDate: string, toDate: string, unitId: number, businessId: number, whId: number | null, productId: number): Observable<number> {
+  const params = {
+    fromDate,
+    toDate,
+    unitId,
+    businessId,
+    whId: whId ?? 0,
+    productId
+  };
+
+  return this.http.get<number>(
+    `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.StockQuantity}`,
+    { params }
+  );
+}
+
+
+
+GetSalesQty(fromDate:string, toDate:string, unitId:number, productId:number, whId:number | null, customerId:number | null): Observable<number> {
+  return this.http.get<number>(
+    GlobalConstant.URL.API_URL + GlobalConstant.API_END_POINTS.SalesQuantity,
+    {
+      params: {
+        fromDate,
+        toDate,
+        unitId: unitId.toString(),
+        productId: productId.toString(),
+        whId: whId?.toString() ?? '',    // if needed in future, pass null now
+        customerId: customerId?.toString() ?? '' //Business ID? 
+      }
+    }
+  );
+}
+
+
+
+
     GetUOMList(): Observable<IUOM[]> {
       return this.http.get<IUOM[]>(
         `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.UOM}`

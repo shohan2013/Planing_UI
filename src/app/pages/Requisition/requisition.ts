@@ -17,6 +17,7 @@ import {
 import {
   catchError,
   debounceTime,
+  
   distinctUntilChanged,
   finalize,
   map,
@@ -88,10 +89,11 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
   formGroup: FormGroup = new FormGroup({
     UnitId: new FormControl('',Validators.required),
     BusinessId: new FormControl('',Validators.required),
-    ReqDate: new FormControl(
-      new Date().toISOString().split('T')[0],
-      Validators.required
-    ),
+    ReqDate: new FormControl(new Date().toISOString().split('T')[0],Validators.required),
+
+    StartDate: new FormControl('',Validators.required),
+    EndDate: new FormControl('',Validators.required),
+
     Remarks: new FormControl(''),
     Lines: new FormArray([])
   });
@@ -106,6 +108,8 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
       Validators.required,
       Validators.min(1)
     ]),
+    StockQuantity: new FormControl(0),
+    SalesQuantity: new FormControl(0),
     Remarks: new FormControl('')
   });
 
@@ -119,11 +123,18 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
     this.loadCommonData();
     this.watchItemInput();
     this.watchProductType();
+    this.watchDateRange();
   }
 
 
+  // protected override fetchData(request: ServerQueryRequest): Observable<ServerQueryResponse<IRequisition>> {
+  //   return this.requisitionService.GetRequisition(request);
+  // }
+
   protected override fetchData(request: ServerQueryRequest): Observable<ServerQueryResponse<IRequisition>> {
-    return this.requisitionService.GetRequisition(request);
+  return this.requisitionService.GetRequisition(request).pipe(
+    tap(response => console.log('Requisition table response:',response))
+  );
   }
 
   get f(): { [key: string]: AbstractControl } {
@@ -213,13 +224,13 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
   }
 
   watchItemInput(): void {
-    this.lineFormGroup.get('ItemSearch')?.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(value => {
+    this.lineFormGroup.get('ItemSearch')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(value => {
         if (this.selectedLineProductTypeId === 2 && typeof value === 'string') {
           this.lineFormGroup.patchValue({
             ItemId: '',
-            ItemName: ''
+            ItemName: '',  
+            StockQuantity: 0,
+            SalesQuantity: 0
           },{
             emitEvent: false
           });
@@ -239,7 +250,9 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
         this.lineFormGroup.patchValue({
           ItemSearch: '',
           ItemId: '',
-          ItemName: ''
+          ItemName: '',
+          StockQuantity: 0,
+          SalesQuantity: 0
         },{
           emitEvent: false
         });
@@ -274,9 +287,146 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
       });
   }
 
+
+watchDateRange(): void {
+  this.formGroup.get('StartDate')?.valueChanges
+    .pipe(takeUntil(this.destroy$))
+    .subscribe(() => {
+      this.refreshStockQuantities();
+    });
+
+  this.formGroup.get('EndDate')?.valueChanges
+    .pipe(takeUntil(this.destroy$))
+    .subscribe(() => {
+      this.refreshStockQuantities();
+    });
+}
+
+refreshStockQuantities(): void {
+  const startDate = this.formGroup.get('StartDate')?.value;
+  const endDate = this.formGroup.get('EndDate')?.value;
+  const businessId = Number(this.formGroup.get('BusinessId')?.value);
+
+  this.lineFormGroup.patchValue({
+    StockQuantity: 0,
+    SalesQuantity: 0
+  },{
+    emitEvent: false
+  });
+
+  this.lines.controls.forEach(line => {
+    line.patchValue({
+      StockQuantity: 0,
+      SalesQuantity: 0
+    },{
+      emitEvent: false
+    });
+  });
+
+  if (
+    !this.selectedUnitId ||
+    !businessId ||
+    !startDate ||
+    !endDate ||
+    new Date(startDate) > new Date(endDate)
+  ) {
+    return;
+  }
+
+  const selectedItemId = Number(this.lineFormGroup.get('ItemId')?.value);
+
+  if (this.selectedLineProductTypeId === 2 && selectedItemId > 0) {
+    this.loadStockQuantity(selectedItemId,this.lineFormGroup);
+    this.loadSalesQuantity(selectedItemId,this.lineFormGroup);  
+  }
+
+  this.lines.controls.forEach(line => {
+    const productTypeId = Number(line.get('ProductTypeId')?.value);
+    const itemId = Number(line.get('ItemId')?.value);
+
+    if (productTypeId === 2 && itemId > 0) {
+      this.loadStockQuantity(itemId,line);
+      this.loadSalesQuantity(itemId,line);
+    }
+  });
+}
+
+loadStockQuantity(productId:number,target:AbstractControl): void {
+  const startDate = this.formGroup.get('StartDate')?.value;
+  const endDate = this.formGroup.get('EndDate')?.value;
+  const businessId = Number(this.formGroup.get('BusinessId')?.value);
+
+  this.commonService.GetStockQty(
+    startDate,
+    endDate,
+    this.selectedUnitId,
+    businessId,
+    null,
+    productId
+  )
+  .pipe(takeUntil(this.destroy$))
+  .subscribe({
+    next: quantity => {
+      target.patchValue({
+        StockQuantity: Number(quantity)
+       
+      },{
+        emitEvent: false
+      });
+    },
+    error: () => {
+      target.patchValue({
+        StockQuantity: 0
+      },{
+        emitEvent: false
+      });
+
+      this.toastr.error('Unable to load Stock Quantity.');
+    }
+  });
+}
+
+
+
+loadSalesQuantity(productId:number,target:AbstractControl): void {
+  const startDate = this.formGroup.get('StartDate')?.value;
+  const endDate = this.formGroup.get('EndDate')?.value;
+
+  this.commonService.GetSalesQty(
+    startDate,
+    endDate,
+    this.selectedUnitId,
+    productId,
+    null,
+    null
+  )
+  .pipe(takeUntil(this.destroy$))
+  .subscribe({
+    next: quantity => {
+      target.patchValue({
+        SalesQuantity: Number(quantity)
+      },{
+        emitEvent: false
+      });
+    },
+    error: () => {
+      target.patchValue({
+        SalesQuantity: 0
+      },{
+        emitEvent: false
+      });
+
+      this.toastr.error('Unable to load Sales Quantity.');
+    }
+  });
+}
+
+
+
+
   searchItems = (text$: Observable<string>): Observable<IItem[]> => {
     return text$.pipe(
-      debounceTime(300),
+      debounceTime(800), //
       distinctUntilChanged(),
 
       switchMap(searchText => {
@@ -294,6 +444,9 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
           this.isItemSearching = false;
           return of([]);
         }
+
+
+
 
         this.isItemSearching = true;
 
@@ -324,7 +477,8 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
       return item;
     }
 
-    return item ? `${item.Name} (${item.Id})` : '';
+    // return item ? `${item.Name} (${item.Id})` : '';
+    return item ? item.Name : '';
   };
 
   scrollActiveItem(): void {
@@ -358,20 +512,53 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
 
 
 
-  onItemSelect(event: NgbTypeaheadSelectItemEvent): void {
-    const item = event.item as IItem;
 
-    this.lineFormGroup.patchValue({
-      ItemId: item.Id,
-      ItemName: item.Name
-    },{
-      emitEvent: false
-    });
 
-    this.itemSearchCompleted = false;
-    this.itemSearchHasResults = true;
-    this.itemSearchFailed = false;
+
+onItemSelect(event: NgbTypeaheadSelectItemEvent): void {
+  const startDate = this.formGroup.get('StartDate')?.value;
+  const endDate = this.formGroup.get('EndDate')?.value;
+  const businessId = Number(this.formGroup.get('BusinessId')?.value);
+
+  if (!startDate || !endDate) {
+    event.preventDefault();
+    this.toastr.warning('Please select Start Date and End Date first.');
+    return;
   }
+
+  if (!this.selectedUnitId || !businessId) {
+    event.preventDefault();
+    this.toastr.warning('Please select Unit and Business first.');
+    return;
+  }
+
+  if (new Date(startDate) > new Date(endDate)) {
+    event.preventDefault();
+    this.toastr.warning('Start Date cannot be greater than End Date.');
+    return;
+  }
+
+  const item = event.item as IItem;
+
+  this.lineFormGroup.patchValue({
+    ItemId: item.Id,
+    ItemName: item.Name,
+    StockQuantity: 0,
+    SalesQuantity: 0
+  },{
+    emitEvent: false
+  });
+
+  this.loadStockQuantity(Number(item.Id),this.lineFormGroup);
+  this.loadSalesQuantity(Number(item.Id),this.lineFormGroup);
+
+  this.itemSearchCompleted = false;
+  this.itemSearchHasResults = true;
+  this.itemSearchFailed = false;
+}
+
+
+
 
   onUnitChange(): void {
     this.formGroup.get('BusinessId')?.reset('');
@@ -386,6 +573,17 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
     this.itemSearchFailed = false;
     this.lineSubmitted = false;
   }
+
+  onBusinessChange(): void {
+  this.lines.clear();
+  this.resetLineInput();
+
+  this.isItemSearching = false;
+  this.itemSearchCompleted = false;
+  this.itemSearchHasResults = true;
+  this.itemSearchFailed = false;
+  this.lineSubmitted = false;
+}
 
   filterBusinesses(): void {
     this.filteredBusinesses = this.businesses.filter(
@@ -422,6 +620,10 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
       UOMId: new FormControl(Number(lineValue.UOMId)),
       UOMName: new FormControl(selectedUOM?.Name ?? ''),
       Quantity: new FormControl(Number(lineValue.Quantity)),
+
+      StockQuantity: new FormControl(Number(lineValue.StockQuantity) || 0),
+      SalesQuantity: new FormControl(Number(lineValue.SalesQuantity) || 0),
+
       Remarks: new FormControl(lineValue.Remarks ?? ''),
       FileStatusId: new FormControl(1),
       IsActive: new FormControl(true)
@@ -440,6 +642,8 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
       ItemId: '',
       ItemName: '',
       UOMId: '',
+      StockQuantity: 0,
+      SalesQuantity: 0,
       Quantity: '',
       Remarks: ''
     });
@@ -521,7 +725,11 @@ openEditModal(content:any,requisition:IRequisition): void {
     this.formGroup.patchValue({
       UnitId: requisition.Header.UnitId,
       BusinessId: requisition.Header.BusinessId,
-      ReqDate: new Date(requisition.Header.ReqDate).toISOString().split('T')[0],
+      ReqDate: String(requisition.Header.ReqDate).substring(0,10),
+
+      StartDate: String(requisition.Header.StartDate).substring(0,10),
+      EndDate: String(requisition.Header.EndDate).substring(0,10),
+
       Remarks: requisition.Header.Remarks
     });
 
@@ -538,6 +746,10 @@ openEditModal(content:any,requisition:IRequisition): void {
         UOMId: new FormControl(Number(line.UOMId)),
         UOMName: new FormControl(this.getUOMName(Number(line.UOMId))),
         Quantity: new FormControl(Number(line.Quantity)),
+
+        StockQuantity: new FormControl(line.StockQuantity ?? 0),
+        SalesQuantity: new FormControl(line.SalesQuantity ?? 0),
+
         Remarks: new FormControl(line.Remarks ?? ''),
         FileStatusId: new FormControl(Number(line.FileStatusId)),
         IsActive: new FormControl(true)
@@ -582,7 +794,12 @@ openEditModal(content:any,requisition:IRequisition): void {
     this.formGroup.reset({
       UnitId: '',
       BusinessId: '',
-      ReqDate: new Date().toISOString().split('T')[0],
+      ReqDate: {
+        value: new Date().toISOString().split('T')[0],
+        disabled: true
+      },
+      StartDate: '',
+      EndDate: '',
       Remarks: ''
     });
 
@@ -617,6 +834,10 @@ openEditModal(content:any,requisition:IRequisition): void {
       UnitId: Number(formValue.UnitId),
       BusinessId: Number(formValue.BusinessId),
       ReqDate: new Date(formValue.ReqDate),
+
+      StartDate: new Date(formValue.StartDate),
+      EndDate: new Date(formValue.EndDate),
+
       Remarks: formValue.Remarks?.trim() ?? '',
       FileStatusId: 1,
       IsActive: true,
@@ -637,6 +858,10 @@ openEditModal(content:any,requisition:IRequisition): void {
         : null,
       UOMId: Number(line.UOMId),
       Quantity: Number(line.Quantity),
+
+      StockQuantity: Number(line.StockQuantity) || 0,
+      SalesQuantity: Number(line.SalesQuantity) || 0,
+
       Remarks: line.Remarks?.trim() ?? '',
       FileStatusId: 1,
       IsActive: true
@@ -701,6 +926,11 @@ Update(): void {
       UnitId: Number(formValue.UnitId),
       BusinessId: Number(formValue.BusinessId),
       ReqDate: new Date(formValue.ReqDate),
+
+      StartDate: new Date(formValue.StartDate),
+      EndDate: new Date(formValue.EndDate),
+
+
       Remarks: formValue.Remarks?.trim() ?? '',
       FileStatusId: existingHeader.FileStatusId,
       IsActive: existingHeader.IsActive,
@@ -723,6 +953,10 @@ Update(): void {
           : null,
         UOMId: Number(line.UOMId),
         Quantity: Number(line.Quantity),
+
+        StockQuantity: Number(line.StockQuantity) || 0,
+        SalesQuantity: Number(line.SalesQuantity) || 0,
+
         Remarks: line.Remarks?.trim() ?? '',
         FileStatusId: Number(line.FileStatusId),
         IsActive: true

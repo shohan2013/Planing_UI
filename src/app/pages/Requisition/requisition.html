@@ -370,7 +370,7 @@
               <th>UOM</th>
               <th>QUANTITY</th>
 
-              <th>CURRENT QUANTITY</th> 
+              <th>COMPLETED QUANTITY</th> 
               <th>REMAINING QUANTITY</th>
               <th>STOCK</th>
 
@@ -511,14 +511,6 @@
           {{ isEditMode ? 'EDIT REQUISITION' : 'CREATE REQUISITION' }}
         </h5>
 
-        <!-- <span
-          class="mt-1 text-danger fw-semibold opacity-55"
-          [class.invisible]="formGroup.get('UnitId')?.value">
-
-          Note: Please select a Unit before adding a Product.
-
-        </span> -->
-
         <span
           class="mt-1 fw-semibold"
           style="color: #86c592;"
@@ -586,6 +578,7 @@
           <select
             class="form-select"
             formControlName="BusinessId"
+            (change)="onBusinessChange()"
             [ngClass]="{
               'is-invalid': submitted && f['BusinessId'].errors
             }">
@@ -619,6 +612,7 @@
             type="date"
             class="form-control"
             formControlName="ReqDate"
+            readonly
             [ngClass]="{
               'is-invalid': submitted && f['ReqDate'].errors
             }">
@@ -659,16 +653,58 @@
 
       
 
-<h6 class="d-inline-flex align-items-center gap-1">
-  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="12" cy="12" r="10"></circle>
-    <line x1="12" y1="8" x2="12" y2="16"></line>
-    <line x1="8" y1="12" x2="16" y2="12"></line>
-  </svg>
-  Add Product
-</h6>
+<div class="d-flex align-items-end gap-3 mb-2">
 
-      <!-- <h6>&#10010; Add Product</h6> -->
+  <h6 class="d-inline-flex align-items-center gap-1 mb-2">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="8" x2="12" y2="16"></line>
+      <line x1="8" y1="12" x2="16" y2="12"></line>
+    </svg>
+    Add Product
+  </h6>
+
+  <div>
+    <label class="form-label mb-1">Start Date :</label>
+
+    <input
+      type="date"
+      class="form-control"
+      formControlName="StartDate"
+      [ngClass]="{
+        'is-invalid': submitted && f['StartDate'].errors
+      }">
+
+    <div
+      *ngIf="submitted && f['StartDate'].errors"
+      class="invalid-feedback">
+
+      Start Date is required.
+    </div>
+  </div>
+
+  <div>
+    <label class="form-label mb-1">End Date :</label>
+
+    <input
+      type="date"
+      class="form-control"
+      formControlName="EndDate"
+      [ngClass]="{
+        'is-invalid': submitted && f['EndDate'].errors
+      }">
+
+    <div
+      *ngIf="submitted && f['EndDate'].errors"
+      class="invalid-feedback">
+
+      End Date is required.
+    </div>
+  </div>
+
+</div>
+
+  
       
       <div [formGroup]="lineFormGroup">
 
@@ -676,11 +712,13 @@
 
           
           <colgroup>
-            <col style="width: 16%;">
-            <col style="width: 29%;">
             <col style="width: 13%;">
-            <col style="width: 12%;">
-            <col style="width: 23%;">
+            <col style="width: 22%;">
+            <col style="width: 10%;">
+            <col style="width: 10%;">
+            <col style="width: 11%;">
+            <col style="width: 11%;">
+            <col style="width: 16%;">
             <col style="width: 7%;">
           </colgroup>
           
@@ -691,6 +729,8 @@
               <th>ITEM</th>
               <th>UOM</th>
               <th>QUANTITY</th>
+              <th>STOCK QUANTITY</th>
+              <th>SALES QUANTITY</th>
               <th>REMARKS</th>
               <th>ADD</th>
             </tr>
@@ -867,6 +907,34 @@
               </td>
 
 
+
+              <td>
+
+                <input
+                  type="number"
+                  class="form-control"
+                  formControlName="StockQuantity"
+                  readonly>
+
+              </td>
+
+
+              <td>
+
+                <input
+                  type="number"
+                  class="form-control"
+                  formControlName="SalesQuantity"
+                  readonly>
+
+              </td>
+
+
+
+
+
+
+
               <td>
 
                 <input
@@ -936,15 +1004,32 @@
         <table class="custom-table">
 
           <colgroup>
-            <col style="width: 5%;">
-            <col style="width: 16%;">
-            <col style="width: 34%;">
-            <col style="width: 14%;">
+            <col style="width: 4%;">
+            <col style="width: 12%;">
+            <col style="width: 24%;">
             <col style="width: 10%;">
-            <col style="width: 11%;">
-            <col *ngIf="isEditMode" style="width: 10%;">
-            <col style="width: 5%;">
+            <col style="width: 8%;">
+            <col style="width: 10%;">
+            <col style="width: 10%;">
+            <col style="width: 10%;">
+            <col *ngIf="isEditMode" style="width: 8%;">
+            <col style="width: 4%;">
           </colgroup>
+
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>PRODUCT TYPE</th>
+              <th>ITEM</th>
+              <th>UOM</th>
+              <th>QUANTITY</th>
+              <th>STOCK QUANTITY</th>
+              <th>SALES QUANTITY</th>
+              <th>REMARKS</th>
+              <th *ngIf="isEditMode">STATUS</th>
+              <th>ACTION</th>
+            </tr>
+          </thead>
 
           <tbody>
 
@@ -971,43 +1056,33 @@
               </td>
 
               <td>
+                {{ line.get('StockQuantity')?.value }}
+              </td>
+
+              <td>
+                {{ line.get('SalesQuantity')?.value }}
+              </td>
+
+              <td>
                 {{ line.get('Remarks')?.value || '-' }}
               </td>
 
-              
-              <!-- <td *ngIf="isEditMode">
+              <td *ngIf="isEditMode">
+
                 <span
-                  class="badge rounded-pill"
+                  class="g-status g-status-sm"
                   [ngClass]="{
-                    'bg-warning text-dark':
-                      line.get('FileStatusId')?.value == 1,
-                    'bg-success':
-                      line.get('FileStatusId')?.value == 2
+                    'status-pending': line.get('FileStatusId')?.value == 1,
+                    'status-approve': line.get('FileStatusId')?.value == 2,
+                    'status-reject': line.get('FileStatusId')?.value == 3
                   }">
+
+                  <span class="g-dot"></span>
 
                   {{ getFileStatusName(line.get('FileStatusId')?.value) }}
                 </span>
-              </td> -->
 
-              <td *ngIf="isEditMode">
-
-  <span
-    class="g-status g-status-sm"
-    [ngClass]="{
-      'status-pending': line.get('FileStatusId')?.value == 1,
-      'status-approve': line.get('FileStatusId')?.value == 2,
-      'status-reject': line.get('FileStatusId')?.value == 3
-    }">
-
-    <span class="g-dot"></span>
-
-    {{ getFileStatusName(line.get('FileStatusId')?.value) }}
-  </span>
-
-</td>
-
-
-
+              </td>
 
               <td class="text-end">
 
