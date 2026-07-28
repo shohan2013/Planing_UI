@@ -1,6 +1,18 @@
-import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  signal,
+} from '@angular/core';
 
-import { debounceTime, distinctUntilChanged, Subject, switchMap, takeUntil } from 'rxjs';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  Subject,
+  switchMap,
+  takeUntil,
+} from 'rxjs';
 import { PermissionService } from 'src/app/core/services/Permission/PermissionService';
 import { IPermission } from 'src/app/core/model/Permission/Permission';
 import { CommonModule } from '@angular/common';
@@ -9,45 +21,50 @@ import { NgSelectModule } from '@ng-select/ng-select';
 import { CommonService } from 'src/app/core/services/Common/CommonService';
 import { IEmpViewInfo } from 'src/app/core/model/Common/EmpInfo/ViewEmpInfo';
 
-
-import { Submenu } from "../../SubMenu/submenu/submenu";
+import { Submenu } from '../../SubMenu/submenu/submenu';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Menu } from '../../Menu/menu/menu';
-import { AccessPermission } from "../../Access/access-permission/access-permission";
-import { Approvematrix } from "../../ApprovalMatrix/Matrix/approvematrix/approvematrix";
+import { AccessPermission } from '../../Access/access-permission/access-permission';
+import { Approvematrix } from '../../ApprovalMatrix/Matrix/approvematrix/approvematrix';
 
 @Component({
   selector: 'app-permission',
-  imports: [CommonModule, FormsModule, NgSelectModule, Menu, Submenu, AccessPermission, Approvematrix],
-  standalone:true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    NgSelectModule,
+    Menu,
+    Submenu,
+    AccessPermission,
+    Approvematrix,
+  ],
+  standalone: true,
   templateUrl: './permission.html',
   styleUrls: ['./permission.scss'],
-  changeDetection:ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-
-
-export class Permission implements OnInit {
-
+export class Permission implements OnInit, OnDestroy {
   searchText = '';
   selectedId: number;
 
   paginatedItems: IPermission[] = [];
 
-  EmpList: any[] = [];          // dropdown source
+  EmpList: any[] = []; // dropdown source
   selectedUser: number;
 
-  search$=new Subject<string>();
+  search$ = new Subject<string>();
 
-   private destroy$ = new Subject<void>();
-   
+  private destroy$ = new Subject<void>();
 
   currentJustify = 'start';
   currentOrientation = 'horizontal';
   disabled = true; // For disabled tab examples
 
-  
-
- constructor(private permissionservice: PermissionService,private commonservice: CommonService, private modalService: NgbModal){}
+  constructor(
+    private permissionservice: PermissionService,
+    private commonservice: CommonService,
+    private modalService: NgbModal,
+  ) {}
   ngOnInit(): void {
     this.GetEmpInfo();
   }
@@ -57,52 +74,50 @@ export class Permission implements OnInit {
   onTabChange(tab: string) {
     this.activeTab.set(tab);
   }
-  
-    PermissionModal(content: any) {
+
+  PermissionModal(content: any) {
     this.modalService.open(content, {
-      size: 'lg'
+      size: 'lg',
     });
   }
 
-  
-  GetEmpInfo()
-  {
-      this.search$.pipe(
+  GetEmpInfo() {
+    this.search$
+      .pipe(
         debounceTime(300),
         distinctUntilChanged(),
-        switchMap(term => this.commonservice.GetEmpData(term))
-      ).subscribe(data =>{
-          this.EmpList=data;
+        switchMap((term) => this.commonservice.GetEmpData(term)),
+      )
+      .subscribe((data) => {
+        this.EmpList = data;
       });
   }
 
-isActive = signal(false);
+  isActive = signal(false);
 
-toggle() {
-  this.isActive.update(v => !v);
-}
+  toggle() {
+    this.isActive.update((v) => !v);
+  }
 
   trackById(index: number, item: any): number {
-  return item.Id;
+    return item.Id;
   }
 
- //selectedCustomer: number | null = null;
+  //selectedCustomer: number | null = null;
 
+  onSearch(event: any) {
+    const term = event.term;
 
- onSearch(event: any) {
-   const term = event.term;
-
-  if (!term || term.length < 2) {
-    this.EmpList = [];
-    return;
-  }
-
-  this.search$.next(term);
-}
-
-   ngOnDestroy() {
-        this.destroy$.next();
-        this.destroy$.complete();
+    if (!term || term.length < 2) {
+      this.EmpList = [];
+      return;
     }
-}
 
+    this.search$.next(term);
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+}
