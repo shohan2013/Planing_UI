@@ -18,7 +18,5 @@ export class LoginService {
   Logout() : Observable<any> {
     return this.http.post(`${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.LOGOUT}`,{});
   }
-
-
 }
 

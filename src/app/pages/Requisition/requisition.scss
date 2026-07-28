@@ -34,3 +34,55 @@
 .user-card .card-body {
   padding: 20px;
 }
+
+
+// STATUS
+
+.g-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.g-dot {
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.g-status-lg {
+  padding: 5px 10px;
+  font-size: 13px;
+}
+
+.g-status-lg .g-dot {
+  width: 8px;
+  height: 8px;
+}
+
+.g-status-sm {
+  padding: 3px 8px;
+  font-size: 11px;
+}
+
+.g-status-sm .g-dot {
+  width: 6px;
+  height: 6px;
+}
+
+.status-pending {
+  color: #b7791f;
+  background-color: #fff7e6;
+}
+
+.status-approve {
+  color: #2f855a;
+  background-color: #eaf7ef;
+}
+
+.status-reject {
+  color: #c53030;
+  background-color: #fdecec;
+}
