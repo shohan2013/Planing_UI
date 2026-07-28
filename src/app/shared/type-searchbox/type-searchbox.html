@@ -1,6 +1,7 @@
 <div class="type-searchbox">
 
   <input
+    #searchInput
     type="text"
     class="form-control"
     [formControl]="searchControl"
@@ -8,6 +9,7 @@
     [ngbTypeahead]="search"
     [resultFormatter]="itemFormatter"
     [inputFormatter]="itemFormatter"
+    [focusFirst]="false"
     placement="bottom-start"
     container="body"
     autocomplete="off"
@@ -18,20 +20,31 @@
 
   <div class="search-status">
 
+
+    <span
+      *ngIf="searchValidationMessage"
+      class="text-muted">
+
+      {{ searchValidationMessage }}
+    </span>
+
     <span *ngIf="isSearching" class="text-primary">
       <span class="spinner-border spinner-border-sm me-1"></span>
-      Searching...
+      <!-- Searching... -->
+       {{ searchingText }}
     </span>
 
     <span
       *ngIf="searchCompleted && !hasResults && !searchFailed"
       class="text-muted">
 
-      No matching records found.
+      <!-- No matching records found. -->
+       {{ noResultsText }}
     </span>
 
     <span *ngIf="searchFailed" class="text-danger">
-      Search failed. Please try again.
+      <!-- Search failed. Please try again. -->
+       {{ searchFailedText }}
     </span>
 
   </div>
