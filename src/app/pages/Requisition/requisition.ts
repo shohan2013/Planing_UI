@@ -72,6 +72,8 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
   deletedLineIds: number[] = [];
   
 
+  selectedUnitFilterId = 0;
+
   units: IUnit[] = [];
   businesses: IBusiness[] = [];
   filteredBusinesses: IBusiness[] = [];
@@ -127,14 +129,24 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
   }
 
 
+
+
   // protected override fetchData(request: ServerQueryRequest): Observable<ServerQueryResponse<IRequisition>> {
-  //   return this.requisitionService.GetRequisition(request);
+  // return this.requisitionService.GetRequisition(request).pipe(
+  //   tap(response => console.log('Requisition table response:',response))
+  // );
   // }
 
-  protected override fetchData(request: ServerQueryRequest): Observable<ServerQueryResponse<IRequisition>> {
-  return this.requisitionService.GetRequisition(request).pipe(
+  protected override fetchData(request:ServerQueryRequest): Observable<ServerQueryResponse<IRequisition>> {
+  return this.requisitionService.GetRequisition(request,this.selectedUnitFilterId).pipe(
     tap(response => console.log('Requisition table response:',response))
   );
+  }
+
+  onUnitFilterChange(unitId:number): void {
+    this.selectedUnitFilterId = Number(unitId);
+    this.currentPage.set(1);
+    this.retry();
   }
 
   get f(): { [key: string]: AbstractControl } {

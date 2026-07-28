@@ -21,6 +21,35 @@
 
       </div>
 
+
+
+      <div style="width: 260px;">
+
+        <div class="input-group">
+
+          <div class="input-group-text">
+            <i class="fa-solid fa-filter"></i>
+          </div>
+
+          <select
+            class="form-select"
+            [ngModel]="selectedUnitFilterId"
+            (ngModelChange)="onUnitFilterChange($event)">
+
+            <option [ngValue]="0">All Units</option>
+
+            <option *ngFor="let unit of units" [ngValue]="unit.Id">
+              {{ unit.Name }}
+            </option>
+
+          </select>
+
+        </div>
+
+      </div>
+
+
+
       <div class="flex-fill">
 
         <div class="input-group">
@@ -297,62 +326,115 @@
 
     @if (selectedRequisition) {
 
-      <div class="row g-3 mb-4">
 
-        <!-- <div class="col-md-4">
 
-          <strong>Requisition ID :</strong>
 
-          {{ selectedRequisition.Header.ReqID }}
-        </div> -->
+        <div
+          style="
+            background:
+              radial-gradient(circle, rgba(33, 137, 207, 0.08) 0.7px, transparent 0.8px) 0 0 / 7px 7px,
+              linear-gradient(
+                to bottom,
+                #f3f9fd 0%,
+                #eaf5fc 55%,
+                rgba(243, 249, 253, 0.5) 78%,
+                rgba(255, 255, 255, 0) 100%
+              );
+            border-top: 1px solid rgba(125, 163, 188, 0.2);
+            border-bottom: 1px dashed rgba(125, 163, 188, 0.22);
+            margin: -1rem -1rem 0.75rem;
+            padding: 1rem 1rem 2rem;
+          ">
 
-        <div class="col-md-6">
+        <div class="row g-3">
 
-          <strong>Requisition Number :</strong>
 
-          {{ selectedRequisition.Header.RequisitionNumber || '-' }}
-        </div>
 
-        <div class="col-md-6">
+          <div class="col-md-6">
 
-          <strong>Requisition Date :</strong>
+            <strong>Requisition Number :</strong>
 
-          {{ selectedRequisition.Header.ReqDate | date: 'dd-MMM-yyyy' }}
-        </div>
+            {{ selectedRequisition.Header.RequisitionNumber || '-' }}
+          </div>
+
+          <div class="col-md-6">
+
+            <strong>Requisition Date :</strong>
+
+            {{ selectedRequisition.Header.ReqDate | date: 'dd-MMM-yyyy' }}
+          </div>
+
+          <div class="col-md-6">
+
+            <strong>Start Date :</strong>
+
+            {{ selectedRequisition.Header.StartDate | date: 'dd-MMM-yyyy' }}
+          </div>
+
+          <div class="col-md-6">
+
+            <strong>End Date :</strong>
+
+            {{ selectedRequisition.Header.EndDate | date: 'dd-MMM-yyyy' }}
+          </div>
 
         
-        <!-- <div class="col-md-6">
+          <!-- <div class="col-md-6">
 
-          <strong>Status :</strong>
+            <strong>Status :</strong>
 
-          {{ getFileStatusName(selectedRequisition.Header.FileStatusId) }}
-        </div> -->
+            {{ getFileStatusName(selectedRequisition.Header.FileStatusId) }}
+          </div> -->
 
-<div class="col-md-6">
+          <div class="col-md-6">
 
-  <strong>Status :</strong>
+            <strong>Status :</strong>
 
-  <span
-    class="g-status g-status-lg ms-1"
-    [ngClass]="{
-      'status-pending': selectedRequisition.Header.FileStatusId == 1,
-      'status-approve': selectedRequisition.Header.FileStatusId == 2,
-      'status-reject': selectedRequisition.Header.FileStatusId == 3
-    }">
+            <span
+              class="g-status g-status-lg ms-1"
+              [ngClass]="{
+                'status-pending': selectedRequisition.Header.FileStatusId == 1,
+                'status-approve': selectedRequisition.Header.FileStatusId == 2,
+                'status-reject': selectedRequisition.Header.FileStatusId == 3
+              }">
 
-    <span class="g-dot"></span>
+              <span class="g-dot"></span>
 
-    {{ getFileStatusName(selectedRequisition.Header.FileStatusId) }}
-  </span>
+              {{ getFileStatusName(selectedRequisition.Header.FileStatusId) }}
+            </span>
 
-</div>
+          </div>
 
-
+        </div>
 
       </div>
 
 
-      <h6>Requisition Lines</h6>
+
+      <h6>
+        
+        
+        <svg
+          width="17"
+          height="17"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round">
+
+          <ellipse cx="12" cy="5" rx="8" ry="3"></ellipse>
+          <path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"></path>
+          <path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"></path>
+        </svg>
+        
+        
+        
+        
+        
+        
+        Product Requisitions</h6>
 
 
       <div class="table-responsive">
@@ -372,7 +454,8 @@
 
               <th>COMPLETED QUANTITY</th> 
               <th>REMAINING QUANTITY</th>
-              <th>STOCK</th>
+              <th>STOCK QUANTITY</th>
+              <th>SALES QUANTITY</th>
 
               <th>REMARKS</th>
               <th>STATUS</th>
@@ -387,8 +470,8 @@
 
               <tr>
 
-                <td colspan="6" class="text-center py-4">
-                  No active Requisition Lines found.
+                <td colspan="10" class="text-center py-4">
+                  No active Requisition found.
                 </td>
 
               </tr>
@@ -410,7 +493,8 @@
 
                   <td>0</td>
                   <td>0</td>
-                  <td>0</td>
+                  <td>{{ line.StockQuantity }}</td>
+                  <td>{{ line.SalesQuantity }}</td>
 
                   <td>{{ line.Remarks || '-' }}</td>
 
@@ -499,7 +583,7 @@
 
   <form [formGroup]="formGroup" (ngSubmit)="isEditMode ? Update() : Create()">
 
-    <div class="modal-header">
+    <div class="modal-header" style="padding-right: 30px;">
 
    
 
@@ -512,11 +596,12 @@
         </h5>
 
         <span
-          class="mt-1 fw-semibold"
-          style="color: #86c592;"
+          *ngIf="!isEditMode"
+          class="mt-1 fw-semibold small"
+          style="color: #28a745; font-size: 0.6rem;"
           [class.invisible]="formGroup.get('UnitId')?.value">
 
-          Note: Please select a Unit before adding a Product.
+          [Note: Please select a unit before adding a product.]
 
         </span>
 
@@ -537,9 +622,13 @@
     </div>
 
 
-    <div class="modal-body">
+    <div class="modal-body" style="padding-right: 30px;">
 
-      <div class="row g-3">
+      <div
+        class="row g-3"
+        [ngClass]="{
+          'border rounded-3 p-3 mb-3': isEditMode
+        }">
 
         <div class="col-md-4">
 
@@ -649,58 +738,99 @@
 
 
 
-      <hr class="my-4">
+      <hr *ngIf="!isEditMode" class="my-4">
 
       
 
-<div class="d-flex align-items-end gap-3 mb-2">
+<div class="row align-items-center mb-3">
 
-  <h6 class="d-inline-flex align-items-center gap-1 mb-2">
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="10"></circle>
-      <line x1="12" y1="8" x2="12" y2="16"></line>
-      <line x1="8" y1="12" x2="16" y2="12"></line>
-    </svg>
-    Add Product
-  </h6>
+  <div class="col-md-3">
 
-  <div>
-    <label class="form-label mb-1">Start Date :</label>
+    <h6 class="d-inline-flex align-items-center gap-1 mb-0">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="16"></line>
+        <line x1="8" y1="12" x2="16" y2="12"></line>
+      </svg>
+      Add Product
+    </h6>
 
-    <input
-      type="date"
-      class="form-control"
-      formControlName="StartDate"
-      [ngClass]="{
-        'is-invalid': submitted && f['StartDate'].errors
-      }">
-
-    <div
-      *ngIf="submitted && f['StartDate'].errors"
-      class="invalid-feedback">
-
-      Start Date is required.
-    </div>
   </div>
 
-  <div>
-    <label class="form-label mb-1">End Date :</label>
-
-    <input
-      type="date"
-      class="form-control"
-      formControlName="EndDate"
-      [ngClass]="{
-        'is-invalid': submitted && f['EndDate'].errors
-      }">
+  <div class="col-md-6 mt-2 mt-md-0">
 
     <div
-      *ngIf="submitted && f['EndDate'].errors"
-      class="invalid-feedback">
+      *ngIf="!isEditMode"
+      class="d-flex align-items-start justify-content-center gap-3">
 
-      End Date is required.
+      <div>
+
+        <div class="d-flex align-items-center gap-2">
+
+          <label class="form-label mb-0 text-nowrap">Start Date :</label>
+
+          <input
+            type="date"
+            class="form-control form-control-sm"
+            style="width: 190px; height: 36px;"
+            formControlName="StartDate"
+            [ngClass]="{
+              'is-invalid': submitted && f['StartDate'].errors
+            }">
+
+        </div>
+
+        <div
+          *ngIf="submitted && f['StartDate'].errors"
+          class="invalid-feedback d-block text-end">
+
+          Start Date is required.
+        </div>
+
+      </div>
+
+      <div class="border-start align-self-stretch"></div>
+
+      <div>
+
+        <div class="d-flex align-items-center gap-2">
+
+          <label class="form-label mb-0 text-nowrap">End Date :</label>
+
+          <input
+            type="date"
+            class="form-control form-control-sm"
+            style="width: 190px; height: 36px;"
+            formControlName="EndDate"
+            [ngClass]="{
+              'is-invalid': submitted && f['EndDate'].errors
+            }">
+
+        </div>
+
+        <div
+          *ngIf="submitted && f['EndDate'].errors"
+          class="invalid-feedback d-block text-end">
+
+          End Date is required.
+        </div>
+
+      </div>
+
     </div>
+
+    <div
+      *ngIf="isEditMode"
+      class="text-center fw-semibold">
+
+      {{ formGroup.get('StartDate')?.value | date: 'dd-MMM-yyyy' }}
+      <span class="mx-2 text-muted">to</span>
+      {{ formGroup.get('EndDate')?.value | date: 'dd-MMM-yyyy' }}
+    </div>
+
   </div>
+
+  <div class="col-md-3"></div>
 
 </div>
 
