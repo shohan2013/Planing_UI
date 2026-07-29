@@ -1,5 +1,4 @@
 <div class="user-card">
-
   <div class="card-header">
     <h5>APPROVAL MATRIX</h5>
   </div>
@@ -7,234 +6,293 @@
   <div class="card-body">
     <div class="d-flex gap-3">
       <div class="flex-fill">
-        <button type="button" class="btn-shadow d-inline-flex align-items-center btn btn-success" (click)="saveModal(insert)"
-          style="margin-left: 5px;">
+        <button
+          type="button"
+          class="btn-shadow d-inline-flex align-items-center btn btn-success"
+          (click)="saveModal(insert)"
+          style="margin-left: 5px"
+        >
           <i class="fa-solid fa-fw fa-plus" aria-hidden="true" title="plus"></i>
           Create New
         </button>
       </div>
 
       <div class="flex-fill">
-        <ng-select
-                  [items]="EmpList"
-                  bindLabel="Name"
-                  bindValue="Id"
-                  [(ngModel)]="selectedUser"
-                  placeholder="Search Employee..."
-                  [searchable]="true"
-                  [clearable]="true" style="margin-right: 5px;" (search)="onSearch($event)" (ngModelChange)="onSelect($event)">
+        <div class="input-group">
+          <div class="input-group-text">
+            <span class=""
+              ><i
+                class="fa-solid fa-fw fa-earth-americas"
+                aria-hidden="true"
+                title="earth-americas"
+              ></i
+            ></span>
+          </div>
+          <ng-select
+            class="form-control"
+            [items]="EmpList"
+            bindLabel="Name"
+            bindValue="Id"
+            [(ngModel)]="selectedUser"
+            placeholder="Search Employee..."
+            [searchable]="true"
+            [clearable]="true"
+            style="margin-right: 5px"
+            (search)="onSearch($event)"
+            (ngModelChange)="onSelect($event)"
+          >
           </ng-select>
+        </div>
       </div>
-    </div><br />
-
+    </div>
+    <br />
 
     <div class="table-responsive">
       <table class="custom-table">
         <thead>
-          <tr style="font-style: italic;">
-          <th class="text-center">#</th>
-          <th>MENU</th>
-          <th>SUBMENU</th>
-          <th>GROUP</th>
-          <th>ALLOWED APPROVAL</th>
-          <th>SEQUENCE</th>
-          <th>UNIT</th>
-          <th>STATUS</th>
-          <th>CREATED BY</th>
-          <th>CREATED DATE</th>
-          <th>UPDATED BY</th>
-          <th>UPDATED DATE</th>
+          <tr style="font-style: italic">
+            <th class="text-center">#</th>
+            <th>MENU</th>
+            <th>SUBMENU</th>
+            <th>GROUP</th>
+            <th>ALLOWED APPROVAL</th>
+            <th>SEQUENCE</th>
+            <th>UNIT</th>
+            <th>STATUS</th>
+            <th>CREATED BY</th>
+            <th>CREATED DATE</th>
+            <th>UPDATED BY</th>
+            <th>UPDATED DATE</th>
           </tr>
         </thead>
         <tbody>
           @if(paginatedItems.length === 0){
           <tr>
             <td colspan="100%" class="text-center py-4">
-                <i class="fas fa-folder-open fa-4x text-secondary mb-3"></i><br/>
+              <i class="fas fa-folder-open fa-4x text-secondary mb-3"></i><br />
               <h6 class="emptymsg">No Records Found.</h6>
             </td>
           </tr>
-          }
-
-          @for (item of paginatedItems; track trackById($index, item)) {
+          } @for (item of paginatedItems; track trackById($index, item)) {
           <tr>
             <td>{{$index + 1 }}</td>
-          <td>{{ item.MenuName }}</td>
-          <td>{{ item.SubMenu }}</td>
-           <td>{{ item.GroupName }}</td>
-          <td>
-            <div class="form-check form-switch d-flex justify-content-center align-items-center">
-                <input class="form-check-input" [disabled]="true"
-                type="checkbox"
-                [(ngModel)]="item.IsAllowedApproval">
-                </div>
+            <td>{{ item.MenuName }}</td>
+            <td>{{ item.SubMenu }}</td>
+            <td>{{ item.GroupName }}</td>
+            <td>
+              <div
+                class="form-check form-switch d-flex justify-content-center align-items-center"
+              >
+                <input
+                  class="form-check-input"
+                  [disabled]="true"
+                  type="checkbox"
+                  [(ngModel)]="item.IsAllowedApproval"
+                />
+              </div>
             </td>
             <td>{{ item.Sequence }}</td>
-          <td>{{ item.Unit }}</td>
+            <td>{{ item.Unit }}</td>
             <td>
-            <div class="form-check form-switch d-flex justify-content-center align-items-center">
-                <input class="form-check-input"
-                type="checkbox"
-                [(ngModel)]="item.IsActive" (ngModelChange)="onToggle(item.Id, 1,item.IsActive)">
-                </div>
+              <div
+                class="form-check form-switch d-flex justify-content-center align-items-center"
+              >
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  [(ngModel)]="item.IsActive"
+                  (ngModelChange)="onToggle(item.Id, 1,item.IsActive)"
+                />
+              </div>
             </td>
-          <td>{{ item.CreatedBy }}</td>
-          <td>{{ item.CreatedDate }}</td>
-          <td>{{ item.UpdatedBy }}</td>
-          <td>{{ item.UpdatedDate }}</td>
+            <td>{{ item.CreatedBy }}</td>
+            <td>{{ item.CreatedDate }}</td>
+            <td>{{ item.UpdatedBy }}</td>
+            <td>{{ item.UpdatedDate }}</td>
           </tr>
           }
         </tbody>
       </table>
     </div>
-    <div class="card-footer">
-     
-    </div>
-
+    <div class="card-footer"></div>
   </div>
 </div>
 
-
-
-
-
-
 <ng-template #insert let-c="close" let-d="dismiss">
   <form [formGroup]="formGroup" (ngSubmit)="Create()">
-
     <div class="modal-header">
       <h5 class="modal-title">CREATE APPROVAL</h5>
-      <button type="button" class="btn-close" (click)="d('Cross click')"></button>
+      <button
+        type="button"
+        class="btn-close"
+        (click)="d('Cross click')"
+      ></button>
     </div>
 
     <div class="modal-body">
-
       <div class="d-flex gap-3">
-        <div class="flex-fill">
+        <div class="flex-fill" style="width: 50%">
           <label class="form-label">Select Menu :</label>
           <!-- <select class="form-select" formControlName="MenuId"
             [ngClass]="{ 'is-invalid': submitted && f['MenuId'].errors }"> -->
-            <select class="form-select"
-                    formControlName="MenuId"
-                    (change)="onMenuChange()"
-                    [ngClass]="{ 'is-invalid': submitted && f['MenuId'].errors }">
-            <option value="" disabled selected>Select Menu</option>
-            <option *ngFor="let list of MenuDropdown" [value]="list.Id">
-              {{ list.Name }}
-            </option>
+          <select
+            class="form-select"
+            formControlName="MenuId"
+            (change)="onMenuChange()"
+            [ngClass]="{ 'is-invalid': submitted && f['MenuId'].errors }"
+          >
+            <option value="0" disabled selected>Select Menu</option>
+            @for(list of MenuDropdown; track $index){
+            <option [value]="list.Id">{{list.Name}}</option>
+            }
           </select>
-          <div *ngIf="submitted && f['MenuId'].errors" class="invalid-feedback">
-            <div *ngIf="f['MenuId'].errors['required']">Please select menu.</div>
+          @if (submitted && f['MenuId'].errors) {
+          <div class="invalid-feedback">
+            @if (f['MenuId'].errors?.['required']) {
+            <div>Please select menu.</div>
+            }
           </div>
+          }
         </div>
 
-        <div class="flex-fill">
+        <div class="flex-fill" style="width: 50%">
           <label class="form-label">Select SubMenu :</label>
-          <select class="form-select" formControlName="SubMenuId"
-            [ngClass]="{ 'is-invalid': submitted && f['SubMenuId'].errors }">
-            <option value="" disabled selected>Select SubMenu</option>
-            <!-- <option *ngFor="let list of SubMenuDropdown" [value]="list.Id">
-              {{ list.SubMenuName }}
-            </option> -->
-
-            <ng-container *ngFor="let list of SubMenuDropdown">
-              <option
-                *ngIf="list.MenuID == formGroup.value.MenuId"
-                [value]="list.Id">
-                {{ list.SubMenuName }}
-              </option>
-            </ng-container>
-
-
-
+          <select
+            class="form-select"
+            formControlName="SubMenuId"
+            [ngClass]="{ 'is-invalid': submitted && f['SubMenuId'].errors }"
+          >
+            <option value="0" disabled selected>Select SubMenu</option>
+            @for (list of SubMenuDropdown(); track list.Id){
+            <option [value]="list.Id">{{ list.SubMenuName }}</option>
+            }
           </select>
-          <div *ngIf="submitted && f['SubMenuId'].errors" class="invalid-feedback">
-            <div *ngIf="f['SubMenuId'].errors['required']">SubMenu Name Required.</div>
-          </div>
+          @if (submitted && f['SubMenuId'].hasError('required')) {
+          <div class="invalid-feedback">SubMenu Name Required.</div>
+          }
         </div>
       </div>
 
       <!-- Row 2: Group Type & Priority -->
       <div class="d-flex gap-3 mt-3">
-        <div class="flex-fill" style="width: 50%;">
+        <div class="flex-fill" style="width: 50%">
           <label class="form-label">Group Type :</label>
-          <select class="form-select" formControlName="GroupTypeId"
-            (change)="onGroupTypeChange($any($event.target).value)">
-            <option *ngFor="let list of ApproveGroupTypeListDropdown" [value]="list.Id">
-              {{ list.GroupType }}
-            </option>
+          <select
+            class="form-select"
+            formControlName="GroupTypeId"
+            (change)="onGroupTypeChange($any($event.target).value)"
+            [ngClass]="{ 'is-invalid': submitted && f['GroupTypeId'].errors }"
+          >
+            <option [ngValue]="0" disabled selected>Select Group</option>
+            @for (list of ApproveGroupTypeListDropdown; track $index) {
+            <option [ngValue]="list.Id">{{ list.GroupType }}</option>
+            }
           </select>
+          @if (submitted && f['GroupTypeId'].errors?.['required']) {
+          <div class="invalid-feedback">
+            <div>Group Type Required.</div>
+          </div>
+          }
         </div>
 
-        <div class="flex-fill" style="width: 50%;">
+        <div class="flex-fill" style="width: 50%">
           <label class="form-label">Priority :</label>
-          <select class="form-select" formControlName="PriorityId"
-            [ngClass]="{ 'is-invalid': submitted && f['PriorityId'].errors }">
-            <option value="" disabled selected>Select Priority</option>
-            <option *ngFor="let list of PriorityListDropdown" [value]="list.Id">
-              {{ list.PriorityName }}
-            </option>
+          <select
+            class="form-select"
+            formControlName="PriorityId"
+            [ngClass]="{ 'is-invalid': submitted && f['PriorityId'].errors }"
+          >
+            <option value="0" disabled selected>Select Priority</option>
+            @for(list of PriorityListDropdown; track $index){
+            <option [value]="list.Id">{{list.PriorityName}}</option>
+            }
           </select>
-          <div *ngIf="submitted && f['PriorityId'].errors" class="invalid-feedback">
-            <div *ngIf="f['PriorityId'].errors['required']">Sequence Required.</div>
+          @if (submitted && f['PriorityId'].errors?.['required']) {
+          <div class="invalid-feedback">
+            <div>Sequence Required.</div>
           </div>
+          }
         </div>
       </div>
 
       <!-- Row 3: Group/Individuals & Unit -->
       <div class="d-flex gap-3 mt-3">
-
-        <div class="flex-fill" style="width: 75%;" *ngIf="formGroup.value.GroupTypeId == 2">
+        <!-- <div>{{typeof(formGroup.get('GroupTypeId')?.value)}}</div> -->
+        @if(formGroup.get('GroupTypeId')?.value === 2){
+        <div class="flex-fill" style="width: 75%">
           <label class="form-label">Select Group :</label>
-          <select class="form-select" formControlName="GroupId"
-            [ngClass]="{ 'is-invalid': submitted && f['GroupId'].errors }">
-            <option value="" disabled selected>Select Group</option>
-            <option *ngFor="let list of ApproveGroupListDropdown" [value]="list.Id">
-              {{ list.GroupName }}
-            </option>
+          <select
+            class="form-select"
+            formControlName="GroupId"
+            (change)="onGroupChange($any($event.target).value)"
+            [ngClass]="{ 'is-invalid': submitted && f['GroupId'].errors }"
+          >
+            <option value="0" disabled selected>Select Group</option>
+            @for(list of ApproveGroupListDropdown; track $index){
+            <option [value]="list.Id">{{ list.GroupName }}</option>
+            }
           </select>
-          <div *ngIf="submitted && f['GroupId'].errors" class="invalid-feedback">
-            <div *ngIf="f['GroupId'].errors['required']">Select Group.</div>
+          @if (submitted && f['GroupId'].errors?.['required']) {
+          <div class="invalid-feedback">
+            <div>Select Group.</div>
           </div>
+          }
         </div>
-
-        <div class="flex-fill" style="width: 75%;" *ngIf="formGroup.value.GroupTypeId == 1">
+        } @else if(formGroup.get('GroupTypeId')?.value === 1){
+        <div class="flex-fill" style="width: 75%">
           <label class="form-label">Select Individuals :</label>
 
           @if (dropdownSettings && selectedEmployees) {
-          <ng-multiselect-dropdown style="width: 100%;" formControlName="Enroll" [placeholder]="'Select Employees'"
-            [settings]="dropdownSettings" [data]="EmpList" (onSelect)="onItemSelect($event)"
-            (onDeSelect)="onItemDeSelect($event)" (onSelectAll)="onSelectAll($event)" (onDeSelectAll)="onDeSelectAll()">
+          <ng-multiselect-dropdown
+            style="width: 100%"
+            formControlName="Enroll"
+            [placeholder]="'Select Employees'"
+            [settings]="dropdownSettings"
+            [data]="EmpList"
+            (onSelect)="onItemSelect($event)"
+            (onDeSelect)="onItemDeSelect($event)"
+            (onSelectAll)="onSelectAll($event)"
+            (onDeSelectAll)="onDeSelectAll()"
+          >
           </ng-multiselect-dropdown>
           }
         </div>
 
-        <div class="flex-fill" style="width: 25%;" *ngIf="formGroup.value.GroupTypeId == 1">
+        <div class="flex-fill" style="width: 25%">
           <label class="form-label">Select Unit :</label>
-          <select class="form-select" formControlName="UnitId"
-            [ngClass]="{ 'is-invalid': submitted && f['UnitId'].errors }">
-            <option value="" disabled selected>Select Unit</option>
-            <option *ngFor="let list of UnitList" [value]="list.Id">
-              {{ list.Name }}
-            </option>
+          <select
+            class="form-select"
+            formControlName="UnitId"
+            [ngClass]="{ 'is-invalid': submitted && f['UnitId'].errors }"
+          >
+            <option value="0" disabled selected>Select Unit</option>
+            @for(list of UnitList;track $index){
+            <option [value]="list.Id">{{ list.Name }}</option>
+            }
           </select>
-          <div *ngIf="submitted && f['UnitId'].errors" class="invalid-feedback">
-            <div *ngIf="f['UnitId'].errors['required']">Select Unit.</div>
+          @if (submitted && f['UnitId'].errors?.['required']) {
+          <div class="invalid-feedback">
+            <div>Select Unit.</div>
           </div>
+          }
         </div>
-
+        }
       </div>
     </div>
 
     <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" (click)="c('Close click')">
-        <i class="fa-solid fa-fw fa-xmark" aria-hidden="true" title="xmark"></i> Close
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="c('Close click')"
+      >
+        <i class="fa-solid fa-fw fa-xmark" aria-hidden="true" title="xmark"></i>
+        Close
       </button>
       <button type="submit" class="btn btn-success">
-        <i class="fa-solid fa-fw fa-check" aria-hidden="true" title="check"></i> Save changes
+        <i class="fa-solid fa-fw fa-check" aria-hidden="true" title="check"></i>
+        Save changes
       </button>
     </div>
-
   </form>
-
 </ng-template>
