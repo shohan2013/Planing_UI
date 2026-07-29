@@ -3,6 +3,5 @@ import { ApproverMatrixLine } from './ApproveMatrixLine';
 
 export class ApproveMatrixSave {
   Header: ApproveMatrixHeader = new ApproveMatrixHeader();
-  Lines:  ApproverMatrixLine[] = [];
+  Line: ApproverMatrixLine = new ApproverMatrixLine();
 }
-

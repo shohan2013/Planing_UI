@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, NgModule, OnDestroy, OnInit } from '@angular/core';
+import { Component, NgModule, OnDestroy, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   AbstractControl,
@@ -39,6 +39,7 @@ import {
   IDropdownSettings,
   NgMultiSelectDropDownModule,
 } from 'ng-multiselect-dropdown';
+import { CustomValidators } from 'src/app/CustomValidators/custom-validators';
 
 @Component({
   selector: 'app-approvematrix',
@@ -61,7 +62,7 @@ export class Approvematrix implements OnInit, OnDestroy {
   paginatedItems: IViewApproveMatrixEntity[] = [];
   EmpList: IEnroll[] = []; //EmpList: any[] = [];
   MenuDropdown: MenuModel[] = [];
-  SubMenuDropdown: SubMenuModel[] = []; // dropdown source
+  SubMenuDropdown = signal<SubMenuModel[]>([]); // dropdown source
   ApproveGroupListDropdown: IApproveMatrixGroup[] = [];
   PriorityListDropdown: IPriority[] = [];
   selectedUser: number;
@@ -80,10 +81,9 @@ export class Approvematrix implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadMenu();
-    this.loadSubMenu();
+    //this.loadSubMenu();
     this.loadGroup();
     this.loadPriority();
-
     this.loadUnit();
     this.loadGroupType();
     this.loadEnroll();
@@ -104,7 +104,7 @@ export class Approvematrix implements OnInit, OnDestroy {
       .GetApproveMatrixGroupTypeList()
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
-        // console.log('Group Type List:', data);
+        //console.log('Group Type List:', data);
         this.ApproveGroupTypeListDropdown = data;
       });
   }
@@ -129,21 +129,23 @@ export class Approvematrix implements OnInit, OnDestroy {
       });
   }
 
-  loadSubMenu() {
+  loadSubMenu(menuId: number) {
     this.commonservice
-      .GetSubMenuList()
+      .GetSubMenuListByMenuId(menuId)
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
         //console.log('SubMenu:', data);
-        this.SubMenuDropdown = data;
+        this.SubMenuDropdown.set(data);
       });
   }
 
   onMenuChange() {
-    //console.log(this.formGroup.value);
+    //console.log('FormGroup: ', this.formGroup.value);
     this.formGroup.patchValue({
-      SubMenuId: '',
+      SubMenuId: 0,
     });
+    const menuId = this.formGroup.get('MenuId')?.value;
+    this.loadSubMenu(menuId);
   }
 
   loadPriority() {
@@ -191,11 +193,13 @@ export class Approvematrix implements OnInit, OnDestroy {
   };
 
   Create() {
+    //console.log('hitted');
     this.isLoading = true;
     this.error = null;
     this.submitted = true;
     const model = new ApproveMatrixSave();
 
+    console.log(this.formGroup);
     if (this.formGroup.valid) {
       const ApproverMatrixHeader = {
         Id: 0,
@@ -222,14 +226,11 @@ export class Approvematrix implements OnInit, OnDestroy {
             : [],
         Sequence: Number(this.formGroup.value.PriorityId),
         IsActive: true,
-        UnitId:
-          Number(this.formGroup.value.GroupTypeId) === 1
-            ? Number(this.formGroup.value.UnitId)
-            : 0,
+        UnitId: Number(this.formGroup.value.UnitId),
       };
 
       model.Header = ApproverMatrixHeader;
-      model.Lines.push(ApproverMatrixLine);
+      model.Line = ApproverMatrixLine;
 
       console.log('ApproveMatrixSave Payload:', model);
 
@@ -238,13 +239,13 @@ export class Approvematrix implements OnInit, OnDestroy {
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: () => {
-            // this.formGroup.reset();
-            this.formGroup.reset({
-              GroupTypeId: 2,
-              Enroll: [],
-              GroupId: '',
-              UnitId: '',
-            });
+            this.formGroup.reset();
+            // this.formGroup.reset({
+            //   GroupTypeId: 2,
+            //   Enroll: [],
+            //   GroupId: '',
+            //   UnitId: '',
+            // });
             this.submitted = false;
             this.toastr.success('Data saved successfully.');
           },
@@ -257,6 +258,7 @@ export class Approvematrix implements OnInit, OnDestroy {
       .GetApprovalGroupList()
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
+        //console.log(data);
         this.ApproveGroupListDropdown = data;
       });
   }
@@ -293,15 +295,18 @@ export class Approvematrix implements OnInit, OnDestroy {
   }
 
   formGroup: FormGroup = new FormGroup({
-    MenuId: new FormControl('', Validators.required),
-    SubMenuId: new FormControl('', Validators.required),
-    GroupTypeId: new FormControl(2, Validators.required),
-    Enroll: new FormControl<any[]>([]), //new FormControl(''),
+    MenuId: new FormControl(0, CustomValidators.requiredNonZero()),
+    SubMenuId: new FormControl(0, CustomValidators.requiredNonZero()),
+    GroupTypeId: new FormControl(0, CustomValidators.requiredNonZero()),
+    Enroll: new FormControl<any[]>(
+      [],
+      CustomValidators.requiredNonEmptyArray(),
+    ),
 
-    GroupId: new FormControl('', Validators.required),
-    PriorityId: new FormControl('', Validators.required),
+    GroupId: new FormControl(0, CustomValidators.requiredNonZero()),
+    PriorityId: new FormControl(0, CustomValidators.requiredNonZero()),
 
-    UnitId: new FormControl(''),
+    UnitId: new FormControl(0, CustomValidators.requiredNonZero()),
   });
 
   onGroupTypeChange(groupTypeId: any) {
@@ -310,9 +315,9 @@ export class Approvematrix implements OnInit, OnDestroy {
     this.selectedEmployees = [];
 
     this.formGroup.patchValue({
-      GroupId: '',
+      GroupId: 0,
       Enroll: [],
-      UnitId: '',
+      UnitId: 0,
     });
 
     if (selectedType === 1) {
@@ -332,6 +337,15 @@ export class Approvematrix implements OnInit, OnDestroy {
     this.formGroup.get('GroupId')?.updateValueAndValidity();
     this.formGroup.get('Enroll')?.updateValueAndValidity();
     this.formGroup.get('UnitId')?.updateValueAndValidity();
+  }
+
+  onGroupChange(GroupId: number) {
+    const unitId = this.ApproveGroupListDropdown.find(
+      (x) => x.Id == GroupId,
+    ).UnitId;
+    this.formGroup.patchValue({
+      UnitId: unitId,
+    });
   }
 
   get f(): { [key: string]: AbstractControl } {

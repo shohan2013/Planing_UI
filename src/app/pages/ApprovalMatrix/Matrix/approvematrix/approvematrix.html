@@ -131,7 +131,7 @@
 
     <div class="modal-body">
       <div class="d-flex gap-3">
-        <div class="flex-fill">
+        <div class="flex-fill" style="width: 50%">
           <label class="form-label">Select Menu :</label>
           <!-- <select class="form-select" formControlName="MenuId"
             [ngClass]="{ 'is-invalid': submitted && f['MenuId'].errors }"> -->
@@ -141,7 +141,7 @@
             (change)="onMenuChange()"
             [ngClass]="{ 'is-invalid': submitted && f['MenuId'].errors }"
           >
-            <option value="" disabled selected>Select Menu</option>
+            <option value="0" disabled selected>Select Menu</option>
             @for(list of MenuDropdown; track $index){
             <option [value]="list.Id">{{list.Name}}</option>
             }
@@ -155,30 +155,21 @@
           }
         </div>
 
-        <div class="flex-fill">
+        <div class="flex-fill" style="width: 50%">
           <label class="form-label">Select SubMenu :</label>
           <select
             class="form-select"
             formControlName="SubMenuId"
             [ngClass]="{ 'is-invalid': submitted && f['SubMenuId'].errors }"
           >
-            <option value="" disabled selected>Select SubMenu</option>
-
-            <ng-container>
-              @for (list of SubMenuDropdown; track list.Id) { @if (list.MenuID
-              === formGroup.value.MenuId) {
-              <option [value]="list.Id">{{ list.SubMenuName }}</option>
-              } }
-            </ng-container>
+            <option value="0" disabled selected>Select SubMenu</option>
+            @for (list of SubMenuDropdown(); track list.Id){
+            <option [value]="list.Id">{{ list.SubMenuName }}</option>
+            }
           </select>
-          <div
-            *ngIf="submitted && f['SubMenuId'].errors"
-            class="invalid-feedback"
-          >
-            <div *ngIf="f['SubMenuId'].errors['required']">
-              SubMenu Name Required.
-            </div>
-          </div>
+          @if (submitted && f['SubMenuId'].hasError('required')) {
+          <div class="invalid-feedback">SubMenu Name Required.</div>
+          }
         </div>
       </div>
 
@@ -190,11 +181,18 @@
             class="form-select"
             formControlName="GroupTypeId"
             (change)="onGroupTypeChange($any($event.target).value)"
+            [ngClass]="{ 'is-invalid': submitted && f['GroupTypeId'].errors }"
           >
+            <option [ngValue]="0" disabled selected>Select Group</option>
             @for (list of ApproveGroupTypeListDropdown; track $index) {
-            <option [value]="list.Id">{{ list.GroupType }}</option>
+            <option [ngValue]="list.Id">{{ list.GroupType }}</option>
             }
           </select>
+          @if (submitted && f['GroupTypeId'].errors?.['required']) {
+          <div class="invalid-feedback">
+            <div>Group Type Required.</div>
+          </div>
+          }
         </div>
 
         <div class="flex-fill" style="width: 50%">
@@ -204,56 +202,44 @@
             formControlName="PriorityId"
             [ngClass]="{ 'is-invalid': submitted && f['PriorityId'].errors }"
           >
-            <option value="" disabled selected>Select Priority</option>
+            <option value="0" disabled selected>Select Priority</option>
             @for(list of PriorityListDropdown; track $index){
             <option [value]="list.Id">{{list.PriorityName}}</option>
             }
           </select>
-          <div
-            *ngIf="submitted && f['PriorityId'].errors"
-            class="invalid-feedback"
-          >
-            <div *ngIf="f['PriorityId'].errors['required']">
-              Sequence Required.
-            </div>
+          @if (submitted && f['PriorityId'].errors?.['required']) {
+          <div class="invalid-feedback">
+            <div>Sequence Required.</div>
           </div>
+          }
         </div>
       </div>
 
       <!-- Row 3: Group/Individuals & Unit -->
       <div class="d-flex gap-3 mt-3">
-        <div
-          class="flex-fill"
-          style="width: 75%"
-          *ngIf="formGroup.value.GroupTypeId == 2"
-        >
+        <!-- <div>{{typeof(formGroup.get('GroupTypeId')?.value)}}</div> -->
+        @if(formGroup.get('GroupTypeId')?.value === 2){
+        <div class="flex-fill" style="width: 75%">
           <label class="form-label">Select Group :</label>
           <select
             class="form-select"
             formControlName="GroupId"
+            (change)="onGroupChange($any($event.target).value)"
             [ngClass]="{ 'is-invalid': submitted && f['GroupId'].errors }"
           >
-            <option value="" disabled selected>Select Group</option>
-            <option
-              *ngFor="let list of ApproveGroupListDropdown"
-              [value]="list.Id"
-            >
-              {{ list.GroupName }}
-            </option>
+            <option value="0" disabled selected>Select Group</option>
+            @for(list of ApproveGroupListDropdown; track $index){
+            <option [value]="list.Id">{{ list.GroupName }}</option>
+            }
           </select>
-          <div
-            *ngIf="submitted && f['GroupId'].errors"
-            class="invalid-feedback"
-          >
-            <div *ngIf="f['GroupId'].errors['required']">Select Group.</div>
+          @if (submitted && f['GroupId'].errors?.['required']) {
+          <div class="invalid-feedback">
+            <div>Select Group.</div>
           </div>
+          }
         </div>
-
-        <div
-          class="flex-fill"
-          style="width: 75%"
-          *ngIf="formGroup.value.GroupTypeId == 1"
-        >
+        } @else if(formGroup.get('GroupTypeId')?.value === 1){
+        <div class="flex-fill" style="width: 75%">
           <label class="form-label">Select Individuals :</label>
 
           @if (dropdownSettings && selectedEmployees) {
@@ -272,26 +258,25 @@
           }
         </div>
 
-        <div
-          class="flex-fill"
-          style="width: 25%"
-          *ngIf="formGroup.value.GroupTypeId == 1"
-        >
+        <div class="flex-fill" style="width: 25%">
           <label class="form-label">Select Unit :</label>
           <select
             class="form-select"
             formControlName="UnitId"
             [ngClass]="{ 'is-invalid': submitted && f['UnitId'].errors }"
           >
-            <option value="" disabled selected>Select Unit</option>
-            <option *ngFor="let list of UnitList" [value]="list.Id">
-              {{ list.Name }}
-            </option>
+            <option value="0" disabled selected>Select Unit</option>
+            @for(list of UnitList;track $index){
+            <option [value]="list.Id">{{ list.Name }}</option>
+            }
           </select>
-          <div *ngIf="submitted && f['UnitId'].errors" class="invalid-feedback">
-            <div *ngIf="f['UnitId'].errors['required']">Select Unit.</div>
+          @if (submitted && f['UnitId'].errors?.['required']) {
+          <div class="invalid-feedback">
+            <div>Select Unit.</div>
           </div>
+          }
         </div>
+        }
       </div>
     </div>
 
