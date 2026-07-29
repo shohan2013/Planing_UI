@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import {
   AbstractControl,
   FormArray,
@@ -18,6 +18,8 @@ import {
   catchError,
   debounceTime,
   
+  forkJoin,
+
   distinctUntilChanged,
   finalize,
   map,
@@ -60,8 +62,8 @@ import { ToastrService } from 'ngx-toastr';
   templateUrl: './requisition.html',
   styleUrl: './requisition.scss'
 })
-export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisition> implements OnDestroy {
 
+export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisition> implements OnInit,OnDestroy {
   submitted = false;
   lineSubmitted = false;
   selectedRequisition: IRequisition | null = null;
@@ -122,6 +124,14 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
     private toastr: ToastrService
   ) {
     super();
+
+  }
+
+
+
+  override ngOnInit(): void {
+    
+
     this.loadCommonData();
     this.watchItemInput();
     this.watchProductType();
@@ -129,19 +139,14 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
   }
 
 
-
-
-  // protected override fetchData(request: ServerQueryRequest): Observable<ServerQueryResponse<IRequisition>> {
-  // return this.requisitionService.GetRequisition(request).pipe(
-  //   tap(response => console.log('Requisition table response:',response))
-  // );
-  // }
-
   protected override fetchData(request:ServerQueryRequest): Observable<ServerQueryResponse<IRequisition>> {
   return this.requisitionService.GetRequisition(request,this.selectedUnitFilterId).pipe(
     tap(response => console.log('Requisition table response:',response))
   );
   }
+
+
+
 
   onUnitFilterChange(unitId:number): void {
     this.selectedUnitFilterId = Number(unitId);
