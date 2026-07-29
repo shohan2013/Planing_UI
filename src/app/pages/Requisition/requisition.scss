@@ -15,7 +15,7 @@
 
 ::ng-deep .requisition-item-dropdown {
   z-index: 2000 !important;
-  max-height: min(420px, 45vh);
+  max-height: 240px !important;
   overflow-y: auto;
   overflow-x: hidden;
   overscroll-behavior: contain;

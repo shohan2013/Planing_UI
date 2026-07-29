@@ -692,7 +692,7 @@ openViewModal(content:any,requisition:IRequisition): void {
     };
 
     this.modalService.open(content,{
-      size: 'xl'
+      fullscreen: true
     });
   });
 }
