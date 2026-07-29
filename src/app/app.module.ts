@@ -83,8 +83,6 @@ import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
     // All page components are declared in feature modules
   ],
   imports: [
-    
-
     AppRoutingModule,
     RouterModule,
     BrowserAnimationsModule,
