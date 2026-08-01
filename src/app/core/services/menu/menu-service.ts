@@ -27,7 +27,7 @@ export class MenuService {
 
     addMenu(data: IMenu): Observable<Response> {
     // return this.http.post<Response>(`${environment.production}${GlobalConstant.API_END_POINTS.addMenu}`, data);
-    return this.http.post<Response>(`${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.addMenu}`, data);
+    return this.http.post<Response>(`${environment.API_URL}${GlobalConstant.API_END_POINTS.addMenu}`, data);
 
   }
     

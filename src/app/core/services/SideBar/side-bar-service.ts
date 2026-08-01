@@ -3,6 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { GlobalConstant } from 'src/app/core/constants/global.constants';
 import { ISideBarMenu } from 'src/app/core/model/SideBar/SideBar';
+import { environment } from 'src/environments/environment.prod';
+
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +15,7 @@ export class SideBarService {
 
   GetSideBarData(enroll: number): Observable<ISideBarMenu[]> {
     return this.http.get<ISideBarMenu[]>(
-      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.SideBar}/${enroll}`
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.SideBar}/${enroll}`
     );
   }
 }
