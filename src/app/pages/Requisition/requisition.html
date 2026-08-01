@@ -855,7 +855,7 @@
 
                     <option value="" disabled>Select UOM</option>
 
-                    <option *ngFor="let uom of uoms" [value]="uom.Id">
+                    <option *ngFor="let uom of filteredUOMs" [value]="uom.Id">
                       {{ uom.Name }}
                     </option>
 

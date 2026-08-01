@@ -85,9 +85,11 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
 
   units: IUnit[] = [];
   businesses: IBusiness[] = [];
-  filteredBusinesses: IBusiness[] = [];
+  filteredBusinesses: IBusiness[] = []; //for create/edit modal Unit
   productTypes: IProductType[] = [];
   uoms: IUOM[] = [];
+  filteredUOMs: IUOM[] = []; //for create/edit modal Unit
+
   fileStatusList: IDropdownBind[] = [];
 
   isItemSearching = false;
@@ -239,10 +241,20 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
         this.productTypes = data;
       });
 
+    // this.commonService.GetUOMList()
+    //   .pipe(takeUntil(this.destroy$))
+    //   .subscribe(data => {
+    //     this.uoms = data;
+    //   });
+
     this.commonService.GetUOMList()
       .pipe(takeUntil(this.destroy$))
       .subscribe(data => {
         this.uoms = data;
+
+        if (this.selectedUnitId) {
+          this.filterUOMs();
+        }
       });
 
     this.commonService.GetDocumentStatusList()
@@ -594,6 +606,7 @@ onItemSelect(event: NgbTypeaheadSelectItemEvent): void {
   onUnitChange(): void {
     this.formGroup.get('BusinessId')?.reset('');
     this.filterBusinesses();
+    this.filterUOMs();
 
     this.lines.clear();
     this.resetLineInput();
@@ -621,6 +634,12 @@ onItemSelect(event: NgbTypeaheadSelectItemEvent): void {
       business => Number(business.UnitId) === this.selectedUnitId
     );
   }
+  
+  filterUOMs(): void {
+  this.filteredUOMs = this.uoms.filter(
+    uom => Number(uom.UnitId) === this.selectedUnitId
+  );
+}
 
   addLine(): void {
     this.lineSubmitted = true;
