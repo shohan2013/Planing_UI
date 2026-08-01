@@ -31,6 +31,8 @@ import {
   tap
 } from 'rxjs';
 
+
+
 import { IUnit } from 'src/app/core/model/Common/Unit/Unit';
 import { IBusiness } from 'src/app/core/model/Common/BusinessType/BusinessType';
 import { IProductType } from 'src/app/core/model/Common/ProductType/ProductType';
@@ -62,6 +64,11 @@ import { ToastrService } from 'ngx-toastr';
   templateUrl: './requisition.html',
   styleUrl: './requisition.scss'
 })
+
+
+
+
+
 
 export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisition> implements OnInit,OnDestroy {
   submitted = false;
@@ -117,6 +124,12 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
     Remarks: new FormControl('')
   });
 
+
+
+
+
+
+
   constructor(
     private commonService: CommonService,
     private modalService: NgbModal,
@@ -130,9 +143,10 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
 
 
   override ngOnInit(): void {
-    
+    super.ngOnInit();
 
     this.loadCommonData();
+
     this.watchItemInput();
     this.watchProductType();
     this.watchDateRange();
