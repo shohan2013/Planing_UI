@@ -634,7 +634,7 @@ onItemSelect(event: NgbTypeaheadSelectItemEvent): void {
       business => Number(business.UnitId) === this.selectedUnitId
     );
   }
-  
+
   filterUOMs(): void {
   this.filteredUOMs = this.uoms.filter(
     uom => Number(uom.UnitId) === this.selectedUnitId
@@ -784,6 +784,7 @@ openEditModal(content:any,requisition:IRequisition): void {
     });
 
     this.filterBusinesses();
+    this.filterUOMs();
     this.formGroup.get('UnitId')?.disable();
 
     lines.forEach(line => {
@@ -856,6 +857,7 @@ openEditModal(content:any,requisition:IRequisition): void {
     this.resetLineInput();
 
     this.filteredBusinesses = [];
+    this.filteredUOMs = [];
     this.submitted = false;
     this.lineSubmitted = false;
   }
