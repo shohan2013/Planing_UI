@@ -93,7 +93,7 @@ export class AccessPermission implements OnInit {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
-          console.log(data);
+          //console.log(data);
           this.paginatedItems.set(data);
         },
         error: (error) => {

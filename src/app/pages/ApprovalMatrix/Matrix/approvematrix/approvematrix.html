@@ -39,7 +39,7 @@
             [clearable]="true"
             style="margin-right: 5px"
             (search)="onSearch($event)"
-            (ngModelChange)="onSelect($event)"
+            (ngModelChange)="onSelect()"
           >
           </ng-select>
         </div>
@@ -66,14 +66,14 @@
           </tr>
         </thead>
         <tbody>
-          @if(paginatedItems.length === 0){
+          @if(paginatedItems().length === 0){
           <tr>
             <td colspan="100%" class="text-center py-4">
               <i class="fas fa-folder-open fa-4x text-secondary mb-3"></i><br />
               <h6 class="emptymsg">No Records Found.</h6>
             </td>
           </tr>
-          } @for (item of paginatedItems; track trackById($index, item)) {
+          } @for (item of paginatedItems(); track trackById($index, item)) {
           <tr>
             <td>{{$index + 1 }}</td>
             <td>{{ item.MenuName }}</td>
@@ -101,14 +101,14 @@
                   class="form-check-input"
                   type="checkbox"
                   [(ngModel)]="item.IsActive"
-                  (ngModelChange)="onToggle(item.Id, 1,item.IsActive)"
+                  (ngModelChange)="onToggle(item.Id,item.IsActive)"
                 />
               </div>
             </td>
             <td>{{ item.CreatedBy }}</td>
-            <td>{{ item.CreatedDate }}</td>
+            <td>{{ item.CreatedDate | dateTime }}</td>
             <td>{{ item.UpdatedBy }}</td>
-            <td>{{ item.UpdatedDate }}</td>
+            <td>{{ item.UpdatedDate | dateTime}}</td>
           </tr>
           }
         </tbody>

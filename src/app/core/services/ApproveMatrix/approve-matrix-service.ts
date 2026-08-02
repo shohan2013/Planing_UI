@@ -5,25 +5,32 @@ import { HttpClient } from '@angular/common/http';
 import { IViewApproveMatrixEntity } from '../../model/ApproveMatrix/ViewApproveMatrix';
 import { ApproveMatrixSave } from '../../model/ApproveMatrix/ApproveMatrixSave';
 import { IApiResponse } from '../../model/Response/ApiResponse';
+import { ApproveMatrixPermissionUpdate } from '../../model/ApproveMatrix/ApproveMatrixPermissionUpdate';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ApproveMatrixService {
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   GetApproveMatrix(enroll: string): Observable<IViewApproveMatrixEntity[]> {
-    return this.http.get<IViewApproveMatrixEntity[]>(`${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.ApproveMatrix}/${enroll}`);
-  }
-
-  ProvideApproveMatrix(typeid: number, id: number, status: boolean): Observable<IApiResponse> {
-    const url = `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.ProvideApproveMatrix}?typeid=${typeid}&id=${id}&status=${status}`;
-    return this.http.get<IApiResponse>(url).pipe(
-
+    return this.http.get<IViewApproveMatrixEntity[]>(
+      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.ApproveMatrix}/${enroll}`,
     );
   }
 
+  ProvideApproveMatrix(
+    id: number,
+    data: ApproveMatrixPermissionUpdate,
+  ): Observable<IApiResponse> {
+    const url = `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.ProvideApproveMatrix}/${id}`;
+    return this.http.patch<IApiResponse>(url, data);
+  }
+
   addData(data: ApproveMatrixSave): Observable<IApiResponse> {
-    return this.http.post<IApiResponse>(`${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.ApproveMatrix}`, data);
+    return this.http.post<IApiResponse>(
+      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.ApproveMatrix}`,
+      data,
+    );
   }
 }

@@ -40,6 +40,8 @@ import {
   NgMultiSelectDropDownModule,
 } from 'ng-multiselect-dropdown';
 import { CustomValidators } from 'src/app/CustomValidators/custom-validators';
+import { DateTimePipe } from '../../../../shared/pipes/date-time-pipe';
+import { ApproveMatrixPermissionUpdate } from 'src/app/core/model/ApproveMatrix/ApproveMatrixPermissionUpdate';
 
 @Component({
   selector: 'app-approvematrix',
@@ -52,6 +54,7 @@ import { CustomValidators } from 'src/app/CustomValidators/custom-validators';
     CommonModule,
     ReactiveFormsModule,
     NgMultiSelectDropDownModule,
+    DateTimePipe,
   ],
 })
 export class Approvematrix implements OnInit, OnDestroy {
@@ -59,7 +62,7 @@ export class Approvematrix implements OnInit, OnDestroy {
   submitted = false;
   selectedId: number;
   ApproveGroupTypeListDropdown: IApproveMatrixGroupList[] = [];
-  paginatedItems: IViewApproveMatrixEntity[] = [];
+  paginatedItems = signal<IViewApproveMatrixEntity[]>([]);
   EmpList: IEnroll[] = []; //EmpList: any[] = [];
   MenuDropdown: MenuModel[] = [];
   SubMenuDropdown = signal<SubMenuModel[]>([]); // dropdown source
@@ -87,6 +90,11 @@ export class Approvematrix implements OnInit, OnDestroy {
     this.loadUnit();
     this.loadGroupType();
     this.loadEnroll();
+    this.loadApproveMatrix();
+  }
+
+  loadApproveMatrix(): void {
+    this.GetApproveMatrix(localStorage.getItem('Enroll'));
   }
 
   loadUnit() {
@@ -263,13 +271,21 @@ export class Approvematrix implements OnInit, OnDestroy {
       });
   }
 
-  onToggle(id: number, type: number, status: boolean) {
+  onToggle(id: number, status: boolean) {
+    const model: ApproveMatrixPermissionUpdate = {
+      Status: status,
+      UpdateBy: Number(localStorage.getItem('Enroll')),
+    };
+
     this.approvematrixservice
-      .ProvideApproveMatrix(type, id, status)
+      .ProvideApproveMatrix(id, model)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-          console.log(response);
+          //console.log(response);
+          this.GetApproveMatrix(
+            this.selectedUser?.toString() ?? localStorage.getItem('Enroll'),
+          );
           this.toastr.success(response.Message);
         },
         error: (error) => {
@@ -352,18 +368,18 @@ export class Approvematrix implements OnInit, OnDestroy {
     return this.formGroup.controls;
   }
 
-  onSelect(e: any) {
-    if (!e) return null;
-    this.GetApproveMatrix(e);
+  onSelect() {
+    this.GetApproveMatrix(this.selectedUser.toString());
   }
 
-  GetApproveMatrix(name: string) {
+  GetApproveMatrix(enroll: string) {
     this.approvematrixservice
-      .GetApproveMatrix(name)
+      .GetApproveMatrix(enroll)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
-          this.paginatedItems = data;
+          //console.log(data);
+          this.paginatedItems.set(data);
         },
         error: (error) => {
           console.log('Error :', error);

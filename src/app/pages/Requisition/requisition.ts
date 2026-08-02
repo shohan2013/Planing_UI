@@ -7,12 +7,12 @@ import {
   FormGroup,
   FormsModule,
   ReactiveFormsModule,
-  Validators
+  Validators,
 } from '@angular/forms';
 import {
   NgbModal,
   NgbTypeaheadModule,
-  NgbTypeaheadSelectItemEvent
+  NgbTypeaheadSelectItemEvent,
 } from '@ng-bootstrap/ng-bootstrap';
 import {
   catchError,
@@ -25,7 +25,7 @@ import {
   Subject,
   switchMap,
   takeUntil,
-  tap
+  tap,
 } from 'rxjs';
 
 import { IUnit } from 'src/app/core/model/Common/Unit/Unit';
@@ -40,11 +40,15 @@ import { IDropdownBind } from 'src/app/core/model/Common/dropdown-bind';
 import { RequisitionService } from 'src/app/core/services/Requisition/requisition.service';
 import { IRequisition } from 'src/app/core/model/Requisition/Requisition';
 
-import { ServerQueryRequest, ServerQueryResponse } from 'src/app/core/model/Common/Pagination/ServerQueryRequest';
+import {
+  ServerQueryRequest,
+  ServerQueryResponse,
+} from 'src/app/core/model/Common/Pagination/ServerQueryRequest';
 import { ServerSideFilteredPaginatedComponent } from 'src/app/core/server-side-filtered-paginated/server-side-filtered-paginated.component';
 import { PaginationComponent } from 'src/app/shared/pagination/pagination.component';
 
 import { ToastrService } from 'ngx-toastr';
+import { DateTimePipe } from '../../shared/pipes/date-time-pipe';
 
 @Component({
   selector: 'app-requisition',
@@ -54,13 +58,16 @@ import { ToastrService } from 'ngx-toastr';
     FormsModule,
     ReactiveFormsModule,
     NgbTypeaheadModule,
-    PaginationComponent
+    PaginationComponent,
+    DateTimePipe,
   ],
   templateUrl: './requisition.html',
-  styleUrl: './requisition.scss'
+  styleUrl: './requisition.scss',
 })
-export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisition> implements OnDestroy {
-
+export class Requisition
+  extends ServerSideFilteredPaginatedComponent<IRequisition>
+  implements OnDestroy
+{
   submitted = false;
   lineSubmitted = false;
   selectedRequisition: IRequisition | null = null;
@@ -69,7 +76,6 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
   isEditMode = false;
   editingReqID = 0;
   deletedLineIds: number[] = [];
-  
 
   units: IUnit[] = [];
   businesses: IBusiness[] = [];
@@ -86,34 +92,31 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
   private destroy$ = new Subject<void>();
 
   formGroup: FormGroup = new FormGroup({
-    UnitId: new FormControl('',Validators.required),
-    BusinessId: new FormControl('',Validators.required),
+    UnitId: new FormControl('', Validators.required),
+    BusinessId: new FormControl('', Validators.required),
     ReqDate: new FormControl(
       new Date().toISOString().split('T')[0],
-      Validators.required
+      Validators.required,
     ),
     Remarks: new FormControl(''),
-    Lines: new FormArray([])
+    Lines: new FormArray([]),
   });
 
   lineFormGroup: FormGroup = new FormGroup({
-    ProductTypeId: new FormControl(2,Validators.required),
-    ItemSearch: new FormControl('',Validators.required),
-    ItemId: new FormControl('',Validators.required),
+    ProductTypeId: new FormControl(2, Validators.required),
+    ItemSearch: new FormControl('', Validators.required),
+    ItemId: new FormControl('', Validators.required),
     ItemName: new FormControl(''),
-    UOMId: new FormControl('',Validators.required),
-    Quantity: new FormControl('',[
-      Validators.required,
-      Validators.min(1)
-    ]),
-    Remarks: new FormControl('')
+    UOMId: new FormControl('', Validators.required),
+    Quantity: new FormControl('', [Validators.required, Validators.min(1)]),
+    Remarks: new FormControl(''),
   });
 
   constructor(
     private commonService: CommonService,
     private modalService: NgbModal,
     private requisitionService: RequisitionService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
   ) {
     super();
     this.loadCommonData();
@@ -121,8 +124,9 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
     this.watchProductType();
   }
 
-
-  protected override fetchData(request: ServerQueryRequest): Observable<ServerQueryResponse<IRequisition>> {
+  protected override fetchData(
+    request: ServerQueryRequest,
+  ): Observable<ServerQueryResponse<IRequisition>> {
     return this.requisitionService.GetRequisition(request);
   }
 
@@ -150,40 +154,47 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
     return Number(this.lineFormGroup.get('ProductTypeId')?.value);
   }
 
-
   getUnitName(unitId: number): string {
-    return this.units.find(x => Number(x.Id) === Number(unitId))?.Name ?? '-';
+    return this.units.find((x) => Number(x.Id) === Number(unitId))?.Name ?? '-';
   }
 
   getBusinessName(businessId: number): string {
-    return this.businesses.find(x => Number(x.Id) === Number(businessId))?.Name ?? '-';
+    return (
+      this.businesses.find((x) => Number(x.Id) === Number(businessId))?.Name ??
+      '-'
+    );
   }
 
   getProductTypeName(productTypeId: number): string {
-    return this.productTypes.find(x => Number(x.Id) === Number(productTypeId))?.Name ?? '-';
+    return (
+      this.productTypes.find((x) => Number(x.Id) === Number(productTypeId))
+        ?.Name ?? '-'
+    );
   }
 
   getUOMName(uomId: number): string {
-    return this.uoms.find(x => Number(x.Id) === Number(uomId))?.Name ?? '-';
+    return this.uoms.find((x) => Number(x.Id) === Number(uomId))?.Name ?? '-';
   }
 
   getFileStatusName(fileStatusId: number): string {
-  return this.fileStatusList.find(
-    x => Number(x.Id) === Number(fileStatusId)
-    )?.Name ?? '-';
+    return (
+      this.fileStatusList.find((x) => Number(x.Id) === Number(fileStatusId))
+        ?.Name ?? '-'
+    );
   }
 
-
   loadCommonData(): void {
-    this.commonService.GetUnitList()
+    this.commonService
+      .GetUnitList()
       .pipe(takeUntil(this.destroy$))
-      .subscribe(data => {
+      .subscribe((data) => {
         this.units = data;
       });
 
-    this.commonService.GetBusinessList()
+    this.commonService
+      .GetBusinessList()
       .pipe(takeUntil(this.destroy$))
-      .subscribe(data => {
+      .subscribe((data) => {
         this.businesses = data;
 
         if (this.selectedUnitId) {
@@ -191,73 +202,80 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
         }
       });
 
-    this.commonService.GetProductTypeList()
+    this.commonService
+      .GetProductTypeList()
       .pipe(takeUntil(this.destroy$))
-      .subscribe(data => {
+      .subscribe((data) => {
         this.productTypes = data;
       });
 
-    this.commonService.GetUOMList()
+    this.commonService
+      .GetUOMList()
       .pipe(takeUntil(this.destroy$))
-      .subscribe(data => {
+      .subscribe((data) => {
         this.uoms = data;
       });
 
-    this.commonService.GetDocumentStatusList()
+    this.commonService
+      .GetDocumentStatusList()
       .pipe(takeUntil(this.destroy$))
-      .subscribe(data => {
+      .subscribe((data) => {
         this.fileStatusList = data;
       });
-
-
   }
 
   watchItemInput(): void {
-    this.lineFormGroup.get('ItemSearch')?.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(value => {
+    this.lineFormGroup
+      .get('ItemSearch')
+      ?.valueChanges.pipe(takeUntil(this.destroy$))
+      .subscribe((value) => {
         if (this.selectedLineProductTypeId === 2 && typeof value === 'string') {
-          this.lineFormGroup.patchValue({
-            ItemId: '',
-            ItemName: ''
-          },{
-            emitEvent: false
-          });
+          this.lineFormGroup.patchValue(
+            {
+              ItemId: '',
+              ItemName: '',
+            },
+            {
+              emitEvent: false,
+            },
+          );
         }
       });
   }
 
   watchProductType(): void {
-    this.lineFormGroup.get('ProductTypeId')?.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(value => {
+    this.lineFormGroup
+      .get('ProductTypeId')
+      ?.valueChanges.pipe(takeUntil(this.destroy$))
+      .subscribe((value) => {
         const productTypeId = Number(value);
         const itemSearchControl = this.lineFormGroup.get('ItemSearch');
         const itemIdControl = this.lineFormGroup.get('ItemId');
         const itemNameControl = this.lineFormGroup.get('ItemName');
 
-        this.lineFormGroup.patchValue({
-          ItemSearch: '',
-          ItemId: '',
-          ItemName: ''
-        },{
-          emitEvent: false
-        });
+        this.lineFormGroup.patchValue(
+          {
+            ItemSearch: '',
+            ItemId: '',
+            ItemName: '',
+          },
+          {
+            emitEvent: false,
+          },
+        );
 
         if (productTypeId === 1) {
           itemSearchControl?.clearValidators();
           itemIdControl?.clearValidators();
           itemNameControl?.setValidators([
             Validators.required,
-            Validators.maxLength(200)
+            Validators.maxLength(200),
           ]);
-        }
-        else if (productTypeId === 2) {
+        } else if (productTypeId === 2) {
           itemSearchControl?.setValidators(Validators.required);
           itemIdControl?.setValidators(Validators.required);
           itemNameControl?.clearValidators();
-        }
-        else {
+        } else {
           itemSearchControl?.clearValidators();
           itemIdControl?.clearValidators();
           itemNameControl?.clearValidators();
@@ -279,7 +297,7 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
       debounceTime(300),
       distinctUntilChanged(),
 
-      switchMap(searchText => {
+      switchMap((searchText) => {
         const text = searchText.trim();
 
         this.itemSearchCompleted = false;
@@ -297,8 +315,8 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
 
         this.isItemSearching = true;
 
-        return this.commonService.GetItemList(this.selectedUnitId,text).pipe(
-          tap(items => {
+        return this.commonService.GetItemList(this.selectedUnitId, text).pipe(
+          tap((items) => {
             this.itemSearchCompleted = true;
             this.itemSearchHasResults = items.length > 0;
             this.itemSearchFailed = false;
@@ -313,9 +331,9 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
 
           finalize(() => {
             this.isItemSearching = false;
-          })
+          }),
         );
-      })
+      }),
     );
   };
 
@@ -331,11 +349,11 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
     setTimeout(() => {
       const dropdown = document.querySelector(
         // 'ngb-typeahead-window.dropdown-menu'
-        '.requisition-item-dropdown'
+        '.requisition-item-dropdown',
       ) as HTMLElement | null;
 
       const activeItem = dropdown?.querySelector(
-        '.dropdown-item.active'
+        '.dropdown-item.active',
       ) as HTMLElement | null;
 
       if (!dropdown || !activeItem) {
@@ -349,24 +367,24 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
 
       if (itemTop < visibleTop) {
         dropdown.scrollTop = itemTop;
-      }
-      else if (itemBottom > visibleBottom) {
+      } else if (itemBottom > visibleBottom) {
         dropdown.scrollTop = itemBottom - dropdown.clientHeight;
       }
     });
   }
 
-
-
   onItemSelect(event: NgbTypeaheadSelectItemEvent): void {
     const item = event.item as IItem;
 
-    this.lineFormGroup.patchValue({
-      ItemId: item.Id,
-      ItemName: item.Name
-    },{
-      emitEvent: false
-    });
+    this.lineFormGroup.patchValue(
+      {
+        ItemId: item.Id,
+        ItemName: item.Name,
+      },
+      {
+        emitEvent: false,
+      },
+    );
 
     this.itemSearchCompleted = false;
     this.itemSearchHasResults = true;
@@ -389,7 +407,7 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
 
   filterBusinesses(): void {
     this.filteredBusinesses = this.businesses.filter(
-      business => Number(business.UnitId) === this.selectedUnitId
+      (business) => Number(business.UnitId) === this.selectedUnitId,
     );
   }
 
@@ -405,26 +423,27 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
     const productTypeId = Number(lineValue.ProductTypeId);
 
     const selectedUOM = this.uoms.find(
-      uom => Number(uom.Id) === Number(lineValue.UOMId)
+      (uom) => Number(uom.Id) === Number(lineValue.UOMId),
     );
 
     const newLine = new FormGroup({
       ID: new FormControl(0),
       ReqID: new FormControl(0),
       ProductTypeId: new FormControl(productTypeId),
-      ItemId: new FormControl(productTypeId === 1 ? 0 : Number(lineValue.ItemId)
+      ItemId: new FormControl(
+        productTypeId === 1 ? 0 : Number(lineValue.ItemId),
       ),
       ItemName: new FormControl(
         productTypeId === 1
-          ? lineValue.ItemName?.trim() ?? ''
-          : lineValue.ItemName
+          ? (lineValue.ItemName?.trim() ?? '')
+          : lineValue.ItemName,
       ),
       UOMId: new FormControl(Number(lineValue.UOMId)),
       UOMName: new FormControl(selectedUOM?.Name ?? ''),
       Quantity: new FormControl(Number(lineValue.Quantity)),
       Remarks: new FormControl(lineValue.Remarks ?? ''),
       FileStatusId: new FormControl(1),
-      IsActive: new FormControl(true)
+      IsActive: new FormControl(true),
     });
 
     this.lines.push(newLine);
@@ -441,7 +460,7 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
       ItemName: '',
       UOMId: '',
       Quantity: '',
-      Remarks: ''
+      Remarks: '',
     });
 
     this.isItemSearching = false;
@@ -454,118 +473,116 @@ export class Requisition extends ServerSideFilteredPaginatedComponent<IRequisiti
   //   this.lines.removeAt(index);
   // }
 
-  removeLine(index:number): void {
-  const lineId = Number(this.lines.at(index).get('ID')?.value);
+  removeLine(index: number): void {
+    const lineId = Number(this.lines.at(index).get('ID')?.value);
 
-  if (this.isEditMode && lineId > 0) {
-    this.deletedLineIds.push(lineId);
+    if (this.isEditMode && lineId > 0) {
+      this.deletedLineIds.push(lineId);
+    }
+
+    this.lines.removeAt(index);
   }
 
-  this.lines.removeAt(index);
-}
+  openViewModal(content: any, requisition: IRequisition): void {
+    const activeLines = requisition.Lines.filter((x) => x.IsActive);
 
+    this.loadItemNames(activeLines).subscribe((lines) => {
+      this.selectedRequisition = {
+        Header: requisition.Header,
+        Lines: lines,
+        DeletedLineIds: [],
+      };
 
-openViewModal(content:any,requisition:IRequisition): void {
-  const activeLines = requisition.Lines.filter(x => x.IsActive);
-
-  this.loadItemNames(activeLines).subscribe(lines => {
-    this.selectedRequisition = {
-      Header: requisition.Header,
-      Lines: lines,
-      DeletedLineIds: []
-    };
-
-    this.modalService.open(content,{
-      size: 'xl'
+      this.modalService.open(content, {
+        size: 'xl',
+      });
     });
-  });
-}
-loadItemNames(lines:any[]): Observable<any[]> {
-  const items = lines.map(line => ({
-    Type: Number(line.ProductTypeId),
-    Id: Number(line.ItemId),
-    Name: ''
-  }));
+  }
+  loadItemNames(lines: any[]): Observable<any[]> {
+    const items = lines.map((line) => ({
+      Type: Number(line.ProductTypeId),
+      Id: Number(line.ItemId),
+      Name: '',
+    }));
 
-  return this.commonService.GetRequisitionItemNames(items).pipe(
-    map(result => {
-      return lines.map(line => ({
-        ...line,
-        ItemName: result.find(x =>
-          Number(x.Type) === Number(line.ProductTypeId) &&
-          Number(x.Id) === Number(line.ItemId)
-        )?.Name ?? ''
-      }));
-    })
-  );
-}
+    return this.commonService.GetRequisitionItemNames(items).pipe(
+      map((result) => {
+        return lines.map((line) => ({
+          ...line,
+          ItemName:
+            result.find(
+              (x) =>
+                Number(x.Type) === Number(line.ProductTypeId) &&
+                Number(x.Id) === Number(line.ItemId),
+            )?.Name ?? '',
+        }));
+      }),
+    );
+  }
 
+  openEditModal(content: any, requisition: IRequisition): void {
+    const activeLines = requisition.Lines.filter((x) => x.IsActive);
 
+    this.loadItemNames(activeLines).subscribe((lines) => {
+      this.resetCreateForm();
 
-openEditModal(content:any,requisition:IRequisition): void {
-  const activeLines = requisition.Lines.filter(x => x.IsActive);
+      this.isEditMode = true;
+      this.editingReqID = requisition.Header.ReqID;
+      this.deletedLineIds = [];
 
-  this.loadItemNames(activeLines).subscribe(lines => {
+      this.selectedRequisition = {
+        Header: requisition.Header,
+        Lines: lines,
+        DeletedLineIds: [],
+      };
+
+      this.formGroup.patchValue({
+        UnitId: requisition.Header.UnitId,
+        BusinessId: requisition.Header.BusinessId,
+        ReqDate: new Date(requisition.Header.ReqDate)
+          .toISOString()
+          .split('T')[0],
+        Remarks: requisition.Header.Remarks,
+      });
+
+      this.filterBusinesses();
+      this.formGroup.get('UnitId')?.disable();
+
+      lines.forEach((line) => {
+        this.lines.push(
+          new FormGroup({
+            ID: new FormControl(Number(line.ID)),
+            ReqID: new FormControl(Number(line.ReqID)),
+            ProductTypeId: new FormControl(Number(line.ProductTypeId)),
+            ItemId: new FormControl(Number(line.ItemId)),
+            ItemName: new FormControl(line.ItemName ?? ''),
+            UOMId: new FormControl(Number(line.UOMId)),
+            UOMName: new FormControl(this.getUOMName(Number(line.UOMId))),
+            Quantity: new FormControl(Number(line.Quantity)),
+            Remarks: new FormControl(line.Remarks ?? ''),
+            FileStatusId: new FormControl(Number(line.FileStatusId)),
+            IsActive: new FormControl(true),
+          }),
+        );
+      });
+
+      this.modalService.open(content, {
+        fullscreen: true,
+        backdrop: 'static',
+        keyboard: false,
+        windowClass: 'requisition-fullscreen-modal',
+      });
+    });
+  }
+
+  openCreateModal(content: any): void {
     this.resetCreateForm();
 
-    this.isEditMode = true;
-    this.editingReqID = requisition.Header.ReqID;
-    this.deletedLineIds = [];
-
-    this.selectedRequisition = {
-      Header: requisition.Header,
-      Lines: lines,
-      DeletedLineIds: []
-    };
-
-    this.formGroup.patchValue({
-      UnitId: requisition.Header.UnitId,
-      BusinessId: requisition.Header.BusinessId,
-      ReqDate: new Date(requisition.Header.ReqDate).toISOString().split('T')[0],
-      Remarks: requisition.Header.Remarks
-    });
-
-    this.filterBusinesses();
-    this.formGroup.get('UnitId')?.disable();
-
-    lines.forEach(line => {
-      this.lines.push(new FormGroup({
-        ID: new FormControl(Number(line.ID)),
-        ReqID: new FormControl(Number(line.ReqID)),
-        ProductTypeId: new FormControl(Number(line.ProductTypeId)),
-        ItemId: new FormControl(Number(line.ItemId)),
-        ItemName: new FormControl(line.ItemName ?? ''),
-        UOMId: new FormControl(Number(line.UOMId)),
-        UOMName: new FormControl(this.getUOMName(Number(line.UOMId))),
-        Quantity: new FormControl(Number(line.Quantity)),
-        Remarks: new FormControl(line.Remarks ?? ''),
-        FileStatusId: new FormControl(Number(line.FileStatusId)),
-        IsActive: new FormControl(true)
-      }));
-    });
-
-    this.modalService.open(content,{
+    this.modalService.open(content, {
       fullscreen: true,
       backdrop: 'static',
       keyboard: false,
-      windowClass: 'requisition-fullscreen-modal'
-    });
-  });
-}
-
-
-
-
-
-
-  openCreateModal(content:any): void {
-    this.resetCreateForm();
-
-    this.modalService.open(content,{
-      fullscreen: true,
-      backdrop: 'static',
-      keyboard: false,
-      windowClass: 'requisition-fullscreen-modal'
+      windowClass: 'requisition-fullscreen-modal',
     });
   }
 
@@ -583,7 +600,7 @@ openEditModal(content:any,requisition:IRequisition): void {
       UnitId: '',
       BusinessId: '',
       ReqDate: new Date().toISOString().split('T')[0],
-      Remarks: ''
+      Remarks: '',
     });
 
     this.resetLineInput();
@@ -594,217 +611,189 @@ openEditModal(content:any,requisition:IRequisition): void {
   }
 
   Create(): void {
-  this.submitted = true;
-  this.formGroup.markAllAsTouched();
+    this.submitted = true;
+    this.formGroup.markAllAsTouched();
 
-  if (this.formGroup.invalid || this.lines.length === 0) {
-    console.warn('Requisition validation failed.', {
-      headerValid: this.formGroup.valid,
-      lineCount: this.lines.length
-    });
+    if (this.formGroup.invalid || this.lines.length === 0) {
+      console.warn('Requisition validation failed.', {
+        headerValid: this.formGroup.valid,
+        lineCount: this.lines.length,
+      });
 
-    return;
-  }
-
-  const formValue = this.formGroup.getRawValue();
-  const enroll = Number(localStorage.getItem('Enroll'));
-  const currentDate = new Date();
-
-  const requisitionData: IRequisition = {
-    Header: {
-      ReqID: 0,
-      RequisitionNumber: '',
-      UnitId: Number(formValue.UnitId),
-      BusinessId: Number(formValue.BusinessId),
-      ReqDate: new Date(formValue.ReqDate),
-      Remarks: formValue.Remarks?.trim() ?? '',
-      FileStatusId: 1,
-      IsActive: true,
-      CREATEDBY: enroll,
-      UPDATEDBY: enroll,
-      CREATEDDATE: currentDate,
-      UPDATEDDATE: currentDate
-    },
-    Lines: this.lines.getRawValue().map((line: any) => ({
-      ID: 0,
-      ReqID: 0,
-      ProductTypeId: Number(line.ProductTypeId),
-      ItemId: Number(line.ProductTypeId) === 1
-        ? 0
-        : Number(line.ItemId),
-      ItemName: Number(line.ProductTypeId) === 1
-        ? line.ItemName?.trim() ?? ''
-        : null,
-      UOMId: Number(line.UOMId),
-      Quantity: Number(line.Quantity),
-      Remarks: line.Remarks?.trim() ?? '',
-      FileStatusId: 1,
-      IsActive: true
-    })),
-
-    DeletedLineIds: []
-
-  };
-
-  console.log('Requisition API payload:', requisitionData);
-
-  this.requisitionService.addData(requisitionData)
-    .pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: response => {
-        if (response.Status) {
-          this.toastr.success(response.Message);
-          this.resetCreateForm();
-          this.modalService.dismissAll();
-          this.currentPage.set(1);
-          this.retry();
-        } else {
-          this.toastr.warning(
-            response.Message || 'Unable to save the requisition.'
-          );
-        }
-      },
-      error: () => {
-        this.toastr.error(
-          'Something went wrong while saving the requisition.'
-        );
-      }
-    });
+      return;
     }
 
+    const formValue = this.formGroup.getRawValue();
+    const enroll = Number(localStorage.getItem('Enroll'));
+    const currentDate = new Date();
 
-
-
-
-
-Update(): void {
-  this.submitted = true;
-  this.formGroup.markAllAsTouched();
-
-  if (
-    this.formGroup.invalid ||
-    this.lines.length === 0 ||
-    !this.selectedRequisition
-  ) {
-    return;
-  }
-
-  const formValue = this.formGroup.getRawValue();
-  const enroll = Number(localStorage.getItem('Enroll'));
-  const currentDate = new Date();
-  const existingHeader = this.selectedRequisition.Header;
-
-  const requisitionData: IRequisition = {
-    Header: {
-      ReqID: this.editingReqID,
-      RequisitionNumber: existingHeader.RequisitionNumber,
-      UnitId: Number(formValue.UnitId),
-      BusinessId: Number(formValue.BusinessId),
-      ReqDate: new Date(formValue.ReqDate),
-      Remarks: formValue.Remarks?.trim() ?? '',
-      FileStatusId: existingHeader.FileStatusId,
-      IsActive: existingHeader.IsActive,
-      CREATEDBY: existingHeader.CREATEDBY,
-      UPDATEDBY: enroll,
-      CREATEDDATE: existingHeader.CREATEDDATE,
-      UPDATEDDATE: currentDate
-    },
-    Lines: this.lines.getRawValue()
-      .filter((line:any) => Number(line.ID) === 0)
-      .map((line:any) => ({
+    const requisitionData: IRequisition = {
+      Header: {
+        ReqID: 0,
+        RequisitionNumber: '',
+        UnitId: Number(formValue.UnitId),
+        BusinessId: Number(formValue.BusinessId),
+        ReqDate: new Date(formValue.ReqDate),
+        Remarks: formValue.Remarks?.trim() ?? '',
+        FileStatusId: 1,
+        IsActive: true,
+        CREATEDBY: enroll,
+        UPDATEDBY: enroll,
+        CREATEDDATE: currentDate,
+        UPDATEDDATE: currentDate,
+      },
+      Lines: this.lines.getRawValue().map((line: any) => ({
         ID: 0,
-        ReqID: this.editingReqID,
+        ReqID: 0,
         ProductTypeId: Number(line.ProductTypeId),
-        ItemId: Number(line.ProductTypeId) === 1
-          ? 0
-          : Number(line.ItemId),
-        ItemName: Number(line.ProductTypeId) === 1
-          ? line.ItemName?.trim() ?? ''
-          : null,
+        ItemId: Number(line.ProductTypeId) === 1 ? 0 : Number(line.ItemId),
+        ItemName:
+          Number(line.ProductTypeId) === 1
+            ? (line.ItemName?.trim() ?? '')
+            : null,
         UOMId: Number(line.UOMId),
         Quantity: Number(line.Quantity),
         Remarks: line.Remarks?.trim() ?? '',
-        FileStatusId: Number(line.FileStatusId),
-        IsActive: true
+        FileStatusId: 1,
+        IsActive: true,
       })),
-    DeletedLineIds: this.deletedLineIds
-  };
 
-  this.requisitionService.updateData(requisitionData)
-    .pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: response => {
-        if (response.Status) {
-          this.toastr.success(response.Message);
-          this.resetCreateForm();
-          this.modalService.dismissAll();
-          this.retry();
-        }
-        else {
-          this.toastr.warning(
-            response.Message || 'Unable to update the requisition.'
+      DeletedLineIds: [],
+    };
+
+    console.log('Requisition API payload:', requisitionData);
+
+    this.requisitionService
+      .addData(requisitionData)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.Status) {
+            this.toastr.success(response.Message);
+            this.resetCreateForm();
+            this.modalService.dismissAll();
+            this.currentPage.set(1);
+            this.retry();
+          } else {
+            this.toastr.warning(
+              response.Message || 'Unable to save the requisition.',
+            );
+          }
+        },
+        error: () => {
+          this.toastr.error(
+            'Something went wrong while saving the requisition.',
           );
-        }
-      },
-      error: () => {
-        this.toastr.error(
-          'Something went wrong while updating the requisition.'
-        );
-      }
-    });
-}
-
-
-
-
-
-
-Delete(reqId:number): void {
-
-  const isConfirmed = confirm('Are you sure you want to delete this requisition?');
-
-  if (!isConfirmed) {
-    return;
+        },
+      });
   }
 
-  this.requisitionService.deleteData(reqId).subscribe({
-    next: (response) => {
+  Update(): void {
+    this.submitted = true;
+    this.formGroup.markAllAsTouched();
 
-      if (response.Status) {
-        this.toastr.success(response.Message);
-        //this.currentPage.set(1);
-        this.retry();
-      }
-      else {
-        this.toastr.error(response.Message);
-      }
-
-    },
-    error: (error) => {
-
-      this.toastr.error(
-        error?.error?.Message || 'Unable to delete the requisition.'
-      );
-
+    if (
+      this.formGroup.invalid ||
+      this.lines.length === 0 ||
+      !this.selectedRequisition
+    ) {
+      return;
     }
-  });
 
-}
+    const formValue = this.formGroup.getRawValue();
+    const enroll = Number(localStorage.getItem('Enroll'));
+    const currentDate = new Date();
+    const existingHeader = this.selectedRequisition.Header;
 
+    const requisitionData: IRequisition = {
+      Header: {
+        ReqID: this.editingReqID,
+        RequisitionNumber: existingHeader.RequisitionNumber,
+        UnitId: Number(formValue.UnitId),
+        BusinessId: Number(formValue.BusinessId),
+        ReqDate: new Date(formValue.ReqDate),
+        Remarks: formValue.Remarks?.trim() ?? '',
+        FileStatusId: existingHeader.FileStatusId,
+        IsActive: existingHeader.IsActive,
+        CREATEDBY: existingHeader.CREATEDBY,
+        UPDATEDBY: enroll,
+        CREATEDDATE: existingHeader.CREATEDDATE,
+        UPDATEDDATE: currentDate,
+      },
+      Lines: this.lines
+        .getRawValue()
+        .filter((line: any) => Number(line.ID) === 0)
+        .map((line: any) => ({
+          ID: 0,
+          ReqID: this.editingReqID,
+          ProductTypeId: Number(line.ProductTypeId),
+          ItemId: Number(line.ProductTypeId) === 1 ? 0 : Number(line.ItemId),
+          ItemName:
+            Number(line.ProductTypeId) === 1
+              ? (line.ItemName?.trim() ?? '')
+              : null,
+          UOMId: Number(line.UOMId),
+          Quantity: Number(line.Quantity),
+          Remarks: line.Remarks?.trim() ?? '',
+          FileStatusId: Number(line.FileStatusId),
+          IsActive: true,
+        })),
+      DeletedLineIds: this.deletedLineIds,
+    };
 
+    this.requisitionService
+      .updateData(requisitionData)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.Status) {
+            this.toastr.success(response.Message);
+            this.resetCreateForm();
+            this.modalService.dismissAll();
+            this.retry();
+          } else {
+            this.toastr.warning(
+              response.Message || 'Unable to update the requisition.',
+            );
+          }
+        },
+        error: () => {
+          this.toastr.error(
+            'Something went wrong while updating the requisition.',
+          );
+        },
+      });
+  }
 
+  Delete(reqId: number): void {
+    const isConfirmed = confirm(
+      'Are you sure you want to delete this requisition?',
+    );
 
+    if (!isConfirmed) {
+      return;
+    }
 
+    this.requisitionService.deleteData(reqId).subscribe({
+      next: (response) => {
+        if (response.Status) {
+          this.toastr.success(response.Message);
+          //this.currentPage.set(1);
+          this.retry();
+        } else {
+          this.toastr.error(response.Message);
+        }
+      },
+      error: (error) => {
+        this.toastr.error(
+          error?.error?.Message || 'Unable to delete the requisition.',
+        );
+      },
+    });
+  }
 
-
-
-
-ngOnDestroy(): void {
-  this.destroy$.next();
-  this.destroy$.complete();
-}
-
-
-
-
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 }

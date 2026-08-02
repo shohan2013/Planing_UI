@@ -22,7 +22,7 @@ export const GlobalConstant = {
 
     /*===========================MATRIX===================================== */
     ApproveMatrix: 'ApproveMatrix',
-    ProvideApproveMatrix: 'ApproveMatrix/approvematrixpermissionbytype',
+    ProvideApproveMatrix: 'ApproveMatrix/updateApproveMatrixPermission',
 
     ApproveMatrixGroup: 'ApprovalMatrixGroup',
 

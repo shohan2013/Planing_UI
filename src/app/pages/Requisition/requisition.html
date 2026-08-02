@@ -1,30 +1,23 @@
 <div class="user-card">
-
   <div class="page-header">
     <h5><b>REQUISITION</b></h5>
   </div>
-<hr>
+  <hr />
   <div class="card-body">
-
     <div class="d-flex gap-3 mb-3">
-
       <div class="flex-fill">
-
         <button
           type="button"
           class="btn-shadow d-inline-flex align-items-center btn btn-success"
-          (click)="openCreateModal(requisitionModal)">
-
+          (click)="openCreateModal(requisitionModal)"
+        >
           <i class="fa-solid fa-fw fa-plus"></i>
           Create New
         </button>
-
       </div>
 
       <div class="flex-fill">
-
         <div class="input-group">
-
           <div class="input-group-text">
             <i class="fa-solid fa-magnifying-glass"></i>
           </div>
@@ -34,40 +27,29 @@
             class="form-control"
             placeholder="Search by Requisition Number or Remarks..."
             [ngModel]="globalSearch()"
-            (ngModelChange)="updateSearch($event)">
-
+            (ngModelChange)="updateSearch($event)"
+          />
         </div>
-
       </div>
-
     </div>
-
 
     @if (error()) {
 
-      <div class="alert alert-danger d-flex justify-content-between align-items-center">
+    <div
+      class="alert alert-danger d-flex justify-content-between align-items-center"
+    >
+      <span>{{ error() }}</span>
 
-        <span>{{ error() }}</span>
-
-        <button
-          type="button"
-          class="btn btn-danger btn-sm"
-          (click)="retry()">
-
-          Retry
-        </button>
-
-      </div>
+      <button type="button" class="btn btn-danger btn-sm" (click)="retry()">
+        Retry
+      </button>
+    </div>
 
     }
 
-
     <div class="table-responsive">
-
       <table class="custom-table">
-
         <thead>
-
           <tr>
             <!-- <th>#</th> -->
             <th>REQ ID</th>
@@ -84,106 +66,81 @@
             <!-- <th>STATUS</th> -->
             <th>ACTION</th>
           </tr>
-
         </thead>
 
         <tbody>
-
           @if (isLoading()) {
 
-            <tr>
+          <tr>
+            <td colspan="10" class="text-center py-4">
+              <span
+                class="spinner-border spinner-border-sm me-2"
+                aria-hidden="true"
+              >
+              </span>
 
-              <td colspan="10" class="text-center py-4">
-
-                <span
-                  class="spinner-border spinner-border-sm me-2"
-                  aria-hidden="true">
-                </span>
-
-                Loading requisitions...
-              </td>
-
-            </tr>
+              Loading requisitions...
+            </td>
+          </tr>
 
           } @else if (paginatedItems().length === 0) {
 
-            <tr>
+          <tr>
+            <td colspan="10" class="text-center py-4">
+              <i class="fas fa-folder-open fa-4x text-secondary mb-3"></i>
 
-              <td colspan="10" class="text-center py-4">
+              <br />
 
-                <i class="fas fa-folder-open fa-4x text-secondary mb-3"></i>
+              <h6>No Records Found.</h6>
+            </td>
+          </tr>
 
-                <br>
+          } @else { @for (item of paginatedItems(); track item.Header.ReqID; let
+          i = $index) {
 
-                <h6>No Records Found.</h6>
-              </td>
-
-            </tr>
-
-          } @else {
-
-            @for (item of paginatedItems(); track item.Header.ReqID; let i = $index) {
-
-              <tr>
-
-                <!-- <td>
+          <tr>
+            <!-- <td>
                   {{ ((currentPage() - 1) * pageSize()) + i + 1 }}
                 </td> -->
 
-                <td>
-                  {{ item.Header.ReqID }}
-                </td>
+            <td>{{ item.Header.ReqID }}</td>
 
-                <td>
-                  {{ item.Header.RequisitionNumber || '-' }}
-                </td>
+            <td>{{ item.Header.RequisitionNumber || '-' }}</td>
 
-                <td>
-                  {{ getUnitName(item.Header.UnitId) }}
-                  <!-- ({{ item.Header.UnitId }}) -->
-                </td>
+            <td>
+              {{ getUnitName(item.Header.UnitId) }}
+              <!-- ({{ item.Header.UnitId }}) -->
+            </td>
 
-                <td>
-                  {{ getBusinessName(item.Header.BusinessId) }}
-                  <!-- ({{ item.Header.BusinessId }}) -->
-                </td>
+            <td>
+              {{ getBusinessName(item.Header.BusinessId) }}
+              <!-- ({{ item.Header.BusinessId }}) -->
+            </td>
 
-                <td>
-                  {{ item.Header.ReqDate | date: 'dd-MMM-yyyy' }}
-                </td>
+            <td>{{ item.Header.ReqDate | dateTime }}</td>
 
-                <td>
-                  {{ item.Header.Remarks || '-' }}
-                </td>
+            <td>{{ item.Header.Remarks || '-' }}</td>
 
-                <td>
-                  {{ item.Header.CREATEDBY }}
-                </td>
+            <td>{{ item.Header.CREATEDBY }}</td>
 
-                <td>
-                  {{ item.Header.CREATEDDATE | date: 'dd-MMM-yyyy h:mm a' }}
-                </td>
+            <td>{{ item.Header.CREATEDDATE | dateTime }}</td>
 
+            <td>
+              <span
+                class="g-status g-status-lg"
+                [ngClass]="{
+                    'status-pending': item.Header.FileStatusId === 1,
+                    'status-approve': item.Header.FileStatusId === 2,
+                    'status-reject': item.Header.FileStatusId === 3
+                  }"
+              >
+                <span class="g-dot"></span>
 
+                {{ getFileStatusName(item.Header.FileStatusId) }}
+              </span>
+            </td>
 
-                <td>
-
-                <span
-                  class="g-status g-status-lg"
-                  [ngClass]="{
-                    'status-pending': item.Header.FileStatusId == 1,
-                    'status-approve': item.Header.FileStatusId == 2,
-                    'status-reject': item.Header.FileStatusId == 3
-                  }">
-
-                  <span class="g-dot"></span>
-
-                  {{ getFileStatusName(item.Header.FileStatusId) }}
-                </span>
-
-              </td>
-
-                <!-- <td>
+            <!-- <td>
                   {{ item.Header.UPDATEDBY }}
                 </td>
 
@@ -191,7 +148,7 @@
                   {{ item.Header.UPDATEDDATE | date: 'dd-MMM-yyyy h:mm a' }}
                 </td> -->
 
-                <!-- <td>
+            <!-- <td>
 
                   <span
                     class="g-status"
@@ -204,237 +161,182 @@
 
                 </td> -->
 
-                <td>
+            <td>
+              <div class="action-buttons">
+                <button
+                  type="button"
+                  class="action-btn btn-view"
+                  title="View"
+                  (click)="openViewModal(viewRequisitionModal,item)"
+                >
+                  <i class="fa-solid fa-magnifying-glass-plus"></i>
+                </button>
 
-                  <div class="action-buttons">
+                <button
+                  type="button"
+                  class="action-btn btn-edit"
+                  title="Edit"
+                  (click)="openEditModal(requisitionModal,item)"
+                >
+                  <i class="fa-regular fa-pen-to-square"></i>
+                </button>
 
-                    <button
-                      type="button"
-                      class="action-btn btn-view"
-                      title="View"
-                      (click)="openViewModal(viewRequisitionModal,item)">
+                <button
+                  type="button"
+                  class="action-btn btn-delete"
+                  title="Delete"
+                  (click)="Delete(item.Header.ReqID)"
+                >
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
 
-                      <i class="fa-solid fa-magnifying-glass-plus"></i>
-                    </button>
-
-                    <button
-                      type="button"
-                      class="action-btn btn-edit"
-                      title="Edit"
-                      (click)="openEditModal(requisitionModal,item)">
-
-                      <i class="fa-regular fa-pen-to-square"></i>
-                    </button>
-
-                    <button
-                      type="button"
-                      class="action-btn btn-delete"
-                      title="Delete"
-                      (click)="Delete(item.Header.ReqID)">
-
-                      <i class="fa-solid fa-trash-can"></i>
-
-                    </button>
-
-                  </div>
-
-                </td>
-
-              </tr>
-
-            }
-
-          }
-
+          } }
         </tbody>
-
       </table>
-
     </div>
-
   </div>
 
-
   <div class="card-footer">
-
     <app-pagination
       [(currentPage)]="currentPage"
       [(pageSize)]="pageSize"
       [totalItems]="totalItems()"
       (pageChanged)="onPageChange($event)"
-      (pageSizeChanged)="onPageSizeChange($event)">
+      (pageSizeChanged)="onPageSizeChange($event)"
+    >
     </app-pagination>
-
   </div>
-
 </div>
 
-
-
-
-
-
-
-
 <ng-template #viewRequisitionModal let-c="close" let-d="dismiss">
-
   <div class="modal-header">
+    <h5 class="modal-title">REQUISITION DETAILS</h5>
 
-    <h5 class="modal-title">
-      REQUISITION DETAILS
-    </h5>
-
-    <button
-      type="button"
-      class="btn-close"
-      (click)="d('Cross click')">
-    </button>
-
+    <button type="button" class="btn-close" (click)="d('Cross click')"></button>
   </div>
 
-
   <div class="modal-body">
-
     @if (selectedRequisition) {
 
-      <div class="row g-3 mb-4">
-
-        <!-- <div class="col-md-4">
+    <div class="row g-3 mb-4">
+      <!-- <div class="col-md-4">
 
           <strong>Requisition ID :</strong>
 
           {{ selectedRequisition.Header.ReqID }}
         </div> -->
 
-        <div class="col-md-6">
+      <div class="col-md-6">
+        <strong>Requisition Number :</strong>
 
-          <strong>Requisition Number :</strong>
+        {{ selectedRequisition.Header.RequisitionNumber || '-' }}
+      </div>
 
-          {{ selectedRequisition.Header.RequisitionNumber || '-' }}
-        </div>
+      <div class="col-md-6">
+        <strong>Requisition Date :</strong>
 
-        <div class="col-md-6">
+        {{ selectedRequisition.Header.ReqDate | date: 'dd-MMM-yyyy' }}
+      </div>
 
-          <strong>Requisition Date :</strong>
-
-          {{ selectedRequisition.Header.ReqDate | date: 'dd-MMM-yyyy' }}
-        </div>
-
-        
-        <!-- <div class="col-md-6">
+      <!-- <div class="col-md-6">
 
           <strong>Status :</strong>
 
           {{ getFileStatusName(selectedRequisition.Header.FileStatusId) }}
         </div> -->
 
-<div class="col-md-6">
+      <div class="col-md-6">
+        <strong>Status :</strong>
 
-  <strong>Status :</strong>
-
-  <span
-    class="g-status g-status-lg ms-1"
-    [ngClass]="{
+        <span
+          class="g-status g-status-lg ms-1"
+          [ngClass]="{
       'status-pending': selectedRequisition.Header.FileStatusId == 1,
       'status-approve': selectedRequisition.Header.FileStatusId == 2,
       'status-reject': selectedRequisition.Header.FileStatusId == 3
-    }">
+    }"
+        >
+          <span class="g-dot"></span>
 
-    <span class="g-dot"></span>
-
-    {{ getFileStatusName(selectedRequisition.Header.FileStatusId) }}
-  </span>
-
-</div>
-
-
-
+          {{ getFileStatusName(selectedRequisition.Header.FileStatusId) }}
+        </span>
       </div>
+    </div>
 
+    <h6>Requisition Lines</h6>
 
-      <h6>Requisition Lines</h6>
-
-
-      <div class="table-responsive">
-
-        <table class="custom-table">
-
-          <thead>
-
-            <tr>
-              <!-- <th>#</th>
+    <div class="table-responsive">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <!-- <th>#</th>
               <th>LINE ID</th>
               <th>REQ ID</th> -->
-              <th>PRODUCT TYPE</th>
-              <th>ITEM</th>
-              <th>UOM</th>
-              <th>QUANTITY</th>
+            <th>PRODUCT TYPE</th>
+            <th>ITEM</th>
+            <th>UOM</th>
+            <th>QUANTITY</th>
 
-              <th>CURRENT QUANTITY</th> 
-              <th>REMAINING QUANTITY</th>
-              <th>STOCK</th>
+            <th>CURRENT QUANTITY</th>
+            <th>REMAINING QUANTITY</th>
+            <th>STOCK</th>
 
-              <th>REMARKS</th>
-              <th>STATUS</th>
-              <!-- <th>STATUS</th> -->
-            </tr>
+            <th>REMARKS</th>
+            <th>STATUS</th>
+            <!-- <th>STATUS</th> -->
+          </tr>
+        </thead>
 
-          </thead>
+        <tbody>
+          @if (selectedRequisition.Lines.length === 0) {
 
-          <tbody>
+          <tr>
+            <td colspan="6" class="text-center py-4">
+              No active Requisition Lines found.
+            </td>
+          </tr>
 
-            @if (selectedRequisition.Lines.length === 0) {
+          } @else {
 
-              <tr>
+          <!-- @for (line of selectedRequisition.Lines; track line.ID; let i = $index) { -->
+          @for (line of selectedRequisition.Lines; track line.ID) {
 
-                <td colspan="6" class="text-center py-4">
-                  No active Requisition Lines found.
-                </td>
-
-              </tr>
-
-            } @else {
-
-              <!-- @for (line of selectedRequisition.Lines; track line.ID; let i = $index) { -->
-              @for (line of selectedRequisition.Lines; track line.ID) {
-
-                <tr>
-
-                  <!-- <td>{{ i + 1 }}</td>
+          <tr>
+            <!-- <td>{{ i + 1 }}</td>
                   <td>{{ line.ID }}</td>
                   <td>{{ line.ReqID }}</td> -->
-                  <td>{{ getProductTypeName(line.ProductTypeId) }}</td>
-                  <td>{{ line.ItemName }}</td>
-                  <td>{{ getUOMName(line.UOMId) }}</td>
-                  <td>{{ line.Quantity }}</td>
+            <td>{{ getProductTypeName(line.ProductTypeId) }}</td>
+            <td>{{ line.ItemName }}</td>
+            <td>{{ getUOMName(line.UOMId) }}</td>
+            <td>{{ line.Quantity }}</td>
 
-                  <td>0</td>
-                  <td>0</td>
-                  <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
 
-                  <td>{{ line.Remarks || '-' }}</td>
+            <td>{{ line.Remarks || '-' }}</td>
 
-
-<td>
-
-  <span
-    class="g-status g-status-lg"
-    [ngClass]="{
+            <td>
+              <span
+                class="g-status g-status-lg"
+                [ngClass]="{
       'status-pending': line.FileStatusId == 1,
       'status-approve': line.FileStatusId == 2,
       'status-reject': line.FileStatusId == 3
-    }">
+    }"
+              >
+                <span class="g-dot"></span>
 
-    <span class="g-dot"></span>
+                {{ getFileStatusName(line.FileStatusId) }}
+              </span>
+            </td>
 
-    {{ getFileStatusName(line.FileStatusId) }}
-  </span>
+            <!-- <td>{{ getFileStatusName(line.FileStatusId) }}</td> -->
 
-</td>
-
-                  <!-- <td>{{ getFileStatusName(line.FileStatusId) }}</td> -->
-
-                  <!-- <td>
+            <!-- <td>
 
                     <span
                       class="g-status"
@@ -446,67 +348,28 @@
                     </span>
 
                   </td> -->
+          </tr>
 
-                </tr>
-
-              }
-
-            }
-
-          </tbody>
-
-        </table>
-
-      </div>
+          } }
+        </tbody>
+      </table>
+    </div>
 
     }
-
   </div>
 
-
   <div class="modal-footer">
-
-    <button
-      type="button"
-      class="btn btn-secondary"
-      (click)="c('Close click')">
-
+    <button type="button" class="btn btn-secondary" (click)="c('Close click')">
       <i class="fa-solid fa-fw fa-xmark"></i>
       Close
     </button>
-
   </div>
-
 </ng-template>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <ng-template #requisitionModal let-c="close" let-d="dismiss">
-
-
-
   <form [formGroup]="formGroup" (ngSubmit)="isEditMode ? Update() : Create()">
-
     <div class="modal-header">
-
-   
-
-
-      
       <div class="d-flex flex-column align-items-start">
-
         <h5 class="modal-title mb-0">
           {{ isEditMode ? 'EDIT REQUISITION' : 'CREATE REQUISITION' }}
         </h5>
@@ -521,36 +384,23 @@
 
         <span
           class="mt-1 fw-semibold"
-          style="color: #86c592;"
-          [class.invisible]="formGroup.get('UnitId')?.value">
-
+          style="color: #86c592"
+          [class.invisible]="formGroup.get('UnitId')?.value"
+        >
           Note: Please select a Unit before adding a Product.
-
         </span>
-
       </div>
-
-   
-
-
-
-
 
       <button
         type="button"
         class="btn-close"
-        (click)="d('Cross click')">
-      </button>
-
+        (click)="d('Cross click')"
+      ></button>
     </div>
 
-
     <div class="modal-body">
-
       <div class="row g-3">
-
         <div class="col-md-4">
-
           <label class="form-label">Unit :</label>
 
           <select
@@ -559,28 +409,21 @@
             (change)="onUnitChange()"
             [ngClass]="{
               'is-invalid': submitted && f['UnitId'].errors
-            }">
-
+            }"
+          >
             <option value="" disabled>Select Unit</option>
 
             <option *ngFor="let unit of units" [value]="unit.Id">
               {{ unit.Name }}
             </option>
-
           </select>
 
-          <div
-            *ngIf="submitted && f['UnitId'].errors"
-            class="invalid-feedback">
-
+          <div *ngIf="submitted && f['UnitId'].errors" class="invalid-feedback">
             Please select Unit.
           </div>
-
         </div>
 
-
         <div class="col-md-4">
-
           <label class="form-label">Business :</label>
 
           <select
@@ -588,31 +431,27 @@
             formControlName="BusinessId"
             [ngClass]="{
               'is-invalid': submitted && f['BusinessId'].errors
-            }">
-
+            }"
+          >
             <option value="" disabled>Select Business</option>
 
             <option
               *ngFor="let business of filteredBusinesses"
-              [value]="business.Id">
-
+              [value]="business.Id"
+            >
               {{ business.Name }}
             </option>
-
           </select>
 
           <div
             *ngIf="submitted && f['BusinessId'].errors"
-            class="invalid-feedback">
-
+            class="invalid-feedback"
+          >
             Please select Business.
           </div>
-
         </div>
 
-
         <div class="col-md-4">
-
           <label class="form-label">Requisition Date :</label>
 
           <input
@@ -621,69 +460,63 @@
             formControlName="ReqDate"
             [ngClass]="{
               'is-invalid': submitted && f['ReqDate'].errors
-            }">
+            }"
+          />
 
           <div
             *ngIf="submitted && f['ReqDate'].errors"
-            class="invalid-feedback">
-
+            class="invalid-feedback"
+          >
             Requisition Date is required.
           </div>
-
         </div>
 
-
         <div class="col-12">
-
           <label class="form-label">Remarks :</label>
 
           <textarea
             class="form-control"
             formControlName="Remarks"
             rows="2"
-            placeholder="Enter remarks, if required">
+            placeholder="Enter remarks, if required"
+          >
           </textarea>
-
         </div>
-
       </div>
 
+      <hr class="my-4" />
 
-
-
-
-
-
-
-      <hr class="my-4">
-
-      
-
-<h6 class="d-inline-flex align-items-center gap-1">
-  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="12" cy="12" r="10"></circle>
-    <line x1="12" y1="8" x2="12" y2="16"></line>
-    <line x1="8" y1="12" x2="16" y2="12"></line>
-  </svg>
-  Add Product
-</h6>
+      <h6 class="d-inline-flex align-items-center gap-1">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="16"></line>
+          <line x1="8" y1="12" x2="16" y2="12"></line>
+        </svg>
+        Add Product
+      </h6>
 
       <!-- <h6>&#10010; Add Product</h6> -->
-      
+
       <div [formGroup]="lineFormGroup">
-
         <table class="custom-table">
-
-          
           <colgroup>
-            <col style="width: 16%;">
-            <col style="width: 29%;">
-            <col style="width: 13%;">
-            <col style="width: 12%;">
-            <col style="width: 23%;">
-            <col style="width: 7%;">
+            <col style="width: 16%" />
+            <col style="width: 29%" />
+            <col style="width: 13%" />
+            <col style="width: 12%" />
+            <col style="width: 23%" />
+            <col style="width: 7%" />
           </colgroup>
-          
 
           <thead>
             <tr>
@@ -698,157 +531,135 @@
 
           <tbody>
             <tr>
-
-
-
-
               <td>
-
                 <select
                   class="form-select"
                   formControlName="ProductTypeId"
                   [ngClass]="{
                     'is-invalid':
                       lineSubmitted && lf['ProductTypeId'].errors
-                  }">
-
+                  }"
+                >
                   <option value="" disabled>Select Product Type</option>
 
                   <option
                     *ngFor="let productType of productTypes"
-                    [value]="productType.Id">
-
+                    [value]="productType.Id"
+                  >
                     {{ productType.Name }}
                   </option>
-
                 </select>
 
-                <div class="invalid-feedback">
-                  Please select Product Type.
-                </div>
-
+                <div class="invalid-feedback">Please select Product Type.</div>
               </td>
 
-
               <td>
-
                 @if (selectedLineProductTypeId === 1) {
 
-                  <input
-                    type="text"
-                    class="form-control"
-                    formControlName="ItemName"
-                    maxlength="200"
-                    placeholder="Enter Sample Product name"
-                    [ngClass]="{
+                <input
+                  type="text"
+                  class="form-control"
+                  formControlName="ItemName"
+                  maxlength="200"
+                  placeholder="Enter Sample Product name"
+                  [ngClass]="{
                       'is-invalid':
                         lineSubmitted && lf['ItemName'].errors
-                    }">
+                    }"
+                />
 
-                  <div class="invalid-feedback">
-                    Please enter a Sample Product name.
-                  </div>
+                <div class="invalid-feedback">
+                  Please enter a Sample Product name.
+                </div>
 
                 } @else if (selectedLineProductTypeId === 2) {
 
-                  <input
-                    type="text"
-                    class="form-control"
-                    formControlName="ItemSearch"
-                    placeholder="Type at least 2 characters"
-                    autocomplete="off"
-                    [ngbTypeahead]="searchItems"
-                    placement="bottom-start"
-                    container="body"
-                    [popupClass]="'requisition-item-dropdown'"
-                    [resultFormatter]="itemFormatter"
-                    [inputFormatter]="itemFormatter"
-                    (selectItem)="onItemSelect($event)"
-                    (keydown.arrowdown)="scrollActiveItem()"
-                    (keydown.arrowup)="scrollActiveItem()"
-                    [ngClass]="{
+                <input
+                  type="text"
+                  class="form-control"
+                  formControlName="ItemSearch"
+                  placeholder="Type at least 2 characters"
+                  autocomplete="off"
+                  [ngbTypeahead]="searchItems"
+                  placement="bottom-start"
+                  container="body"
+                  [popupClass]="'requisition-item-dropdown'"
+                  [resultFormatter]="itemFormatter"
+                  [inputFormatter]="itemFormatter"
+                  (selectItem)="onItemSelect($event)"
+                  (keydown.arrowdown)="scrollActiveItem()"
+                  (keydown.arrowup)="scrollActiveItem()"
+                  [ngClass]="{
                       'is-invalid':
                         lineSubmitted &&
                         (
                           lf['ItemSearch'].errors ||
                           lf['ItemId'].errors
                         )
-                    }">
+                    }"
+                />
 
-                  <div class="invalid-feedback">
-                    Please search and select a valid Item.
-                  </div>
+                <div class="invalid-feedback">
+                  Please search and select a valid Item.
+                </div>
 
-                  <div
-                    *ngIf="isItemSearching"
-                    class="small text-primary mt-1">
+                <div *ngIf="isItemSearching" class="small text-primary mt-1">
+                  <span
+                    class="spinner-border spinner-border-sm me-1"
+                    aria-hidden="true"
+                  >
+                  </span>
 
-                    <span
-                      class="spinner-border spinner-border-sm me-1"
-                      aria-hidden="true">
-                    </span>
+                  Searching...
+                </div>
 
-                    Searching...
-                  </div>
-
-                  <div
-                    *ngIf="
+                <div
+                  *ngIf="
                       itemSearchCompleted &&
                       !itemSearchHasResults &&
                       !itemSearchFailed
                     "
-                    class="small text-muted mt-1">
+                  class="small text-muted mt-1"
+                >
+                  No matching Items found.
+                </div>
 
-                    No matching Items found.
-                  </div>
-
-                  <div
-                    *ngIf="itemSearchFailed"
-                    class="small text-danger mt-1">
-
-                    Item search failed. Please try again.
-                  </div>
+                <div *ngIf="itemSearchFailed" class="small text-danger mt-1">
+                  Item search failed. Please try again.
+                </div>
 
                 } @else {
 
-                  <input
-                    type="text"
-                    class="form-control"
-                    placeholder="Select Product Type first"
-                    disabled>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Select Product Type first"
+                  disabled
+                />
 
                 }
-
               </td>
 
-
               <td>
-
                 <select
                   class="form-select"
                   formControlName="UOMId"
                   [ngClass]="{
                     'is-invalid':
                       lineSubmitted && lf['UOMId'].errors
-                  }">
-
+                  }"
+                >
                   <option value="" disabled>Select UOM</option>
 
                   <option *ngFor="let uom of uoms" [value]="uom.Id">
                     {{ uom.Name }}
                   </option>
-
                 </select>
 
-                <div class="invalid-feedback">
-                  Please select UOM.
-                </div>
-
+                <div class="invalid-feedback">Please select UOM.</div>
               </td>
 
-
               <td>
-
                 <input
                   type="number"
                   class="form-control"
@@ -858,26 +669,22 @@
                   [ngClass]="{
                     'is-invalid':
                       lineSubmitted && lf['Quantity'].errors
-                  }">
+                  }"
+                />
 
                 <div class="invalid-feedback">
                   Please enter a valid Quantity.
                 </div>
-
               </td>
 
-
               <td>
-
                 <input
                   type="text"
                   class="form-control"
                   formControlName="Remarks"
-                  placeholder="Remarks">
-
+                  placeholder="Remarks"
+                />
               </td>
-
-
 
               <td>
                 <button
@@ -885,96 +692,59 @@
                   class="btn btn-success"
                   [disabled]="!canAddLine"
                   title="Add Line"
-                  (click)="addLine()">
-
+                  (click)="addLine()"
+                >
                   <i class="fa-solid fa-plus"></i>
                   Add
                 </button>
               </td>
-
             </tr>
           </tbody>
-
         </table>
-
       </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-      <hr class="my-4">
+      <hr class="my-4" />
 
       <div
         *ngIf="submitted && lines.length === 0"
-        class="alert alert-danger py-2 mt-3">
-
+        class="alert alert-danger py-2 mt-3"
+      >
         At least one Requisition Line is required.
       </div>
 
-
-      <div
-        *ngIf="lines.length === 0"
-        class="empty-requisition-lines">
-
+      <div *ngIf="lines.length === 0" class="empty-requisition-lines">
         <!-- <hr class="my-4"> -->
-
       </div>
 
-
       <div class="table-responsive mt-3" *ngIf="lines.length > 0">
-
         <table class="custom-table">
-
           <colgroup>
-            <col style="width: 5%;">
-            <col style="width: 16%;">
-            <col style="width: 34%;">
-            <col style="width: 14%;">
-            <col style="width: 10%;">
-            <col style="width: 11%;">
-            <col *ngIf="isEditMode" style="width: 10%;">
-            <col style="width: 5%;">
+            <col style="width: 5%" />
+            <col style="width: 16%" />
+            <col style="width: 34%" />
+            <col style="width: 14%" />
+            <col style="width: 10%" />
+            <col style="width: 11%" />
+            <col *ngIf="isEditMode" style="width: 10%" />
+            <col style="width: 5%" />
           </colgroup>
 
           <tbody>
-
             <tr *ngFor="let line of lines.controls; let i = index">
-
-              <td class="text-center">
-                {{ i + 1 }}
-              </td>
+              <td class="text-center">{{ i + 1 }}</td>
 
               <td>
                 {{ getProductTypeName(line.get('ProductTypeId')?.value) }}
               </td>
 
-              <td>
-                {{ line.get('ItemName')?.value }}
-              </td>
+              <td>{{ line.get('ItemName')?.value }}</td>
 
-              <td>
-                {{ line.get('UOMName')?.value }}
-              </td>
+              <td>{{ line.get('UOMName')?.value }}</td>
 
-              <td>
-                {{ line.get('Quantity')?.value }}
-              </td>
+              <td>{{ line.get('Quantity')?.value }}</td>
 
-              <td>
-                {{ line.get('Remarks')?.value || '-' }}
-              </td>
+              <td>{{ line.get('Remarks')?.value || '-' }}</td>
 
-              
               <!-- <td *ngIf="isEditMode">
                 <span
                   class="badge rounded-pill"
@@ -990,68 +760,50 @@
               </td> -->
 
               <td *ngIf="isEditMode">
-
-  <span
-    class="g-status g-status-sm"
-    [ngClass]="{
+                <span
+                  class="g-status g-status-sm"
+                  [ngClass]="{
       'status-pending': line.get('FileStatusId')?.value == 1,
       'status-approve': line.get('FileStatusId')?.value == 2,
       'status-reject': line.get('FileStatusId')?.value == 3
-    }">
+    }"
+                >
+                  <span class="g-dot"></span>
 
-    <span class="g-dot"></span>
-
-    {{ getFileStatusName(line.get('FileStatusId')?.value) }}
-  </span>
-
-</td>
-
-
-
+                  {{ getFileStatusName(line.get('FileStatusId')?.value) }}
+                </span>
+              </td>
 
               <td class="text-end">
-
                 <button
                   type="button"
                   class="action-btn btn-delete"
                   title="Delete Line"
-                  (click)="removeLine(i)">
-
+                  (click)="removeLine(i)"
+                >
                   <i class="fa-solid fa-trash-can"></i>
                 </button>
-
               </td>
-
             </tr>
-
           </tbody>
-
         </table>
-
       </div>
-
     </div>
 
-
     <div class="modal-footer">
-
       <button
         type="button"
         class="btn btn-secondary"
-        (click)="c('Close click')">
-
+        (click)="c('Close click')"
+      >
         <i class="fa-solid fa-fw fa-xmark"></i>
         Close
       </button>
 
       <button type="submit" class="btn btn-success">
-
         <i class="fa-solid fa-fw fa-check"></i>
         {{ isEditMode ? 'Update' : 'Save' }}
       </button>
-
     </div>
-
   </form>
-
 </ng-template>
