@@ -17,6 +17,9 @@ import { DeliveryOrderService } from 'src/app/core/services/DeliveryOrder/delive
   imports: [],
 })
 export class DeliveryOrderLanding extends ServerSideFilteredPaginatedComponent<IDeliveryOrder> {
+  selectedUnitId: Number = 0;
+  selectedBusinessId: Number = 0;
+
   constructor(private deliveryOrderService: DeliveryOrderService) {
     super();
   }
