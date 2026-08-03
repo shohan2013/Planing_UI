@@ -15,11 +15,11 @@ export class RequisitionService {
 
   constructor(private http: HttpClient) {}
 
-  GetRequisition(request: ServerQueryRequest): Observable<ServerQueryResponse<IRequisition>> {
-    return this.http.get<ServerQueryResponse<IRequisition>>(
-      `${environment.API_URL}${GlobalConstant.API_END_POINTS.getRequisition}?GlobalSearch=${request.globalSearch}&PageIndex=${request.page}&PageSize=${request.pageSize}`
-    );
-  }
+GetRequisition(request:ServerQueryRequest,unitId:number = 0): Observable<ServerQueryResponse<IRequisition>> {
+  return this.http.get<ServerQueryResponse<IRequisition>>(
+    `${environment.API_URL}${GlobalConstant.API_END_POINTS.getRequisition}?GlobalSearch=${request.globalSearch}&UnitId=${unitId}&PageIndex=${request.page}&PageSize=${request.pageSize}`
+  );
+}
 
   addData(model: IRequisition): Observable<any> {
     return this.http.post(

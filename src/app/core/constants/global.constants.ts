@@ -46,14 +46,23 @@ export const GlobalConstant = {
     SideBar: 'SideBar',
     UserMenuPermission: 'UserMenuPermission',
 
-    Businesses: 'Common/BusinessList',
-    ProductType: 'Common/ProductTypeList',
-    Item: 'Common/ItemList',
-    RequisitionItemNames: 'Common/RequisitionItemNames',
-    UOM: 'Common/UOMList',
+      Businesses : 'Common/BusinessList',
+      ProductType : 'Common/ProductTypeList',
+      Item : 'Common/ItemList',
 
-    DocumentStatus: 'Common/DocumentStatusList',
-  },
+      StockQuantity : 'Common/StockQty',
+      SalesQuantity : 'Common/GetSalesQty',
 
-  URL: { API_URL: 'https://localhost:7111/api/' },
-};
+      RequisitionItemNames: 'Common/RequisitionItemNames',
+      UOM : 'Common/UOMList',
+
+      DocumentStatus: 'Common/DocumentStatusList',
+
+
+
+
+    },
+    
+    URL: {API_URL : 'https://localhost:7111/api/'}
+}
+

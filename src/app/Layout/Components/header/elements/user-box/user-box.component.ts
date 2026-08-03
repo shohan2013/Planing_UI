@@ -18,6 +18,7 @@ export class UserBoxComponent {
   {
       
   }
+  
   constructor(public globals: ThemeOptions,private loginservice: LoginService,private router:Router) {
       this.Name=localStorage.getItem('Name');
       this.Designation=localStorage.getItem('Designation');

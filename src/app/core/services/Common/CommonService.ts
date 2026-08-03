@@ -20,108 +20,147 @@ import { IApproveMatrixGroup } from '../../model/Common/ApproveMatrixGroup/Appro
 import { IEnroll } from '../../model/Common/Enroll/Enroll';
 
 import { IApproveMatrixGroupList } from '../../model/Common/ApproveMatrixGroupList/ApproveMatrixGroupList';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
+
 export class CommonService {
   constructor(private http: HttpClient) {}
 
   GetEmpData(enroll: string): Observable<IEmpViewInfo[]> {
     return this.http.get<IEmpViewInfo[]>(
-      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.Common}?Prefix=${enroll}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.Common}?Prefix=${enroll}`,
     );
   }
 
   GetModuleList(): Observable<Module[]> {
     return this.http.get<Module[]>(
-      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.modules}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.modules}`,
     );
   }
 
   GetMenuList(): Observable<MenuModel[]> {
     return this.http.get<MenuModel[]>(
-      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.menus}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.menus}`,
     );
   }
 
   GetSubMenuList(): Observable<SubMenuModel[]> {
     return this.http.get<SubMenuModel[]>(
-      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.SubMenuList}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.SubMenuList}`,
     );
   }
 
   GetSubMenuListByMenuId(id: number): Observable<SubMenuModel[]> {
     return this.http.get<SubMenuModel[]>(
-      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.SubMenuListByMenuId}?menuId=${id}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.SubMenuListByMenuId}?menuId=${id}`,
     );
   }
 
   GetApprovalGroupList(): Observable<IApproveMatrixGroup[]> {
     return this.http.get<IApproveMatrixGroup[]>(
-      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.approvalgroups}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.approvalgroups}`,
     );
   }
 
   GetApproveMatrixGroupTypeList(): Observable<IApproveMatrixGroupList[]> {
     return this.http.get<IApproveMatrixGroupList[]>(
-      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.ApproveMatrixGroupTypeList}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.ApproveMatrixGroupTypeList}`,
     );
   }
 
   GetUnitList(): Observable<IUnit[]> {
     return this.http.get<IUnit[]>(
-      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.units}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.units}`,
     );
   }
 
   GetBusinessList(): Observable<IBusiness[]> {
     return this.http.get<IBusiness[]>(
-      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.Businesses}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.Businesses}`,
     );
   }
 
   GetProductTypeList(): Observable<IProductType[]> {
     return this.http.get<IProductType[]>(
-      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.ProductType}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.ProductType}`,
     );
   }
 
-  GetItemList(unitId: number, searchText: string): Observable<IItem[]> {
-    return this.http.get<IItem[]>(
-      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.Item}?unitId=${unitId}&searchText=${encodeURIComponent(searchText)}`,
-    );
-  }
-  GetRequisitionItemNames(
-    model: IRequisitionItemName[],
-  ): Observable<IRequisitionItemName[]> {
-    return this.http.post<IRequisitionItemName[]>(
-      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.RequisitionItemNames}`,
-      model,
-    );
-  }
+GetItemList(unitId:number,searchText:string): Observable<IItem[]> {
+  return this.http.get<IItem[]>(
+    `${environment.API_URL}${GlobalConstant.API_END_POINTS.Item}?unitId=${unitId}&searchText=${encodeURIComponent(searchText)}`
+  );
+}
+GetRequisitionItemNames(model: IRequisitionItemName[]): Observable<IRequisitionItemName[]> {
+  return this.http.post<IRequisitionItemName[]>(
+    `${environment.API_URL}${GlobalConstant.API_END_POINTS.RequisitionItemNames}`,
+    model
+  );
+}
+
+
+
+
+GetStockQty(fromDate: string, toDate: string, unitId: number, businessId: number, whId: number | null, productId: number): Observable<number> {
+  const params = {
+    fromDate,
+    toDate,
+    unitId,
+    businessId,
+    whId: whId ?? 0,
+    productId
+  };
+
+  return this.http.get<number>(
+    `${environment.API_URL}${GlobalConstant.API_END_POINTS.StockQuantity}`,
+    { params }
+  );
+}
+
+
+
+GetSalesQty(fromDate:string, toDate:string, unitId:number, productId:number, whId:number | null, customerId:number | null): Observable<number> {
+  return this.http.get<number>(
+    environment.API_URL + GlobalConstant.API_END_POINTS.SalesQuantity,
+    {
+      params: {
+        fromDate,
+        toDate,
+        unitId: unitId.toString(),
+        productId: productId.toString(),
+        whId: whId?.toString() ?? '',    // if needed in future, pass null now
+        customerId: customerId?.toString() ?? '' //Business ID? 
+      }
+    }
+  );
+}
+
 
   GetUOMList(): Observable<IUOM[]> {
     return this.http.get<IUOM[]>(
-      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.UOM}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.UOM}`,
     );
   }
 
   GetDocumentStatusList(): Observable<IDropdownBind[]> {
     return this.http.get<IDropdownBind[]>(
-      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.DocumentStatus}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.DocumentStatus}`,
     );
   }
 
   GetPriorityList(): Observable<IPriority[]> {
     return this.http.get<IPriority[]>(
-      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.priority}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.priority}`,
     );
   }
 
   GetEnrollList(): Observable<IEnroll[]> {
     return this.http.get<IEnroll[]>(
-      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.EnrollList}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.EnrollList}`,
     );
   }
 }
+

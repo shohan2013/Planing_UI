@@ -45,6 +45,7 @@ import {
   ChartjsComponent,
 } from './components.barrel';
 import { authGuard } from './core/guards/auth/auth.guard';
+import { Requisition } from './pages/Requisition/requisition';
 
 const routes: Routes = [
   {
@@ -56,7 +57,7 @@ const routes: Routes = [
       { path: '', redirectTo: '/pages/login-boxed', pathMatch: 'full' },
       {
         path: 'dashboards/analytics',
-        component: AnalyticsComponent,
+        component: Requisition,
         data: { extraParameter: 'dashboardsMenu' },
       },
       {

@@ -4,6 +4,10 @@ export interface IRequisitionHeader {
   UnitId: number;
   BusinessId: number;
   ReqDate: Date;
+
+  StartDate: Date;
+  EndDate: Date;
+
   Remarks: string;
   FileStatusId: number;
   IsActive: boolean;
@@ -21,6 +25,10 @@ export interface IRequisitionLine {
   ItemName: string | null;
   UOMId: number;
   Quantity: number;
+
+  StockQuantity: number;
+  SalesQuantity: number;
+
   Remarks: string | null;
   FileStatusId: number;
   IsActive: boolean;

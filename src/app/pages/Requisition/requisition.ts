@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import {
   AbstractControl,
   FormArray,
@@ -17,6 +17,7 @@ import {
 import {
   catchError,
   debounceTime,
+  forkJoin,
   distinctUntilChanged,
   finalize,
   map,
@@ -66,7 +67,7 @@ import { DateTimePipe } from '../../shared/pipes/date-time-pipe';
 })
 export class Requisition
   extends ServerSideFilteredPaginatedComponent<IRequisition>
-  implements OnDestroy
+  implements OnInit, OnDestroy
 {
   submitted = false;
   lineSubmitted = false;
@@ -77,11 +78,15 @@ export class Requisition
   editingReqID = 0;
   deletedLineIds: number[] = [];
 
+  selectedUnitFilterId = 0;
+
   units: IUnit[] = [];
   businesses: IBusiness[] = [];
-  filteredBusinesses: IBusiness[] = [];
+  filteredBusinesses: IBusiness[] = []; //for create/edit modal Unit
   productTypes: IProductType[] = [];
   uoms: IUOM[] = [];
+  filteredUOMs: IUOM[] = []; //for create/edit modal Unit
+
   fileStatusList: IDropdownBind[] = [];
 
   isItemSearching = false;
@@ -98,6 +103,10 @@ export class Requisition
       new Date().toISOString().split('T')[0],
       Validators.required,
     ),
+
+    StartDate: new FormControl('', Validators.required),
+    EndDate: new FormControl('', Validators.required),
+
     Remarks: new FormControl(''),
     Lines: new FormArray([]),
   });
@@ -109,6 +118,8 @@ export class Requisition
     ItemName: new FormControl(''),
     UOMId: new FormControl('', Validators.required),
     Quantity: new FormControl('', [Validators.required, Validators.min(1)]),
+    StockQuantity: new FormControl(0),
+    SalesQuantity: new FormControl(0),
     Remarks: new FormControl(''),
   });
 
@@ -119,15 +130,32 @@ export class Requisition
     private toastr: ToastrService,
   ) {
     super();
+  }
+
+  override ngOnInit(): void {
+    super.ngOnInit();
+
     this.loadCommonData();
+
     this.watchItemInput();
     this.watchProductType();
+    this.watchDateRange();
   }
 
   protected override fetchData(
     request: ServerQueryRequest,
   ): Observable<ServerQueryResponse<IRequisition>> {
-    return this.requisitionService.GetRequisition(request);
+    return this.requisitionService
+      .GetRequisition(request, this.selectedUnitFilterId)
+      .pipe(
+        tap((response) => console.log('Requisition table response:', response)),
+      );
+  }
+
+  onUnitFilterChange(unitId: number): void {
+    this.selectedUnitFilterId = Number(unitId);
+    this.currentPage.set(1);
+    this.retry();
   }
 
   get f(): { [key: string]: AbstractControl } {
@@ -209,11 +237,21 @@ export class Requisition
         this.productTypes = data;
       });
 
+    // this.commonService.GetUOMList()
+    //   .pipe(takeUntil(this.destroy$))
+    //   .subscribe(data => {
+    //     this.uoms = data;
+    //   });
+
     this.commonService
       .GetUOMList()
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
         this.uoms = data;
+
+        if (this.selectedUnitId) {
+          this.filterUOMs();
+        }
       });
 
     this.commonService
@@ -234,6 +272,8 @@ export class Requisition
             {
               ItemId: '',
               ItemName: '',
+              StockQuantity: 0,
+              SalesQuantity: 0,
             },
             {
               emitEvent: false,
@@ -258,6 +298,8 @@ export class Requisition
             ItemSearch: '',
             ItemId: '',
             ItemName: '',
+            StockQuantity: 0,
+            SalesQuantity: 0,
           },
           {
             emitEvent: false,
@@ -292,9 +334,161 @@ export class Requisition
       });
   }
 
+  watchDateRange(): void {
+    this.formGroup
+      .get('StartDate')
+      ?.valueChanges.pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.refreshStockQuantities();
+      });
+
+    this.formGroup
+      .get('EndDate')
+      ?.valueChanges.pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.refreshStockQuantities();
+      });
+  }
+
+  refreshStockQuantities(): void {
+    const startDate = this.formGroup.get('StartDate')?.value;
+    const endDate = this.formGroup.get('EndDate')?.value;
+    const businessId = Number(this.formGroup.get('BusinessId')?.value);
+
+    this.lineFormGroup.patchValue(
+      {
+        StockQuantity: 0,
+        SalesQuantity: 0,
+      },
+      {
+        emitEvent: false,
+      },
+    );
+
+    this.lines.controls.forEach((line) => {
+      line.patchValue(
+        {
+          StockQuantity: 0,
+          SalesQuantity: 0,
+        },
+        {
+          emitEvent: false,
+        },
+      );
+    });
+
+    if (
+      !this.selectedUnitId ||
+      !businessId ||
+      !startDate ||
+      !endDate ||
+      new Date(startDate) > new Date(endDate)
+    ) {
+      return;
+    }
+
+    const selectedItemId = Number(this.lineFormGroup.get('ItemId')?.value);
+
+    if (this.selectedLineProductTypeId === 2 && selectedItemId > 0) {
+      this.loadStockQuantity(selectedItemId, this.lineFormGroup);
+      this.loadSalesQuantity(selectedItemId, this.lineFormGroup);
+    }
+
+    this.lines.controls.forEach((line) => {
+      const productTypeId = Number(line.get('ProductTypeId')?.value);
+      const itemId = Number(line.get('ItemId')?.value);
+
+      if (productTypeId === 2 && itemId > 0) {
+        this.loadStockQuantity(itemId, line);
+        this.loadSalesQuantity(itemId, line);
+      }
+    });
+  }
+
+  loadStockQuantity(productId: number, target: AbstractControl): void {
+    const startDate = this.formGroup.get('StartDate')?.value;
+    const endDate = this.formGroup.get('EndDate')?.value;
+    const businessId = Number(this.formGroup.get('BusinessId')?.value);
+
+    this.commonService
+      .GetStockQty(
+        startDate,
+        endDate,
+        this.selectedUnitId,
+        businessId,
+        null,
+        productId,
+      )
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (quantity) => {
+          target.patchValue(
+            {
+              StockQuantity: Number(quantity),
+            },
+            {
+              emitEvent: false,
+            },
+          );
+        },
+        error: () => {
+          target.patchValue(
+            {
+              StockQuantity: 0,
+            },
+            {
+              emitEvent: false,
+            },
+          );
+
+          this.toastr.error('Unable to load Stock Quantity.');
+        },
+      });
+  }
+
+  loadSalesQuantity(productId: number, target: AbstractControl): void {
+    const startDate = this.formGroup.get('StartDate')?.value;
+    const endDate = this.formGroup.get('EndDate')?.value;
+
+    this.commonService
+      .GetSalesQty(
+        startDate,
+        endDate,
+        this.selectedUnitId,
+        productId,
+        null,
+        null,
+      )
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (quantity) => {
+          target.patchValue(
+            {
+              SalesQuantity: Number(quantity),
+            },
+            {
+              emitEvent: false,
+            },
+          );
+        },
+        error: () => {
+          target.patchValue(
+            {
+              SalesQuantity: 0,
+            },
+            {
+              emitEvent: false,
+            },
+          );
+
+          this.toastr.error('Unable to load Sales Quantity.');
+        },
+      });
+  }
+
   searchItems = (text$: Observable<string>): Observable<IItem[]> => {
     return text$.pipe(
-      debounceTime(300),
+      debounceTime(800), //
       distinctUntilChanged(),
 
       switchMap((searchText) => {
@@ -342,7 +536,8 @@ export class Requisition
       return item;
     }
 
-    return item ? `${item.Name} (${item.Id})` : '';
+    // return item ? `${item.Name} (${item.Id})` : '';
+    return item ? item.Name : '';
   };
 
   scrollActiveItem(): void {
@@ -374,17 +569,44 @@ export class Requisition
   }
 
   onItemSelect(event: NgbTypeaheadSelectItemEvent): void {
+    const startDate = this.formGroup.get('StartDate')?.value;
+    const endDate = this.formGroup.get('EndDate')?.value;
+    const businessId = Number(this.formGroup.get('BusinessId')?.value);
+
+    if (!startDate || !endDate) {
+      event.preventDefault();
+      this.toastr.warning('Please select Start Date and End Date first.');
+      return;
+    }
+
+    if (!this.selectedUnitId || !businessId) {
+      event.preventDefault();
+      this.toastr.warning('Please select Unit and Business first.');
+      return;
+    }
+
+    if (new Date(startDate) > new Date(endDate)) {
+      event.preventDefault();
+      this.toastr.warning('Start Date cannot be greater than End Date.');
+      return;
+    }
+
     const item = event.item as IItem;
 
     this.lineFormGroup.patchValue(
       {
         ItemId: item.Id,
         ItemName: item.Name,
+        StockQuantity: 0,
+        SalesQuantity: 0,
       },
       {
         emitEvent: false,
       },
     );
+
+    this.loadStockQuantity(Number(item.Id), this.lineFormGroup);
+    this.loadSalesQuantity(Number(item.Id), this.lineFormGroup);
 
     this.itemSearchCompleted = false;
     this.itemSearchHasResults = true;
@@ -394,7 +616,19 @@ export class Requisition
   onUnitChange(): void {
     this.formGroup.get('BusinessId')?.reset('');
     this.filterBusinesses();
+    this.filterUOMs();
 
+    this.lines.clear();
+    this.resetLineInput();
+
+    this.isItemSearching = false;
+    this.itemSearchCompleted = false;
+    this.itemSearchHasResults = true;
+    this.itemSearchFailed = false;
+    this.lineSubmitted = false;
+  }
+
+  onBusinessChange(): void {
     this.lines.clear();
     this.resetLineInput();
 
@@ -408,6 +642,12 @@ export class Requisition
   filterBusinesses(): void {
     this.filteredBusinesses = this.businesses.filter(
       (business) => Number(business.UnitId) === this.selectedUnitId,
+    );
+  }
+
+  filterUOMs(): void {
+    this.filteredUOMs = this.uoms.filter(
+      (uom) => Number(uom.UnitId) === this.selectedUnitId,
     );
   }
 
@@ -441,6 +681,10 @@ export class Requisition
       UOMId: new FormControl(Number(lineValue.UOMId)),
       UOMName: new FormControl(selectedUOM?.Name ?? ''),
       Quantity: new FormControl(Number(lineValue.Quantity)),
+
+      StockQuantity: new FormControl(Number(lineValue.StockQuantity) || 0),
+      SalesQuantity: new FormControl(Number(lineValue.SalesQuantity) || 0),
+
       Remarks: new FormControl(lineValue.Remarks ?? ''),
       FileStatusId: new FormControl(1),
       IsActive: new FormControl(true),
@@ -459,6 +703,8 @@ export class Requisition
       ItemId: '',
       ItemName: '',
       UOMId: '',
+      StockQuantity: 0,
+      SalesQuantity: 0,
       Quantity: '',
       Remarks: '',
     });
@@ -494,7 +740,7 @@ export class Requisition
       };
 
       this.modalService.open(content, {
-        size: 'xl',
+        fullscreen: true,
       });
     });
   }
@@ -539,13 +785,16 @@ export class Requisition
       this.formGroup.patchValue({
         UnitId: requisition.Header.UnitId,
         BusinessId: requisition.Header.BusinessId,
-        ReqDate: new Date(requisition.Header.ReqDate)
-          .toISOString()
-          .split('T')[0],
+        ReqDate: String(requisition.Header.ReqDate).substring(0, 10),
+
+        StartDate: String(requisition.Header.StartDate).substring(0, 10),
+        EndDate: String(requisition.Header.EndDate).substring(0, 10),
+
         Remarks: requisition.Header.Remarks,
       });
 
       this.filterBusinesses();
+      this.filterUOMs();
       this.formGroup.get('UnitId')?.disable();
 
       lines.forEach((line) => {
@@ -559,6 +808,10 @@ export class Requisition
             UOMId: new FormControl(Number(line.UOMId)),
             UOMName: new FormControl(this.getUOMName(Number(line.UOMId))),
             Quantity: new FormControl(Number(line.Quantity)),
+
+            StockQuantity: new FormControl(line.StockQuantity ?? 0),
+            SalesQuantity: new FormControl(line.SalesQuantity ?? 0),
+
             Remarks: new FormControl(line.Remarks ?? ''),
             FileStatusId: new FormControl(Number(line.FileStatusId)),
             IsActive: new FormControl(true),
@@ -599,13 +852,19 @@ export class Requisition
     this.formGroup.reset({
       UnitId: '',
       BusinessId: '',
-      ReqDate: new Date().toISOString().split('T')[0],
+      ReqDate: {
+        value: new Date().toISOString().split('T')[0],
+        disabled: true,
+      },
+      StartDate: '',
+      EndDate: '',
       Remarks: '',
     });
 
     this.resetLineInput();
 
     this.filteredBusinesses = [];
+    this.filteredUOMs = [];
     this.submitted = false;
     this.lineSubmitted = false;
   }
@@ -634,6 +893,10 @@ export class Requisition
         UnitId: Number(formValue.UnitId),
         BusinessId: Number(formValue.BusinessId),
         ReqDate: new Date(formValue.ReqDate),
+
+        StartDate: new Date(formValue.StartDate),
+        EndDate: new Date(formValue.EndDate),
+
         Remarks: formValue.Remarks?.trim() ?? '',
         FileStatusId: 1,
         IsActive: true,
@@ -653,6 +916,10 @@ export class Requisition
             : null,
         UOMId: Number(line.UOMId),
         Quantity: Number(line.Quantity),
+
+        StockQuantity: Number(line.StockQuantity) || 0,
+        SalesQuantity: Number(line.SalesQuantity) || 0,
+
         Remarks: line.Remarks?.trim() ?? '',
         FileStatusId: 1,
         IsActive: true,
@@ -712,6 +979,10 @@ export class Requisition
         UnitId: Number(formValue.UnitId),
         BusinessId: Number(formValue.BusinessId),
         ReqDate: new Date(formValue.ReqDate),
+
+        StartDate: new Date(formValue.StartDate),
+        EndDate: new Date(formValue.EndDate),
+
         Remarks: formValue.Remarks?.trim() ?? '',
         FileStatusId: existingHeader.FileStatusId,
         IsActive: existingHeader.IsActive,
@@ -734,6 +1005,10 @@ export class Requisition
               : null,
           UOMId: Number(line.UOMId),
           Quantity: Number(line.Quantity),
+
+          StockQuantity: Number(line.StockQuantity) || 0,
+          SalesQuantity: Number(line.SalesQuantity) || 0,
+
           Remarks: line.Remarks?.trim() ?? '',
           FileStatusId: Number(line.FileStatusId),
           IsActive: true,

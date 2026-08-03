@@ -12,13 +12,11 @@ export class LoginService {
   http=inject(HttpClient);
 
   Login(user: any) : Observable<any> {
-    return this.http.post<any>(`${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.LOGIN}`,user);
+    return this.http.post<any>(`${environment.API_URL}${GlobalConstant.API_END_POINTS.LOGIN}`,user);
   }
 
   Logout() : Observable<any> {
-    return this.http.post(`${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.LOGOUT}`,{});
+    return this.http.post(`${environment.API_URL}${GlobalConstant.API_END_POINTS.LOGOUT}`,{});
   }
-
-
 }
 
