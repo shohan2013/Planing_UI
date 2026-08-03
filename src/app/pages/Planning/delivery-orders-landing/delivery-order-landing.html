@@ -1,0 +1,169 @@
+<div class="user-card">
+  <div class="page-header">
+    <h5><b>DELIVERY ORDERS</b></h5>
+  </div>
+  <hr />
+  <div class="card-body">
+    <div class="d-flex gap-3 mb-3">
+      <div class="flex-fill">
+        <button
+          type="button"
+          class="btn-shadow d-inline-flex align-items-center btn btn-success"
+        >
+          <i class="fa-solid fa-fw fa-plus"></i>
+          Create New
+        </button>
+      </div>
+
+      <div class="flex-fill">
+        <div class="input-group">
+          <div class="input-group-text">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </div>
+          <!-- <input
+            type="text"
+            class="form-control"
+            placeholder="Search by Requisition Number or Remarks..."
+            [ngModel]="globalSearch()"
+            (ngModelChange)="updateSearch($event)"
+          /> -->
+        </div>
+      </div>
+    </div>
+
+    @if (error()) {
+    <div
+      class="alert alert-danger d-flex justify-content-between align-items-center"
+    >
+      <span>{{ error() }}</span>
+      <button type="button" class="btn btn-danger btn-sm" (click)="retry()">
+        Retry
+      </button>
+    </div>
+
+    }
+
+    <div class="table-responsive">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th style="width: 40px">
+              <input type="checkbox" (change)="toggleAll($event)" />
+            </th>
+            <th>SOID</th>
+            <th>DO CODE</th>
+            <th>CREATED DATE</th>
+            <th>REQUEST DELIVERY DATE</th>
+            <th>UNIT</th>
+            <th>BUSINESS</th>
+            <th>CUSTOMER NAME</th>
+            <th>TOTAL AMOUNT</th>
+            <th>ACTION</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @if (isLoading()) {
+
+          <tr>
+            <td colspan="10" class="text-center py-4">
+              <span
+                class="spinner-border spinner-border-sm me-2"
+                aria-hidden="true"
+              >
+              </span>
+
+              Loading Delivery Orders...
+            </td>
+          </tr>
+
+          } @else if (paginatedItems().length === 0) {
+
+          <tr>
+            <td colspan="10" class="text-center py-4">
+              <i class="fas fa-folder-open fa-4x text-secondary mb-3"></i>
+              <br />
+              <h6>No Records Found.</h6>
+            </td>
+          </tr>
+
+          } @else { @for (item of paginatedItems(); track $index; let i =
+          $index) {
+          <tr>
+            <td>
+              <input type="checkbox" />
+            </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+
+            <td></td>
+
+            <td></td>
+
+            <td></td>
+
+            <td></td>
+
+            <td></td>
+
+            <!-- <td>
+                  {{ item.Header.UPDATEDBY }}
+                </td>
+
+                <td>
+                  {{ item.Header.UPDATEDDATE | date: 'dd-MMM-yyyy h:mm a' }}
+                </td> -->
+
+            <!-- <td>
+
+                  <span
+                    class="g-status"
+                    [ngClass]="item.Header.IsActive ? 'active' : 'inactive'">
+
+                    <span class="g-dot"></span>
+
+                    {{ item.Header.IsActive ? 'Active' : 'Inactive' }}
+                  </span>
+
+                </td> -->
+
+            <td>
+              <div class="action-buttons">
+                <button type="button" class="action-btn btn-view" title="View">
+                  <i class="fa-solid fa-magnifying-glass-plus"></i>
+                </button>
+
+                <button type="button" class="action-btn btn-edit" title="Edit">
+                  <i class="fa-regular fa-pen-to-square"></i>
+                </button>
+
+                <button
+                  type="button"
+                  class="action-btn btn-delete"
+                  title="Delete"
+                >
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          } }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card-footer">
+    <!-- <app-pagination
+      [(currentPage)]="currentPage"
+      [(pageSize)]="pageSize"
+      [totalItems]="totalItems()"
+      (pageChanged)="onPageChange(1)"
+      (pageSizeChanged)="onPageSizeChange(1)"
+    >
+    </app-pagination> -->
+  </div>
+</div>

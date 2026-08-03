@@ -85,6 +85,13 @@ const routes: Routes = [
         loadComponent: () =>
           import('./pages/Requisition/requisition').then((m) => m.Requisition),
       },
+      {
+        path: 'planning',
+        loadComponent: () =>
+          import('./pages/Planning/delivery-orders-landing/delivery-order-landing').then(
+            (m) => m.DeliveryOrderLanding,
+          ),
+      },
 
       // Elements
       {
