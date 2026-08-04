@@ -57,7 +57,6 @@
         </div>
       </div>
     </div>
-
     @if (error()) {
 
     <div
@@ -71,7 +70,6 @@
     </div>
 
     }
-
     <div class="table-responsive">
       <table class="custom-table">
         <thead>
@@ -305,9 +303,9 @@
             <td>
               <span
                 [ngClass]="{
-                            'status-pending': selectedRequisition.Header.FileStatusId == 1,
-                            'status-approve': selectedRequisition.Header.FileStatusId == 2,
-                            'status-reject': selectedRequisition.Header.FileStatusId == 3
+                            'status-pending': selectedRequisition.Header.FileStatusId === 1,
+                            'status-approve': selectedRequisition.Header.FileStatusId === 2,
+                            'status-reject': selectedRequisition.Header.FileStatusId === 3
                         }"
               >
                 <span class="g-dot"></span>

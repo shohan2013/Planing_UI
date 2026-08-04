@@ -40,7 +40,8 @@ export class DeliveryOrderLanding
 
   override ngOnInit(): void {
     super.ngOnInit();
-    this.loadCommonData();
+    this.GetBusinessList();
+    this.GetUnitList();
   }
 
   protected override fetchData(
@@ -54,7 +55,14 @@ export class DeliveryOrderLanding
   }
 
   onUnitFilterChange(): void {
-    console.log(this.selectedUnitId);
+    //console.log(this.selectedUnitId);
+    this.selectedBusinessId = 0;
+    this.GetBusinessList();
+    this.currentPage.set(1);
+    this.retry();
+  }
+
+  onBusinessFilterChange(): void {
     this.currentPage.set(1);
     this.retry();
   }
@@ -67,7 +75,17 @@ export class DeliveryOrderLanding
     throw new Error('Method not implemented.');
   }
 
-  loadCommonData(): void {
+  GetBusinessList(): void {
+    this.commonService
+      .GetBusinessList(this.selectedUnitId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data) => {
+        //console.log(data);
+        this.businesses = data;
+      });
+  }
+
+  GetUnitList(): void {
     this.commonService
       .GetUnitList()
       .pipe(takeUntil(this.destroy$))
@@ -75,48 +93,6 @@ export class DeliveryOrderLanding
         //console.log(data);
         this.units = data;
       });
-
-    // this.commonService
-    //   .GetBusinessList()
-    //   .pipe(takeUntil(this.destroy$))
-    //   .subscribe((data) => {
-    //     this.businesses = data;
-
-    //     if (this.selectedUnitId) {
-    //       this.filterBusinesses();
-    //     }
-    //   });
-
-    // this.commonService
-    //   .GetProductTypeList()
-    //   .pipe(takeUntil(this.destroy$))
-    //   .subscribe((data) => {
-    //     this.productTypes = data;
-    //   });
-
-    // this.commonService.GetUOMList()
-    //   .pipe(takeUntil(this.destroy$))
-    //   .subscribe(data => {
-    //     this.uoms = data;
-    //   });
-
-    // this.commonService
-    //   .GetUOMList()
-    //   .pipe(takeUntil(this.destroy$))
-    //   .subscribe((data) => {
-    //     this.uoms = data;
-
-    //     if (this.selectedUnitId) {
-    //       this.filterUOMs();
-    //     }
-    //   });
-
-    // this.commonService
-    //   .GetDocumentStatusList()
-    //   .pipe(takeUntil(this.destroy$))
-    //   .subscribe((data) => {
-    //     this.fileStatusList = data;
-    //   });
   }
 
   ngOnDestroy(): void {
