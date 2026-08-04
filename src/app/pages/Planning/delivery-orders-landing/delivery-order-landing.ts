@@ -38,8 +38,8 @@ export class DeliveryOrderLanding
     super();
   }
 
-  override ngOnInit(): void {
-    super.ngOnInit();
+  ngOnInit(): void {
+    //super.ngOnInit();
     this.GetBusinessList();
     this.GetUnitList();
   }

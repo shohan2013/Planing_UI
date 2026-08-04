@@ -1,12 +1,31 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { AbstractControl, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormControl,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { ModalDismissReasons, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { finalize, Observable, Subject, takeUntil } from 'rxjs';
 import { Module } from 'src/app/core/model/Common/Module/Module';
-import { ServerQueryRequest, ServerQueryResponse } from 'src/app/core/model/Common/Pagination/ServerQueryRequest';
+import {
+  ServerQueryRequest,
+  ServerQueryResponse,
+} from 'src/app/core/model/Common/Pagination/ServerQueryRequest';
 import { IMenu } from 'src/app/core/model/Menu/Menu';
 import { ServerSideFilteredPaginatedComponent } from 'src/app/core/server-side-filtered-paginated/server-side-filtered-paginated.component';
 import { CommonService } from 'src/app/core/services/Common/CommonService';
@@ -15,18 +34,20 @@ import { PaginationComponent } from 'src/app/shared/pagination/pagination.compon
 
 import { InputHelper } from 'src/app/shared/pipes/NumberInputOnly';
 
-
 @Component({
   selector: 'app-menu',
   standalone: true,
   templateUrl: './menu.html',
   styleUrl: './menu.scss',
-  imports: [CommonModule, PaginationComponent, FormsModule, ReactiveFormsModule],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  imports: [
+    CommonModule,
+    PaginationComponent,
+    FormsModule,
+    ReactiveFormsModule,
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-
 export class Menu extends ServerSideFilteredPaginatedComponent<IMenu> {
-
   InputHelper = InputHelper;
   closeResult = '';
   submitted = false;
@@ -36,53 +57,61 @@ export class Menu extends ServerSideFilteredPaginatedComponent<IMenu> {
   private destroy$ = new Subject<void>();
   isLoadingdata = false;
 
- protected override fetchData(request: ServerQueryRequest): Observable<ServerQueryResponse<IMenu>> {
-  this.isLoadingdata = true;
-  return this.menuservice.GetMenu(request).pipe(
-    finalize(() => {
-      this.isLoadingdata = false;
-    })
-  );
-}
-
-  getMenuById(id: number) {
-  
-    this.menuservice.getMenuById(Number(id)).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (data) => {
-
-        this.eformGroup.controls['eModuleID'].setValue(data.ModuleID);
-        this.eformGroup.controls['eName'].setValue(data.Name);
-        this.eformGroup.controls['eSequence'].setValue(data.Sequence);
-        this.eformGroup.controls['eCode'].setValue(data.Code);
-        this.eformGroup.controls['eIsActive'].setValue(Boolean(data.IsActive));
-        this.PID = data.Id;
-        this.isLoading.set(false);
-      }
-    });
+  protected override fetchData(
+    request: ServerQueryRequest,
+  ): Observable<ServerQueryResponse<IMenu>> {
+    this.isLoadingdata = true;
+    return this.menuservice.GetMenu(request).pipe(
+      finalize(() => {
+        this.isLoadingdata = false;
+      }),
+    );
   }
 
-  constructor(private menuservice: MenuService, private commonservice: CommonService, private modalService: NgbModal, private toastr: ToastrService) {
+  getMenuById(id: number) {
+    this.menuservice
+      .getMenuById(Number(id))
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.eformGroup.controls['eModuleID'].setValue(data.ModuleID);
+          this.eformGroup.controls['eName'].setValue(data.Name);
+          this.eformGroup.controls['eSequence'].setValue(data.Sequence);
+          this.eformGroup.controls['eCode'].setValue(data.Code);
+          this.eformGroup.controls['eIsActive'].setValue(
+            Boolean(data.IsActive),
+          );
+          this.PID = data.Id;
+          this.isLoading.set(false);
+        },
+      });
+  }
+
+  constructor(
+    private menuservice: MenuService,
+    private commonservice: CommonService,
+    private modalService: NgbModal,
+    private toastr: ToastrService,
+  ) {
     super();
     this.loadModule();
     this.loadMenu();
   }
 
-  protected override onInit(): void {
-    //this.GetMenu();
-  }
-
   loadModule() {
-    this.commonservice.GetModuleList()
+    this.commonservice
+      .GetModuleList()
       .pipe(takeUntilDestroyed())
-      .subscribe(data => {
+      .subscribe((data) => {
         this.modules = data;
       });
   }
 
   loadMenu() {
-    this.commonservice.GetModuleList()
+    this.commonservice
+      .GetModuleList()
       .pipe(takeUntilDestroyed())
-      .subscribe(data => {
+      .subscribe((data) => {
         this.modules = data;
       });
   }
@@ -93,7 +122,6 @@ export class Menu extends ServerSideFilteredPaginatedComponent<IMenu> {
     this.submitted = true;
 
     if (this.formGroup.valid) {
-
       const menuData = {
         Id: 0,
         ModuleID: this.formGroup.value.ModuleID,
@@ -106,19 +134,24 @@ export class Menu extends ServerSideFilteredPaginatedComponent<IMenu> {
         CreatedBy: Number(localStorage.getItem('Enroll')),
         CreatedDate: new Date(),
         UpdatedBy: Number(localStorage.getItem('Enroll')),
-        UpdatedDate: new Date()
+        UpdatedDate: new Date(),
       };
 
-      this.menuservice.addMenu(menuData).pipe(takeUntil(this.destroy$), finalize(() => this.isLoading.set(false))).subscribe({
-        next: () => {
-          this.formGroup.reset();
-          this.submitted = false;
-          this.toastr.success('Data saved successfully.')
-        }
-      })
+      this.menuservice
+        .addMenu(menuData)
+        .pipe(
+          takeUntil(this.destroy$),
+          finalize(() => this.isLoading.set(false)),
+        )
+        .subscribe({
+          next: () => {
+            this.formGroup.reset();
+            this.submitted = false;
+            this.toastr.success('Data saved successfully.');
+          },
+        });
     }
   }
-
 
   Update(): void {
     this.isLoading.set(true);
@@ -126,7 +159,6 @@ export class Menu extends ServerSideFilteredPaginatedComponent<IMenu> {
     this.submitted = true;
 
     if (this.eformGroup.valid) {
-
       const menuData = {
         Id: this.PID,
         ModuleID: this.eformGroup.value.eModuleID,
@@ -139,22 +171,26 @@ export class Menu extends ServerSideFilteredPaginatedComponent<IMenu> {
         CreatedBy: Number(localStorage.getItem('Enroll')),
         CreatedDate: new Date(),
         UpdatedBy: Number(localStorage.getItem('Enroll')),
-        UpdatedDate: new Date()
+        UpdatedDate: new Date(),
       };
 
-      this.menuservice.updateMenu(this.PID, menuData).pipe(takeUntil(this.destroy$), finalize(() => this.isLoading.set(false))).subscribe({
-        next: (data) => {
-          this.formGroup.reset();
-          this.submitted = false;
-          this.toastr.success(data.Message)
-        }
-      })
+      this.menuservice
+        .updateMenu(this.PID, menuData)
+        .pipe(
+          takeUntil(this.destroy$),
+          finalize(() => this.isLoading.set(false)),
+        )
+        .subscribe({
+          next: (data) => {
+            this.formGroup.reset();
+            this.submitted = false;
+            this.toastr.success(data.Message);
+          },
+        });
     }
   }
 
-  onToggle() {
-
-  }
+  onToggle() {}
 
   trackById(index: number, item: any): number {
     return item.Id;
@@ -165,7 +201,7 @@ export class Menu extends ServerSideFilteredPaginatedComponent<IMenu> {
     ModuleID: new FormControl('', Validators.required),
     Code: new FormControl('', Validators.required),
     Sequence: new FormControl('', Validators.required),
-    IsActive: new FormControl('')
+    IsActive: new FormControl(''),
   });
 
   eformGroup: FormGroup = new FormGroup({
@@ -173,7 +209,7 @@ export class Menu extends ServerSideFilteredPaginatedComponent<IMenu> {
     eModuleID: new FormControl('', Validators.required),
     eCode: new FormControl('', Validators.required),
     eSequence: new FormControl('', Validators.required),
-    eIsActive: new FormControl('')
+    eIsActive: new FormControl(''),
   });
 
   get f(): { [key: string]: AbstractControl } {
@@ -186,24 +222,30 @@ export class Menu extends ServerSideFilteredPaginatedComponent<IMenu> {
 
   Delete(id: number) {
     this.submitted = false;
-    this.menuservice.deleteMenu(id).pipe(takeUntil(this.destroy$), finalize(() => this.isLoading.set(false))).subscribe({
-      next: (data => {
-        this.submitted = false;
-        this.toastr.success(data.Message)
-      })
-    })
+    this.menuservice
+      .deleteMenu(id)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.isLoading.set(false)),
+      )
+      .subscribe({
+        next: (data) => {
+          this.submitted = false;
+          this.toastr.success(data.Message);
+        },
+      });
   }
 
   saveModal(content: any) {
     this.modalService.open(content, {
-      size: 'lg'
+      size: 'lg',
     });
   }
 
   EditModal(content: any, id: number) {
     this.getMenuById(id);
     this.modalService.open(content, {
-      size: 'lg'
+      size: 'lg',
     });
   }
 

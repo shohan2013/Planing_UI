@@ -132,9 +132,7 @@ export class Requisition
     super();
   }
 
-  override ngOnInit(): void {
-    super.ngOnInit();
-
+  ngOnInit(): void {
     this.loadCommonData();
 
     this.watchItemInput();

@@ -4,15 +4,21 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError, debounceTime, switchMap, tap } from 'rxjs/operators';
 import { BasePaginatedTableComponent } from '../base-paginated-table/base-paginated-table.component';
-import { FilterState, ServerQueryRequest, ServerQueryResponse } from '../model/Common/Pagination/ServerQueryRequest';
+import {
+  FilterState,
+  ServerQueryRequest,
+  ServerQueryResponse,
+} from '../model/Common/Pagination/ServerQueryRequest';
 
-@Component({ template: '' }) 
-export abstract class ServerSideFilteredPaginatedComponent<T> extends BasePaginatedTableComponent<T> implements OnInit {
+@Component({ template: '' })
+export abstract class ServerSideFilteredPaginatedComponent<
+  T,
+> extends BasePaginatedTableComponent<T> {
   protected router = inject(Router);
   protected route = inject(ActivatedRoute);
 
-  /** 
-   * Server overrides 
+  /**
+   * Server overrides
    * We intercept totalItems and paginatedItems from your BaseClass to prevent local slicing
    */
   protected serverTotalItems = signal<number>(0);
@@ -30,74 +36,76 @@ export abstract class ServerSideFilteredPaginatedComponent<T> extends BasePagina
   // UI / Async State
   protected isLoading = signal<boolean>(false);
   protected error = signal<string | null>(null);
-  
+
   // Internal trigger used to force manual retries without altering filter states
   private readonly retryTrigger = signal<number>(0);
 
   /**
    * The fetch method that concrete components MUST implement.
    */
-  protected abstract fetchData(request: ServerQueryRequest): Observable<ServerQueryResponse<T>>;
+  protected abstract fetchData(
+    request: ServerQueryRequest,
+  ): Observable<ServerQueryResponse<T>>;
 
   constructor() {
     super();
 
     // URL sync removed per request
     // 2. Reactively derive the "API Request body" based on current Signals
-    const requestState$ = toObservable(computed(() => ({
-      page: this.currentPage(),
-      pageSize: this.pageSize(),
-      sortBy: this.sortColumn(),
-      sortOrder: this.sortOrder(),
-      globalSearch: this.globalSearch(),
-      filters: this.columnFilters(),
-      _trigger: this.retryTrigger() // Causes re-emission on retry
-    })));
+    const requestState$ = toObservable(
+      computed(() => ({
+        page: this.currentPage(),
+        pageSize: this.pageSize(),
+        sortBy: this.sortColumn(),
+        sortOrder: this.sortOrder(),
+        globalSearch: this.globalSearch(),
+        filters: this.columnFilters(),
+        _trigger: this.retryTrigger(), // Causes re-emission on retry
+      })),
+    );
 
     // 3. Debounce and Execute HTTP Fetch automatically when state changes
-    requestState$.pipe(
-      debounceTime(300), // Wait 300ms after user stops typing
-      tap(() => {
-        this.isLoading.set(true);
-        this.error.set(null);
-      }),
-      switchMap((req) => this.fetchData(req as ServerQueryRequest).pipe(
-        catchError(err => {
-          this.error.set('Failed to initialize data. Please verify your connection and try again.');
-          return of(null);
-        })
-      )),
-      takeUntilDestroyed()
-    ).subscribe(res => {
-      this.isLoading.set(false);
+    requestState$
+      .pipe(
+        debounceTime(300), // Wait 300ms after user stops typing
+        tap(() => {
+          this.isLoading.set(true);
+          this.error.set(null);
+        }),
+        switchMap((req) =>
+          this.fetchData(req as ServerQueryRequest).pipe(
+            catchError((err) => {
+              this.error.set(
+                'Failed to initialize data. Please verify your connection and try again.',
+              );
+              return of(null);
+            }),
+          ),
+        ),
+        takeUntilDestroyed(),
+      )
+      .subscribe((res) => {
+        this.isLoading.set(false);
 
-      if (res) {
-        this.items.set(res.Data);
-        this.serverTotalItems.set(res.Total);
-      }
-    });
+        if (res) {
+          this.items.set(res.Data);
+          this.serverTotalItems.set(res.Total);
+        }
+      });
 
     // Disable local Base Class behaviors to allow RxJS pipeline to drive logic
     this.afterPageChange = () => {};
     this.afterPageSizeChange = () => {};
   }
 
-  ngOnInit() {
-
-    this.onInit();
-  }
-
-  protected onInit() {}
-
-
-  // --- Public Action Handlers --- 
+  // --- Public Action Handlers ---
 
   public onSort(column: string) {
     if (this.sortColumn() === column) {
       if (this.sortOrder() === 'asc') this.sortOrder.set('desc');
       else {
-         this.sortColumn.set(null);
-         this.sortOrder.set(null);
+        this.sortColumn.set(null);
+        this.sortOrder.set(null);
       }
     } else {
       this.sortColumn.set(column);
@@ -112,15 +120,15 @@ export abstract class ServerSideFilteredPaginatedComponent<T> extends BasePagina
   }
 
   public updateFilter(column: string, value: any) {
-     const newFilters = { ...this.columnFilters() };
-     if (value === null || value === '' || value === undefined) {
-       delete newFilters[column];
-     } else {
-       newFilters[column] = value;
-     }
+    const newFilters = { ...this.columnFilters() };
+    if (value === null || value === '' || value === undefined) {
+      delete newFilters[column];
+    } else {
+      newFilters[column] = value;
+    }
 
-     this.columnFilters.set(newFilters);
-     this.currentPage.set(1);
+    this.columnFilters.set(newFilters);
+    this.currentPage.set(1);
   }
 
   public clearFilters() {
@@ -132,6 +140,6 @@ export abstract class ServerSideFilteredPaginatedComponent<T> extends BasePagina
   }
 
   public retry() {
-    this.retryTrigger.update(v => v + 1);
+    this.retryTrigger.update((v) => v + 1);
   }
 }
