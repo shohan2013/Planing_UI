@@ -17,9 +17,11 @@ export class DeliveryOrderService {
 
   GetDeliverOrders(
     request: ServerQueryRequest,
+    unitId: Number,
+    BusinessesId: Number,
   ): Observable<ServerQueryResponse<IDeliveryOrder>> {
     return this.http.get<ServerQueryResponse<IDeliveryOrder>>(
-      `${environment.API_URL}${GlobalConstant.API_END_POINTS.getRequisition}?GlobalSearch=${request.globalSearch}&PageIndex=${request.page}&PageSize=${request.pageSize}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.DeliveryOrders}?GlobalSearch=${request.globalSearch}&PageIndex=${request.page}&PageSize=${request.pageSize}&UnitId=${unitId}&BusinessId=${BusinessesId}`,
     );
   }
 }

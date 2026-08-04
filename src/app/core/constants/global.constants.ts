@@ -45,24 +45,18 @@ export const GlobalConstant = {
     ApproveMatrixGroupTypeList: 'Common/approvalmatrixgrouplist',
     SideBar: 'SideBar',
     UserMenuPermission: 'UserMenuPermission',
+    Businesses: 'Common/BusinessList',
+    ProductType: 'Common/ProductTypeList',
+    Item: 'Common/ItemList',
+    StockQuantity: 'Common/StockQty',
+    SalesQuantity: 'Common/GetSalesQty',
+    RequisitionItemNames: 'Common/RequisitionItemNames',
+    UOM: 'Common/UOMList',
+    DocumentStatus: 'Common/DocumentStatusList',
 
-      Businesses : 'Common/BusinessList',
-      ProductType : 'Common/ProductTypeList',
-      Item : 'Common/ItemList',
+    /*==============================PLANNING====================================*/
+    DeliveryOrders: 'SalesOrderLanding/GetDOData',
+  },
 
-      StockQuantity : 'Common/StockQty',
-      SalesQuantity : 'Common/GetSalesQty',
-
-      RequisitionItemNames: 'Common/RequisitionItemNames',
-      UOM : 'Common/UOMList',
-
-      DocumentStatus: 'Common/DocumentStatusList',
-
-
-
-
-    },
-    
-    URL: {API_URL : 'https://localhost:7111/api/'}
-}
-
+  URL: { API_URL: 'https://localhost:7111/api/' },
+};
