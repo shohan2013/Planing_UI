@@ -220,14 +220,14 @@ export class Requisition
       });
 
     this.commonService
-      .GetBusinessList()
+      .GetBusinessList(this.selectedUnitId)
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
         this.businesses = data;
 
-        if (this.selectedUnitId) {
-          this.filterBusinesses();
-        }
+        // if (this.selectedUnitId) {
+        //   this.filterBusinesses();
+        // }
       });
 
     this.commonService

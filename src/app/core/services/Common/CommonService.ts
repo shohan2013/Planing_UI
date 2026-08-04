@@ -25,7 +25,6 @@ import { environment } from 'src/environments/environment';
 @Injectable({
   providedIn: 'root',
 })
-
 export class CommonService {
   constructor(private http: HttpClient) {}
 
@@ -77,9 +76,15 @@ export class CommonService {
     );
   }
 
-  GetBusinessList(): Observable<IBusiness[]> {
+  // GetBusinessList(): Observable<IBusiness[]> {
+  //   return this.http.get<IBusiness[]>(
+  //     `${environment.API_URL}${GlobalConstant.API_END_POINTS.Businesses}`,
+  //   );
+  // }
+
+  GetBusinessList(unitId: Number): Observable<IBusiness[]> {
     return this.http.get<IBusiness[]>(
-      `${environment.API_URL}${GlobalConstant.API_END_POINTS.Businesses}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.Businesses}?unitId=${unitId}`,
     );
   }
 
@@ -89,55 +94,65 @@ export class CommonService {
     );
   }
 
-GetItemList(unitId:number,searchText:string): Observable<IItem[]> {
-  return this.http.get<IItem[]>(
-    `${environment.API_URL}${GlobalConstant.API_END_POINTS.Item}?unitId=${unitId}&searchText=${encodeURIComponent(searchText)}`
-  );
-}
-GetRequisitionItemNames(model: IRequisitionItemName[]): Observable<IRequisitionItemName[]> {
-  return this.http.post<IRequisitionItemName[]>(
-    `${environment.API_URL}${GlobalConstant.API_END_POINTS.RequisitionItemNames}`,
-    model
-  );
-}
+  GetItemList(unitId: number, searchText: string): Observable<IItem[]> {
+    return this.http.get<IItem[]>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.Item}?unitId=${unitId}&searchText=${encodeURIComponent(searchText)}`,
+    );
+  }
+  GetRequisitionItemNames(
+    model: IRequisitionItemName[],
+  ): Observable<IRequisitionItemName[]> {
+    return this.http.post<IRequisitionItemName[]>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.RequisitionItemNames}`,
+      model,
+    );
+  }
 
+  GetStockQty(
+    fromDate: string,
+    toDate: string,
+    unitId: number,
+    businessId: number,
+    whId: number | null,
+    productId: number,
+  ): Observable<number> {
+    const params = {
+      fromDate,
+      toDate,
+      unitId,
+      businessId,
+      whId: whId ?? 0,
+      productId,
+    };
 
+    return this.http.get<number>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.StockQuantity}`,
+      { params },
+    );
+  }
 
-
-GetStockQty(fromDate: string, toDate: string, unitId: number, businessId: number, whId: number | null, productId: number): Observable<number> {
-  const params = {
-    fromDate,
-    toDate,
-    unitId,
-    businessId,
-    whId: whId ?? 0,
-    productId
-  };
-
-  return this.http.get<number>(
-    `${environment.API_URL}${GlobalConstant.API_END_POINTS.StockQuantity}`,
-    { params }
-  );
-}
-
-
-
-GetSalesQty(fromDate:string, toDate:string, unitId:number, productId:number, whId:number | null, customerId:number | null): Observable<number> {
-  return this.http.get<number>(
-    environment.API_URL + GlobalConstant.API_END_POINTS.SalesQuantity,
-    {
-      params: {
-        fromDate,
-        toDate,
-        unitId: unitId.toString(),
-        productId: productId.toString(),
-        whId: whId?.toString() ?? '',    // if needed in future, pass null now
-        customerId: customerId?.toString() ?? '' //Business ID? 
-      }
-    }
-  );
-}
-
+  GetSalesQty(
+    fromDate: string,
+    toDate: string,
+    unitId: number,
+    productId: number,
+    whId: number | null,
+    customerId: number | null,
+  ): Observable<number> {
+    return this.http.get<number>(
+      environment.API_URL + GlobalConstant.API_END_POINTS.SalesQuantity,
+      {
+        params: {
+          fromDate,
+          toDate,
+          unitId: unitId.toString(),
+          productId: productId.toString(),
+          whId: whId?.toString() ?? '', // if needed in future, pass null now
+          customerId: customerId?.toString() ?? '', //Business ID?
+        },
+      },
+    );
+  }
 
   GetUOMList(): Observable<IUOM[]> {
     return this.http.get<IUOM[]>(
@@ -163,4 +178,3 @@ GetSalesQty(fromDate:string, toDate:string, unitId:number, productId:number, whI
     );
   }
 }
-

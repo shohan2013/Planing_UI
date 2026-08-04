@@ -16,9 +16,28 @@
             [(ngModel)]="selectedUnitId"
             (ngModelChange)="onUnitFilterChange()"
           >
-            <option [ngValue]="0">All Units</option>
+            <option [ngValue]="0">--All Units--</option>
             @for (unit of units; track unit.Id) {
             <option [ngValue]="unit.Id">{{ unit.Name }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div style="width: 25%">
+        <div class="input-group">
+          <div class="input-group-text">
+            <i class="fa-solid fa-filter"></i>
+          </div>
+
+          <select
+            class="form-select"
+            [(ngModel)]="selectedBusinessId"
+            (ngModelChange)="onBusinessFilterChange()"
+          >
+            <option [ngValue]="0">--All Business--</option>
+            @for (business of businesses; track business.Id) {
+            <option [ngValue]="business.Id">{{ business.Name }}</option>
             }
           </select>
         </div>
