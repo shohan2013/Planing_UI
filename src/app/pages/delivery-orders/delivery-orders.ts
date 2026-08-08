@@ -5,7 +5,6 @@ import {
   OnInit,
   Output,
   signal,
-  TemplateRef,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Observable, Subject, takeUntil, tap } from 'rxjs';
@@ -49,8 +48,7 @@ export class DeliveryOrders
     super();
   }
 
-  @Output()
-  SelectedOrdersChange = new EventEmitter<any[]>();
+  @Output() SelectedOrdersChange = new EventEmitter<any[]>();
 
   ngOnInit(): void {
     //super.ngOnInit();
@@ -161,10 +159,6 @@ export class DeliveryOrders
     }
   }
 
-  openCreateModal(_t10: TemplateRef<any>) {
-    throw new Error('Method not implemented.');
-  }
-
   removeSelection(soid: Number) {
     this.selectedDeliveryOrders.update((items) =>
       items.filter((item) => item.SOID !== soid),
@@ -180,6 +174,9 @@ export class DeliveryOrders
   }
 
   goToNextStep() {
+    this.cartOpen.set(false);
+
+    // Emit selected orders to PlanningProcessComponent
     this.SelectedOrdersChange.emit(this.selectedDeliveryOrders());
   }
 

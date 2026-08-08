@@ -1,371 +1,546 @@
-/* =========================================
-   Planning Selection Cart
-   ========================================= */
+/* =========================================================
+   Right Side Delivery Order Cart
+   ========================================================= */
 
-.planning-cart {
+.cart-backdrop {
   position: fixed;
+  inset: 0;
+
+  background: rgba(15, 23, 42, 0.28);
+
+  backdrop-filter: blur(1.5px);
+
+  z-index: 1040;
+
+  animation: cartOverlayFade 0.2s ease-out;
+}
+
+/* =========================================================
+   Cart Container
+   ========================================================= */
+
+.selection-cart {
+  position: fixed;
+
   top: 0;
   right: 0;
 
-  width: 390px;
+  width: 365px;
   max-width: 90vw;
   height: 100vh;
 
   background: #fff;
 
+  z-index: 1050;
+
   display: flex;
   flex-direction: column;
 
-  z-index: 1055;
+  border-left: 1px solid #e5e7eb;
 
   box-shadow: -8px 0 30px rgba(0, 0, 0, 0.12);
 
-  transform: translateX(105%);
-  transition: transform 0.3s ease-in-out;
-
-  visibility: hidden;
+  animation: slideIn 0.28s ease-out;
 }
 
-/* Open cart */
-.planning-cart.show {
-  transform: translateX(0);
-  visibility: visible;
-}
-
-/* =========================================
+/* =========================================================
    Header
-   ========================================= */
+   ========================================================= */
 
-.planning-cart-header {
-  min-height: 75px;
+.selection-cart-header {
+  min-height: 68px;
 
-  padding: 16px 20px;
+  padding: 12px 16px;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  border-bottom: 1px solid #e9ecef;
-
   background: #fff;
+
+  border-bottom: 1px solid #edf0f2;
 }
 
-.cart-title {
-  font-size: 16px;
+.selection-cart-header h5 {
+  margin: 0;
+
+  font-size: 14px;
   font-weight: 600;
-  color: #212529;
+
+  color: #1f2937;
 
   display: flex;
   align-items: center;
 }
 
-.cart-title i {
+.selection-cart-header h5 i {
   color: #198754;
+
+  font-size: 15px;
 }
 
-.cart-subtitle {
+.selection-cart-header span {
   display: block;
 
   margin-top: 3px;
 
-  color: #6c757d;
-  font-size: 12px;
+  font-size: 11px;
+
+  color: #8a929a;
 }
 
+/* Close */
+
 .cart-close-btn {
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
+
+  padding: 0;
 
   border: 0;
   border-radius: 6px;
 
-  background: #f8f9fa;
-  color: #6c757d;
+  background: #f5f6f7;
+
+  color: #7a828a;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  transition: all 0.2s ease;
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .cart-close-btn:hover {
   background: #e9ecef;
+
   color: #212529;
 }
 
-/* =========================================
+/* =========================================================
    Cart Body
-   ========================================= */
+   ========================================================= */
 
-.planning-cart-body {
+.selection-cart-body {
   flex: 1;
 
   overflow-y: auto;
 
-  padding: 16px;
-  background: #f8f9fa;
+  padding: 10px;
+
+  background: #f7f8fa;
 }
 
-/* =========================================
+/* Scrollbar */
+
+.selection-cart-body::-webkit-scrollbar {
+  width: 4px;
+}
+
+.selection-cart-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.selection-cart-body::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+
+  border-radius: 10px;
+}
+
+/* =========================================================
    Selected DO Card
-   ========================================= */
+   ========================================================= */
 
 .selected-do-card {
+  position: relative;
+
+  padding: 10px 11px;
+
+  margin-bottom: 8px;
+
   background: #fff;
 
-  border: 1px solid #e3e6ea;
-  border-radius: 8px;
-
-  padding: 14px;
-
-  margin-bottom: 12px;
-
-  transition: all 0.2s ease;
-}
-
-.selected-do-card:hover {
-  border-color: #198754;
-
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
-}
-
-/* Top section */
-
-.do-card-top {
-  display: flex;
-  align-items: center;
-}
-
-.do-icon {
-  width: 38px;
-  height: 38px;
+  border: 1px solid #e5e7eb;
 
   border-radius: 7px;
 
-  background: #e9f7ef;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+/* Small green indicator */
+
+.selected-do-card::before {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+
+  width: 3px;
+
+  border-radius: 0 3px 3px 0;
+
+  background: #198754;
+}
+
+.selected-do-card:hover {
+  border-color: #b7dfc8;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+  transform: translateY(-1px);
+}
+
+/* =========================================================
+   Card Header
+   ========================================================= */
+
+.selected-do-header {
+  display: flex;
+
+  align-items: center;
+
+  padding-left: 3px;
+}
+
+/* Truck Icon */
+
+.do-icon {
+  width: 32px;
+  height: 32px;
+
+  flex-shrink: 0;
+
+  border-radius: 6px;
+
+  background: #edf8f2;
+
   color: #198754;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  margin-right: 10px;
+  margin-right: 8px;
+
+  font-size: 13px;
 }
 
-.do-info {
+/* Main information */
+
+.do-main-info {
   flex: 1;
+
   min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+
+  gap: 4px;
+
+  padding-right: 6px;
 }
 
-.do-number {
-  font-size: 14px;
+.do-code {
+  display: block;
+
+  font-size: 13px;
+
   font-weight: 600;
+
+  line-height: 1.3;
 
   color: #212529;
 
   white-space: nowrap;
+
   overflow: hidden;
+
   text-overflow: ellipsis;
 }
 
 .do-date {
-  font-size: 12px;
-  color: #6c757d;
+  display: flex;
 
-  margin-top: 2px;
+  align-items: center;
+
+  gap: 5px;
+
+  font-size: 11px;
+
+  line-height: 1.2;
+
+  color: #8a929a;
+
+  white-space: nowrap;
 }
 
-/* Remove button */
+.do-date i {
+  font-size: 10px;
+
+  color: #198754;
+}
+/* Remove */
 
 .remove-do-btn {
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
+
+  padding: 0;
 
   border: 0;
+
   border-radius: 5px;
 
   background: transparent;
+
   color: #adb5bd;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  transition: all 0.2s ease;
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .remove-do-btn:hover {
-  background: #fff1f1;
+  background: #fff0f0;
+
   color: #dc3545;
 }
 
-/* =========================================
+/* =========================================================
    DO Details
-   ========================================= */
+   ========================================================= */
 
-.do-card-details {
+.selected-do-details {
   display: grid;
 
   grid-template-columns: 1fr 1fr;
 
-  gap: 8px;
+  gap: 6px 12px;
 
-  margin-top: 14px;
+  margin-top: 9px;
 
-  padding-top: 12px;
+  padding-top: 8px;
 
-  border-top: 1px solid #f0f0f0;
+  padding-left: 3px;
+
+  border-top: 1px solid #f0f1f2;
 }
 
-.detail-item {
-  display: flex;
-  flex-direction: column;
-
+.selected-do-details > div {
   min-width: 0;
 }
 
-.detail-label {
-  font-size: 10px;
+.selected-do-details span {
+  display: block;
+
+  margin-bottom: 1px;
+
+  font-size: 9px;
+
+  line-height: 1.2;
 
   text-transform: uppercase;
 
-  color: #8b939a;
-
   letter-spacing: 0.3px;
+
+  color: #9aa1a8;
 }
 
-.detail-value {
-  margin-top: 2px;
+.selected-do-details strong {
+  display: block;
 
-  font-size: 12px;
+  font-size: 11px;
+
+  line-height: 1.3;
+
   font-weight: 500;
 
   color: #343a40;
 
   white-space: nowrap;
+
   overflow: hidden;
+
   text-overflow: ellipsis;
 }
 
-/* =========================================
-   Empty Cart
-   ========================================= */
+.customer-detail {
+  grid-column: span 2;
+}
 
-.empty-cart {
+/* =========================================================
+   Empty State
+   ========================================================= */
+
+.empty-selection {
   height: 100%;
 
   display: flex;
+
   flex-direction: column;
 
   align-items: center;
+
   justify-content: center;
 
   text-align: center;
 
-  padding: 30px;
+  padding: 25px;
 }
 
-.empty-cart-icon {
-  width: 65px;
-  height: 65px;
+.empty-selection-icon {
+  width: 52px;
+  height: 52px;
+
+  margin-bottom: 12px;
 
   border-radius: 50%;
 
-  background: #e9ecef;
-  color: #6c757d;
+  background: #eef0f2;
+
+  color: #8a929a;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  font-size: 24px;
-
-  margin-bottom: 15px;
+  font-size: 19px;
 }
 
-.empty-cart h6 {
-  margin-bottom: 6px;
+.empty-selection h6 {
+  margin: 0 0 5px;
+
+  font-size: 13px;
 
   font-weight: 600;
+
+  color: #343a40;
 }
 
-.empty-cart p {
+.empty-selection p {
+  max-width: 230px;
+
   margin: 0;
 
-  color: #6c757d;
-
-  font-size: 12px;
+  font-size: 11px;
 
   line-height: 1.5;
+
+  color: #8a929a;
 }
 
-/* =========================================
-   Cart Footer
-   ========================================= */
+/* =========================================================
+   Footer
+   ========================================================= */
 
-.planning-cart-footer {
-  padding: 15px 18px;
+.selection-cart-footer {
+  padding: 10px 14px 12px;
 
   background: #fff;
 
-  border-top: 1px solid #e9ecef;
+  border-top: 1px solid #e5e7eb;
+
+  box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.03);
 }
 
-.selection-summary {
+.selected-count {
   display: flex;
+
   align-items: center;
+
   justify-content: space-between;
 
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 
-  font-size: 13px;
+  font-size: 11px;
 
-  color: #6c757d;
+  color: #7a828a;
 }
 
-.selection-summary strong {
-  color: #212529;
-  font-size: 14px;
+.selected-count strong {
+  min-width: 24px;
+
+  height: 22px;
+
+  padding: 0 6px;
+
+  border-radius: 11px;
+
+  background: #e8f5ee;
+
+  color: #198754;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 11px;
 }
 
-.next-btn {
+.next-planning-btn {
   width: 100%;
 
-  height: 42px;
+  height: 38px;
 
-  font-size: 13px;
+  border-radius: 6px;
+
+  font-size: 12px;
+
   font-weight: 500;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: all 0.15s ease;
 }
 
-/* =========================================
-   Scrollbar
-   ========================================= */
+.next-planning-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
 
-.planning-cart-body::-webkit-scrollbar {
-  width: 5px;
+  box-shadow: 0 3px 8px rgba(25, 135, 84, 0.2);
 }
 
-.planning-cart-body::-webkit-scrollbar-track {
-  background: transparent;
+/* =========================================================
+   Animations
+   ========================================================= */
+
+@keyframes cartOverlayFade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
-.planning-cart-body::-webkit-scrollbar-thumb {
-  background: #ced4da;
-  border-radius: 10px;
-}
-
-.planning-cart-body::-webkit-scrollbar-thumb:hover {
-  background: #adb5bd;
-}
-
-/* =========================================
-   Responsive
-   ========================================= */
+/* =========================================================
+   Mobile
+   ========================================================= */
 
 @media (max-width: 576px) {
-  .planning-cart {
+  .selection-cart {
     width: 100%;
+
     max-width: 100%;
   }
 }
