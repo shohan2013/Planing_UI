@@ -1,0 +1,538 @@
+.planning-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  margin: 16px 16px;
+  padding: 12px 16px;
+
+  font-size: 14px;
+  font-weight: 500;
+  color: #5f6368;
+
+  background-color: #f8f9fa;
+  border: 1px solid #e2e5e9;
+  border-radius: 6px;
+
+  i {
+    font-size: 15px;
+    color: #ff0f0f;
+  }
+}
+
+/* =========================================================
+   Floating Selection Cart Button
+   ========================================================= */
+
+.selection-cart-trigger {
+  position: fixed;
+
+  right: 24px;
+  bottom: 30px;
+
+  width: 58px;
+  height: 58px;
+
+  border: none;
+  border-radius: 50%;
+
+  background: #198754;
+  color: #fff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 20px;
+
+  cursor: pointer;
+
+  z-index: 1040;
+
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.selection-cart-trigger:hover {
+  transform: translateY(-3px);
+
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+/* Cart count */
+
+.cart-badge {
+  position: absolute;
+
+  top: -5px;
+  right: -5px;
+
+  min-width: 23px;
+  height: 23px;
+
+  padding: 0 6px;
+
+  border-radius: 50%;
+
+  background: #dc3545;
+  color: #fff;
+
+  border: 2px solid #fff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* =========================================================
+   Dark Overlay
+   ========================================================= */
+
+.cart-overlay {
+  position: fixed;
+
+  inset: 0;
+
+  background: rgba(0, 0, 0, 0.35);
+
+  z-index: 1045;
+
+  animation: cartOverlayFade 0.25s ease;
+}
+
+@keyframes cartOverlayFade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* =========================================================
+   Right Side Cart
+   ========================================================= */
+
+.selection-cart {
+  position: fixed;
+
+  top: 0;
+  right: 0;
+
+  width: 420px;
+  max-width: 90vw;
+  height: 100vh;
+
+  background: #fff;
+
+  z-index: 1050;
+
+  display: flex;
+  flex-direction: column;
+
+  box-shadow: -8px 0 30px rgba(0, 0, 0, 0.15);
+
+  transform: translateX(105%);
+
+  transition: transform 0.3s ease-in-out;
+
+  visibility: hidden;
+}
+
+/* Open */
+
+.selection-cart.open {
+  transform: translateX(0);
+
+  visibility: visible;
+}
+
+/* =========================================================
+   Cart Header
+   ========================================================= */
+
+.selection-cart-header {
+  min-height: 78px;
+
+  padding: 16px 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  border-bottom: 1px solid #e9ecef;
+
+  background: #fff;
+}
+
+.selection-cart-header h5 {
+  margin: 0;
+
+  font-size: 16px;
+  font-weight: 600;
+
+  color: #212529;
+}
+
+.selection-cart-header h5 i {
+  color: #198754;
+}
+
+.selection-cart-header span {
+  display: block;
+
+  margin-top: 4px;
+
+  color: #6c757d;
+
+  font-size: 12px;
+}
+
+/* Close button */
+
+.cart-close-btn {
+  width: 34px;
+  height: 34px;
+
+  border: 0;
+  border-radius: 6px;
+
+  background: #f8f9fa;
+
+  color: #6c757d;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.cart-close-btn:hover {
+  background: #e9ecef;
+
+  color: #212529;
+}
+
+/* =========================================================
+   Cart Body
+   ========================================================= */
+
+.selection-cart-body {
+  flex: 1;
+
+  overflow-y: auto;
+
+  padding: 16px;
+
+  background: #f7f8fa;
+}
+
+/* Scrollbar */
+
+.selection-cart-body::-webkit-scrollbar {
+  width: 5px;
+}
+
+.selection-cart-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.selection-cart-body::-webkit-scrollbar-thumb {
+  background: #ced4da;
+
+  border-radius: 10px;
+}
+
+/* =========================================================
+   Selected DO Card
+   ========================================================= */
+
+.selected-do-card {
+  padding: 14px;
+
+  margin-bottom: 12px;
+
+  background: #fff;
+
+  border: 1px solid #e1e5e9;
+
+  border-radius: 8px;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.selected-do-card:hover {
+  border-color: #198754;
+
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* Card header */
+
+.selected-do-header {
+  display: flex;
+  align-items: center;
+}
+
+/* Truck icon */
+
+.do-icon {
+  width: 38px;
+  height: 38px;
+
+  flex-shrink: 0;
+
+  border-radius: 7px;
+
+  background: #e8f5ee;
+
+  color: #198754;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-right: 10px;
+}
+
+/* Main information */
+
+.do-main-info {
+  flex: 1;
+
+  min-width: 0;
+}
+
+.do-code {
+  font-size: 14px;
+
+  font-weight: 600;
+
+  color: #212529;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+.do-date {
+  margin-top: 2px;
+
+  font-size: 11px;
+
+  color: #6c757d;
+}
+
+/* Remove */
+
+.remove-do-btn {
+  width: 30px;
+  height: 30px;
+
+  border: none;
+  border-radius: 5px;
+
+  background: transparent;
+
+  color: #adb5bd;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.remove-do-btn:hover {
+  background: #fff1f1;
+
+  color: #dc3545;
+}
+
+/* =========================================================
+   DO Details
+   ========================================================= */
+
+.selected-do-details {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 10px;
+
+  margin-top: 13px;
+
+  padding-top: 12px;
+
+  border-top: 1px solid #f0f0f0;
+}
+
+.selected-do-details > div {
+  min-width: 0;
+}
+
+.selected-do-details span {
+  display: block;
+
+  margin-bottom: 2px;
+
+  font-size: 10px;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.3px;
+
+  color: #8b939a;
+}
+
+.selected-do-details strong {
+  display: block;
+
+  font-size: 12px;
+
+  font-weight: 500;
+
+  color: #343a40;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+.customer-detail {
+  grid-column: span 2;
+}
+
+/* =========================================================
+   Empty State
+   ========================================================= */
+
+.empty-selection {
+  height: 100%;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  text-align: center;
+
+  padding: 30px;
+}
+
+.empty-selection-icon {
+  width: 65px;
+  height: 65px;
+
+  margin-bottom: 15px;
+
+  border-radius: 50%;
+
+  background: #e9ecef;
+
+  color: #6c757d;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 24px;
+}
+
+.empty-selection h6 {
+  margin-bottom: 6px;
+
+  font-weight: 600;
+
+  color: #343a40;
+}
+
+.empty-selection p {
+  max-width: 250px;
+
+  margin: 0;
+
+  font-size: 12px;
+
+  line-height: 1.5;
+
+  color: #6c757d;
+}
+
+/* =========================================================
+   Cart Footer
+   ========================================================= */
+
+.selection-cart-footer {
+  padding: 15px 18px;
+
+  background: #fff;
+
+  border-top: 1px solid #e9ecef;
+}
+
+.selected-count {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  margin-bottom: 12px;
+
+  font-size: 13px;
+
+  color: #6c757d;
+}
+
+.selected-count strong {
+  color: #212529;
+
+  font-size: 14px;
+}
+
+.next-planning-btn {
+  height: 42px;
+
+  font-size: 13px;
+
+  font-weight: 500;
+}
+
+/* =========================================================
+   Mobile
+   ========================================================= */
+
+@media (max-width: 576px) {
+  .selection-cart {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .selection-cart-trigger {
+    right: 18px;
+    bottom: 20px;
+  }
+}

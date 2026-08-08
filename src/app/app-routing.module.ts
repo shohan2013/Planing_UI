@@ -89,9 +89,7 @@ const routes: Routes = [
       {
         path: 'planning',
         loadComponent: () =>
-          import('./pages/Planning/delivery-orders-landing/delivery-order-landing').then(
-            (m) => m.DeliveryOrderLanding,
-          ),
+          import('./pages/planning/planning').then((m) => m.Planning),
       },
 
       // Elements

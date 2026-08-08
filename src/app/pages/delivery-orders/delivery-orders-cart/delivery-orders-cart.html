@@ -1,0 +1,104 @@
+<!-- Selected Delivery Orders Cart -->
+<div class="planning-cart" [class.show]="selectedDeliveryOrders.length > 0">
+  <!-- Cart Header -->
+  <div class="planning-cart-header">
+    <div>
+      <div class="cart-title">
+        <i class="fa-solid fa-cart-shopping me-2"></i>
+        Selected Delivery Orders
+      </div>
+
+      <small class="cart-subtitle">
+        {{ selectedDeliveryOrders.length }} order(s) selected
+      </small>
+    </div>
+
+    <button
+      type="button"
+      class="cart-close-btn"
+      (click)="closeSelectionCart()"
+      title="Close"
+    >
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+
+  <!-- Cart Body -->
+  <div class="planning-cart-body">
+    @if (selectedDeliveryOrders.length > 0) { @for (order of
+    selectedDeliveryOrders; track order.id) {
+
+    <div class="selected-do-card">
+      <div class="do-card-top">
+        <div class="do-icon">
+          <i class="fa-solid fa-truck"></i>
+        </div>
+
+        <div class="do-info">
+          <div class="do-number">{{ order.deliveryOrderNo }}</div>
+
+          <div class="do-date">{{ order.date | dateTime }}</div>
+        </div>
+
+        <button
+          type="button"
+          class="remove-do-btn"
+          title="Remove"
+          (click)="removeDeliveryOrder(order.id)"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="do-card-details">
+        <div class="detail-item">
+          <span class="detail-label">Customer</span>
+          <span class="detail-value"> {{ order.customerName }} </span>
+        </div>
+
+        <div class="detail-item">
+          <span class="detail-label">Unit</span>
+          <span class="detail-value"> {{ order.unitName }} </span>
+        </div>
+
+        <div class="detail-item">
+          <span class="detail-label">Quantity</span>
+          <span class="detail-value"> {{ order.quantity }} </span>
+        </div>
+      </div>
+    </div>
+
+    } } @else {
+
+    <div class="empty-cart">
+      <div class="empty-cart-icon">
+        <i class="fa-solid fa-cart-shopping"></i>
+      </div>
+
+      <h6>No Delivery Orders</h6>
+
+      <p>Select delivery orders from the list to start planning.</p>
+    </div>
+
+    }
+  </div>
+
+  <!-- Cart Footer -->
+  <div class="planning-cart-footer">
+    <div class="selection-summary">
+      <span>Total Selected</span>
+
+      <strong> {{ selectedDeliveryOrders.length }} </strong>
+    </div>
+
+    <button
+      type="button"
+      class="btn btn-success next-btn"
+      [disabled]="selectedDeliveryOrders.length === 0"
+      (click)="goToMergeOrSplit()"
+    >
+      Next
+      <i class="fa-solid fa-arrow-right ms-2"></i>
+    </button>
+  </div>
+</div>

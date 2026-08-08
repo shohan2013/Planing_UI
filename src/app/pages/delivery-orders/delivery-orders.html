@@ -1,8 +1,8 @@
 <div class="user-card">
-  <div class="page-header">
-    <h5><b>DELIVERY ORDERS</b></h5>
+  <div class="planning-hint">
+    <i class="fa-solid fa-circle-info"></i>
+    <span> Select delivery orders to start planning...</span>
   </div>
-  <hr />
   <div class="card-body">
     <div class="d-flex justify-content-end align-items-center gap-3 mb-3">
       <div style="width: 25%">
@@ -76,7 +76,11 @@
         <thead>
           <tr>
             <th style="width: 40px">
-              <input type="checkbox" (change)="toggleAll($event)" />
+              <input
+                type="checkbox"
+                [checked]="isAllSelected()"
+                (change)="toggleAll($event)"
+              />
             </th>
             <th>DO CODE</th>
             <th>CREATED DATE</th>
@@ -116,7 +120,11 @@
           $index) {
           <tr>
             <td>
-              <input type="checkbox" />
+              <input
+                type="checkbox"
+                [checked]="isSelected(item.SOID)"
+                (change)="toggleSelection(item, $event)"
+              />
             </td>
             <td>{{item.Code}}</td>
             <td>{{item.CreatedDate | dateTime}}</td>
@@ -171,16 +179,144 @@
         </tbody>
       </table>
     </div>
-  </div>
 
-  <div class="card-footer">
-    <app-pagination
-      [(currentPage)]="currentPage"
-      [(pageSize)]="pageSize"
-      [totalItems]="totalItems()"
-      (pageChanged)="onPageChange($event)"
-      (pageSizeChanged)="onPageSizeChange($event)"
-    >
-    </app-pagination>
+    <div class="card-footer">
+      <app-pagination
+        [(currentPage)]="currentPage"
+        [(pageSize)]="pageSize"
+        [totalItems]="totalItems()"
+        (pageChanged)="onPageChange($event)"
+        (pageSizeChanged)="onPageSizeChange($event)"
+      >
+      </app-pagination>
+    </div>
   </div>
 </div>
+
+<!-- Floating Selection Cart Button -->
+@if (selectedDeliveryOrders().length > 0) {
+<button
+  type="button"
+  class="selection-cart-trigger"
+  (click)="toggleCart()"
+  title="View selected Delivery Orders"
+>
+  <i class="fa-solid fa-cart-shopping"></i>
+
+  <span class="cart-badge"> {{ selectedDeliveryOrders().length }} </span>
+</button>
+}
+
+<!-- Cart Overlay -->
+@if (cartOpen()) {
+<div class="cart-overlay" (click)="closeCart()"></div>
+}
+
+<!-- Right Side Cart -->
+<aside class="selection-cart" [class.open]="cartOpen()">
+  <!-- Header -->
+  <div class="selection-cart-header">
+    <div>
+      <h5>
+        <i class="fa-solid fa-cart-shopping me-2"></i>
+        Selected Delivery Orders
+      </h5>
+
+      <span> {{ selectedDeliveryOrders().length }} order(s) selected </span>
+    </div>
+
+    <button
+      type="button"
+      class="cart-close-btn"
+      (click)="closeCart()"
+      title="Close"
+    >
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+
+  <!-- Body -->
+  <div class="selection-cart-body">
+    @if (selectedDeliveryOrders().length > 0) { @for ( item of
+    selectedDeliveryOrders(); track item.SOID ) {
+
+    <div class="selected-do-card">
+      <div class="selected-do-header">
+        <div class="do-icon">
+          <i class="fa-solid fa-truck"></i>
+        </div>
+
+        <div class="do-main-info">
+          <div class="do-code">{{ item.Code }}</div>
+
+          <div class="do-date">{{ item.CreatedDate | dateTime }}</div>
+        </div>
+
+        <button
+          type="button"
+          class="remove-do-btn"
+          (click)="removeSelection(item.SOID)"
+          title="Remove"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="selected-do-details">
+        <div>
+          <span>Unit</span>
+          <strong>{{ item.Unit }}</strong>
+        </div>
+
+        <div>
+          <span>Business</span>
+          <strong>{{ item.Business }}</strong>
+        </div>
+
+        <div class="customer-detail">
+          <span>Customer</span>
+          <strong>{{ item.CustomerName }}</strong>
+        </div>
+
+        <div>
+          <span>Amount</span>
+          <strong>{{ item.TotalAmount }}</strong>
+        </div>
+      </div>
+    </div>
+
+    } } @else {
+
+    <div class="empty-selection">
+      <div class="empty-selection-icon">
+        <i class="fa-solid fa-cart-shopping"></i>
+      </div>
+
+      <h6>No Delivery Orders Selected</h6>
+
+      <p>Select Delivery Orders from the table to start planning.</p>
+    </div>
+
+    }
+  </div>
+
+  <!-- Footer -->
+  <div class="selection-cart-footer">
+    <div class="selected-count">
+      <span>Selected Orders</span>
+
+      <strong> {{ selectedDeliveryOrders().length }} </strong>
+    </div>
+
+    <button
+      type="button"
+      class="btn btn-success w-100 next-planning-btn"
+      [disabled]="selectedDeliveryOrders().length === 0"
+      (click)="goToNextStep()"
+    >
+      Continue to Merge / Split
+
+      <i class="fa-solid fa-arrow-right ms-2"></i>
+    </button>
+  </div>
+</aside>

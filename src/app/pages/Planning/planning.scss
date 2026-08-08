@@ -1,0 +1,22 @@
+.planning-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  margin: 16px 0;
+  padding: 12px 16px;
+
+  font-size: 14px;
+  font-weight: 500;
+  color: #5f6368;
+
+  background-color: #f8f9fa;
+  border: 1px solid #e2e5e9;
+  border-radius: 6px;
+
+  i {
+    font-size: 15px;
+    color: #ff330f;
+  }
+}

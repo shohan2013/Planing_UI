@@ -1,60 +1,28 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  OnDestroy,
-  OnInit,
-  signal,
-} from '@angular/core';
-
-import { debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
-import { PermissionService } from 'src/app/core/services/Permission/PermissionService';
-import { IPermission } from 'src/app/core/model/Permission/Permission';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { NgSelectModule } from '@ng-select/ng-select';
-import { CommonService } from 'src/app/core/services/Common/CommonService';
-
-import { Submenu } from '../../SubMenu/submenu/submenu';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { Menu } from '../../Menu/menu/menu';
-import { AccessPermission } from '../../Access/access-permission/access-permission';
-import { Approvematrix } from '../../ApprovalMatrix/Matrix/approvematrix/approvematrix';
+import { debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
+import { CommonService } from 'src/app/core/services/Common/CommonService';
+import { DeliveryOrders } from '../delivery-orders/delivery-orders';
 
 @Component({
-  selector: 'app-permission',
-  imports: [
-    CommonModule,
-    FormsModule,
-    NgSelectModule,
-    Menu,
-    Submenu,
-    AccessPermission,
-    Approvematrix,
-  ],
-  standalone: true,
-  templateUrl: './permission.html',
-  styleUrls: ['./permission.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-planning',
+  imports: [DeliveryOrders],
+  templateUrl: './planning.html',
+  styleUrl: './planning.scss',
 })
-export class Permission implements OnInit, OnDestroy {
+export class Planning implements OnInit, OnDestroy {
   searchText = '';
   selectedId: number;
-
-  paginatedItems: IPermission[] = [];
-
+  //paginatedItems: IPermission[] = [];
   EmpList: any[] = []; // dropdown source
   selectedUser: number;
-
   search$ = new Subject<string>();
-
   private destroy$ = new Subject<void>();
-
   currentJustify = 'start';
   currentOrientation = 'horizontal';
   disabled = true; // For disabled tab examples
 
   constructor(
-    private permissionservice: PermissionService,
     private commonservice: CommonService,
     private modalService: NgbModal,
   ) {}
@@ -62,7 +30,7 @@ export class Permission implements OnInit, OnDestroy {
     this.GetEmpInfo();
   }
 
-  activeTab = signal<string>('menu');
+  activeTab = signal<string>('deliveryOrders');
 
   onTabChange(tab: string) {
     this.activeTab.set(tab);
