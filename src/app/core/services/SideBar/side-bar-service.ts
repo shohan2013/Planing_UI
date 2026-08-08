@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { GlobalConstant } from 'src/app/core/constants/global.constants';
 import { ISideBarMenu } from 'src/app/core/model/SideBar/SideBar';
-import { environment } from 'src/environments/environment.prod';
+import { environment } from 'src/environments/environment';
 
 
 @Injectable({
