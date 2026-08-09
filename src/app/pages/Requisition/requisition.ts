@@ -107,7 +107,7 @@ export class Requisition
   uoms: IUOM[] = [];
   filteredUOMs: IUOM[] = []; //for create/edit modal Unit
 
-  fileStatusList: IDropdownBind[] = [];
+  DocStatusList: IDropdownBind[] = [];
 
   isItemSearching = false;
   itemSearchCompleted = false;
@@ -232,9 +232,9 @@ export class Requisition
     return this.uoms.find((x) => Number(x.Id) === Number(uomId))?.Name ?? '-';
   }
 
-  getFileStatusName(fileStatusId: number): string {
+  getDocStatusName(DocStatusId: number): string {
     return (
-      this.fileStatusList.find((x) => Number(x.Id) === Number(fileStatusId))
+      this.DocStatusList.find((x) => Number(x.Id) === Number(DocStatusId))
         ?.Name ?? '-'
     );
   }
@@ -278,7 +278,7 @@ export class Requisition
     this.commonService.GetDocumentStatusList()
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
-        this.fileStatusList = data;
+        this.DocStatusList = data;
       });
   }
 
@@ -703,7 +703,7 @@ export class Requisition
       SalesQuantity: new FormControl(Number(lineValue.SalesQuantity) || 0),
 
       Remarks: new FormControl(lineValue.Remarks ?? ''),
-      FileStatusId: new FormControl(1),
+      DocStatusId: new FormControl(1),
       IsActive: new FormControl(true),
     });
 
@@ -876,8 +876,8 @@ export class Requisition
                 ),
 
                 Remarks: new FormControl(line.Remarks ?? ''),
-                FileStatusId: new FormControl(
-                  Number(line.FileStatusId),
+                DocStatusId: new FormControl(
+                  Number(line.DocStatusId),
                 ),
                 IsActive: new FormControl(true),
               }),
@@ -999,7 +999,7 @@ export class Requisition
         EndDate: new Date(formValue.EndDate),
 
         Remarks: formValue.Remarks?.trim() ?? '',
-        FileStatusId: 1,
+        DocStatusId: 1,
         IsActive: true,
         CREATEDBY: enroll,
         UPDATEDBY: enroll,
@@ -1022,7 +1022,7 @@ export class Requisition
         SalesQuantity: Number(line.SalesQuantity) || 0,
 
         Remarks: line.Remarks?.trim() ?? '',
-        FileStatusId: 1,
+        DocStatusId: 1,
         IsActive: true,
       })),
 
@@ -1096,7 +1096,7 @@ export class Requisition
         EndDate: new Date(formValue.EndDate),
 
         Remarks: formValue.Remarks?.trim() ?? '',
-        FileStatusId: Number(existingHeader.FileStatusId),
+        DocStatusId: Number(existingHeader.DocStatusId),
         IsActive: existingHeader.IsActive,
         CREATEDBY: existingHeader.CREATEDBY,
         UPDATEDBY: enroll,
@@ -1122,7 +1122,7 @@ export class Requisition
           SalesQuantity: Number(line.SalesQuantity) || 0,
 
           Remarks: line.Remarks?.trim() ?? '',
-          FileStatusId: 1, //Number(line.FileStatusId),
+          DocStatusId: 1, //Number(line.DocStatusId),
           IsActive: true,
         })),
       DeletedLineIds: this.deletedLineIds,

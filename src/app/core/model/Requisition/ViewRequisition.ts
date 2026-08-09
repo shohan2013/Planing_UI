@@ -13,7 +13,7 @@ export interface IViewRequisitionHeader {
   UPDATEDBY: number | null;
   CREATEDDATE: Date | null;
   UPDATEDDATE: Date | null;
-  FileStatusId: number;
+  DocStatusId: number;
   IsActive: boolean;
 }
 
@@ -30,7 +30,7 @@ export interface IViewRequisitionLine {
   StockQuantity: number | null;
   SalesQuantity: number | null;
   Remarks: string | null;
-  FileStatusId: number;
+  DocStatusId: number;
   IsActive: boolean;
 }
 

@@ -9,7 +9,7 @@ export interface IRequisitionHeader {
   EndDate: Date;
 
   Remarks: string;
-  FileStatusId: number;
+  DocStatusId: number;
   IsActive: boolean;
   CREATEDBY: number;
   UPDATEDBY: number;
@@ -30,7 +30,7 @@ export interface IRequisitionLine {
   SalesQuantity: number;
 
   Remarks: string | null;
-  FileStatusId: number;
+  DocStatusId: number;
   IsActive: boolean;
 }
 

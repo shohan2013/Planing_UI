@@ -172,14 +172,14 @@
               <span
                 class="g-status g-status-lg"
                 [ngClass]="{
-                    'status-pending': item.FileStatusId === 1,
-                    'status-approve': item.FileStatusId === 2,
-                    'status-reject': item.FileStatusId === 3
+                    'status-pending': item.DocStatusId === 1,
+                    'status-approve': item.DocStatusId === 2,
+                    'status-reject': item.DocStatusId === 3
                   }"
               >
                 <span class="g-dot"></span>
 
-                {{ getFileStatusName(item.FileStatusId) }}
+                {{ getDocStatusName(item.DocStatusId) }}
               </span>
             </td>
 
@@ -321,13 +321,13 @@
               <span
                 class="g-status g-status-lg"
                 [ngClass]="{
-                            'status-pending': selectedRequisition.Header.FileStatusId === 1,
-                            'status-approve': selectedRequisition.Header.FileStatusId === 2,
-                            'status-reject': selectedRequisition.Header.FileStatusId === 3
+                            'status-pending': selectedRequisition.Header.DocStatusId === 1,
+                            'status-approve': selectedRequisition.Header.DocStatusId === 2,
+                            'status-reject': selectedRequisition.Header.DocStatusId === 3
                         }"
               >
                 <span class="g-dot"></span>
-                {{ getFileStatusName(selectedRequisition.Header.FileStatusId) }}
+                {{ getDocStatusName(selectedRequisition.Header.DocStatusId) }}
               </span>
             </td>
           </tr>
@@ -402,18 +402,18 @@
               <span
                 class="g-status g-status-lg"
                 [ngClass]="{
-      'status-pending': line.FileStatusId === 1,
-      'status-approve': line.FileStatusId === 2,
-      'status-reject': line.FileStatusId === 3
+      'status-pending': line.DocStatusId === 1,
+      'status-approve': line.DocStatusId === 2,
+      'status-reject': line.DocStatusId === 3
     }"
               >
                 <span class="g-dot"></span>
 
-                {{ getFileStatusName(line.FileStatusId) }}
+                {{ getDocStatusName(line.DocStatusId) }}
               </span>
             </td>
 
-            <!-- <td>{{ getFileStatusName(line.FileStatusId) }}</td> -->
+            <!-- <td>{{ getDocStatusName(line.DocStatusId) }}</td> -->
 
             <!-- <td>
 
@@ -948,14 +948,14 @@
                 <span
                   class="g-status g-status-sm"
                   [ngClass]="{
-                    'status-pending': +line.get('FileStatusId')?.value === 1,
-                    'status-approve': +line.get('FileStatusId')?.value === 2,
-                    'status-reject': +line.get('FileStatusId')?.value === 3
+                    'status-pending': +line.get('DocStatusId')?.value === 1,
+                    'status-approve': +line.get('DocStatusId')?.value === 2,
+                    'status-reject': +line.get('DocStatusId')?.value === 3
                   }"
                 >
                   <span class="g-dot"></span>
 
-                  {{ getFileStatusName(line.get('FileStatusId')?.value) }}
+                  {{ getDocStatusName(line.get('DocStatusId')?.value) }}
                 </span>
               </td>
 
