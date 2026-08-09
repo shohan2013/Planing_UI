@@ -17,10 +17,8 @@ import {
 import {
   catchError,
   debounceTime,
-  forkJoin,
   distinctUntilChanged,
   finalize,
-  map,
   Observable,
   of,
   Subject,
@@ -29,17 +27,32 @@ import {
   tap,
 } from 'rxjs';
 
+
+
+
+
+
 import { IUnit } from 'src/app/core/model/Common/Unit/Unit';
 import { IBusiness } from 'src/app/core/model/Common/BusinessType/BusinessType';
 import { IProductType } from 'src/app/core/model/Common/ProductType/ProductType';
 import { IItem } from 'src/app/core/model/Common/Items/Item';
-import { IRequisitionItemName } from 'src/app/core/model/Common/RequisitionItemName/RequisitionItemName';
 import { IUOM } from 'src/app/core/model/Common/UOM/UOM';
 import { CommonService } from 'src/app/core/services/Common/CommonService';
 import { IDropdownBind } from 'src/app/core/model/Common/dropdown-bind';
 
+
+
 import { RequisitionService } from 'src/app/core/services/Requisition/requisition.service';
 import { IRequisition } from 'src/app/core/model/Requisition/Requisition';
+
+
+import {
+  IViewRequisition,
+  IViewRequisitionHeader,
+  IViewRequisitionLine,
+} from 'src/app/core/model/Requisition/ViewRequisition';
+
+
 
 import {
   ServerQueryRequest,
@@ -65,20 +78,27 @@ import { DateTimePipe } from '../../shared/pipes/date-time-pipe';
   templateUrl: './requisition.html',
   styleUrl: './requisition.scss',
 })
+
+
 export class Requisition
-  extends ServerSideFilteredPaginatedComponent<IRequisition>
+  extends ServerSideFilteredPaginatedComponent<IViewRequisitionHeader>
   implements OnInit, OnDestroy
 {
   submitted = false;
   lineSubmitted = false;
-  selectedRequisition: IRequisition | null = null;
+  
+
+  selectedRequisition: IViewRequisition | null = null;
+
   isViewLoading = false;
+  isSubmitting = false;
 
   isEditMode = false;
   editingReqID = 0;
   deletedLineIds: number[] = [];
 
   selectedUnitFilterId = 0;
+  selectedBusinessFilterId = 0;
 
   units: IUnit[] = [];
   businesses: IBusiness[] = [];
@@ -87,7 +107,7 @@ export class Requisition
   uoms: IUOM[] = [];
   filteredUOMs: IUOM[] = []; //for create/edit modal Unit
 
-  fileStatusList: IDropdownBind[] = [];
+  DocStatusList: IDropdownBind[] = [];
 
   isItemSearching = false;
   itemSearchCompleted = false;
@@ -140,18 +160,28 @@ export class Requisition
     this.watchDateRange();
   }
 
-  protected override fetchData(
-    request: ServerQueryRequest,
-  ): Observable<ServerQueryResponse<IRequisition>> {
+  protected override fetchData( request: ServerQueryRequest,): Observable<ServerQueryResponse<IViewRequisitionHeader>> {
     return this.requisitionService
-      .GetRequisition(request, this.selectedUnitFilterId)
+      .GetRequisition(
+        request,
+        this.selectedUnitFilterId,
+        this.selectedBusinessFilterId,
+      )
       .pipe(
         tap((response) => console.log('Requisition table response:', response)),
-      );
+      )
+      ;
   }
 
   onUnitFilterChange(unitId: number): void {
     this.selectedUnitFilterId = Number(unitId);
+    this.selectedBusinessFilterId = 0;
+    this.currentPage.set(1);
+    this.retry();
+  }
+
+  onBusinessFilterChange(businessId: number): void {
+    this.selectedBusinessFilterId = Number(businessId);
     this.currentPage.set(1);
     this.retry();
   }
@@ -202,61 +232,53 @@ export class Requisition
     return this.uoms.find((x) => Number(x.Id) === Number(uomId))?.Name ?? '-';
   }
 
-  getFileStatusName(fileStatusId: number): string {
+  getDocStatusName(DocStatusId: number): string {
     return (
-      this.fileStatusList.find((x) => Number(x.Id) === Number(fileStatusId))
+      this.DocStatusList.find((x) => Number(x.Id) === Number(DocStatusId))
         ?.Name ?? '-'
     );
   }
 
   loadCommonData(): void {
-    this.commonService
-      .GetUnitList()
+    this.commonService.GetUnitList()
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
         this.units = data;
       });
 
-    this.commonService
-      .GetBusinessList(this.selectedUnitId)
+    this.commonService.GetBusinessList(this.selectedUnitId)
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
         this.businesses = data;
 
-        // if (this.selectedUnitId) {
-        //   this.filterBusinesses();
-        // }
+        if (this.selectedUnitId) {
+          this.filterBusinesses();
+        }
       });
 
-    this.commonService
-      .GetProductTypeList()
+    this.commonService.GetProductTypeList()
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
         this.productTypes = data;
       });
 
-    // this.commonService.GetUOMList()
-    //   .pipe(takeUntil(this.destroy$))
-    //   .subscribe(data => {
-    //     this.uoms = data;
-    //   });
 
-    this.commonService
-      .GetUOMList()
+
+    this.commonService.GetUOMList()
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
         this.uoms = data;
+        console.log('UOMs loaded:', this.uoms);
 
         if (this.selectedUnitId) {
           this.filterUOMs();
         }
       });
 
-    this.commonService
-      .GetDocumentStatusList()
+    this.commonService.GetDocumentStatusList()
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
-        this.fileStatusList = data;
+        this.DocStatusList = data;
       });
   }
 
@@ -408,8 +430,7 @@ export class Requisition
     const endDate = this.formGroup.get('EndDate')?.value;
     const businessId = Number(this.formGroup.get('BusinessId')?.value);
 
-    this.commonService
-      .GetStockQty(
+    this.commonService.GetStockQty(
         startDate,
         endDate,
         this.selectedUnitId,
@@ -448,14 +469,15 @@ export class Requisition
     const startDate = this.formGroup.get('StartDate')?.value;
     const endDate = this.formGroup.get('EndDate')?.value;
 
-    this.commonService
-      .GetSalesQty(
+    const businessId = Number(this.formGroup.get('BusinessId')?.value);
+
+    this.commonService.GetSalesQty(
         startDate,
         endDate,
         this.selectedUnitId,
         productId,
-        null,
-        null,
+        null, //warehouseId,
+        null, //businessId,
       )
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -486,7 +508,7 @@ export class Requisition
 
   searchItems = (text$: Observable<string>): Observable<IItem[]> => {
     return text$.pipe(
-      debounceTime(800), //
+      debounceTime(800), 
       distinctUntilChanged(),
 
       switchMap((searchText) => {
@@ -533,15 +555,12 @@ export class Requisition
     if (typeof item === 'string') {
       return item;
     }
-
-    // return item ? `${item.Name} (${item.Id})` : '';
     return item ? item.Name : '';
   };
 
   scrollActiveItem(): void {
     setTimeout(() => {
       const dropdown = document.querySelector(
-        // 'ngb-typeahead-window.dropdown-menu'
         '.requisition-item-dropdown',
       ) as HTMLElement | null;
 
@@ -660,7 +679,7 @@ export class Requisition
     const lineValue = this.lineFormGroup.getRawValue();
     const productTypeId = Number(lineValue.ProductTypeId);
 
-    const selectedUOM = this.uoms.find(
+    const selectedUOM = this.filteredUOMs.find( //this.uoms.find(
       (uom) => Number(uom.Id) === Number(lineValue.UOMId),
     );
 
@@ -684,7 +703,7 @@ export class Requisition
       SalesQuantity: new FormControl(Number(lineValue.SalesQuantity) || 0),
 
       Remarks: new FormControl(lineValue.Remarks ?? ''),
-      FileStatusId: new FormControl(1),
+      DocStatusId: new FormControl(1),
       IsActive: new FormControl(true),
     });
 
@@ -713,137 +732,209 @@ export class Requisition
     this.itemSearchFailed = false;
   }
 
-  // removeLine(index:number): void {
-  //   this.lines.removeAt(index);
-  // }
-
   removeLine(index: number): void {
     const lineId = Number(this.lines.at(index).get('ID')?.value);
 
-    if (this.isEditMode && lineId > 0) {
+    if (this.isEditMode && lineId > 0  && !this.deletedLineIds.includes(lineId) ) {
       this.deletedLineIds.push(lineId);
     }
 
     this.lines.removeAt(index);
   }
 
-  openViewModal(content: any, requisition: IRequisition): void {
-    const activeLines = requisition.Lines.filter((x) => x.IsActive);
+  openViewModal(
+    content: any,
+    header: IViewRequisitionHeader,
+    ): void {
+      if (this.isViewLoading) {
+        return;
+      }
 
-    this.loadItemNames(activeLines).subscribe((lines) => {
-      this.selectedRequisition = {
-        Header: requisition.Header,
-        Lines: lines,
-        DeletedLineIds: [],
-      };
+      this.clearViewData();
+      this.isViewLoading = true;
 
-      this.modalService.open(content, {
-        fullscreen: true,
-      });
-    });
-  }
-  loadItemNames(lines: any[]): Observable<any[]> {
-    const items = lines.map((line) => ({
-      Type: Number(line.ProductTypeId),
-      Id: Number(line.ItemId),
-      Name: '',
-    }));
-
-    return this.commonService.GetRequisitionItemNames(items).pipe(
-      map((result) => {
-        return lines.map((line) => ({
-          ...line,
-          ItemName:
-            result.find(
-              (x) =>
-                Number(x.Type) === Number(line.ProductTypeId) &&
-                Number(x.Id) === Number(line.ItemId),
-            )?.Name ?? '',
-        }));
-      }),
-    );
-  }
-
-  openEditModal(content: any, requisition: IRequisition): void {
-    const activeLines = requisition.Lines.filter((x) => x.IsActive);
-
-    this.loadItemNames(activeLines).subscribe((lines) => {
-      this.resetCreateForm();
-
-      this.isEditMode = true;
-      this.editingReqID = requisition.Header.ReqID;
-      this.deletedLineIds = [];
-
-      this.selectedRequisition = {
-        Header: requisition.Header,
-        Lines: lines,
-        DeletedLineIds: [],
-      };
-
-      this.formGroup.patchValue({
-        UnitId: requisition.Header.UnitId,
-        BusinessId: requisition.Header.BusinessId,
-        ReqDate: String(requisition.Header.ReqDate).substring(0, 10),
-
-        StartDate: String(requisition.Header.StartDate).substring(0, 10),
-        EndDate: String(requisition.Header.EndDate).substring(0, 10),
-
-        Remarks: requisition.Header.Remarks,
-      });
-
-      this.filterBusinesses();
-      this.filterUOMs();
-      this.formGroup.get('UnitId')?.disable();
-
-      lines.forEach((line) => {
-        this.lines.push(
-          new FormGroup({
-            ID: new FormControl(Number(line.ID)),
-            ReqID: new FormControl(Number(line.ReqID)),
-            ProductTypeId: new FormControl(Number(line.ProductTypeId)),
-            ItemId: new FormControl(Number(line.ItemId)),
-            ItemName: new FormControl(line.ItemName ?? ''),
-            UOMId: new FormControl(Number(line.UOMId)),
-            UOMName: new FormControl(this.getUOMName(Number(line.UOMId))),
-            Quantity: new FormControl(Number(line.Quantity)),
-
-            StockQuantity: new FormControl(line.StockQuantity ?? 0),
-            SalesQuantity: new FormControl(line.SalesQuantity ?? 0),
-
-            Remarks: new FormControl(line.Remarks ?? ''),
-            FileStatusId: new FormControl(Number(line.FileStatusId)),
-            IsActive: new FormControl(true),
+      this.requisitionService
+        .GetLinesByReqId(header.ReqID)
+        .pipe(
+          takeUntil(this.destroy$),
+          finalize(() => {
+            this.isViewLoading = false;
           }),
-        );
-      });
+        )
+        .subscribe({
+          next: (lines: IViewRequisitionLine[]) => {
+            this.selectedRequisition = {
+              Header: header,
+              Lines: lines.filter((line) => line.IsActive),
+            };
 
-      this.modalService.open(content, {
-        fullscreen: true,
-        backdrop: 'static',
-        keyboard: false,
-        windowClass: 'requisition-fullscreen-modal',
-      });
-    });
+            const modalRef = this.modalService.open(content, {
+              fullscreen: true,
+            });
+
+            modalRef.result.then(
+              () => this.clearViewData(),
+              () => this.clearViewData(),
+            );
+          },
+          error: () => {
+            this.clearViewData();
+            this.toastr.error('Unable to load the requisition lines.');
+          },
+        });
+    }
+
+  clearViewData(): void {
+    this.selectedRequisition = null;
   }
+
+  toDateInputValue(
+      value: Date | string | null | undefined,
+    ): string {
+      if (!value) {
+        return '';
+      }
+
+      if (value instanceof Date) {
+        const year = value.getFullYear();
+        const month = String(value.getMonth() + 1).padStart(2, '0');
+        const day = String(value.getDate()).padStart(2, '0');
+
+        return `${year}-${month}-${day}`;
+      }
+
+      return value.substring(0, 10);
+    }
+
+
+  openEditModal(
+    content: any,
+    header: IViewRequisitionHeader,
+  ): void {
+    if (this.isViewLoading || this.isSubmitting) {
+      return;
+    }
+
+    this.isViewLoading = true;
+
+    this.requisitionService
+      .GetLinesByReqId(header.ReqID)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
+          this.isViewLoading = false;
+        }),
+      )
+      .subscribe({
+        next: (fetchedLines: IViewRequisitionLine[]) => {
+          const activeLines = fetchedLines.filter((line) => line.IsActive);
+
+          this.resetCreateForm();
+
+          this.isEditMode = true;
+          this.editingReqID = header.ReqID;
+          this.deletedLineIds = [];
+
+          this.selectedRequisition = {
+            Header: header,
+            Lines: activeLines,
+          };
+
+          this.formGroup.patchValue({
+            UnitId: header.UnitId,
+            BusinessId: header.BusinessId,
+            ReqDate: this.toDateInputValue(header.ReqDate),
+            StartDate: this.toDateInputValue(header.StartDate),
+            EndDate: this.toDateInputValue(header.EndDate),
+            Remarks: header.Remarks ?? '',
+          });
+
+          this.filterBusinesses();
+          this.filterUOMs();
+          this.formGroup.get('UnitId')?.disable();
+          this.formGroup.get('BusinessId')?.disable();
+
+          activeLines.forEach((line) => {
+            this.lines.push(
+              new FormGroup({
+                ID: new FormControl(Number(line.ID)),
+                ReqID: new FormControl(Number(line.ReqID)),
+                ProductTypeId: new FormControl(
+                  Number(line.ProductTypeId),
+                ),
+                ItemId: new FormControl(Number(line.ItemId)),
+                ItemName: new FormControl(line.ItemName ?? ''),
+                UOMId: new FormControl(Number(line.UOMId)),
+                UOMName: new FormControl(line.UOMName ?? ''),
+                Quantity: new FormControl(Number(line.Quantity)),
+
+                StockQuantity: new FormControl(
+                  Number(line.StockQuantity) || 0,
+                ),
+                SalesQuantity: new FormControl(
+                  Number(line.SalesQuantity) || 0,
+                ),
+
+                Remarks: new FormControl(line.Remarks ?? ''),
+                DocStatusId: new FormControl(
+                  Number(line.DocStatusId),
+                ),
+                IsActive: new FormControl(true),
+              }),
+            );
+          });
+
+          const modalRef = this.modalService.open(content, {
+            fullscreen: true,
+            backdrop: 'static',
+            keyboard: false,
+            windowClass: 'requisition-fullscreen-modal',
+          });
+
+          modalRef.result.then(
+            () => this.resetCreateForm(),
+            () => this.resetCreateForm(),
+          );
+        },
+        error: () => {
+          this.resetCreateForm();
+          this.toastr.error('Unable to load the requisition lines.');
+        },
+      });
+  }
+
+
 
   openCreateModal(content: any): void {
     this.resetCreateForm();
 
-    this.modalService.open(content, {
+    const modalRef = this.modalService.open(content, {
       fullscreen: true,
       backdrop: 'static',
       keyboard: false,
       windowClass: 'requisition-fullscreen-modal',
     });
+
+    modalRef.result.then(
+      () => this.resetCreateForm(),
+      () => this.resetCreateForm(),
+    );
   }
+
+
+
+
+
 
   resetCreateForm(): void {
     this.formGroup.get('UnitId')?.enable();
+    this.formGroup.get('BusinessId')?.enable();
 
     this.isEditMode = false;
     this.editingReqID = 0;
     this.deletedLineIds = [];
     this.selectedRequisition = null;
+
 
     this.lines.clear();
 
@@ -867,7 +958,17 @@ export class Requisition
     this.lineSubmitted = false;
   }
 
+  closeAndClearModal(): void {
+    this.modalService.dismissAll();
+    // this.resetCreateForm();
+  }
+
   Create(): void {
+
+    if (this.isSubmitting) {
+      return;
+    }
+
     this.submitted = true;
     this.formGroup.markAllAsTouched();
 
@@ -879,6 +980,8 @@ export class Requisition
 
       return;
     }
+
+    this.isSubmitting = true;
 
     const formValue = this.formGroup.getRawValue();
     const enroll = Number(localStorage.getItem('Enroll'));
@@ -896,7 +999,7 @@ export class Requisition
         EndDate: new Date(formValue.EndDate),
 
         Remarks: formValue.Remarks?.trim() ?? '',
-        FileStatusId: 1,
+        DocStatusId: 1,
         IsActive: true,
         CREATEDBY: enroll,
         UPDATEDBY: enroll,
@@ -919,7 +1022,7 @@ export class Requisition
         SalesQuantity: Number(line.SalesQuantity) || 0,
 
         Remarks: line.Remarks?.trim() ?? '',
-        FileStatusId: 1,
+        DocStatusId: 1,
         IsActive: true,
       })),
 
@@ -930,30 +1033,39 @@ export class Requisition
 
     this.requisitionService
       .addData(requisitionData)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntil(this.destroy$),finalize(() => {this.isSubmitting = false;}),
+      )
       .subscribe({
         next: (response) => {
           if (response.Status) {
             this.toastr.success(response.Message);
-            this.resetCreateForm();
-            this.modalService.dismissAll();
+            this.closeAndClearModal();
             this.currentPage.set(1);
             this.retry();
           } else {
             this.toastr.warning(
               response.Message || 'Unable to save the requisition.',
             );
+            this.closeAndClearModal();
           }
         },
         error: () => {
           this.toastr.error(
             'Something went wrong while saving the requisition.',
           );
+          this.closeAndClearModal();
         },
       });
   }
 
+
+
+
+
   Update(): void {
+    if (this.isSubmitting) {
+      return;
+    }
     this.submitted = true;
     this.formGroup.markAllAsTouched();
 
@@ -964,6 +1076,8 @@ export class Requisition
     ) {
       return;
     }
+
+    this.isSubmitting = true;
 
     const formValue = this.formGroup.getRawValue();
     const enroll = Number(localStorage.getItem('Enroll'));
@@ -982,7 +1096,7 @@ export class Requisition
         EndDate: new Date(formValue.EndDate),
 
         Remarks: formValue.Remarks?.trim() ?? '',
-        FileStatusId: existingHeader.FileStatusId,
+        DocStatusId: Number(existingHeader.DocStatusId),
         IsActive: existingHeader.IsActive,
         CREATEDBY: existingHeader.CREATEDBY,
         UPDATEDBY: enroll,
@@ -1008,34 +1122,40 @@ export class Requisition
           SalesQuantity: Number(line.SalesQuantity) || 0,
 
           Remarks: line.Remarks?.trim() ?? '',
-          FileStatusId: Number(line.FileStatusId),
+          DocStatusId: 1, //Number(line.DocStatusId),
           IsActive: true,
         })),
       DeletedLineIds: this.deletedLineIds,
     };
 
-    this.requisitionService
-      .updateData(requisitionData)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          if (response.Status) {
-            this.toastr.success(response.Message);
-            this.resetCreateForm();
-            this.modalService.dismissAll();
-            this.retry();
-          } else {
-            this.toastr.warning(
-              response.Message || 'Unable to update the requisition.',
-            );
-          }
-        },
-        error: () => {
-          this.toastr.error(
-            'Something went wrong while updating the requisition.',
+  this.requisitionService
+    .updateData(requisitionData)
+    .pipe(
+      takeUntil(this.destroy$),
+      finalize(() => {
+        this.isSubmitting = false;
+      }),
+    )
+    .subscribe({
+      next: (response) => {
+        if (response.Status) {
+          this.toastr.success(response.Message);
+          this.closeAndClearModal();
+          this.retry();
+        } else {
+          this.toastr.warning(
+            response.Message || 'Unable to update the requisition.',
           );
-        },
-      });
+          this.closeAndClearModal();
+        }
+      },
+      error: () => {
+        this.toastr.error(
+          'Something went wrong while updating the requisition.',
+        );
+        this.closeAndClearModal();
+      },
+    });
   }
 
   Delete(reqId: number): void {
@@ -1047,7 +1167,11 @@ export class Requisition
       return;
     }
 
-    this.requisitionService.deleteData(reqId).subscribe({
+   
+    this.requisitionService
+      .deleteData(reqId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
       next: (response) => {
         if (response.Status) {
           this.toastr.success(response.Message);
@@ -1066,6 +1190,7 @@ export class Requisition
   }
 
   ngOnDestroy(): void {
+    this.modalService.dismissAll();
     this.destroy$.next();
     this.destroy$.complete();
   }

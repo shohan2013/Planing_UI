@@ -19,8 +19,8 @@
 
       <!-- Right -->
       <div class="ms-auto d-flex align-items-center gap-3" style="width: 75%">
-        <!-- Filter -->
-        <div style="width: 260px">
+        <!-- Unit Filter -->
+        <div style="width: 230px">
           <div class="input-group">
             <div class="input-group-text">
               <i class="fa-solid fa-filter"></i>
@@ -32,11 +32,33 @@
               (ngModelChange)="onUnitFilterChange($event)"
             >
               <option [ngValue]="0">All Units</option>
+
               @for (unit of units; track unit.Id) {
-              <option [ngValue]="unit.Id">{{ unit.Name }}</option>
+                <option [ngValue]="unit.Id">{{ unit.Name }}</option>
               }
             </select>
           </div>
+        </div>
+
+        <!-- Business Filter -->
+        <div style="width: 230px">
+          <select
+            class="form-select"
+            [ngModel]="selectedBusinessFilterId"
+            (ngModelChange)="onBusinessFilterChange($event)"
+            [disabled]="selectedUnitFilterId === 0"
+          >
+            <option [ngValue]="0">All Businesses</option>
+
+            @for (business of businesses; track business.Id) {
+              @if (
+                selectedUnitFilterId === 0 ||
+                +business.UnitId === selectedUnitFilterId
+              ) {
+                <option [ngValue]="business.Id">{{ business.Name }}</option>
+              }
+            }
+          </select>
         </div>
 
         <!-- Search -->
@@ -118,71 +140,48 @@
             </td>
           </tr>
 
-          } @else { @for (item of paginatedItems(); track item.Header.ReqID; let
-          i = $index) {
+          } @else {
+          @for (item of paginatedItems(); track item.ReqID) {
 
           <tr>
             <!-- <td>
                   {{ ((currentPage() - 1) * pageSize()) + i + 1 }}
                 </td> -->
 
-            <td>{{ item.Header.ReqID }}</td>
+            <td>{{ item.ReqID }}</td>
 
-            <td>{{ item.Header.RequisitionNumber || '-' }}</td>
+            <td>{{ item.RequisitionNumber || '-' }}</td>
 
             <td>
-              {{ getUnitName(item.Header.UnitId) }}
-              <!-- ({{ item.Header.UnitId }}) -->
+              {{ getUnitName(item.UnitId) }}
             </td>
 
             <td>
-              {{ getBusinessName(item.Header.BusinessId) }}
-              <!-- ({{ item.Header.BusinessId }}) -->
+              {{ getBusinessName(item.BusinessId) }}
             </td>
 
-            <td>{{ item.Header.ReqDate| dateTime}}</td>
+            <td>{{ item.ReqDate | dateTime }}</td>
 
-            <td>{{ item.Header.Remarks || '-' }}</td>
+            <td>{{ item.Remarks || '-' }}</td>
 
-            <td>{{ item.Header.CREATEDBY }}</td>
+            <td>{{ item.CREATEDBY ?? '-' }}</td>
 
-            <td>{{ item.Header.CREATEDDATE | dateTime }}</td>
+            <td>{{ item.CREATEDDATE ? (item.CREATEDDATE | dateTime) : '-' }}</td>
 
             <td>
               <span
                 class="g-status g-status-lg"
                 [ngClass]="{
-                    'status-pending': item.Header.FileStatusId === 1,
-                    'status-approve': item.Header.FileStatusId === 2,
-                    'status-reject': item.Header.FileStatusId === 3
+                    'status-pending': item.DocStatusId === 1,
+                    'status-approve': item.DocStatusId === 2,
+                    'status-reject': item.DocStatusId === 3
                   }"
               >
                 <span class="g-dot"></span>
 
-                {{ getFileStatusName(item.Header.FileStatusId) }}
+                {{ getDocStatusName(item.DocStatusId) }}
               </span>
             </td>
-
-            <!-- <td>
-                  {{ item.Header.UPDATEDBY }}
-                </td>
-
-                <td>
-                  {{ item.Header.UPDATEDDATE | date: 'dd-MMM-yyyy h:mm a' }}
-                </td> -->
-
-            <!-- <td>
-
-                  <span
-                    class="g-status"
-                    [ngClass]="item.Header.IsActive ? 'active' : 'inactive'">
-
-                    <span class="g-dot"></span>
-
-                    {{ item.Header.IsActive ? 'Active' : 'Inactive' }}
-                  </span>
-
-                </td> -->
 
             <td>
               <div class="action-buttons">
@@ -190,7 +189,8 @@
                   type="button"
                   class="action-btn btn-view"
                   title="View"
-                  (click)="openViewModal(viewRequisitionModal,item)"
+                  [disabled]="isViewLoading || isSubmitting"
+                  (click)="openViewModal(viewRequisitionModal, item)"
                 >
                   <i class="fa-solid fa-magnifying-glass-plus"></i>
                 </button>
@@ -199,7 +199,8 @@
                   type="button"
                   class="action-btn btn-edit"
                   title="Edit"
-                  (click)="openEditModal(requisitionModal,item)"
+                  [disabled]="isViewLoading || isSubmitting"
+                  (click)="openEditModal(requisitionModal, item)"
                 >
                   <i class="fa-regular fa-pen-to-square"></i>
                 </button>
@@ -208,7 +209,8 @@
                   type="button"
                   class="action-btn btn-delete"
                   title="Delete"
-                  (click)="Delete(item.Header.ReqID)"
+                  [disabled]="isViewLoading || isSubmitting"
+                  (click)="Delete(item.ReqID)"
                 >
                   <i class="fa-solid fa-trash-can"></i>
                 </button>
@@ -278,6 +280,16 @@
           </tr>
 
           <tr>
+            <th>Unit</th>
+            <td>{{ getUnitName(selectedRequisition.Header.UnitId) }}</td>
+          </tr>
+
+          <tr>
+            <th>Business</th>
+            <td>{{ getBusinessName(selectedRequisition.Header.BusinessId) }}</td>
+          </tr>
+
+          <tr>
             <th>Requisition Date</th>
             <td>
               {{ selectedRequisition.Header.ReqDate | date:'dd-MMM-yyyy' }}
@@ -299,17 +311,23 @@
           </tr>
 
           <tr>
+            <th>Remarks</th>
+            <td>{{ selectedRequisition.Header.Remarks || '-' }}</td>
+          </tr>
+
+          <tr>
             <th>Status</th>
             <td>
               <span
+                class="g-status g-status-lg"
                 [ngClass]="{
-                            'status-pending': selectedRequisition.Header.FileStatusId === 1,
-                            'status-approve': selectedRequisition.Header.FileStatusId === 2,
-                            'status-reject': selectedRequisition.Header.FileStatusId === 3
+                            'status-pending': selectedRequisition.Header.DocStatusId === 1,
+                            'status-approve': selectedRequisition.Header.DocStatusId === 2,
+                            'status-reject': selectedRequisition.Header.DocStatusId === 3
                         }"
               >
                 <span class="g-dot"></span>
-                {{ getFileStatusName(selectedRequisition.Header.FileStatusId) }}
+                {{ getDocStatusName(selectedRequisition.Header.DocStatusId) }}
               </span>
             </td>
           </tr>
@@ -341,22 +359,14 @@
       <table class="custom-table">
         <thead>
           <tr>
-            <!-- <th>#</th>
-              <th>LINE ID</th>
-              <th>REQ ID</th> -->
             <th>PRODUCT TYPE</th>
             <th>ITEM</th>
             <th>UOM</th>
             <th>QUANTITY</th>
-
-            <th>COMPLETED QUANTITY</th>
-            <th>REMAINING QUANTITY</th>
             <th>STOCK QUANTITY</th>
             <th>SALES QUANTITY</th>
-
             <th>REMARKS</th>
             <th>STATUS</th>
-            <!-- <th>STATUS</th> -->
           </tr>
         </thead>
 
@@ -364,8 +374,8 @@
           @if (selectedRequisition.Lines.length === 0) {
 
           <tr>
-            <td colspan="10" class="text-center py-4">
-              No active Requisition found.
+            <td colspan="8" class="text-center py-4">
+              No active Requisition Lines found.
             </td>
           </tr>
 
@@ -383,8 +393,6 @@
             <td>{{ getUOMName(line.UOMId) }}</td>
             <td>{{ line.Quantity }}</td>
 
-            <td>0</td>
-            <td>0</td>
             <td>{{ line.StockQuantity }}</td>
             <td>{{ line.SalesQuantity }}</td>
 
@@ -394,18 +402,18 @@
               <span
                 class="g-status g-status-lg"
                 [ngClass]="{
-      'status-pending': line.FileStatusId == 1,
-      'status-approve': line.FileStatusId == 2,
-      'status-reject': line.FileStatusId == 3
+      'status-pending': line.DocStatusId === 1,
+      'status-approve': line.DocStatusId === 2,
+      'status-reject': line.DocStatusId === 3
     }"
               >
                 <span class="g-dot"></span>
 
-                {{ getFileStatusName(line.FileStatusId) }}
+                {{ getDocStatusName(line.DocStatusId) }}
               </span>
             </td>
 
-            <!-- <td>{{ getFileStatusName(line.FileStatusId) }}</td> -->
+            <!-- <td>{{ getDocStatusName(line.DocStatusId) }}</td> -->
 
             <!-- <td>
 
@@ -458,6 +466,7 @@
       <button
         type="button"
         class="btn-close"
+        [disabled]="isSubmitting"
         (click)="d('Cross click')"
       ></button>
     </div>
@@ -632,9 +641,13 @@
               </div>
             </div>
 
-            <div *ngIf="isEditMode" class="text-center fw-semibold">
+            <div *ngIf="isEditMode" class="text-center">
+              <span class="fw-semibold">Start Date:</span>
               {{ formGroup.get('StartDate')?.value | date: 'dd-MMM-yyyy' }}
-              <span class="mx-2 text-muted">to</span>
+
+              <span class="mx-3 text-muted">|</span>
+
+              <span class="fw-semibold">End Date:</span>
               {{ formGroup.get('EndDate')?.value | date: 'dd-MMM-yyyy' }}
             </div>
           </div>
@@ -719,7 +732,16 @@
                     type="text"
                     class="form-control"
                     formControlName="ItemSearch"
-                    placeholder="Type at least 2 characters"
+                    [placeholder]="
+                      !selectedUnitId
+                        ? 'Select Unit first'
+                        : !formGroup.get('BusinessId')?.value
+                          ? 'Select Business first'
+                          : !formGroup.get('StartDate')?.value ||
+                              !formGroup.get('EndDate')?.value
+                            ? 'Select Start and End Date first'
+                            : 'Type at least 2 characters'
+                    "
                     autocomplete="off"
                     [ngbTypeahead]="searchItems"
                     placement="bottom-start"
@@ -849,7 +871,7 @@
                   <button
                     type="button"
                     class="btn btn-success"
-                    [disabled]="!canAddLine"
+                    [disabled]="!canAddLine || isSubmitting"
                     title="Add Line"
                     (click)="addLine()"
                   >
@@ -902,21 +924,6 @@
             </tr>
           </thead>
 
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>PRODUCT TYPE</th>
-              <th>ITEM</th>
-              <th>UOM</th>
-              <th>QUANTITY</th>
-              <th>STOCK QUANTITY</th>
-              <th>SALES QUANTITY</th>
-              <th>REMARKS</th>
-              <th *ngIf="isEditMode">STATUS</th>
-              <th>ACTION</th>
-            </tr>
-          </thead>
-
           <tbody>
             <tr *ngFor="let line of lines.controls; let i = index">
               <td class="text-center">{{ i + 1 }}</td>
@@ -941,14 +948,14 @@
                 <span
                   class="g-status g-status-sm"
                   [ngClass]="{
-                    'status-pending': line.get('FileStatusId')?.value == 1,
-                    'status-approve': line.get('FileStatusId')?.value == 2,
-                    'status-reject': line.get('FileStatusId')?.value == 3
+                    'status-pending': +line.get('DocStatusId')?.value === 1,
+                    'status-approve': +line.get('DocStatusId')?.value === 2,
+                    'status-reject': +line.get('DocStatusId')?.value === 3
                   }"
                 >
                   <span class="g-dot"></span>
 
-                  {{ getFileStatusName(line.get('FileStatusId')?.value) }}
+                  {{ getDocStatusName(line.get('DocStatusId')?.value) }}
                 </span>
               </td>
 
@@ -957,6 +964,7 @@
                   type="button"
                   class="action-btn btn-delete"
                   title="Delete Line"
+                  [disabled]="isSubmitting"
                   (click)="removeLine(i)"
                 >
                   <i class="fa-solid fa-trash-can"></i>
@@ -978,15 +986,34 @@
       <button
         type="button"
         class="btn btn-secondary"
+        [disabled]="isSubmitting"
         (click)="c('Close click')"
       >
         <i class="fa-solid fa-fw fa-xmark"></i>
         Close
       </button>
 
-      <button type="submit" class="btn btn-success">
-        <i class="fa-solid fa-fw fa-check"></i>
-        {{ isEditMode ? 'Update' : 'Save' }}
+      <button
+        type="submit"
+        class="btn btn-success"
+        [disabled]="isSubmitting"
+      >
+        <span
+          *ngIf="isSubmitting"
+          class="spinner-border spinner-border-sm me-2"
+          aria-hidden="true"
+        ></span>
+
+        <i
+          *ngIf="!isSubmitting"
+          class="fa-solid fa-fw fa-check"
+        ></i>
+
+        {{
+          isSubmitting
+            ? (isEditMode ? 'Updating...' : 'Saving...')
+            : (isEditMode ? 'Update' : 'Save')
+        }}
       </button>
     </div>
   </form>
