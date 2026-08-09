@@ -1,8 +1,8 @@
 <div class="user-card">
-  <div class="page-header">
-    <h5><b>DELIVERY ORDERS</b></h5>
+  <div class="planning-hint">
+    <i class="fa-solid fa-circle-info"></i>
+    <span> Select delivery orders to start planning...</span>
   </div>
-  <hr />
   <div class="card-body">
     <div class="d-flex justify-content-end align-items-center gap-3 mb-3">
       <div style="width: 25%">
@@ -76,7 +76,11 @@
         <thead>
           <tr>
             <th style="width: 40px">
-              <input type="checkbox" (change)="toggleAll($event)" />
+              <input
+                type="checkbox"
+                [checked]="isAllSelected()"
+                (change)="toggleAll($event)"
+              />
             </th>
             <th>DO CODE</th>
             <th>CREATED DATE</th>
@@ -116,7 +120,11 @@
           $index) {
           <tr>
             <td>
-              <input type="checkbox" />
+              <input
+                type="checkbox"
+                [checked]="isSelected(item.SOID)"
+                (change)="toggleSelection(item, $event)"
+              />
             </td>
             <td>{{item.Code}}</td>
             <td>{{item.CreatedDate | dateTime}}</td>
@@ -149,7 +157,12 @@
 
             <td>
               <div class="action-buttons">
-                <button type="button" class="action-btn btn-view" title="View">
+                <button
+                  type="button"
+                  class="action-btn btn-view"
+                  title="View"
+                  (click)="openView(item)"
+                >
                   <i class="fa-solid fa-magnifying-glass-plus"></i>
                 </button>
 
@@ -171,16 +184,46 @@
         </tbody>
       </table>
     </div>
-  </div>
 
-  <div class="card-footer">
-    <app-pagination
-      [(currentPage)]="currentPage"
-      [(pageSize)]="pageSize"
-      [totalItems]="totalItems()"
-      (pageChanged)="onPageChange($event)"
-      (pageSizeChanged)="onPageSizeChange($event)"
-    >
-    </app-pagination>
+    <div class="card-footer">
+      <app-pagination
+        [(currentPage)]="currentPage"
+        [(pageSize)]="pageSize"
+        [totalItems]="totalItems()"
+        (pageChanged)="onPageChange($event)"
+        (pageSizeChanged)="onPageSizeChange($event)"
+      >
+      </app-pagination>
+    </div>
   </div>
 </div>
+
+<!-- Floating Selection Cart Button -->
+@if (selectedDeliveryOrders().length > 0) {
+<button
+  type="button"
+  class="selection-cart-trigger"
+  (click)="toggleCart()"
+  title="View selected Delivery Orders"
+>
+  <i class="fa-solid fa-cart-shopping"></i>
+
+  <span class="cart-badge"> {{ selectedDeliveryOrders().length }} </span>
+</button>
+}
+
+<app-delivery-orders-cart
+  [isOpen]="cartOpen()"
+  [selectedOrders]="selectedDeliveryOrders()"
+  (closeCart)="closeCart()"
+  (removeOrder)="removeSelection($event)"
+  (nextStep)="goToNextStep()"
+></app-delivery-orders-cart>
+
+@if(viewOpen() && OrderForView()){
+<app-delivery-order-view
+  [isOpen]="viewOpen()"
+  [order]="OrderForView()"
+  (closeView)="closeView()"
+></app-delivery-order-view>
+}

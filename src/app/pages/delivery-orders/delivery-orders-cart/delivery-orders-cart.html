@@ -1,0 +1,95 @@
+@if (isOpen) {
+
+<!-- Backdrop -->
+<div class="cart-backdrop" (click)="close()"></div>
+
+<!-- Cart -->
+<aside class="selection-cart">
+  <div class="selection-cart-header">
+    <div>
+      <h5>
+        <i class="fa-solid fa-cart-shopping me-2"></i>
+        Selected Delivery Orders
+      </h5>
+
+      <small> {{ selectedOrders.length }} order(s) selected </small>
+    </div>
+
+    <button type="button" class="cart-close-btn" (click)="close()">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+
+  <div class="selection-cart-body">
+    @for (order of selectedOrders; track order.SOID) {
+
+    <div class="selected-do-card" (click)="ViewOrder(order)">
+      <div class="selected-do-header">
+        <div class="do-icon">
+          <i class="fa-solid fa-truck"></i>
+        </div>
+
+        <div class="do-main-info">
+          <strong class="do-code"> {{ order.Code }} </strong>
+
+          <small class="do-date">
+            <i class="fa-regular fa-calendar-days"></i>
+            {{ order.CreatedDate | dateTime }}
+          </small>
+        </div>
+
+        <button
+          type="button"
+          class="remove-do-btn"
+          (click)="removeDO($event,order.SOID)"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="selected-do-details">
+        <div>
+          <span>Unit</span>
+          <strong>{{ order.Unit }}</strong>
+        </div>
+
+        <div>
+          <span>Business</span>
+          <strong>{{ order.Business || 'N/A' }}</strong>
+        </div>
+
+        <div>
+          <span>Customer</span>
+          <strong>{{ order.CustomerName || 'N/A' }}</strong>
+        </div>
+
+        <div>
+          <span>Amount</span>
+          {{ order.TotalAmount | number:'1.2-2' }}
+        </div>
+      </div>
+    </div>
+
+    }
+  </div>
+
+  <div class="selection-cart-footer">
+    <div class="selected-count">
+      <span>Selected Orders</span>
+      <strong>{{ selectedOrders.length }}</strong>
+    </div>
+
+    <button type="button" class="btn btn-success w-100" (click)="next()">
+      Merge / Split
+      <i class="fa-solid fa-arrow-right ms-2"></i>
+    </button>
+  </div>
+</aside>
+
+@if(viewOpen() && OrderForView()){
+<app-delivery-order-view
+  [isOpen]="viewOpen()"
+  [order]="OrderForView()"
+  (closeView)="closeView()"
+></app-delivery-order-view>
+} }
