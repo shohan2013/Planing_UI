@@ -58,7 +58,8 @@
             aria-labelledby="basic-tab1-tab"
           >
             @if (activeTab() === 'mergeOrSplit') {
-            <app-delivery-orders></app-delivery-orders>
+            <app-delivery-orders (SelectedOrdersChange)="MergeOrSplitOrder()">
+            </app-delivery-orders>
             }
           </div>
           <!-- <div

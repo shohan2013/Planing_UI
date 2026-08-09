@@ -184,7 +184,6 @@ export class DeliveryOrders
 
   goToNextStep() {
     this.cartOpen.set(false);
-
     // Emit selected orders to PlanningProcessComponent
     this.SelectedOrdersChange.emit(this.selectedDeliveryOrders());
   }

@@ -34,7 +34,7 @@ export class DeliveryOrdersCart {
     this.closeCart.emit();
   }
 
-  next() {
+  MergeOrSplit() {
     this.nextStep.emit();
   }
 

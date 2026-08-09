@@ -14,25 +14,13 @@ import {
   templateUrl: './planning.html',
   styleUrl: './planning.scss',
 })
-export class Planning implements OnInit, OnDestroy {
-  searchText = '';
-  selectedId: number;
-  //paginatedItems: IPermission[] = [];
-  EmpList: any[] = []; // dropdown source
-  selectedUser: number;
-  search$ = new Subject<string>();
+export class Planning implements OnDestroy {
   private destroy$ = new Subject<void>();
-  currentJustify = 'start';
-  currentOrientation = 'horizontal';
-  disabled = true; // For disabled tab examples
 
   constructor(
     private commonservice: CommonService,
     private modalService: NgbModal,
   ) {}
-  ngOnInit(): void {
-    this.GetEmpInfo();
-  }
 
   activeTab = signal<string>('mergeOrSplit');
 
@@ -44,18 +32,6 @@ export class Planning implements OnInit, OnDestroy {
     this.modalService.open(content, {
       size: 'lg',
     });
-  }
-
-  GetEmpInfo() {
-    this.search$
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        switchMap((term) => this.commonservice.GetEmpData(term)),
-      )
-      .subscribe((data) => {
-        this.EmpList = data;
-      });
   }
 
   isActive = signal(false);
@@ -70,16 +46,7 @@ export class Planning implements OnInit, OnDestroy {
 
   //selectedCustomer: number | null = null;
 
-  onSearch(event: any) {
-    const term = event.term;
-
-    if (!term || term.length < 2) {
-      this.EmpList = [];
-      return;
-    }
-
-    this.search$.next(term);
-  }
+  MergeOrSplitOrder() {}
 
   ngOnDestroy() {
     this.destroy$.next();

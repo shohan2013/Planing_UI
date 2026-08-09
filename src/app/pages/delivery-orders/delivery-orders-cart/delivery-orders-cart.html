@@ -79,17 +79,22 @@
       <strong>{{ selectedOrders.length }}</strong>
     </div>
 
-    <button type="button" class="btn btn-success w-100" (click)="next()">
-      Merge / Split
+    <button
+      type="button"
+      class="btn btn-success w-100"
+      (click)="MergeOrSplit()"
+    >
+      Merge DO
       <i class="fa-solid fa-arrow-right ms-2"></i>
     </button>
   </div>
-</aside>
 
-@if(viewOpen() && OrderForView()){
-<app-delivery-order-view
-  [isOpen]="viewOpen()"
-  [order]="OrderForView()"
-  (closeView)="closeView()"
-></app-delivery-order-view>
-} }
+  @if(viewOpen() && OrderForView()){
+  <app-delivery-order-view
+    [isOpen]="viewOpen()"
+    [order]="OrderForView()"
+    (closeView)="closeView()"
+  ></app-delivery-order-view>
+  }
+</aside>
+}
