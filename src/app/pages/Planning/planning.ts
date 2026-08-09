@@ -3,6 +3,10 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
 import { CommonService } from 'src/app/core/services/Common/CommonService';
 import { DeliveryOrders } from '../delivery-orders/delivery-orders';
+import {
+  IDeliveryOrder,
+  IDeliveryOrderLine,
+} from 'src/app/core/model/DeliveryOrder/delivery-order-model';
 
 @Component({
   selector: 'app-planning',
@@ -30,7 +34,7 @@ export class Planning implements OnInit, OnDestroy {
     this.GetEmpInfo();
   }
 
-  activeTab = signal<string>('deliveryOrders');
+  activeTab = signal<string>('mergeOrSplit');
 
   onTabChange(tab: string) {
     this.activeTab.set(tab);

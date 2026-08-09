@@ -23,7 +23,7 @@
   <div class="selection-cart-body">
     @for (order of selectedOrders; track order.SOID) {
 
-    <div class="selected-do-card">
+    <div class="selected-do-card" (click)="ViewOrder(order)">
       <div class="selected-do-header">
         <div class="do-icon">
           <i class="fa-solid fa-truck"></i>
@@ -41,7 +41,7 @@
         <button
           type="button"
           class="remove-do-btn"
-          (click)="removeOrder.emit(order.SOID)"
+          (click)="removeDO($event,order.SOID)"
         >
           <i class="fa-solid fa-xmark"></i>
         </button>
@@ -55,17 +55,17 @@
 
         <div>
           <span>Business</span>
-          <strong>{{ order.Business }}</strong>
+          <strong>{{ order.Business || 'N/A' }}</strong>
         </div>
 
         <div>
           <span>Customer</span>
-          <strong>{{ order.CustomerName }}</strong>
+          <strong>{{ order.CustomerName || 'N/A' }}</strong>
         </div>
 
         <div>
           <span>Amount</span>
-          <strong>{{ order.TotalAmount }}</strong>
+          {{ order.TotalAmount | number:'1.2-2' }}
         </div>
       </div>
     </div>
@@ -80,9 +80,16 @@
     </div>
 
     <button type="button" class="btn btn-success w-100" (click)="next()">
-      Continue to Merge / Split
+      Merge / Split
       <i class="fa-solid fa-arrow-right ms-2"></i>
     </button>
   </div>
 </aside>
-}
+
+@if(viewOpen() && OrderForView()){
+<app-delivery-order-view
+  [isOpen]="viewOpen()"
+  [order]="OrderForView()"
+  (closeView)="closeView()"
+></app-delivery-order-view>
+} }

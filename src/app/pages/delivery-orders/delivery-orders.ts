@@ -21,11 +21,18 @@ import { DeliveryOrderService } from 'src/app/core/services/DeliveryOrder/delive
 import { PaginationComponent } from 'src/app/shared/pagination/pagination.component';
 import { DateTimePipe } from 'src/app/shared/pipes/date-time-pipe';
 import { DeliveryOrdersCart } from './delivery-orders-cart/delivery-orders-cart';
+import { DeliveryOrderView } from './delivery-order-view/delivery-order-view';
 
 @Component({
   selector: 'app-delivery-orders',
   standalone: true,
-  imports: [FormsModule, DateTimePipe, PaginationComponent, DeliveryOrdersCart],
+  imports: [
+    FormsModule,
+    DateTimePipe,
+    PaginationComponent,
+    DeliveryOrdersCart,
+    DeliveryOrderView,
+  ],
   templateUrl: './delivery-orders.html',
   styleUrl: './delivery-orders.scss',
 })
@@ -40,6 +47,8 @@ export class DeliveryOrders
   businesses: IBusiness[];
   selectedDeliveryOrders = signal<IDeliveryOrder[]>([]);
   cartOpen = signal(false);
+  viewOpen = signal(false);
+  OrderForView = signal<IDeliveryOrder | null>(null);
 
   constructor(
     private deliveryOrderService: DeliveryOrderService,
@@ -178,6 +187,15 @@ export class DeliveryOrders
 
     // Emit selected orders to PlanningProcessComponent
     this.SelectedOrdersChange.emit(this.selectedDeliveryOrders());
+  }
+
+  openView(order: IDeliveryOrder): void {
+    this.OrderForView.set(order);
+    this.viewOpen.set(true);
+  }
+
+  closeView(): void {
+    this.viewOpen.set(false);
   }
 
   ngOnDestroy(): void {

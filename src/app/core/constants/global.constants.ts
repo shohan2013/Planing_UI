@@ -56,6 +56,7 @@ export const GlobalConstant = {
 
     /*==============================PLANNING====================================*/
     DeliveryOrders: 'SalesOrderLanding/GetDOData',
+    DeliveryOrderLine: 'SalesOrderLanding/GetDOLineData',
   },
 
   URL: { API_URL: 'https://localhost:7111/api/' },

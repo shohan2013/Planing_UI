@@ -157,7 +157,12 @@
 
             <td>
               <div class="action-buttons">
-                <button type="button" class="action-btn btn-view" title="View">
+                <button
+                  type="button"
+                  class="action-btn btn-view"
+                  title="View"
+                  (click)="openView(item)"
+                >
                   <i class="fa-solid fa-magnifying-glass-plus"></i>
                 </button>
 
@@ -214,3 +219,11 @@
   (removeOrder)="removeSelection($event)"
   (nextStep)="goToNextStep()"
 ></app-delivery-orders-cart>
+
+@if(viewOpen() && OrderForView()){
+<app-delivery-order-view
+  [isOpen]="viewOpen()"
+  [order]="OrderForView()"
+  (closeView)="closeView()"
+></app-delivery-order-view>
+}

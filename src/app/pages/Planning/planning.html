@@ -15,10 +15,10 @@
               role="tab"
               aria-controls="basic-tab1"
               aria-selected="true"
-              [class.active]="activeTab() === 'deliveryOrders'"
-              (click)="onTabChange('deliveryOrders')"
+              [class.active]="activeTab() === 'mergeOrSplit'"
+              (click)="onTabChange('mergeOrSplit')"
             >
-              DELIVERY ORDERS
+              MERGE/SPLIT DO
             </button>
           </li>
           <li class="nav-item" role="presentation">
@@ -29,10 +29,10 @@
               role="tab"
               aria-controls="basic-tab2"
               aria-selected="false"
-              [class.active]="activeTab() === 'mergeOrSplit'"
-              (click)="onTabChange('mergeOrSplit')"
+              [class.active]="activeTab() === 'planning'"
+              (click)="onTabChange('planning')"
             >
-              MERGE OR SPLIT
+              PLANNING
             </button>
           </li>
           <li class="nav-item" role="presentation">
@@ -43,10 +43,10 @@
               role="tab"
               aria-controls="basic-tab3"
               aria-selected="false"
-              [class.active]="activeTab() === 'planning'"
-              (click)="onTabChange('planning')"
+              [class.active]="activeTab() === 'planningHistory'"
+              (click)="onTabChange('planningHistory')"
             >
-              PLANNING
+              HISTORY
             </button>
           </li>
         </ul>
@@ -57,7 +57,7 @@
             role="tabpanel"
             aria-labelledby="basic-tab1-tab"
           >
-            @if (activeTab() === 'deliveryOrders') {
+            @if (activeTab() === 'mergeOrSplit') {
             <app-delivery-orders></app-delivery-orders>
             }
           </div>

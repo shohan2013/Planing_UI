@@ -1,0 +1,253 @@
+@if (isOpen && order) {
+
+<!-- Modal Backdrop -->
+
+<div class="do-view-backdrop" (click)="close()"></div>
+
+<!-- Modal -->
+
+<div
+  class="do-view-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="do-view-title"
+>
+  <!-- =====================================================
+     Header
+     ===================================================== -->
+  <div class="do-view-header">
+    <div class="do-title-section">
+      <div class="do-title-icon">
+        <i class="fa-solid fa-truck-fast"></i>
+      </div>
+
+      <div>
+        <h5 id="do-view-title">Delivery Order Details</h5>
+
+        <div class="do-code">{{ order.Code }}</div>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      class="do-close-btn"
+      (click)="close()"
+      title="Close"
+      aria-label="Close"
+    >
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+
+  <!-- =====================================================
+     Body
+     ===================================================== -->
+  <div class="do-view-body">
+    <!-- ===================================================
+       Order Information
+       =================================================== -->
+    <section class="do-section">
+      <div class="section-heading">
+        <div class="section-heading-icon">
+          <i class="fa-solid fa-circle-info"></i>
+        </div>
+
+        <div>
+          <h6>Order Information</h6>
+          <span>Basic delivery order information</span>
+        </div>
+      </div>
+
+      <div class="info-grid">
+        <!-- DO Code -->
+        <div class="info-item">
+          <span class="info-label"> Delivery Order </span>
+
+          <strong class="info-value highlight"> {{ order.Code }} </strong>
+        </div>
+
+        <!-- Created Date -->
+        <div class="info-item">
+          <span class="info-label"> Created Date </span>
+
+          <strong class="info-value">
+            <i class="fa-regular fa-calendar-days"></i>
+            {{ order.CreatedDate | dateTime }}
+          </strong>
+        </div>
+
+        <!-- Required Delivery Date -->
+        <div class="info-item">
+          <span class="info-label"> Request Delivery Date </span>
+
+          <strong class="info-value">
+            @if (order.ReqDeliveryDate) {
+            <i class="fa-regular fa-calendar-check"></i>
+            {{ order.ReqDeliveryDate | dateTime }} } @else {
+            <span class="text-muted"> Not specified </span>
+            }
+          </strong>
+        </div>
+
+        <!-- Customer -->
+        <div class="info-item">
+          <span class="info-label"> Customer </span>
+
+          <strong class="info-value">
+            {{ order.CustomerName || 'Not specified' }}
+          </strong>
+        </div>
+
+        <!-- Unit -->
+        <div class="info-item">
+          <span class="info-label"> Unit </span>
+
+          <strong class="info-value"> {{ order.Unit }} </strong>
+        </div>
+
+        <!-- Business -->
+        <div class="info-item">
+          <span class="info-label"> Business </span>
+
+          <strong class="info-value">
+            {{ order.Business || 'Not specified' }}
+          </strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================
+       Summary
+       =================================================== -->
+    <section class="do-summary">
+      <div class="summary-item">
+        <div class="summary-icon">
+          <i class="fa-solid fa-boxes-stacked"></i>
+        </div>
+
+        <div>
+          <span>Total Items</span>
+
+          <strong> {{ lines().length }} </strong>
+        </div>
+      </div>
+
+      <div class="summary-divider"></div>
+
+      <div class="summary-item">
+        <div class="summary-icon amount-icon">
+          <i class="fa-solid fa-money-bill-wave"></i>
+        </div>
+
+        <div>
+          <span>Total Amount</span>
+
+          <strong> {{ order.TotalAmount.toString()| number:'1.2-2' }} </strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================
+       Order Lines
+       =================================================== -->
+    <section class="do-section">
+      <div class="section-heading">
+        <div class="section-heading-icon">
+          <i class="fa-solid fa-list"></i>
+        </div>
+
+        <div>
+          <h6>Order Items</h6>
+
+          <span> Products included in this delivery order </span>
+        </div>
+      </div>
+
+      @if (lines().length > 0) {
+
+      <div class="do-lines-wrapper">
+        <div class="table-responsive">
+          <table class="do-lines-table">
+            <thead>
+              <tr>
+                <th class="serial-column">#</th>
+                <th>PRODUCT</th>
+                <th class="quantity-column">QUANTITY</th>
+                <th class="price-column">UNIT PRICE</th>
+                <th class="amount-column">AMOUNT</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for ( line of lines(); track line.ID; let i = $index ) {
+
+              <tr>
+                <td class="serial-column">{{ i + 1 }}</td>
+
+                <td>
+                  <div class="product-info">
+                    <div class="product-icon">
+                      <i class="fa-solid fa-box"></i>
+                    </div>
+
+                    <span> {{ line.ProductName }} </span>
+                  </div>
+                </td>
+
+                <td class="quantity-column">{{ line.Quantity }}</td>
+
+                <td class="price-column">
+                  {{ line.Price.toString()| number:'1.2-2' }}
+                </td>
+
+                <td class="amount-column">
+                  <strong>
+                    {{ (line.Quantity * line.Price).toString()| number:'1.2-2'
+                    }}
+                  </strong>
+                </td>
+              </tr>
+
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      } @else {
+
+      <div class="no-lines">
+        <div class="no-lines-icon">
+          <i class="fa-solid fa-box-open"></i>
+        </div>
+
+        <h6>No Order Items</h6>
+
+        <p>No product details are available for this delivery order.</p>
+      </div>
+
+      }
+    </section>
+  </div>
+
+  <!-- =====================================================
+     Footer
+     ===================================================== -->
+  <div class="do-view-footer">
+    <div class="footer-info">
+      <i class="fa-solid fa-circle-info"></i>
+
+      <span> Delivery Order: {{ order.Code }} </span>
+    </div>
+
+    <button
+      type="button"
+      class="btn btn-secondary close-footer-btn"
+      (click)="close()"
+    >
+      <i class="fa-solid fa-xmark me-1"></i>
+      Close
+    </button>
+  </div>
+</div>
+}
