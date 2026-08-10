@@ -49,12 +49,24 @@ return this.http.get<IViewRequisitionLine[]>(
   
   }
 
-  deleteData(reqId: number): Observable<any> {
-    return this.http.delete(
-      environment.API_URL + GlobalConstant.API_END_POINTS.deleteRequisition + reqId
-    );
-  }
 
+
+  deleteData(reqId: number): Observable<any> {
+    const enroll = Number(localStorage.getItem('Enroll'));
+
+    const requestBody = {
+      reqId,
+      enroll,
+    };
+
+    //return this.http.put(`${environment.API_URL}${GlobalConstant.API_END_POINTS.deleteRequisition}`, requestBody);
+  
+      return this.http.put(
+        environment.API_URL+GlobalConstant.API_END_POINTS.deleteRequisition,
+         requestBody
+        );
+
+  }
 
 
 }
