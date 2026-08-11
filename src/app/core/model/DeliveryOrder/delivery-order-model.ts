@@ -12,7 +12,19 @@ export interface IDeliveryOrder {
 export interface IDeliveryOrderLine {
   ID: number;
   ProductId: number;
-  ProductName: String;
+  ProductName: string;
+  PresentStock: number;
   Quantity: number;
-  Price: number;
+  LastPrice: number;
+}
+
+export interface IMergeDeliveryOrderRequest {
+  DeliveryOrderIds: number[] | null;
+  Remarks: string | null;
+  DocumentCreatedBy: number;
+  IsCombineDO: boolean;
+  BusinessID: number;
+  UnitID: number;
+  Business: String;
+  Unit: String;
 }

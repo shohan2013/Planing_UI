@@ -58,6 +58,7 @@ export const GlobalConstant = {
     /*==============================PLANNING====================================*/
     DeliveryOrders: 'SalesOrderLanding/GetDOData',
     DeliveryOrderLine: 'SalesOrderLanding/GetDOLineData',
+    MergeDOs: 'MergeDeliveryOrder/MergeDOs',
   },
 
   URL: { API_URL: 'https://localhost:7111/api/' },

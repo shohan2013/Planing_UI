@@ -162,8 +162,12 @@
           <span> Products included in this delivery order </span>
         </div>
       </div>
-
-      @if (lines().length > 0) {
+      @if (isLoading()) {
+      <div class="loading-container">
+        <span class="spinner-border me-2" aria-hidden="true"></span>
+        <span class="loading-text">Loading Delivery Order Items...</span>
+      </div>
+      } @else if (lines().length > 0) {
 
       <div class="do-lines-wrapper">
         <div class="table-responsive">
@@ -172,6 +176,7 @@
               <tr>
                 <th class="serial-column">#</th>
                 <th>PRODUCT</th>
+                <th class="presentStock-column">PRESENT STOCK</th>
                 <th class="quantity-column">QUANTITY</th>
                 <th class="price-column">UNIT PRICE</th>
                 <th class="amount-column">AMOUNT</th>
@@ -193,17 +198,17 @@
                     <span> {{ line.ProductName }} </span>
                   </div>
                 </td>
-
+                <td class="presentStock-column">{{line.PresentStock}}</td>
                 <td class="quantity-column">{{ line.Quantity }}</td>
 
                 <td class="price-column">
-                  {{ line.Price.toString()| number:'1.2-2' }}
+                  {{ line.LastPrice.toString()| number:'1.2-2' }}
                 </td>
 
                 <td class="amount-column">
                   <strong>
-                    {{ (line.Quantity * line.Price).toString()| number:'1.2-2'
-                    }}
+                    {{ (line.Quantity * line.LastPrice).toString()|
+                    number:'1.2-2' }}
                   </strong>
                 </td>
               </tr>

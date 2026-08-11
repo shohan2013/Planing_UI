@@ -44,10 +44,6 @@ export class Planning implements OnDestroy {
     return item.Id;
   }
 
-  //selectedCustomer: number | null = null;
-
-  MergeOrSplitOrder() {}
-
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();

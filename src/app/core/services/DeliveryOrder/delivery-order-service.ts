@@ -8,9 +8,11 @@ import { Observable } from 'rxjs';
 import {
   IDeliveryOrder,
   IDeliveryOrderLine,
+  IMergeDeliveryOrderRequest,
 } from '../../model/DeliveryOrder/delivery-order-model';
 import { environment } from 'src/environments/environment';
 import { GlobalConstant } from '../../constants/global.constants';
+import { IApiResponse } from '../../model/Response/ApiResponse';
 
 @Injectable({
   providedIn: 'root',
@@ -31,6 +33,13 @@ export class DeliveryOrderService {
   GetDeliveryOrdersDetails(SOID: Number): Observable<IDeliveryOrderLine[]> {
     return this.http.get<IDeliveryOrderLine[]>(
       `${environment.API_URL}${GlobalConstant.API_END_POINTS.DeliveryOrderLine}/${SOID}`,
+    );
+  }
+
+  MergeDO(selectedDOIds: IMergeDeliveryOrderRequest): Observable<IApiResponse> {
+    return this.http.post<IApiResponse>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.MergeDOs}`,
+      selectedDOIds,
     );
   }
 }

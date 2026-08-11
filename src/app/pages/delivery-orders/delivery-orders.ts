@@ -14,7 +14,10 @@ import {
   ServerQueryResponse,
 } from 'src/app/core/model/Common/Pagination/ServerQueryRequest';
 import { IUnit } from 'src/app/core/model/Common/Unit/Unit';
-import { IDeliveryOrder } from 'src/app/core/model/DeliveryOrder/delivery-order-model';
+import {
+  IDeliveryOrder,
+  IMergeDeliveryOrderRequest,
+} from 'src/app/core/model/DeliveryOrder/delivery-order-model';
 import { ServerSideFilteredPaginatedComponent } from 'src/app/core/server-side-filtered-paginated/server-side-filtered-paginated.component';
 import { CommonService } from 'src/app/core/services/Common/CommonService';
 import { DeliveryOrderService } from 'src/app/core/services/DeliveryOrder/delivery-order-service';
@@ -22,6 +25,8 @@ import { PaginationComponent } from 'src/app/shared/pagination/pagination.compon
 import { DateTimePipe } from 'src/app/shared/pipes/date-time-pipe';
 import { DeliveryOrdersCart } from './delivery-orders-cart/delivery-orders-cart';
 import { DeliveryOrderView } from './delivery-order-view/delivery-order-view';
+import { select } from '@ngrx/store';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-delivery-orders',
@@ -41,10 +46,10 @@ export class DeliveryOrders
   implements OnInit, OnDestroy
 {
   private destroy$ = new Subject<void>();
-  selectedUnitId: Number = 0;
-  selectedBusinessId: Number = 0;
   units: IUnit[];
   businesses: IBusiness[];
+  selectedUnitId: Number = 0;
+  selectedBusinessId: Number = 0;
   selectedDeliveryOrders = signal<IDeliveryOrder[]>([]);
   cartOpen = signal(false);
   viewOpen = signal(false);
@@ -53,11 +58,10 @@ export class DeliveryOrders
   constructor(
     private deliveryOrderService: DeliveryOrderService,
     private commonService: CommonService,
+    private toaster: ToastrService,
   ) {
     super();
   }
-
-  @Output() SelectedOrdersChange = new EventEmitter<any[]>();
 
   ngOnInit(): void {
     //super.ngOnInit();
@@ -132,9 +136,22 @@ export class DeliveryOrders
 
     if (isChecked) {
       // Prevent duplicate selection
-      if (!currentSelection.some((order) => order.SOID === item.SOID)) {
-        this.selectedDeliveryOrders.set([...currentSelection, item]);
+      if (currentSelection.some((order) => order.SOID === item.SOID)) {
+        return;
       }
+
+      // Check Unit and Business
+      if (!this.canAddToCart(item)) {
+        checkbox.checked = false;
+
+        this.toaster.error(
+          'You can only select Delivery Orders from the same Unit and Business.',
+        );
+
+        return;
+      }
+
+      this.selectedDeliveryOrders.set([...currentSelection, item]);
     } else {
       this.selectedDeliveryOrders.set(
         currentSelection.filter((order) => order.SOID !== item.SOID),
@@ -145,25 +162,30 @@ export class DeliveryOrders
   toggleAll(event: Event): void {
     const checkbox = event.target as HTMLInputElement;
     const currentPageItems = this.paginatedItems();
+    const currentSelection = this.selectedDeliveryOrders();
 
     if (checkbox.checked) {
-      // Select all items on the current page
-      const currentSelection = this.selectedDeliveryOrders();
-
-      const newItems = currentPageItems.filter(
+      const itemsToAdd = currentPageItems.filter(
         (item) =>
           !currentSelection.some((selected) => selected.SOID === item.SOID),
       );
 
-      this.selectedDeliveryOrders.set([...currentSelection, ...newItems]);
+      if (!this.canSelectAll(itemsToAdd)) {
+        checkbox.checked = false;
+
+        this.toaster.error(
+          'All selected Delivery Orders must have the same Unit and Business.',
+        );
+
+        return;
+      }
+
+      this.selectedDeliveryOrders.set([...currentSelection, ...itemsToAdd]);
     } else {
-      // Remove all items from the current page
       const currentPageIds = new Set(currentPageItems.map((item) => item.SOID));
 
       this.selectedDeliveryOrders.set(
-        this.selectedDeliveryOrders().filter(
-          (item) => !currentPageIds.has(item.SOID),
-        ),
+        currentSelection.filter((item) => !currentPageIds.has(item.SOID)),
       );
     }
   }
@@ -182,12 +204,6 @@ export class DeliveryOrders
     this.cartOpen.set(false);
   }
 
-  goToNextStep() {
-    this.cartOpen.set(false);
-    // Emit selected orders to PlanningProcessComponent
-    this.SelectedOrdersChange.emit(this.selectedDeliveryOrders());
-  }
-
   openView(order: IDeliveryOrder): void {
     this.OrderForView.set(order);
     this.viewOpen.set(true);
@@ -195,6 +211,70 @@ export class DeliveryOrders
 
   closeView(): void {
     this.viewOpen.set(false);
+  }
+
+  nextProcess() {
+    this.MergeDO();
+  }
+
+  MergeDO() {
+    const selectedDO = this.selectedDeliveryOrders()[0];
+    const selectedDOIds: IMergeDeliveryOrderRequest = {
+      DeliveryOrderIds: this.selectedDeliveryOrders().map(
+        (order) => order.SOID,
+      ),
+      Remarks: null,
+      DocumentCreatedBy: Number(localStorage.getItem('Enroll')),
+      IsCombineDO: this.selectedDeliveryOrders().length > 1 ? true : false,
+      BusinessID: this.businesses.find(
+        (business) => business.Name === selectedDO.Business,
+      )?.Id,
+      UnitID: this.units.find((unit) => unit.Name === selectedDO.Unit)?.Id,
+      Business: selectedDO.Business,
+      Unit: selectedDO.Unit,
+    };
+
+    this.deliveryOrderService
+      .MergeDO(selectedDOIds)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.cartOpen.set(false);
+          //this.submitted = false;
+          this.toaster.success('DO merged successfully.');
+        },
+      });
+  }
+
+  private canAddToCart(item: IDeliveryOrder): boolean {
+    const selected = this.selectedDeliveryOrders();
+
+    if (selected.length === 0) {
+      return true;
+    }
+
+    const firstSelected = selected[0];
+
+    return (
+      item.Unit === firstSelected.Unit &&
+      item.Business === firstSelected.Business
+    );
+  }
+
+  private canSelectAll(items: IDeliveryOrder[]): boolean {
+    if (items.length === 0) {
+      return true;
+    }
+
+    const selected = this.selectedDeliveryOrders();
+
+    // If cart already has items, compare against them
+    const reference = selected.length > 0 ? selected[0] : items[0];
+
+    return items.every(
+      (item) =>
+        item.Unit === reference.Unit && item.Business === reference.Business,
+    );
   }
 
   ngOnDestroy(): void {

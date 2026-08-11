@@ -217,7 +217,7 @@
   [selectedOrders]="selectedDeliveryOrders()"
   (closeCart)="closeCart()"
   (removeOrder)="removeSelection($event)"
-  (nextStep)="goToNextStep()"
+  (nextStep)="nextProcess()"
 ></app-delivery-orders-cart>
 
 @if(viewOpen() && OrderForView()){

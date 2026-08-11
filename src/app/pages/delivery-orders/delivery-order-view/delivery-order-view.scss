@@ -398,6 +398,17 @@ Summary
 Order Lines
 ========================================================= */
 
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+  color: #6c757d;
+  font-size: 0.95rem;
+}
+.loading-text {
+  font-size: 0.8rem;
+}
 .do-lines-wrapper {
   overflow: hidden;
 
@@ -462,6 +473,7 @@ Order Lines
   color: #9299a0 !important;
 }
 
+.presentStock-column,
 .quantity-column,
 .price-column,
 .amount-column {

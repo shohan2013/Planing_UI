@@ -16,7 +16,7 @@ import {
 } from 'src/app/core/model/DeliveryOrder/delivery-order-model';
 import { DeliveryOrderService } from 'src/app/core/services/DeliveryOrder/delivery-order-service';
 import { DateTimePipe } from '../../../shared/pipes/date-time-pipe';
-import { Subject, takeUntil } from 'rxjs';
+import { single, Subject, takeUntil } from 'rxjs';
 import { DecimalPipe } from '@angular/common';
 
 @Component({
@@ -33,7 +33,7 @@ export class DeliveryOrderView implements OnChanges, OnDestroy {
   @Output() closeView = new EventEmitter<void>();
 
   lines = signal<IDeliveryOrderLine[]>([]);
-
+  isLoading = signal(false);
   constructor(private deliveryOrderService: DeliveryOrderService) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -43,6 +43,7 @@ export class DeliveryOrderView implements OnChanges, OnDestroy {
   }
 
   GetOrderDetails(): void {
+    this.isLoading.set(true);
     if (!this.order?.SOID) return;
 
     this.deliveryOrderService
@@ -51,6 +52,7 @@ export class DeliveryOrderView implements OnChanges, OnDestroy {
       .subscribe((data) => {
         console.log(data);
         this.lines.set(data);
+        this.isLoading.set(false);
       });
   }
 
