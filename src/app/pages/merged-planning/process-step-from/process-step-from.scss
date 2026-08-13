@@ -1,0 +1,29 @@
+.psf-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.psf-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.psf-field {
+  flex: 1 1 150px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #495057;
+  }
+}
+
+.psf-actions {
+  display: flex;
+  justify-content: flex-end;
+}

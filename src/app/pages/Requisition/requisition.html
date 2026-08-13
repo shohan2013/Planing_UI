@@ -34,7 +34,7 @@
               <option [ngValue]="0">All Units</option>
 
               @for (unit of units; track unit.Id) {
-                <option [ngValue]="unit.Id">{{ unit.Name }}</option>
+              <option [ngValue]="unit.Id">{{ unit.Name }}</option>
               }
             </select>
           </div>
@@ -50,14 +50,11 @@
           >
             <option [ngValue]="0">All Businesses</option>
 
-            @for (business of businesses; track business.Id) {
-              @if (
-                selectedUnitFilterId === 0 ||
-                +business.UnitId === selectedUnitFilterId
-              ) {
-                <option [ngValue]="business.Id">{{ business.Name }}</option>
-              }
-            }
+            @for (business of businesses; track business.Id) { @if (
+            selectedUnitFilterId === 0 || +business.UnitId ===
+            selectedUnitFilterId ) {
+            <option [ngValue]="business.Id">{{ business.Name }}</option>
+            } }
           </select>
         </div>
 
@@ -140,8 +137,7 @@
             </td>
           </tr>
 
-          } @else {
-          @for (item of paginatedItems(); track item.ReqID) {
+          } @else { @for (item of paginatedItems(); track item.ReqID) {
 
           <tr>
             <!-- <td>
@@ -152,13 +148,9 @@
 
             <td>{{ item.RequisitionNumber || '-' }}</td>
 
-            <td>
-              {{ getUnitName(item.UnitId) }}
-            </td>
+            <td>{{ getUnitName(item.UnitId) }}</td>
 
-            <td>
-              {{ getBusinessName(item.BusinessId) }}
-            </td>
+            <td>{{ getBusinessName(item.BusinessId) }}</td>
 
             <td>{{ item.ReqDate | dateTime }}</td>
 
@@ -166,7 +158,9 @@
 
             <td>{{ item.CREATEDBY ?? '-' }}</td>
 
-            <td>{{ item.CREATEDDATE ? (item.CREATEDDATE | dateTime) : '-' }}</td>
+            <td>
+              {{ item.CREATEDDATE ? (item.CREATEDDATE | dateTime) : '-' }}
+            </td>
 
             <td>
               <span
@@ -286,7 +280,9 @@
 
           <tr>
             <th>Business</th>
-            <td>{{ getBusinessName(selectedRequisition.Header.BusinessId) }}</td>
+            <td>
+              {{ getBusinessName(selectedRequisition.Header.BusinessId) }}
+            </td>
           </tr>
 
           <tr>
@@ -993,27 +989,17 @@
         Close
       </button>
 
-      <button
-        type="submit"
-        class="btn btn-success"
-        [disabled]="isSubmitting"
-      >
+      <button type="submit" class="btn btn-success" [disabled]="isSubmitting">
         <span
           *ngIf="isSubmitting"
           class="spinner-border spinner-border-sm me-2"
           aria-hidden="true"
         ></span>
 
-        <i
-          *ngIf="!isSubmitting"
-          class="fa-solid fa-fw fa-check"
-        ></i>
+        <i *ngIf="!isSubmitting" class="fa-solid fa-fw fa-check"></i>
 
-        {{
-          isSubmitting
-            ? (isEditMode ? 'Updating...' : 'Saving...')
-            : (isEditMode ? 'Update' : 'Save')
-        }}
+        {{ isSubmitting ? (isEditMode ? 'Updating...' : 'Saving...') :
+        (isEditMode ? 'Update' : 'Save') }}
       </button>
     </div>
   </form>

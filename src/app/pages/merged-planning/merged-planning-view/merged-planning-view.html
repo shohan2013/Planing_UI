@@ -1,0 +1,128 @@
+@if (isOpen) {
+<div class="mpv-backdrop" (click)="close()"></div>
+
+<div class="mpv-panel">
+  <div class="mpv-header">
+    <div>
+      <h5 class="modal-title">Merged Delivery Order</h5>
+      @if (header()) {
+      <span class="do-code">{{ header()!.DOCode }}</span>
+      }
+    </div>
+    <button type="button" class="btn-close-panel" (click)="close()">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+
+  <div class="mpv-body">
+    @if (isLoading()) {
+    <div class="loading-container">
+      <span
+        class="spinner-border spinner-border-sm me-2"
+        aria-hidden="true"
+      ></span>
+      Loading Order Details...
+    </div>
+    } @else if (header()) {
+    <!-- Header Info -->
+    <div class="mpv-info-grid">
+      <div class="mpv-info-item">
+        <span class="mpv-label">Status</span>
+        <span
+          class="g-status"
+          [class.pending]="header()!.DocumentStatus === 'Pending'"
+          [class.approve]="header()!.DocumentStatus === 'Approved'"
+        >
+          <span class="g-dot"></span>
+          {{ header()!.DocumentStatus }}
+        </span>
+      </div>
+
+      <div class="mpv-info-item">
+        <span class="mpv-label">Type</span>
+        @if (header()!.IsCombineDO) {
+        <span class="combine-badge"
+          ><i class="fa-solid fa-code-merge"></i> Combined</span
+        >
+        } @else {
+        <span class="single-badge">Single</span>
+        }
+      </div>
+
+      <div class="mpv-info-item">
+        <span class="mpv-label">Business</span>
+        <span>{{ header()!.Business }}</span>
+      </div>
+
+      <div class="mpv-info-item">
+        <span class="mpv-label">Unit</span>
+        <span>{{ header()!.Unit }}</span>
+      </div>
+
+      <div class="mpv-info-item">
+        <span class="mpv-label">Created By</span>
+        <span>{{ header()!.DocumentCreatedBy }}</span>
+      </div>
+
+      <div class="mpv-info-item">
+        <span class="mpv-label">Created Date</span>
+        <span>{{ header()!.DocumentCreatedDate | dateTime }}</span>
+      </div>
+    </div>
+
+    <!-- Lines Table -->
+    <div class="table-responsive mt-3">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th style="width: 40px">#</th>
+            <th>PRODUCT NAME</th>
+            <th>UOM</th>
+            <th>QUANTITY</th>
+            <th>RATE</th>
+            <th>ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (lines().length === 0) {
+          <tr>
+            <td colspan="6" class="text-center py-4">
+              <h6>No Line Items Found.</h6>
+            </td>
+          </tr>
+          } @else { @for (line of lines(); track line.Id; let i = $index) {
+          <tr>
+            <td>{{ i + 1 }}</td>
+            <td class="text-start">{{ line.ProductName }}</td>
+            <td>{{ line.UOM }}</td>
+            <td>{{ line.Quantity }}</td>
+            <td>{{ line.Rate| number: '1.2-2' }}</td>
+            <td>
+              <div class="action-buttons">
+                <button
+                  type="button"
+                  class="action-btn btn-view"
+                  title="Plan Production"
+                  (click)="openProductionSteps(line)"
+                >
+                  <i class="fa-solid fa-industry"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          } }
+        </tbody>
+      </table>
+    </div>
+    }
+  </div>
+</div>
+
+<!-- Production Steps (per line item) -->
+<app-production-steps
+  [isOpen]="isProductionStepsOpen()"
+  [line]="selectedLine()"
+  (closeView)="closeProductionSteps()"
+>
+</app-production-steps>
+}

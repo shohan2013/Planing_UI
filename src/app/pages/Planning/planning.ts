@@ -3,24 +3,17 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
 import { CommonService } from 'src/app/core/services/Common/CommonService';
 import { DeliveryOrders } from '../delivery-orders/delivery-orders';
-import {
-  IDeliveryOrder,
-  IDeliveryOrderLine,
-} from 'src/app/core/model/DeliveryOrder/delivery-order-model';
-
+import { MergedPlanning } from '../merged-planning/merged-planning';
 @Component({
   selector: 'app-planning',
-  imports: [DeliveryOrders],
+  imports: [DeliveryOrders, MergedPlanning],
   templateUrl: './planning.html',
   styleUrl: './planning.scss',
 })
 export class Planning implements OnDestroy {
   private destroy$ = new Subject<void>();
 
-  constructor(
-    private commonservice: CommonService,
-    private modalService: NgbModal,
-  ) {}
+  constructor(private modalService: NgbModal) {}
 
   activeTab = signal<string>('mergeOrSplit');
 

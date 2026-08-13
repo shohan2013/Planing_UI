@@ -1,0 +1,54 @@
+<div class="psf-form">
+  <div class="psf-row">
+    <div class="psf-field">
+      <label>Start Date</label>
+      <input
+        type="date"
+        class="form-control form-control-sm"
+        [class.is-invalid]="submitted && !startDate"
+        [(ngModel)]="startDate"
+        name="startDate-{{ stepName }}"
+      />
+      @if (submitted && !startDate) {
+      <div class="invalid-feedback">Start date is required.</div>
+      }
+    </div>
+
+    <div class="psf-field">
+      <label>End Date</label>
+      <input
+        type="date"
+        class="form-control form-control-sm"
+        [class.is-invalid]="submitted && (!endDate || isDateRangeInvalid)"
+        [(ngModel)]="endDate"
+        name="endDate-{{ stepName }}"
+      />
+      @if (submitted && !endDate) {
+      <div class="invalid-feedback">End date is required.</div>
+      } @else if (submitted && isDateRangeInvalid) {
+      <div class="invalid-feedback">End date cannot be before start date.</div>
+      }
+    </div>
+
+    <div class="psf-field">
+      <label>Machine Number</label>
+      <input
+        type="text"
+        class="form-control form-control-sm"
+        [class.is-invalid]="submitted && !machineNumber.trim()"
+        [(ngModel)]="machineNumber"
+        name="machineNumber-{{ stepName }}"
+        placeholder="e.g. M-04"
+      />
+      @if (submitted && !machineNumber.trim()) {
+      <div class="invalid-feedback">Machine number is required.</div>
+      }
+    </div>
+  </div>
+
+  <div class="psf-actions">
+    <button type="button" class="btn btn-success btn-sm" (click)="onSave()">
+      <i class="fa-solid fa-check"></i> Save Step
+    </button>
+  </div>
+</div>

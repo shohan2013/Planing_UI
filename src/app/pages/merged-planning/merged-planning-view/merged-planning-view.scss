@@ -1,0 +1,8 @@
+// Shared slide-over panel base (.mpv-backdrop, .mpv-panel, .mpv-header, .mpv-body,
+// .mpv-info-grid, .mpv-info-item, .mpv-label, .loading-container) now lives in the
+// global styles.scss — Angular's view encapsulation means those classes wouldn't
+// reach child components (production-steps) if kept here.
+//
+// Nothing view-specific left right now. Add overrides here if needed, e.g.:
+//
+// .mpv-panel { width: min(760px, 100vw); }
