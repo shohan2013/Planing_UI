@@ -17,12 +17,6 @@ export class RequisitionService {
 
   constructor(private http: HttpClient) {}
 
-// GetRequisition(request:ServerQueryRequest,unitId:number = 0): Observable<ServerQueryResponse<IRequisition>> {
-//   return this.http.get<ServerQueryResponse<IRequisition>>(
-//     `${environment.API_URL}${GlobalConstant.API_END_POINTS.getRequisition}?GlobalSearch=${request.globalSearch}&UnitId=${unitId}&PageIndex=${request.page}&PageSize=${request.pageSize}`
-//   );
-// }
-
 
 GetRequisition(request: ServerQueryRequest, unitId: number = 0, businessId: number = 0): Observable<ServerQueryResponse<IViewRequisitionHeader>> {
 return this.http.get<ServerQueryResponse<IViewRequisitionHeader>>(

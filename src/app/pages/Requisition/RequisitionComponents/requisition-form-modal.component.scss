@@ -1,0 +1,92 @@
+:host {
+  display: block;
+}
+
+.modal-body {
+  padding-right: 30px;
+}
+
+.modal-body .form-label,
+.modal-body h6 {
+  font-weight: 700;
+}
+
+fieldset legend {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.date-input {
+  width: 190px;
+  height: 36px;
+}
+
+.empty-requisition-lines {
+  min-height: 360px;
+}
+
+::ng-deep .requisition-item-dropdown {
+  z-index: 2000 !important;
+  max-height: 240px !important;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.g-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.g-dot {
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.g-status-sm {
+  padding: 3px 8px;
+  font-size: 11px;
+}
+
+.g-status-sm .g-dot {
+  width: 6px;
+  height: 6px;
+}
+
+.status-pending {
+  color: #b7791f;
+  background-color: #fff7e6;
+}
+
+.status-approve {
+  color: #2f855a;
+  background-color: #eaf7ef;
+}
+
+.status-reject {
+  color: #c53030;
+  background-color: #fdecec;
+}
+
+.custom-table {
+  width: 100%;
+}
+
+.custom-table th,
+.custom-table td {
+  vertical-align: middle;
+}
+
+@media (max-width: 767.98px) {
+  .modal-body {
+    padding-right: var(--bs-modal-padding);
+  }
+
+  .date-input {
+    width: 100%;
+  }
+}

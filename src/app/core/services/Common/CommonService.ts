@@ -154,9 +154,9 @@ export class CommonService {
     );
   }
 
-  GetUOMList(): Observable<IUOM[]> {
+  GetUOMList(unitId: Number): Observable<IUOM[]> {
     return this.http.get<IUOM[]>(
-      `${environment.API_URL}${GlobalConstant.API_END_POINTS.UOM}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.UOM}?unitId=${unitId}`,
     );
   }
 
