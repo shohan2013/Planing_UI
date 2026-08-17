@@ -35,14 +35,11 @@
     Loading Order Details...
   </div>
   } @else if (header()) {
-  <!-- DO Header details — plain boxed fields using Bootstrap's own
-       form-label/form-control, same components requisitionModal already uses -->
-  <div class="row g-3">
-    <div class="col">
-      <label class="form-label small text-muted mb-1">Status</label>
-      <div
-        class="form-control form-control-sm d-flex align-items-center bg-light"
-      >
+  <!-- DO Header details — plain professional label/value strip, no inputs -->
+  <div class="mpv-detail-strip">
+    <div class="mpv-detail-item">
+      <span class="mpv-detail-label">Status</span>
+      <span class="mpv-detail-value">
         <span
           class="g-status"
           [class.pending]="header()!.DocumentStatus === 'Pending'"
@@ -51,14 +48,12 @@
           <span class="g-dot"></span>
           {{ header()!.DocumentStatus }}
         </span>
-      </div>
+      </span>
     </div>
 
-    <div class="col">
-      <label class="form-label small text-muted mb-1">Type</label>
-      <div
-        class="form-control form-control-sm d-flex align-items-center bg-light"
-      >
+    <div class="mpv-detail-item">
+      <span class="mpv-detail-label">Type</span>
+      <span class="mpv-detail-value">
         @if (header()!.IsCombineDO) {
         <span class="combine-badge">
           <i class="fa-solid fa-code-merge"></i>
@@ -67,47 +62,29 @@
         } @else {
         <span class="single-badge">Single</span>
         }
-      </div>
+      </span>
     </div>
 
-    <div class="col">
-      <label class="form-label small text-muted mb-1">Unit</label>
-      <input
-        type="text"
-        class="form-control form-control-sm"
-        [value]="header()!.Unit"
-        readonly
-      />
+    <div class="mpv-detail-item">
+      <span class="mpv-detail-label">Unit</span>
+      <span class="mpv-detail-value">{{ header()!.Unit }}</span>
     </div>
 
-    <div class="col">
-      <label class="form-label small text-muted mb-1">Business</label>
-      <input
-        type="text"
-        class="form-control form-control-sm"
-        [value]="header()!.Business"
-        readonly
-      />
+    <div class="mpv-detail-item">
+      <span class="mpv-detail-label">Business</span>
+      <span class="mpv-detail-value">{{ header()!.Business }}</span>
     </div>
 
-    <div class="col">
-      <label class="form-label small text-muted mb-1">Created By</label>
-      <input
-        type="text"
-        class="form-control form-control-sm"
-        [value]="header()!.DocumentCreatedBy"
-        readonly
-      />
+    <div class="mpv-detail-item">
+      <span class="mpv-detail-label">Created By</span>
+      <span class="mpv-detail-value">{{ header()!.DocumentCreatedBy }}</span>
     </div>
 
-    <div class="col">
-      <label class="form-label small text-muted mb-1">Created Date</label>
-      <input
-        type="text"
-        class="form-control form-control-sm"
-        [value]="header()!.DocumentCreatedDate | dateTime"
-        readonly
-      />
+    <div class="mpv-detail-item">
+      <span class="mpv-detail-label">Created Date</span>
+      <span class="mpv-detail-value"
+        >{{ header()!.DocumentCreatedDate | dateTime }}</span
+      >
     </div>
   </div>
 
@@ -117,23 +94,22 @@
 
   <hr class="my-3" />
 
-  <!-- Line items, planning process shown inline per row -->
-  <div class="table-responsive">
+  <!-- Line items — only # / Product Details / Planning Process, so the
+       process-steps strip has more room to show additional steps.
+       Vertically scrollable since a DO can have many line items. -->
+  <div class="table-responsive mpv-table-scroll">
     <table class="custom-table">
       <thead>
         <tr>
-          <th style="width: 40px">#</th>
-          <th>PRODUCT NAME</th>
-          <th>UOM</th>
-          <th>QUANTITY</th>
-          <th>RATE</th>
-          <th>PLANNING PROCESS</th>
+          <th class="index-column">#</th>
+          <th class="product-column">PRODUCT DETAILS</th>
+          <th class="planning-column">PLANNING PROCESS</th>
         </tr>
       </thead>
       <tbody>
         @if (lines().length === 0) {
         <tr>
-          <td colspan="6" class="text-center py-4">
+          <td colspan="3" class="text-center py-4">
             <i class="fas fa-folder-open fa-4x text-secondary mb-3"></i>
             <br />
             <h6>No Line Items Found.</h6>
@@ -143,11 +119,12 @@
         <tr>
           <td>{{ i + 1 }}</td>
           <td class="text-start">
-            <strong>{{ line.ProductName }}</strong>
+            <div class="mpv-product-name">{{ line.ProductName }}</div>
+            <div class="mpv-product-meta">
+              {{ line.UOM }} &nbsp;•&nbsp; Qty: {{ line.Quantity | number:
+              '1.2-2' }} &nbsp;•&nbsp; Rate: {{ line.Rate | number: '1.2-2' }}
+            </div>
           </td>
-          <td>{{ line.UOM }}</td>
-          <td>{{ line.Quantity | number: '1.2-2' }}</td>
-          <td>{{ line.Rate | number: '1.2-2' }}</td>
           <td class="text-start align-top mpv-process-cell">
             <app-production-steps [line]="line"></app-production-steps>
           </td>

@@ -2,8 +2,89 @@
   margin-right: 4px;
 }
 
-// Capped so each row's step strip has to scroll horizontally within its own
-// cell, rather than the table growing to fit every step card side by side.
+/* ---------- DO header details: plain label/value strip ---------- */
+.mpv-detail-strip {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.mpv-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  padding: 0 24px;
+  border-right: 1px solid #e2e5e9;
+}
+
+.mpv-detail-item:first-child {
+  padding-left: 0;
+}
+
+.mpv-detail-item:last-child {
+  border-right: none;
+}
+
+.mpv-detail-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #8a94a6;
+}
+
+.mpv-detail-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #212529;
+}
+
+/* ---------- Product Details column (merged Name / UOM / Quantity) ------- */
+
+table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.index-column {
+  width: 50px;
+}
+
+.product-column {
+  width: 20%;
+}
+
+.planning-column {
+  width: auto;
+}
+.mpv-product-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #212529;
+}
+
+.mpv-product-meta {
+  font-size: 12px;
+  color: #6c757d;
+  margin-top: 2px;
+}
+
+/* ---------- Scrollable line-items table ---------- */
+.mpv-table-scroll {
+  max-height: calc(100vh - 310px);
+  overflow-y: auto;
+}
+
+.mpv-table-scroll thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+/* ---------- Planning process cell ---------- */
+// No longer capped — Product Name/UOM/Quantity/Rate collapsed into one
+// PRODUCT DETAILS column, freeing width for more step cards to show
+// before the strip needs to scroll.
 .mpv-process-cell {
-  max-width: 640px;
+  max-width: none;
 }

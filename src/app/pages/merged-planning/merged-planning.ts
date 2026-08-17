@@ -108,7 +108,8 @@ export class MergedPlanning
     this.selectedHeaderId.set(item.Id);
     this.modalService.open(this.mergedPlanningViewModal, {
       scrollable: true,
-      windowClass: 'merged-planning-modal', // mirrors .requisition-fullscreen-modal — see global styles.scss
+      fullscreen: true,
+      windowClass: 'fullscreen-modal',
     });
   }
 

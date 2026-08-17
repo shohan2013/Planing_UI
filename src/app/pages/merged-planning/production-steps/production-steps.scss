@@ -6,12 +6,21 @@
 }
 
 .ps-strip::-webkit-scrollbar {
-  height: 6px;
+  height: 10px;
+}
+
+.ps-strip::-webkit-scrollbar-track {
+  background: #f1f3f5;
+  border-radius: 6px;
 }
 
 .ps-strip::-webkit-scrollbar-thumb {
-  background: #d7dde4;
-  border-radius: 4px;
+  background: #b8c0c8;
+  border-radius: 6px;
+}
+
+.ps-strip::-webkit-scrollbar-thumb:hover {
+  background: #8f9aa5;
 }
 
 .ps-scroll-hint {
@@ -19,8 +28,6 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-
-  margin-top: 6px;
   font-size: 11px;
   color: #5f6368;
 }

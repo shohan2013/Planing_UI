@@ -33,7 +33,7 @@ export class MergedPlanningServices {
     headerId: number,
   ): Observable<IMergedPlanningDetails> {
     return this.http.get<IMergedPlanningDetails>(
-      `${environment.API_URL}${GlobalConstant.API_END_POINTS.MergedPlanningDetails}?Id=${headerId}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.MergedPlanningDetails}/${headerId}`,
     );
   }
 }
