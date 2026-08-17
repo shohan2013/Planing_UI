@@ -54,7 +54,7 @@
     "@fortawesome/fontawesome-svg-core": "^7.2.0",
     "@fortawesome/free-solid-svg-icons": "^7.2.0",
     "@ng-bootstrap/ng-bootstrap": "^20.0.0",
-    "@ng-select/ng-select": "^23.2.0",
+    "@ng-select/ng-select": "^21.0.0",
     "@ngrx/store": "^21.1.0",
     "@ngrx/store-devtools": "^21.1.0",
     "@ngx-loading-bar/core": "^7.0.1",
