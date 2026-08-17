@@ -61,6 +61,22 @@ router-outlet + * {
 
 /*=======================================================CUSTOM STYLE=================================================================*/
 
+/*=======================================================FULL SCREEN MODAL============================================================*/
+
+.fullscreen-modal .modal-content {
+  min-height: 100vh;
+  background-color: #ffffff;
+}
+
+.fullscreen-modal .modal-body {
+  background-color: #ffffff;
+  overflow-y: auto;
+}
+
+.fullscreen-modal .modal-footer {
+  background-color: #ffffff;
+}
+
 /*========================================================TABLE========================================================================*/
 .custom-table {
   width: 100%;
@@ -600,20 +616,6 @@ label {
 }
 
 /*==============================================search bar========================================*/
-
-.requisition-fullscreen-modal .modal-content {
-  min-height: 100vh;
-  background-color: #ffffff;
-}
-
-.requisition-fullscreen-modal .modal-body {
-  background-color: #ffffff;
-  overflow-y: auto;
-}
-
-.requisition-fullscreen-modal .modal-footer {
-  background-color: #ffffff;
-}
 
 ngb-typeahead-window.dropdown-menu {
   z-index: 2000 !important;

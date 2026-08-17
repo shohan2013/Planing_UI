@@ -1,21 +1,9 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  OnDestroy,
-  OnInit,
-  signal,
-} from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import {
-  NgbModal,
-  NgbModalRef,
-} from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import {
-  Observable,
-  Subject,
-  takeUntil,
-} from 'rxjs';
+import { Observable, Subject, takeUntil } from 'rxjs';
 
 import { IBusiness } from 'src/app/core/model/Common/BusinessType/BusinessType';
 import { IUnit } from 'src/app/core/model/Common/Unit/Unit';
@@ -38,12 +26,7 @@ import { RequisitionFormModalComponent } from './RequisitionComponents/requisiti
 @Component({
   selector: 'app-requisition',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    PaginationComponent,
-    DateTimePipe,
-  ],
+  imports: [CommonModule, FormsModule, PaginationComponent, DateTimePipe],
   templateUrl: './requisition.html',
   styleUrl: './requisition.scss',
 })
@@ -79,9 +62,7 @@ export class Requisition
 
   protected override fetchData(
     request: ServerQueryRequest,
-  ): Observable<
-    ServerQueryResponse<IViewRequisitionHeader>
-  > {
+  ): Observable<ServerQueryResponse<IViewRequisitionHeader>> {
     return this.requisitionService.GetRequisition(
       request,
       this.selectedUnitFilterId,
@@ -97,68 +78,44 @@ export class Requisition
     this.currentPage.set(1);
 
     if (this.selectedUnitFilterId > 0) {
-      this.loadBusinesses(
-        this.selectedUnitFilterId,
-      );
+      this.loadBusinesses(this.selectedUnitFilterId);
     }
 
     this.retry();
   }
 
-  onBusinessFilterChange(
-    businessId: number,
-  ): void {
-    this.selectedBusinessFilterId =
-      Number(businessId);
+  onBusinessFilterChange(businessId: number): void {
+    this.selectedBusinessFilterId = Number(businessId);
 
     this.currentPage.set(1);
     this.retry();
   }
 
-  openViewModal(
-    header: IViewRequisitionHeader,
-  ): void {
-    if (
-      this.viewModalRef ||
-      this.formModalRef
-    ) {
+  openViewModal(header: IViewRequisitionHeader): void {
+    if (this.viewModalRef || this.formModalRef) {
       return;
     }
 
     try {
-      const modalRef =
-        this.modalService.open(
-          RequisitionViewModalComponent,
-          {
-            fullscreen: true,
-            windowClass:
-              'requisition-fullscreen-modal',
-          },
-        );
+      const modalRef = this.modalService.open(RequisitionViewModalComponent, {
+        fullscreen: true,
+        windowClass: 'fullscreen-modal',
+      });
 
       this.viewModalRef = modalRef;
-      modalRef.componentInstance.header =
-        header;
+      modalRef.componentInstance.header = header;
 
       const clearReference = (): void => {
-        if (
-          this.viewModalRef ===
-          modalRef
-        ) {
+        if (this.viewModalRef === modalRef) {
           this.viewModalRef = null;
         }
       };
 
-      modalRef.result.then(
-        clearReference,
-        clearReference,
-      );
+      modalRef.result.then(clearReference, clearReference);
     } catch {
       this.viewModalRef = null;
 
-      this.toastr.error(
-        'Unable to open the requisition details.',
-      );
+      this.toastr.error('Unable to open the requisition details.');
     }
   }
 
@@ -166,13 +123,8 @@ export class Requisition
     this.openFormModal('create');
   }
 
-  openEditModal(
-    header: IViewRequisitionHeader,
-  ): void {
-    this.openFormModal(
-      'edit',
-      header,
-    );
+  openEditModal(header: IViewRequisitionHeader): void {
+    this.openFormModal('edit', header);
   }
 
   deleteRequisition(reqId: number): void {
@@ -198,17 +150,14 @@ export class Requisition
           this.deletingReqId.set(null);
 
           if (response.Status) {
-            this.toastr.success(
-              response.Message,
-            );
+            this.toastr.success(response.Message);
 
             this.retry();
             return;
           }
 
           this.toastr.error(
-            response.Message ||
-              'Unable to delete the requisition.',
+            response.Message || 'Unable to delete the requisition.',
           );
         },
         error: (error) => {
@@ -226,9 +175,7 @@ export class Requisition
       });
   }
 
-  getDocStatusName(
-    docStatusId: number,
-  ): string {
+  getDocStatusName(docStatusId: number): string {
     switch (docStatusId) {
       case 1:
         return 'Pending';
@@ -255,16 +202,12 @@ export class Requisition
         error: () => {
           this.units.set([]);
 
-          this.toastr.error(
-            'Unable to load the Unit filter.',
-          );
+          this.toastr.error('Unable to load the Unit filter.');
         },
       });
   }
 
-  private loadBusinesses(
-    unitId: number,
-  ): void {
+  private loadBusinesses(unitId: number): void {
     this.businessesLoading.set(true);
 
     this.commonService
@@ -272,80 +215,51 @@ export class Requisition
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (businesses) => {
-          if (
-            this.selectedUnitFilterId !==
-            unitId
-          ) {
+          if (this.selectedUnitFilterId !== unitId) {
             return;
           }
 
-          this.businesses.set(
-            businesses,
-          );
+          this.businesses.set(businesses);
 
-          this.businessesLoading.set(
-            false,
-          );
+          this.businessesLoading.set(false);
         },
         error: () => {
-          if (
-            this.selectedUnitFilterId !==
-            unitId
-          ) {
+          if (this.selectedUnitFilterId !== unitId) {
             return;
           }
 
           this.businesses.set([]);
-          this.businessesLoading.set(
-            false,
-          );
+          this.businessesLoading.set(false);
 
-          this.toastr.error(
-            'Unable to load the Business filter.',
-          );
+          this.toastr.error('Unable to load the Business filter.');
         },
       });
   }
 
   private openFormModal(
     mode: 'create' | 'edit',
-    header:
-      | IViewRequisitionHeader
-      | null = null,
+    header: IViewRequisitionHeader | null = null,
   ): void {
-    if (
-      this.formModalRef ||
-      this.viewModalRef
-    ) {
+    if (this.formModalRef || this.viewModalRef) {
       return;
     }
 
     try {
-      const modalRef =
-        this.modalService.open(
-          RequisitionFormModalComponent,
-          {
-            fullscreen: true,
-            backdrop: 'static',
-            keyboard: false,
-            windowClass:
-              'requisition-fullscreen-modal',
-          },
-        );
+      const modalRef = this.modalService.open(RequisitionFormModalComponent, {
+        fullscreen: true,
+        backdrop: 'static',
+        keyboard: false,
+        windowClass: 'requisition-fullscreen-modal',
+      });
 
       this.formModalRef = modalRef;
 
-      modalRef.componentInstance.mode =
-        mode;
+      modalRef.componentInstance.mode = mode;
 
-      modalRef.componentInstance.header =
-        header;
+      modalRef.componentInstance.header = header;
 
       const clearReference = (): void => {
-        if (
-          this.formModalRef ===
-          modalRef
-        ) {
+        if (this.formModalRef === modalRef) {
           this.formModalRef = null;
         }
       };
@@ -380,13 +294,9 @@ export class Requisition
   }
 
   ngOnDestroy(): void {
-    this.viewModalRef?.dismiss(
-      'landing-destroyed',
-    );
+    this.viewModalRef?.dismiss('landing-destroyed');
 
-    this.formModalRef?.dismiss(
-      'landing-destroyed',
-    );
+    this.formModalRef?.dismiss('landing-destroyed');
 
     this.viewModalRef = null;
     this.formModalRef = null;
