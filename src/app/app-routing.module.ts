@@ -47,24 +47,44 @@ import {
 import { authGuard } from './core/guards/auth/auth.guard';
 import { Requisition } from './pages/Requisition/requisition';
 
+import { permissionGuard } from 'src/app/core/guards/permission.guard';
+
+
+
 const routes: Routes = [
   {
     path: '',
     component: BaseLayoutComponent,
+
+  canActivateChild: [permissionGuard],
+
     children: [
       // Dashboards
       //{path: 'pages/login-boxed', component: LoginBoxedComponent, data: {extraParameter: ''}},
       { path: '', redirectTo: '/pages/login-boxed', pathMatch: 'full' },
       {
         path: 'dashboards/analytics',
-        component: Requisition,
-        data: { extraParameter: 'dashboardsMenu' },
+
+        redirectTo: 'requisition', pathMatch: 'full',
+        // component: Requisition,
+        // data: { extraParameter: 'dashboardsMenu' },
       },
       {
         path: '',
         component: AnalyticsComponent,
         data: { extraParameter: 'dashboardsMenu' },
       },
+
+  {
+    path: 'permission-required',
+    loadComponent: () =>
+      import(
+        './pages/permission-required/permission-required'
+      ).then((m) => m.PermissionRequired),
+  },
+
+
+
 
       {
         path: 'permission',
@@ -217,6 +237,10 @@ const routes: Routes = [
       },
     ],
   },
+
+
+
+
   {
     // Documentation section — lazy-loaded so it stays out of the initial bundle
     path: 'docs',

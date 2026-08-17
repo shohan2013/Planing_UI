@@ -23,10 +23,14 @@ import { DateTimePipe } from '../../shared/pipes/date-time-pipe';
 import { RequisitionViewModalComponent } from './RequisitionComponents/requisition-view-modal.component';
 import { RequisitionFormModalComponent } from './RequisitionComponents/requisition-form-modal.component';
 
+
+import { MenuPermissionDirective } from 'src/app/core/directives/menu-permission.directive';/////
+import { PermissionAction } from 'src/app/core/services/Authorization/authorization.service';/////
+
 @Component({
   selector: 'app-requisition',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaginationComponent, DateTimePipe],
+  imports: [CommonModule, FormsModule, PaginationComponent, DateTimePipe  ,MenuPermissionDirective],
   templateUrl: './requisition.html',
   styleUrl: './requisition.scss',
 })
@@ -34,6 +38,11 @@ export class Requisition
   extends ServerSideFilteredPaginatedComponent<IViewRequisitionHeader>
   implements OnInit, OnDestroy
 {
+
+
+  readonly PermissionAction = PermissionAction;  /////
+
+
   selectedUnitFilterId = 0;
   selectedBusinessFilterId = 0;
 

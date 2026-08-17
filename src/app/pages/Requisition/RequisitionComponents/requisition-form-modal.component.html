@@ -747,6 +747,14 @@
 
     @if (state() !== 'initializing') {
       <button
+
+      *menuPermission="
+        isEditMode
+          ? PermissionAction.Update
+          : PermissionAction.Insert
+      "
+
+
         type="submit"
         class="btn btn-success"
         [disabled]="

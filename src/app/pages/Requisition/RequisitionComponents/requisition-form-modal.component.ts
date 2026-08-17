@@ -35,6 +35,7 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
+import { MenuPermissionDirective } from 'src/app/core/directives/menu-permission.directive';
 
 import { IBusiness } from 'src/app/core/model/Common/BusinessType/BusinessType';
 import { IDropdownBind } from 'src/app/core/model/Common/dropdown-bind';
@@ -47,6 +48,7 @@ import {
   IViewRequisitionHeader,
   IViewRequisitionLine,
 } from 'src/app/core/model/Requisition/ViewRequisition';
+import { PermissionAction } from 'src/app/core/services/Authorization/authorization.service';
 import { CommonService } from 'src/app/core/services/Common/CommonService';
 import { RequisitionService } from 'src/app/core/services/Requisition/requisition.service';
 
@@ -66,11 +68,15 @@ type FormModalState =
     FormsModule,
     ReactiveFormsModule,
     NgbTypeaheadModule,
+    MenuPermissionDirective,
   ],
   templateUrl: './requisition-form-modal.component.html',
   styleUrl: './requisition-form-modal.component.scss',
 })
 export class RequisitionFormModalComponent implements OnInit {
+
+  readonly PermissionAction = PermissionAction;
+
   @Input({ required: true })
   mode: RequisitionFormMode = 'create';
 
