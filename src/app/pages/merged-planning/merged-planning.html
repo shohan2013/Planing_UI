@@ -145,7 +145,7 @@
                   type="button"
                   class="action-btn btn-view"
                   title="Start Planning"
-                  (click)="openPlanning(item.Id)"
+                  (click)="openPlanning(item)"
                 >
                   <i class="fa-solid fa-route"></i>
                 </button>
@@ -172,10 +172,12 @@
   </div>
 </div>
 
-@if(viewOpen() && HeaderIdForView()){
-<app-merged-planning-view
-  [isOpen]="viewOpen()"
-  [headerId]="HeaderIdForView()"
-  (closeView)="closeView()"
-></app-merged-planning-view>
-}
+<!-- NEW: Merged Planning View, opened as an NgbModal via openPlanning() -
+     same ng-template + modalService.open() pattern as viewRequisitionModal -->
+<ng-template #mergedPlanningViewModal let-c="close" let-d="dismiss">
+  <app-merged-planning-view
+    [headerId]="selectedHeaderId()"
+    (closeView)="d('Cross click')"
+  >
+  </app-merged-planning-view>
+</ng-template>

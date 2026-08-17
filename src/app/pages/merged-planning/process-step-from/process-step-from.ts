@@ -19,9 +19,28 @@ export class ProcessStepFrom {
   machineNumber = '';
 
   submitted = false;
+  saved = false;
 
   get isDateRangeInvalid(): boolean {
     return !!(this.startDate && this.endDate && this.endDate < this.startDate);
+  }
+
+  // Total Allocated Time — auto-computed from the date range, read-only on
+  // the card. Displayed in whole days.
+  get totalAllocatedTime(): string {
+    if (!this.startDate || !this.endDate || this.isDateRangeInvalid) {
+      return '';
+    }
+    const start = new Date(this.startDate);
+    const end = new Date(this.endDate);
+    const days =
+      Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    return `${days} day${days === 1 ? '' : 's'}`;
+  }
+
+  onFieldChange(): void {
+    // Any edit after a save invalidates the "saved" state until re-saved
+    this.saved = false;
   }
 
   onSave(): void {
@@ -34,6 +53,8 @@ export class ProcessStepFrom {
     if (this.isDateRangeInvalid) {
       return;
     }
+
+    this.saved = true;
 
     this.save.emit({
       lineId: this.lineId,

@@ -28,11 +28,12 @@ export class MergedPlanningServices {
     );
   }
 
+  // NEW: fetches Header + Lines for a single merged DO, used by merged-planning-view
   GetMergedPlanningDetails(
     headerId: number,
   ): Observable<IMergedPlanningDetails> {
     return this.http.get<IMergedPlanningDetails>(
-      `${environment.API_URL}${GlobalConstant.API_END_POINTS.MergedPlanningDetails}/${headerId}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.MergedPlanningDetails}?Id=${headerId}`,
     );
   }
 }

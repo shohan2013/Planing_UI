@@ -1,29 +1,14 @@
-.psf-form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+// Bootstrap's .card already handles the border/radius/background — this
+// just sets the fixed width for the horizontal strip and the "saved" accent.
+.step-card {
+  flex: 0 0 200px;
 }
 
-.psf-row {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
+.step-card-saved {
+  border-color: #4daa57;
 }
 
-.psf-field {
-  flex: 1 1 150px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-
-  label {
-    font-size: 12px;
-    font-weight: 600;
-    color: #495057;
-  }
-}
-
-.psf-actions {
-  display: flex;
-  justify-content: flex-end;
+.step-saved-icon {
+  color: #4daa57;
+  font-size: 12px;
 }

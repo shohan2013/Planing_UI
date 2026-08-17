@@ -1,33 +1,48 @@
-@if (isOpen) {
-<div class="mpv-backdrop" (click)="close()"></div>
+<div class="modal-header">
+  <h5 class="modal-title">
+    <svg
+      width="17"
+      height="17"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="rgb(84, 173, 94)"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <!-- Clipboard outline -->
+      <rect x="5" y="3" width="14" height="18" rx="2"></rect>
+      <!-- Clip -->
+      <path d="M9 3v2a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1V3"></path>
+      <!-- Route/steps mark -->
+      <path d="M8 12h3l-1 2 3-3-1-2h3"></path>
+    </svg>
+    Product Planning Insertion Form @if (header()) {
+    <span class="do-code ms-2">{{ header()!.DOCode }}</span>
+    }
+  </h5>
 
-<div class="mpv-panel">
-  <div class="mpv-header">
-    <div>
-      <h5 class="modal-title">Merged Delivery Order</h5>
-      @if (header()) {
-      <span class="do-code">{{ header()!.DOCode }}</span>
-      }
-    </div>
-    <button type="button" class="btn-close-panel" (click)="close()">
-      <i class="fa-solid fa-xmark"></i>
-    </button>
+  <button type="button" class="btn-close" (click)="close()"></button>
+</div>
+
+<div class="modal-body">
+  @if (isLoading()) {
+  <div class="loading-container">
+    <span
+      class="spinner-border spinner-border-sm me-2"
+      aria-hidden="true"
+    ></span>
+    Loading Order Details...
   </div>
-
-  <div class="mpv-body">
-    @if (isLoading()) {
-    <div class="loading-container">
-      <span
-        class="spinner-border spinner-border-sm me-2"
-        aria-hidden="true"
-      ></span>
-      Loading Order Details...
-    </div>
-    } @else if (header()) {
-    <!-- Header Info -->
-    <div class="mpv-info-grid">
-      <div class="mpv-info-item">
-        <span class="mpv-label">Status</span>
+  } @else if (header()) {
+  <!-- DO Header details — plain boxed fields using Bootstrap's own
+       form-label/form-control, same components requisitionModal already uses -->
+  <div class="row g-3">
+    <div class="col">
+      <label class="form-label small text-muted mb-1">Status</label>
+      <div
+        class="form-control form-control-sm d-flex align-items-center bg-light"
+      >
         <span
           class="g-status"
           [class.pending]="header()!.DocumentStatus === 'Pending'"
@@ -37,92 +52,116 @@
           {{ header()!.DocumentStatus }}
         </span>
       </div>
+    </div>
 
-      <div class="mpv-info-item">
-        <span class="mpv-label">Type</span>
+    <div class="col">
+      <label class="form-label small text-muted mb-1">Type</label>
+      <div
+        class="form-control form-control-sm d-flex align-items-center bg-light"
+      >
         @if (header()!.IsCombineDO) {
-        <span class="combine-badge"
-          ><i class="fa-solid fa-code-merge"></i> Combined</span
-        >
+        <span class="combine-badge">
+          <i class="fa-solid fa-code-merge"></i>
+          Combined
+        </span>
         } @else {
         <span class="single-badge">Single</span>
         }
       </div>
-
-      <div class="mpv-info-item">
-        <span class="mpv-label">Business</span>
-        <span>{{ header()!.Business }}</span>
-      </div>
-
-      <div class="mpv-info-item">
-        <span class="mpv-label">Unit</span>
-        <span>{{ header()!.Unit }}</span>
-      </div>
-
-      <div class="mpv-info-item">
-        <span class="mpv-label">Created By</span>
-        <span>{{ header()!.DocumentCreatedBy }}</span>
-      </div>
-
-      <div class="mpv-info-item">
-        <span class="mpv-label">Created Date</span>
-        <span>{{ header()!.DocumentCreatedDate | dateTime }}</span>
-      </div>
     </div>
 
-    <!-- Lines Table -->
-    <div class="table-responsive mt-3">
-      <table class="custom-table">
-        <thead>
-          <tr>
-            <th style="width: 40px">#</th>
-            <th>PRODUCT NAME</th>
-            <th>UOM</th>
-            <th>QUANTITY</th>
-            <th>RATE</th>
-            <th>ACTION</th>
-          </tr>
-        </thead>
-        <tbody>
-          @if (lines().length === 0) {
-          <tr>
-            <td colspan="6" class="text-center py-4">
-              <h6>No Line Items Found.</h6>
-            </td>
-          </tr>
-          } @else { @for (line of lines(); track line.Id; let i = $index) {
-          <tr>
-            <td>{{ i + 1 }}</td>
-            <td class="text-start">{{ line.ProductName }}</td>
-            <td>{{ line.UOM }}</td>
-            <td>{{ line.Quantity }}</td>
-            <td>{{ line.Rate| number: '1.2-2' }}</td>
-            <td>
-              <div class="action-buttons">
-                <button
-                  type="button"
-                  class="action-btn btn-view"
-                  title="Plan Production"
-                  (click)="openProductionSteps(line)"
-                >
-                  <i class="fa-solid fa-industry"></i>
-                </button>
-              </div>
-            </td>
-          </tr>
-          } }
-        </tbody>
-      </table>
+    <div class="col">
+      <label class="form-label small text-muted mb-1">Unit</label>
+      <input
+        type="text"
+        class="form-control form-control-sm"
+        [value]="header()!.Unit"
+        readonly
+      />
     </div>
-    }
+
+    <div class="col">
+      <label class="form-label small text-muted mb-1">Business</label>
+      <input
+        type="text"
+        class="form-control form-control-sm"
+        [value]="header()!.Business"
+        readonly
+      />
+    </div>
+
+    <div class="col">
+      <label class="form-label small text-muted mb-1">Created By</label>
+      <input
+        type="text"
+        class="form-control form-control-sm"
+        [value]="header()!.DocumentCreatedBy"
+        readonly
+      />
+    </div>
+
+    <div class="col">
+      <label class="form-label small text-muted mb-1">Created Date</label>
+      <input
+        type="text"
+        class="form-control form-control-sm"
+        [value]="header()!.DocumentCreatedDate | dateTime"
+        readonly
+      />
+    </div>
   </div>
+
+  <hr class="my-4" />
+
+  <h6 class="text-center fw-bold">PRODUCT PLANNING INSERTION FORM</h6>
+
+  <hr class="my-3" />
+
+  <!-- Line items, planning process shown inline per row -->
+  <div class="table-responsive">
+    <table class="custom-table">
+      <thead>
+        <tr>
+          <th style="width: 40px">#</th>
+          <th>PRODUCT NAME</th>
+          <th>UOM</th>
+          <th>QUANTITY</th>
+          <th>RATE</th>
+          <th>PLANNING PROCESS</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (lines().length === 0) {
+        <tr>
+          <td colspan="6" class="text-center py-4">
+            <i class="fas fa-folder-open fa-4x text-secondary mb-3"></i>
+            <br />
+            <h6>No Line Items Found.</h6>
+          </td>
+        </tr>
+        } @else { @for (line of lines(); track line.Id; let i = $index) {
+        <tr>
+          <td>{{ i + 1 }}</td>
+          <td class="text-start">
+            <strong>{{ line.ProductName }}</strong>
+          </td>
+          <td>{{ line.UOM }}</td>
+          <td>{{ line.Quantity | number: '1.2-2' }}</td>
+          <td>{{ line.Rate | number: '1.2-2' }}</td>
+          <td class="text-start align-top mpv-process-cell">
+            <app-production-steps [line]="line"></app-production-steps>
+          </td>
+        </tr>
+        } }
+      </tbody>
+    </table>
+  </div>
+  }
 </div>
 
-<!-- Production Steps (per line item) -->
-<app-production-steps
-  [isOpen]="isProductionStepsOpen()"
-  [line]="selectedLine()"
-  (closeView)="closeProductionSteps()"
->
-</app-production-steps>
-}
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">
+    <i class="fa-solid fa-fw fa-xmark"></i>
+    Close
+  </button>
+</div>

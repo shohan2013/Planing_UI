@@ -1,4 +1,11 @@
-import { Component, OnDestroy, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  signal,
+  TemplateRef,
+  ViewChild,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { Observable, Subject, takeUntil, tap } from 'rxjs';
@@ -15,6 +22,7 @@ import { MergedPlanningServices } from 'src/app/core/services/MergedPlanning/mer
 import { PaginationComponent } from 'src/app/shared/pagination/pagination.component';
 import { DateTimePipe } from 'src/app/shared/pipes/date-time-pipe';
 import { MergedPlanningView } from './merged-planning-view/merged-planning-view';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-merged-planning',
@@ -32,13 +40,17 @@ export class MergedPlanning
   businesses: IBusiness[];
   selectedUnitId: Number = 0;
   selectedBusinessId: Number = 0;
-  viewOpen = signal<boolean>(false);
-  HeaderIdForView = signal<number>(null);
+
+  // NEW: template ref for the merged-planning-view modal, opened via NgbModal
+  @ViewChild('mergedPlanningViewModal')
+  mergedPlanningViewModal!: TemplateRef<any>;
+  selectedHeaderId = signal<number | null>(null);
 
   constructor(
     private mergedPlanningService: MergedPlanningServices,
     private commonService: CommonService,
     private toaster: ToastrService,
+    private modalService: NgbModal, // NEW
   ) {
     super();
   }
@@ -92,13 +104,12 @@ export class MergedPlanning
       });
   }
 
-  openPlanning(headerId: number): void {
-    this.viewOpen.set(true);
-    this.HeaderIdForView.set(headerId);
-  }
-
-  closeView() {
-    this.viewOpen.set(false);
+  openPlanning(item: IMergedPlanning): void {
+    this.selectedHeaderId.set(item.Id);
+    this.modalService.open(this.mergedPlanningViewModal, {
+      scrollable: true,
+      windowClass: 'merged-planning-modal', // mirrors .requisition-fullscreen-modal — see global styles.scss
+    });
   }
 
   ngOnDestroy(): void {

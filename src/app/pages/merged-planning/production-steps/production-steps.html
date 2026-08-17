@@ -1,55 +1,17 @@
-@if (isOpen && line) {
-<div class="mpv-backdrop" (click)="close()"></div>
+@if (line) {
+<div class="ps-strip">
+  @for (step of steps; track step) {
+  <app-process-step-from
+    [lineId]="line.Id"
+    [stepName]="step"
+    (save)="onStepSaved(step, $event)"
+  >
+  </app-process-step-from>
+  }
+</div>
 
-<div class="mpv-panel ps-panel">
-  <div class="mpv-header">
-    <div>
-      <h5 class="modal-title">Production Steps</h5>
-      <span class="do-code">{{ line.ProductName }}</span>
-    </div>
-    <button type="button" class="btn-close-panel" (click)="close()">
-      <i class="fa-solid fa-xmark"></i>
-    </button>
-  </div>
-
-  <div class="mpv-body">
-    <div class="ps-meta">
-      <span class="mpv-label">UOM</span>
-      <span>{{ line.UOM }}</span>
-      <span class="mpv-label">Quantity</span>
-      <span>{{ line.Quantity }}</span>
-    </div>
-
-    <div class="ps-step-list">
-      @for (step of steps; track step) {
-      <div class="ps-step-card" [class.active]="activeStep() === step">
-        <button type="button" class="ps-step-header" (click)="toggleStep(step)">
-          <span class="ps-step-name">
-            @if (savedSteps().has(step)) {
-            <i class="fa-solid fa-circle-check ps-step-done"></i>
-            } @else {
-            <i class="fa-regular fa-circle ps-step-pending"></i>
-            } {{ step }}
-          </span>
-          <i
-            class="fa-solid fa-chevron-down ps-step-chevron"
-            [class.rotated]="activeStep() === step"
-          ></i>
-        </button>
-
-        @if (activeStep() === step) {
-        <div class="ps-step-body">
-          <app-process-step-from
-            [lineId]="line.Id"
-            [stepName]="step"
-            (save)="onStepSaved(step, $event)"
-          >
-          </app-process-step-from>
-        </div>
-        }
-      </div>
-      }
-    </div>
-  </div>
+<div class="ps-scroll-hint">
+  <i class="fa-solid fa-arrows-left-right"></i>
+  Scroll to see more steps
 </div>
 }
