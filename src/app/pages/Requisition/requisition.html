@@ -11,7 +11,7 @@
   <div class="card-body">
     <div class="d-flex align-items-center gap-3 mb-3">
       <button
-      *menuPermission="PermissionAction.Insert"
+        *menuPermission="PermissionAction.Insert"
         type="button"
         class="btn btn-success btn-shadow d-inline-flex align-items-center"
         (click)="openCreateModal()"
@@ -176,7 +176,7 @@
             <td>
               <div class="action-buttons">
                 <button
-                *menuPermission="PermissionAction.View"
+                  *menuPermission="PermissionAction.View"
                   type="button"
                   class="action-btn btn-view"
                   title="View"
@@ -191,7 +191,7 @@
                 </button>
 
                 <button
-
+                  *menuPermission="PermissionAction.Update"
                   type="button"
                   class="action-btn btn-edit"
                   title="Edit"
@@ -206,7 +206,7 @@
                 </button>
 
                 <button
-                *menuPermission="PermissionAction.Delete"
+                  *menuPermission="PermissionAction.Delete"
                   type="button"
                   class="action-btn btn-delete"
                   title="Delete"
