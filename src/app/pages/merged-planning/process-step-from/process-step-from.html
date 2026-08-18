@@ -1,32 +1,67 @@
-<div class="card step-card" [class.step-card-saved]="saved">
-  <div
-    class="card-header py-2 text-center d-flex align-items-center justify-content-center gap-2"
-  >
-    <span class="do-code">{{ stepName }}</span>
+<div
+  class="card step-card"
+  [class.step-card-enabled]="enabled"
+  [class.step-card-saved]="saved"
+>
+  <div class="card-header step-card-header" [class.enabled]="enabled">
+    <label class="step-toggle" [for]="'enableStep-' + lineId + '-' + stepName">
+      <input
+        class="form-check-input"
+        type="checkbox"
+        [id]="'enableStep-' + lineId + '-' + stepName"
+        [name]="'enableStep-' + lineId + '-' + stepName"
+        [(ngModel)]="enabled"
+        (ngModelChange)="onEnabledChange()"
+        [attr.aria-label]="'Enable ' + stepName + ' production step'"
+      />
+      <span class="step-name" [title]="stepName">{{ stepName }}</span>
+    </label>
     @if (saved) {
     <i class="fa-solid fa-circle-check step-saved-icon" title="Saved"></i>
     }
   </div>
 
-  <div class="card-body p-2">
-    <div class="mb-2">
-      <label class="form-label small text-muted mb-1">Machine No</label>
-      <input
-        type="text"
-        class="form-control form-control-sm"
+  <div class="card-body p-2 step-fields-grid">
+    <div>
+      <label class="form-label">Machine No</label>
+      <select
+        class="form-select form-select-sm"
         [class.is-invalid]="submitted && !machineNumber.trim()"
         [(ngModel)]="machineNumber"
         (ngModelChange)="onFieldChange()"
         name="machineNumber-{{ stepName }}"
-        placeholder="e.g. M-04"
-      />
+        [disabled]="!enabled"
+      >
+        <option value="">Select machine</option>
+        @if (machineOptions.length === 0) {
+        <option disabled>No machines available</option>
+        }
+        @for (machine of machineOptions; track machine.MachineNumber) {
+        <option [value]="machine.MachineNumber">
+          {{ machine.MachineNumber }}@if (machine.MachineName) { — {{ machine.MachineName }}}
+        </option>
+        }
+      </select>
       @if (submitted && !machineNumber.trim()) {
       <div class="invalid-feedback">Required.</div>
       }
     </div>
 
-    <div class="mb-2">
-      <label class="form-label small text-muted mb-1">Start Date</label>
+    <div>
+      <label class="form-label">Allocated Time</label>
+      <input
+        type="text"
+        class="form-control form-control-sm bg-light"
+        [value]="totalAllocatedTime"
+        readonly
+        [disabled]="!enabled"
+        placeholder="—"
+        title="Calculated automatically from the start and end dates"
+      />
+    </div>
+
+    <div>
+      <label class="form-label">Start Date</label>
       <input
         type="date"
         class="form-control form-control-sm"
@@ -34,14 +69,15 @@
         [(ngModel)]="startDate"
         (ngModelChange)="onFieldChange()"
         name="startDate-{{ stepName }}"
+        [disabled]="!enabled"
       />
       @if (submitted && !startDate) {
       <div class="invalid-feedback">Required.</div>
       }
     </div>
 
-    <div class="mb-2">
-      <label class="form-label small text-muted mb-1">End Date</label>
+    <div>
+      <label class="form-label">End Date</label>
       <input
         type="date"
         class="form-control form-control-sm"
@@ -49,6 +85,7 @@
         [(ngModel)]="endDate"
         (ngModelChange)="onFieldChange()"
         name="endDate-{{ stepName }}"
+        [disabled]="!enabled"
       />
       @if (submitted && !endDate) {
       <div class="invalid-feedback">Required.</div>
@@ -57,20 +94,7 @@
       }
     </div>
 
-    <div class="mb-3">
-      <label class="form-label small text-muted mb-1"
-        >Total Allocated Time</label
-      >
-      <input
-        type="text"
-        class="form-control form-control-sm bg-light"
-        [value]="totalAllocatedTime"
-        readonly
-        placeholder="—"
-      />
-    </div>
-
-    <button
+    <!-- <button
       type="button"
       class="btn btn-success btn-sm w-100"
       (click)="onSave()"
@@ -81,6 +105,6 @@
         [class.fa-rotate-right]="saved"
       ></i>
       {{ saved ? 'Update' : 'Save' }}
-    </button>
+    </button> -->
   </div>
 </div>

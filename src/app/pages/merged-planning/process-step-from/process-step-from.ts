@@ -1,6 +1,9 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { IProcessStepInput } from 'src/app/core/model/MergedPlanning/planning-processes-model';
+import {
+  IMachineOption,
+  IProcessStepInput,
+} from 'src/app/core/model/MergedPlanning/planning-processes-model';
 
 @Component({
   selector: 'app-process-step-from',
@@ -12,11 +15,13 @@ import { IProcessStepInput } from 'src/app/core/model/MergedPlanning/planning-pr
 export class ProcessStepFrom {
   @Input() lineId!: number;
   @Input() stepName!: string;
+  @Input() machineOptions: IMachineOption[] = [];
   @Output() save = new EventEmitter<IProcessStepInput>();
 
   startDate: string | null = null;
   endDate: string | null = null;
   machineNumber = '';
+  enabled = false;
 
   submitted = false;
   saved = false;
@@ -43,7 +48,14 @@ export class ProcessStepFrom {
     this.saved = false;
   }
 
+  onEnabledChange(): void {
+    this.submitted = false;
+    this.saved = false;
+  }
+
   onSave(): void {
+    if (!this.enabled) return;
+
     this.submitted = true;
 
     if (!this.startDate || !this.endDate || !this.machineNumber.trim()) {

@@ -1,7 +1,105 @@
-// Bootstrap's .card already handles the border/radius/background — this
-// just sets the fixed width for the horizontal strip and the "saved" accent.
+:host {
+  display: block;
+  flex: 0 0 280px;
+}
+
 .step-card {
-  flex: 0 0 200px;
+  width: 100%;
+  height: 164px;
+  overflow: hidden;
+}
+
+.step-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 34px;
+  padding: 6px 9px;
+  border-bottom-color: #e2e5e9;
+  background: #adb5bd;
+  color: #fff;
+  font-size: 12px;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+
+.step-card-header.enabled {
+  background: #4daa57;
+}
+
+.step-card-enabled {
+  border-color: rgba(77, 170, 87, 0.55);
+}
+
+.step-toggle {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.step-toggle .form-check-input {
+  flex: 0 0 auto;
+  margin: 0;
+  border-color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+}
+
+.step-toggle .form-check-input:checked {
+  border-color: #fff;
+  background-color: #212529;
+}
+
+.step-toggle .form-check-input:focus {
+  box-shadow: 0 0 0 0.16rem rgba(255, 255, 255, 0.3);
+}
+
+.step-name {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.step-fields-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  gap: 10px 8px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 4px;
+  color: #6c757d;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.form-control,
+.form-select {
+  min-width: 0;
+  font-size: 12px;
+}
+
+.form-control:disabled,
+.form-select:disabled {
+  border-color: #e2e5e9;
+  background-color: #eef0f2;
+  color: #8a94a6;
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+.invalid-feedback {
+  margin-top: 3px;
+  font-size: 10px;
 }
 
 .step-card-saved {
@@ -9,6 +107,6 @@
 }
 
 .step-saved-icon {
-  color: #4daa57;
+  color: #fff;
   font-size: 12px;
 }

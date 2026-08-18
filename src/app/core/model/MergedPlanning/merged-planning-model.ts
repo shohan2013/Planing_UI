@@ -18,6 +18,24 @@ export interface IMergedPlanningLine {
   Quantity: number;
   Rate: number;
   Remarks: string | null;
+  TakenQty?: number | null;
+  AdvanceProductionQty?: number | null;
+  RecipeVersionId?: number | null;
+  PriorityId?: number | null;
+}
+
+export interface IRecipeVersionOption {
+  Id: number;
+  VersionName: string;
+}
+
+export interface IItemPlanningInput {
+  LineId: number;
+  TakenQty: number | null;
+  AdvanceProductionQty: number | null;
+  RecipeVersionId: number | null;
+  PriorityId: number | null;
+  IsValid: boolean;
 }
 
 export interface IMergedPlanningDetails {

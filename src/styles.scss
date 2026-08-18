@@ -73,10 +73,6 @@ router-outlet + * {
   overflow-y: auto;
 }
 
-.fullscreen-modal .modal-footer {
-  background-color: #ffffff;
-}
-
 /*========================================================TABLE========================================================================*/
 .custom-table {
   width: 100%;
@@ -296,12 +292,6 @@ h6 {
   background-color: #4daa57 !important;
   border: #4daa57 !important;
   color: white;
-}
-
-.modal-title {
-  font-weight: 600;
-  //font-style: italic;
-  font-family: calibri;
 }
 
 label {

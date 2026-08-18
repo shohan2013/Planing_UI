@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
 import { IBusinessFlowForPlanning } from 'src/app/core/model/MergedPlanning/business-flow-for-planning-model';
 import { IMergedPlanningLine } from 'src/app/core/model/MergedPlanning/merged-planning-model';
 import {
+  IMachineOption,
   IProcessStepInput,
   PRODUCTION_STEPS,
 } from 'src/app/core/model/MergedPlanning/planning-processes-model';
@@ -15,6 +16,7 @@ import { ProcessStepFrom } from '../process-step-from/process-step-from';
 })
 export class ProductionSteps {
   @Input() line: IMergedPlanningLine | null = null;
+  @Input() machineOptions: IMachineOption[] = [];
 
   steps = PRODUCTION_STEPS;
 

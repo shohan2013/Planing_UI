@@ -17,7 +17,7 @@
       <!-- Route/steps mark -->
       <path d="M8 12h3l-1 2 3-3-1-2h3"></path>
     </svg>
-    Product Planning Insertion Form @if (header()) {
+    Production Planning for @if (header()) {
     <span class="do-code ms-2">{{ header()!.DOCode }}</span>
     }
   </h5>
@@ -36,103 +36,110 @@
   </div>
   } @else if (header()) {
   <!-- DO Header details — plain professional label/value strip, no inputs -->
-  <div class="mpv-detail-strip">
-    <div class="mpv-detail-item">
-      <span class="mpv-detail-label">Status</span>
-      <span class="mpv-detail-value">
-        <span
-          class="g-status"
-          [class.pending]="header()!.DocumentStatus === 'Pending'"
-          [class.approve]="header()!.DocumentStatus === 'Approved'"
+  <div class="border rounded-3 p-3 mb-2 mt-0">
+    <div class="mpv-detail-strip">
+      <div class="mpv-detail-item">
+        <span class="mpv-detail-label">Type</span>
+        <span class="mpv-detail-value">
+          @if (header()!.IsCombineDO) {
+          <span class="combine-badge">
+            <i class="fa-solid fa-code-merge"></i>
+            Combined
+          </span>
+          } @else {
+          <span class="single-badge">Single</span>
+          }
+        </span>
+      </div>
+
+      <div class="mpv-detail-item">
+        <span class="mpv-detail-label">Unit</span>
+        <span class="mpv-detail-value">{{ header()!.Unit }}</span>
+      </div>
+
+      <div class="mpv-detail-item">
+        <span class="mpv-detail-label">Business</span>
+        <span class="mpv-detail-value">{{ header()!.Business }}</span>
+      </div>
+
+      <div class="mpv-detail-item">
+        <span class="mpv-detail-label">Created By</span>
+        <span class="mpv-detail-value">{{ header()!.DocumentCreatedBy }}</span>
+      </div>
+
+      <div class="mpv-detail-item">
+        <span class="mpv-detail-label">Created Date</span>
+        <span class="mpv-detail-value"
+          >{{ header()!.DocumentCreatedDate | dateTime }}</span
         >
-          <span class="g-dot"></span>
-          {{ header()!.DocumentStatus }}
-        </span>
-      </span>
-    </div>
+      </div>
 
-    <div class="mpv-detail-item">
-      <span class="mpv-detail-label">Type</span>
-      <span class="mpv-detail-value">
-        @if (header()!.IsCombineDO) {
-        <span class="combine-badge">
-          <i class="fa-solid fa-code-merge"></i>
-          Combined
-        </span>
-        } @else {
-        <span class="single-badge">Single</span>
-        }
-      </span>
-    </div>
-
-    <div class="mpv-detail-item">
-      <span class="mpv-detail-label">Unit</span>
-      <span class="mpv-detail-value">{{ header()!.Unit }}</span>
-    </div>
-
-    <div class="mpv-detail-item">
-      <span class="mpv-detail-label">Business</span>
-      <span class="mpv-detail-value">{{ header()!.Business }}</span>
-    </div>
-
-    <div class="mpv-detail-item">
-      <span class="mpv-detail-label">Created By</span>
-      <span class="mpv-detail-value">{{ header()!.DocumentCreatedBy }}</span>
-    </div>
-
-    <div class="mpv-detail-item">
-      <span class="mpv-detail-label">Created Date</span>
-      <span class="mpv-detail-value"
-        >{{ header()!.DocumentCreatedDate | dateTime }}</span
-      >
+      <div class="mpv-detail-item">
+        <span class="mpv-detail-label">Status</span>
+        <span class="mpv-detail-value"> {{ header()!.DocumentStatus }} </span>
+      </div>
     </div>
   </div>
 
-  <hr class="my-4" />
+  <!-- <hr class="my-3" /> -->
 
-  <h6 class="text-center fw-bold">PRODUCT PLANNING INSERTION FORM</h6>
-
-  <hr class="my-3" />
+  <!-- <hr class="my-1" /> -->
 
   <!-- Line items — only # / Product Details / Planning Process, so the
        process-steps strip has more room to show additional steps.
        Vertically scrollable since a DO can have many line items. -->
-  <div class="table-responsive mpv-table-scroll">
-    <table class="custom-table">
-      <thead>
-        <tr>
-          <th class="index-column">#</th>
-          <th class="product-column">PRODUCT DETAILS</th>
-          <th class="planning-column">PLANNING PROCESS</th>
-        </tr>
-      </thead>
-      <tbody>
-        @if (lines().length === 0) {
-        <tr>
-          <td colspan="3" class="text-center py-4">
-            <i class="fas fa-folder-open fa-4x text-secondary mb-3"></i>
-            <br />
-            <h6>No Line Items Found.</h6>
-          </td>
-        </tr>
-        } @else { @for (line of lines(); track line.Id; let i = $index) {
-        <tr>
-          <td>{{ i + 1 }}</td>
-          <td class="text-start">
-            <div class="mpv-product-name">{{ line.ProductName }}</div>
-            <div class="mpv-product-meta">
-              {{ line.UOM }} &nbsp;•&nbsp; Qty: {{ line.Quantity | number:
-              '1.2-2' }} &nbsp;•&nbsp; Rate: {{ line.Rate | number: '1.2-2' }}
-            </div>
-          </td>
-          <td class="text-start align-top mpv-process-cell">
-            <app-production-steps [line]="line"></app-production-steps>
-          </td>
-        </tr>
-        } }
-      </tbody>
-    </table>
-  </div>
+
+  <fieldset class="border rounded-3 p-2 mt-2 mb-0">
+    <legend class="float-none w-auto mb-0 mx-auto">
+      <h6 class="fw-bold mb-0">PRODUCTION PLANNING INSERTION FORM</h6>
+    </legend>
+
+    <div class="table-responsive mpv-table-scroll">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th class="index-column">#</th>
+            <th class="product-column">PRODUCT DETAILS</th>
+            <th class="item-planning-column">ITEM PLANNING</th>
+            <th class="planning-column">PLANNING PROCESS</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (lines().length === 0) {
+          <tr>
+            <td colspan="4" class="text-center py-4">
+              <i class="fas fa-folder-open fa-4x text-secondary mb-3"></i>
+              <br />
+              <h6>No Line Items Found.</h6>
+            </td>
+          </tr>
+          } @else { @for (line of lines(); track line.Id; let i = $index) {
+          <tr>
+            <td>{{ i + 1 }}</td>
+            <td class="text-start">
+              <div class="mpv-product-name">{{ line.ProductName }}</div>
+              <div class="mpv-product-meta">
+                {{ line.UOM }} &nbsp;•&nbsp; Qty: {{ line.Quantity | number:
+                '1.2-2' }} &nbsp;•&nbsp; Rate: {{ line.Rate | number: '1.2-2' }}
+              </div>
+            </td>
+            <td class="text-start align-top">
+              <app-item-planning-fields
+                [line]="line"
+                [priorities]="priorities()"
+                [recipeVersions]="recipeVersions()"
+                (valueChange)="onItemPlanningChange($event)"
+              ></app-item-planning-fields>
+            </td>
+            <td class="text-start align-top mpv-process-cell">
+              <app-production-steps [line]="line"></app-production-steps>
+            </td>
+          </tr>
+          } }
+        </tbody>
+      </table>
+    </div>
+  </fieldset>
   }
 </div>
 

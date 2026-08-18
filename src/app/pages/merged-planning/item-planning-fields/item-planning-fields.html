@@ -1,0 +1,90 @@
+<div class="item-planning-card">
+  <div class="item-planning-grid">
+    <div>
+      <label class="form-label" [for]="'takenQty-' + line.Id">Taken Qty</label>
+      <div class="input-group input-group-sm">
+        <input
+          type="number"
+          class="form-control"
+          [class.is-invalid]="isTakenQtyInvalid"
+          [id]="'takenQty-' + line.Id"
+          [name]="'takenQty-' + line.Id"
+          [(ngModel)]="takenQty"
+          (ngModelChange)="onValueChange()"
+          min="0"
+          [max]="line.Quantity"
+          step="0.01"
+          placeholder="0.00"
+        />
+        @if (line.UOM) {
+        <span class="input-group-text">{{ line.UOM }}</span>
+        }
+      </div>
+      @if (isTakenQtyInvalid) {
+      <div class="field-error">Enter 0–{{ line.Quantity }}.</div>
+      }
+    </div>
+
+    <div>
+      <label class="form-label" [for]="'advanceQty-' + line.Id">Advance Qty</label>
+      <div class="input-group input-group-sm">
+        <input
+          type="number"
+          class="form-control"
+          [class.is-invalid]="isAdvanceQtyInvalid"
+          [id]="'advanceQty-' + line.Id"
+          [name]="'advanceQty-' + line.Id"
+          [(ngModel)]="advanceProductionQty"
+          (ngModelChange)="onValueChange()"
+          min="0"
+          step="0.01"
+          placeholder="0.00"
+        />
+        @if (line.UOM) {
+        <span class="input-group-text">{{ line.UOM }}</span>
+        }
+      </div>
+      @if (isAdvanceQtyInvalid) {
+      <div class="field-error">Cannot be negative.</div>
+      }
+    </div>
+
+    <div>
+      <label class="form-label" [for]="'recipeVersion-' + line.Id">Recipe Version</label>
+      <select
+        class="form-select form-select-sm"
+        [id]="'recipeVersion-' + line.Id"
+        [name]="'recipeVersion-' + line.Id"
+        [(ngModel)]="recipeVersionId"
+        (ngModelChange)="onValueChange()"
+      >
+        <option [ngValue]="null">Select version</option>
+        @if (recipeVersions.length === 0) {
+        <option disabled>No versions available</option>
+        }
+        @for (version of recipeVersions; track version.Id) {
+        <option [ngValue]="version.Id">{{ version.VersionName }}</option>
+        }
+      </select>
+    </div>
+
+    <div>
+      <label class="form-label" [for]="'priority-' + line.Id">Priority</label>
+      <select
+        class="form-select form-select-sm"
+        [id]="'priority-' + line.Id"
+        [name]="'priority-' + line.Id"
+        [(ngModel)]="priorityId"
+        (ngModelChange)="onValueChange()"
+      >
+        <option [ngValue]="null">Select priority</option>
+        @if (priorities.length === 0) {
+        <option disabled>No priorities available</option>
+        }
+        @for (priority of priorities; track priority.Id) {
+        <option [ngValue]="priority.Id">{{ priority.PriorityName }}</option>
+        }
+      </select>
+    </div>
+  </div>
+</div>

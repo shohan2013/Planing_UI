@@ -1,0 +1,47 @@
+.item-planning-card {
+  min-width: 280px;
+  height: 164px;
+  padding: 10px;
+  border: 1px solid #e2e5e9;
+  border-radius: 6px;
+  background: #f8f9fa;
+}
+
+.item-planning-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 8px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 4px;
+  color: #6c757d;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.form-control,
+.form-select,
+.input-group-text {
+  font-size: 12px;
+}
+
+.input-group-text {
+  max-width: 52px;
+  overflow: hidden;
+  color: #f8f9fa;
+  text-overflow: ellipsis;
+}
+
+.field-error {
+  margin-top: 3px;
+  color: #dc3545;
+  font-size: 10px;
+}
+
+@media (max-width: 1199.98px) {
+  .item-planning-grid {
+    grid-template-columns: 1fr;
+  }
+}

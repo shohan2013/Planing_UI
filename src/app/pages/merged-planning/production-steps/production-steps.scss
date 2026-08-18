@@ -1,5 +1,6 @@
 .ps-strip {
   display: flex;
+  align-items: flex-start;
   gap: 12px;
   overflow-x: auto;
   padding-bottom: 8px;
@@ -30,4 +31,5 @@
   gap: 6px;
   font-size: 11px;
   color: #5f6368;
+  line-height: 16px;
 }

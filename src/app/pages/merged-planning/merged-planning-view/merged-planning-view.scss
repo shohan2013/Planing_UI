@@ -6,6 +6,7 @@
 .mpv-detail-strip {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .mpv-detail-item {
@@ -54,6 +55,10 @@ table {
   width: 20%;
 }
 
+.item-planning-column {
+  width: 300px;
+}
+
 .planning-column {
   width: auto;
 }
@@ -70,15 +75,68 @@ table {
 }
 
 /* ---------- Scrollable line-items table ---------- */
+// .mpv-table-scroll {
+//   max-height: calc(100vh - 270px);
+//   overflow-y: auto;
+//   scroll-snap-type: y proximity;
+//   scroll-behavior: smooth;
+// }
+
+// .mpv-table-scroll thead {
+//   position: sticky;
+//   top: 0;
+//   z-index: 2;
+// }
+
+// .mpv-table-scroll tbody tr {
+//   scroll-snap-align: start;
+// }
+
 .mpv-table-scroll {
-  max-height: calc(100vh - 310px);
-  overflow-y: auto;
+  max-height: calc(100vh - 280px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  scroll-snap-type: y proximity;
+  scroll-behavior: smooth;
+  scroll-padding-top: 45px;
+  scrollbar-color: #9aa3ac #f1f3f5;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
 }
 
-.mpv-table-scroll thead th {
+.mpv-table-scroll::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.mpv-table-scroll::-webkit-scrollbar-track {
+  border-radius: 6px;
+  background: #f1f3f5;
+}
+
+.mpv-table-scroll::-webkit-scrollbar-thumb {
+  border: 2px solid #f1f3f5;
+  border-radius: 6px;
+  background: #9aa3ac;
+}
+
+.mpv-table-scroll::-webkit-scrollbar-thumb:hover {
+  background: #747e88;
+}
+
+.mpv-table-scroll table {
+  min-width: 1180px;
+}
+
+.mpv-table-scroll thead {
   position: sticky;
   top: 0;
   z-index: 2;
+}
+
+.mpv-table-scroll tbody tr {
+  scroll-snap-align: start;
 }
 
 /* ---------- Planning process cell ---------- */
@@ -87,4 +145,9 @@ table {
 // before the strip needs to scroll.
 .mpv-process-cell {
   max-width: none;
+}
+
+.do-code {
+  font-weight: 600;
+  color: #198754;
 }
