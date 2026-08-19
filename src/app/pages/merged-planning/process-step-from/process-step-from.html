@@ -4,17 +4,17 @@
   [class.step-card-saved]="saved"
 >
   <div class="card-header step-card-header" [class.enabled]="enabled">
-    <label class="step-toggle" [for]="'enableStep-' + lineId + '-' + stepName">
+    <label class="step-toggle" [for]="'enableStep-' + lineId + '-' + step.Name">
       <input
         class="form-check-input"
         type="checkbox"
-        [id]="'enableStep-' + lineId + '-' + stepName"
-        [name]="'enableStep-' + lineId + '-' + stepName"
+        [id]="'enableStep-' + lineId + '-' + step.Name"
+        [name]="'enableStep-' + lineId + '-' + step.Name"
         [(ngModel)]="enabled"
         (ngModelChange)="onEnabledChange()"
-        [attr.aria-label]="'Enable ' + stepName + ' production step'"
+        [attr.aria-label]="'Enable ' + step.Name"
       />
-      <span class="step-name" [title]="stepName">{{ stepName }}</span>
+      <span class="step-name" [title]="step.Name">{{ step.Name }}</span>
     </label>
     @if (saved) {
     <i class="fa-solid fa-circle-check step-saved-icon" title="Saved"></i>
@@ -29,16 +29,15 @@
         [class.is-invalid]="submitted && !machineNumber.trim()"
         [(ngModel)]="machineNumber"
         (ngModelChange)="onFieldChange()"
-        name="machineNumber-{{ stepName }}"
+        name="machineNumber-{{ step.Name }}"
         [disabled]="!enabled"
       >
         <option value="">Select machine</option>
         @if (machineOptions.length === 0) {
         <option disabled>No machines available</option>
-        }
-        @for (machine of machineOptions; track machine.MachineNumber) {
-        <option [value]="machine.MachineNumber">
-          {{ machine.MachineNumber }}@if (machine.MachineName) { — {{ machine.MachineName }}}
+        } @for (machine of machineOptions; track machine.Id) {
+        <option [value]="machine.Name">
+          {{ machine.Id }}@if (machine.Name) { — {{ machine.Name }}}
         </option>
         }
       </select>
@@ -68,7 +67,7 @@
         [class.is-invalid]="submitted && !startDate"
         [(ngModel)]="startDate"
         (ngModelChange)="onFieldChange()"
-        name="startDate-{{ stepName }}"
+        name="startDate-{{ step.Name }}"
         [disabled]="!enabled"
       />
       @if (submitted && !startDate) {
@@ -84,7 +83,7 @@
         [class.is-invalid]="submitted && (!endDate || isDateRangeInvalid)"
         [(ngModel)]="endDate"
         (ngModelChange)="onFieldChange()"
-        name="endDate-{{ stepName }}"
+        name="endDate-{{ step.Name }}"
         [disabled]="!enabled"
       />
       @if (submitted && !endDate) {

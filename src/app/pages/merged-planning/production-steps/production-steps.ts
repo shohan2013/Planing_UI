@@ -1,12 +1,18 @@
-import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
-import { IBusinessFlowForPlanning } from 'src/app/core/model/MergedPlanning/business-flow-for-planning-model';
-import { IMergedPlanningLine } from 'src/app/core/model/MergedPlanning/merged-planning-model';
 import {
-  IMachineOption,
-  IProcessStepInput,
-  PRODUCTION_STEPS,
-} from 'src/app/core/model/MergedPlanning/planning-processes-model';
+  Component,
+  EventEmitter,
+  input,
+  Input,
+  OnInit,
+  Output,
+  signal,
+} from '@angular/core';
+import { IBusinessFlowForPlanning } from 'src/app/core/model/Common/BusinessFlow/production-steps-model';
+import { IMergedPlanningLine } from 'src/app/core/model/MergedPlanning/merged-planning-model';
 import { ProcessStepFrom } from '../process-step-from/process-step-from';
+import { CommonService } from 'src/app/core/services/Common/CommonService';
+import { Subject } from 'rxjs';
+import { IMachine } from 'src/app/core/model/Common/Machine/machine';
 
 @Component({
   selector: 'app-production-steps',
@@ -16,12 +22,23 @@ import { ProcessStepFrom } from '../process-step-from/process-step-from';
 })
 export class ProductionSteps {
   @Input() line: IMergedPlanningLine | null = null;
-  @Input() machineOptions: IMachineOption[] = [];
+  @Input() machineOptions: IMachine[] = [];
 
-  steps = PRODUCTION_STEPS;
+  steps = input<IBusinessFlowForPlanning[]>([]);
+  isLoading = input<boolean>(true);
+  loadError = input<boolean>(false);
 
-  onStepSaved(step: string, data: IProcessStepInput): void {
-    // TODO: wire this up to a service call to persist the step data
-    console.log('Step saved:', data);
+  @Output() GetSteps = new EventEmitter<void>();
+
+  private destroy$ = new Subject<void>();
+
+  constructor(private CommonService: CommonService) {}
+
+  // onStepSaved(step: string, data: IProcessStepInput): void {
+  //   console.log('Step saved:', data);
+  // }
+
+  GetProductionSteps() {
+    this.GetSteps.emit();
   }
 }

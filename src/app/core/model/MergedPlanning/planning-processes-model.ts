@@ -6,11 +6,6 @@ export interface IProcessStepInput {
   machineNumber: string;
 }
 
-export interface IMachineOption {
-  MachineNumber: string;
-  MachineName?: string | null;
-}
-
 export const PRODUCTION_STEPS: string[] = [
   'Body Ball',
   'HSP Blunger',

@@ -54,6 +54,9 @@ export const GlobalConstant = {
     RequisitionItemNames: 'Common/RequisitionItemNames',
     UOM: 'Common/UOMList',
     DocumentStatus: 'Common/DocumentStatusList',
+    ProductionStepsForPlanning: 'Common/GetBusinessConfigure',
+    Machine: 'Common/GetMachine',
+    Recipe: 'Common/GetRecipe',
 
     /*==============================PLANNING====================================*/
     DeliveryOrders: 'SalesOrderLanding/GetDOData',

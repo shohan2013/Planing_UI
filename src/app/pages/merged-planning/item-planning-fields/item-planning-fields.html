@@ -26,7 +26,9 @@
     </div>
 
     <div>
-      <label class="form-label" [for]="'advanceQty-' + line.Id">Advance Qty</label>
+      <label class="form-label" [for]="'advanceQty-' + line.Id"
+        >Advance Qty</label
+      >
       <div class="input-group input-group-sm">
         <input
           type="number"
@@ -50,7 +52,9 @@
     </div>
 
     <div>
-      <label class="form-label" [for]="'recipeVersion-' + line.Id">Recipe Version</label>
+      <label class="form-label" [for]="'recipeVersion-' + line.Id"
+        >Recipe Version</label
+      >
       <select
         class="form-select form-select-sm"
         [id]="'recipeVersion-' + line.Id"
@@ -61,9 +65,8 @@
         <option [ngValue]="null">Select version</option>
         @if (recipeVersions.length === 0) {
         <option disabled>No versions available</option>
-        }
-        @for (version of recipeVersions; track version.Id) {
-        <option [ngValue]="version.Id">{{ version.VersionName }}</option>
+        } @for (version of recipeVersions; track version.Id) {
+        <option [ngValue]="version.Id">{{ version.Name }}</option>
         }
       </select>
     </div>
@@ -80,8 +83,7 @@
         <option [ngValue]="null">Select priority</option>
         @if (priorities.length === 0) {
         <option disabled>No priorities available</option>
-        }
-        @for (priority of priorities; track priority.Id) {
+        } @for (priority of priorities; track priority.Id) {
         <option [ngValue]="priority.Id">{{ priority.PriorityName }}</option>
         }
       </select>

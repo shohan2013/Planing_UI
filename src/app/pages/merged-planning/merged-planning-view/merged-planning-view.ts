@@ -2,13 +2,15 @@ import {
   Component,
   EventEmitter,
   Input,
+  OnChanges,
   OnDestroy,
   OnInit,
   Output,
   signal,
+  SimpleChanges,
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
-import { Subject, takeUntil } from 'rxjs';
+import { single, Subject, takeUntil } from 'rxjs';
 import { DateTimePipe } from 'src/app/shared/pipes/date-time-pipe';
 import { MergedPlanningServices } from 'src/app/core/services/MergedPlanning/merged-planning-services';
 import { ProductionSteps } from '../production-steps/production-steps';
@@ -20,8 +22,10 @@ import {
   IMergedPlanning,
   IMergedPlanningDetails,
   IMergedPlanningLine,
-  IRecipeVersionOption,
 } from 'src/app/core/model/MergedPlanning/merged-planning-model';
+import { IBusinessFlowForPlanning } from 'src/app/core/model/Common/BusinessFlow/production-steps-model';
+import { IMachine } from 'src/app/core/model/Common/Machine/machine';
+import { IRecipe } from 'src/app/core/model/Common/Recipe/Recipe';
 
 // This component is the CONTENT of an NgbModal (opened via `modalService.open`
 // from merged-planning.ts, same pattern as viewRequisitionModal/requisitionModal).
@@ -43,9 +47,16 @@ export class MergedPlanningView implements OnInit, OnDestroy {
   header = signal<IMergedPlanning | null>(null);
   lines = signal<IMergedPlanningLine[]>([]);
   priorities = signal<IPriority[]>([]);
-  recipeVersions = signal<IRecipeVersionOption[]>([]);
+  recipeVersions = signal<IRecipe[]>([]);
   itemPlanningValues = signal<Record<number, IItemPlanningInput>>({});
+  Machines = signal<IMachine[]>([]);
+
   isLoading = signal(false);
+  loadError = signal(false);
+  stepsLoading = signal(false);
+  stepsLoadError = signal(false);
+
+  productionSteps = signal<IBusinessFlowForPlanning[]>([]);
 
   constructor(
     private mergedPlanningService: MergedPlanningServices,
@@ -88,14 +99,59 @@ export class MergedPlanningView implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data: IMergedPlanningDetails) => {
-          console.log(data);
+          //console.log(data);
           this.header.set(data.Header);
           this.lines.set(data.Lines);
+          this.loadProductionSteps();
+          this.loadMachine();
+          this.loadRecipe();
           this.isLoading.set(false);
         },
         error: () => {
           this.isLoading.set(false);
+          this.loadError.set(true);
         },
+      });
+  }
+
+  loadProductionSteps() {
+    const currentHeader = this.header().Id;
+    if (!currentHeader) return;
+
+    this.stepsLoading.set(true);
+    this.stepsLoadError.set(false);
+
+    this.commonService
+      .GetBusinessConfigure(this.header().UnitId, this.header().BusinessId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          console.log(data);
+          this.productionSteps.set(data);
+          this.stepsLoading.set(false);
+        },
+        error: () => {
+          this.stepsLoading.set(true);
+          this.stepsLoadError.set(false);
+        },
+      });
+  }
+
+  loadMachine() {
+    this.commonService
+      .GetMachine(this.header().UnitId, this.header().BusinessId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data) => {
+        this.Machines.set(data);
+      });
+  }
+
+  loadRecipe() {
+    this.commonService
+      .GetRecipe(this.header().UnitId, this.header().BusinessId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data) => {
+        this.recipeVersions.set(data);
       });
   }
 

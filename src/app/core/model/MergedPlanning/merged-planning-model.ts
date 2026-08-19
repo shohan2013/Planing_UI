@@ -6,8 +6,10 @@ export interface IMergedPlanning {
   DocumentCreatedDate: Date;
   DocumentCreatedBy: string;
   IsCombineDO: boolean;
+  BusinessId: number;
   Business: string;
   Unit: string;
+  UnitId: number;
   IsActive: boolean;
 }
 
@@ -22,11 +24,6 @@ export interface IMergedPlanningLine {
   AdvanceProductionQty?: number | null;
   RecipeVersionId?: number | null;
   PriorityId?: number | null;
-}
-
-export interface IRecipeVersionOption {
-  Id: number;
-  VersionName: string;
 }
 
 export interface IItemPlanningInput {

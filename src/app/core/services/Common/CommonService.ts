@@ -21,6 +21,10 @@ import { IEnroll } from '../../model/Common/Enroll/Enroll';
 
 import { IApproveMatrixGroupList } from '../../model/Common/ApproveMatrixGroupList/ApproveMatrixGroupList';
 import { environment } from 'src/environments/environment';
+import { IBusinessFlowForPlanning } from '../../model/Common/BusinessFlow/production-steps-model';
+import { ServerQueryResponse } from '../../model/Common/Pagination/ServerQueryRequest';
+import { IMachine } from '../../model/Common/Machine/machine';
+import { IRecipe } from '../../model/Common/Recipe/Recipe';
 
 @Injectable({
   providedIn: 'root',
@@ -175,6 +179,27 @@ export class CommonService {
   GetEnrollList(): Observable<IEnroll[]> {
     return this.http.get<IEnroll[]>(
       `${environment.API_URL}${GlobalConstant.API_END_POINTS.EnrollList}`,
+    );
+  }
+
+  GetBusinessConfigure(
+    unitId: Number,
+    BusinessesId: Number,
+  ): Observable<IBusinessFlowForPlanning[]> {
+    return this.http.get<IBusinessFlowForPlanning[]>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.ProductionStepsForPlanning}?UnitId=${unitId}&BusinessId=${BusinessesId}`,
+    );
+  }
+
+  GetMachine(unitId: number, BusinessesId: number): Observable<IMachine[]> {
+    return this.http.get<IMachine[]>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.Machine}?UnitId=${unitId}&BusinessId=${BusinessesId}`,
+    );
+  }
+
+  GetRecipe(unitId: number, BusinessesId: number): Observable<IRecipe[]> {
+    return this.http.get<IRecipe[]>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.Recipe}?UnitId=${unitId}&BusinessId=${BusinessesId}`,
     );
   }
 }

@@ -8,10 +8,10 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { IPriority } from 'src/app/core/model/Common/Priority/Priority';
+import { IRecipe } from 'src/app/core/model/Common/Recipe/Recipe';
 import {
   IItemPlanningInput,
   IMergedPlanningLine,
-  IRecipeVersionOption,
 } from 'src/app/core/model/MergedPlanning/merged-planning-model';
 
 @Component({
@@ -24,7 +24,7 @@ import {
 export class ItemPlanningFields implements OnChanges {
   @Input({ required: true }) line!: IMergedPlanningLine;
   @Input() priorities: IPriority[] = [];
-  @Input() recipeVersions: IRecipeVersionOption[] = [];
+  @Input() recipeVersions: IRecipe[] = [];
   @Output() valueChange = new EventEmitter<IItemPlanningInput>();
 
   takenQty: number | null = null;

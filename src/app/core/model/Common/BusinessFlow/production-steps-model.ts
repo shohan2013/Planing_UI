@@ -3,5 +3,6 @@ export interface IBusinessFlowForPlanning {
   UnitId: number;
   BusinessId: number;
   Name: string | null;
-  SLNO: number;
+  Slno: number;
+  IsActive: Boolean;
 }

@@ -34,6 +34,20 @@
     ></span>
     Loading Order Details...
   </div>
+  } @else if (loadError()) {
+  <div
+    class="alert alert-danger d-flex justify-content-between align-items-center"
+  >
+    <span>Failed to load order details. Please try again.</span>
+
+    <button
+      type="button"
+      class="btn btn-danger btn-sm"
+      (click)="GetMergedPlanningDetails()"
+    >
+      Retry
+    </button>
+  </div>
   } @else if (header()) {
   <!-- DO Header details — plain professional label/value strip, no inputs -->
   <div class="border rounded-3 p-3 mb-2 mt-0">
@@ -81,15 +95,7 @@
     </div>
   </div>
 
-  <!-- <hr class="my-3" /> -->
-
-  <!-- <hr class="my-1" /> -->
-
-  <!-- Line items — only # / Product Details / Planning Process, so the
-       process-steps strip has more room to show additional steps.
-       Vertically scrollable since a DO can have many line items. -->
-
-  <fieldset class="border rounded-3 p-2 mt-2 mb-0">
+  <fieldset class="border rounded-3 p-2 mt-3 mb-0">
     <legend class="float-none w-auto mb-0 mx-auto">
       <h6 class="fw-bold mb-0">PRODUCTION PLANNING INSERTION FORM</h6>
     </legend>
@@ -132,7 +138,13 @@
               ></app-item-planning-fields>
             </td>
             <td class="text-start align-top mpv-process-cell">
-              <app-production-steps [line]="line"></app-production-steps>
+              <app-production-steps
+                [steps]="productionSteps()"
+                [isLoading]="stepsLoading()"
+                [loadError]="stepsLoadError()"
+                [machineOptions]="Machines()"
+                (GetSteps)="loadProductionSteps()"
+              ></app-production-steps>
             </td>
           </tr>
           } }

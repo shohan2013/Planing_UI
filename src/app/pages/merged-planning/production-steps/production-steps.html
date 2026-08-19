@@ -1,11 +1,32 @@
-@if (line) {
+@if (isLoading()) {
+<div class="ps-status">
+  <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+  Loading production steps...
+</div>
+} @else if (loadError()) {
+<div class="ps-status ps-status-error">
+  <i class="fa-solid fa-triangle-exclamation"></i>
+  Couldn't load production steps.
+  <button
+    type="button"
+    class="btn btn-link btn-sm p-0 ms-1"
+    (click)="GetSteps.emit()"
+  >
+    Retry
+  </button>
+</div>
+} @else if (steps().length === 0) {
+<div class="ps-status">
+  <i class="fa-regular fa-circle-question"></i>
+  No production steps configured for this business/unit.
+</div>
+} @else {
 <div class="ps-strip">
-  @for (step of steps; track step) {
+  @for (step of steps(); track step) {
   <app-process-step-from
-    [lineId]="line.Id"
-    [stepName]="step"
+    [lineId]="0"
+    [step]="step"
     [machineOptions]="machineOptions"
-    (save)="onStepSaved(step, $event)"
   >
   </app-process-step-from>
   }

@@ -1,9 +1,8 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import {
-  IMachineOption,
-  IProcessStepInput,
-} from 'src/app/core/model/MergedPlanning/planning-processes-model';
+import { IProcessStepInput } from 'src/app/core/model/MergedPlanning/planning-processes-model';
+import { IBusinessFlowForPlanning } from 'src/app/core/model/Common/BusinessFlow/production-steps-model';
+import { IMachine } from 'src/app/core/model/Common/Machine/machine';
 
 @Component({
   selector: 'app-process-step-from',
@@ -14,8 +13,8 @@ import {
 })
 export class ProcessStepFrom {
   @Input() lineId!: number;
-  @Input() stepName!: string;
-  @Input() machineOptions: IMachineOption[] = [];
+  @Input() step: IBusinessFlowForPlanning;
+  @Input() machineOptions: IMachine[] = [];
   @Output() save = new EventEmitter<IProcessStepInput>();
 
   startDate: string | null = null;
@@ -30,8 +29,6 @@ export class ProcessStepFrom {
     return !!(this.startDate && this.endDate && this.endDate < this.startDate);
   }
 
-  // Total Allocated Time — auto-computed from the date range, read-only on
-  // the card. Displayed in whole days.
   get totalAllocatedTime(): string {
     if (!this.startDate || !this.endDate || this.isDateRangeInvalid) {
       return '';
@@ -70,7 +67,7 @@ export class ProcessStepFrom {
 
     this.save.emit({
       lineId: this.lineId,
-      stepName: this.stepName,
+      stepName: this.step.Name,
       startDate: this.startDate,
       endDate: this.endDate,
       machineNumber: this.machineNumber.trim(),
