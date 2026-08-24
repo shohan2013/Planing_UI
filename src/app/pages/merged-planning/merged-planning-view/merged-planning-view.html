@@ -134,11 +134,11 @@
                 [line]="line"
                 [priorities]="priorities()"
                 [recipeVersions]="recipeVersions()"
-                (valueChange)="onItemPlanningChange($event)"
               ></app-item-planning-fields>
             </td>
             <td class="text-start align-top mpv-process-cell">
               <app-production-steps
+                [line]="line"
                 [steps]="productionSteps()"
                 [isLoading]="stepsLoading()"
                 [loadError]="stepsLoadError()"
@@ -159,5 +159,21 @@
   <button type="button" class="btn btn-secondary" (click)="close()">
     <i class="fa-solid fa-fw fa-xmark"></i>
     Close
+  </button>
+
+  <button
+    type="button"
+    class="btn btn-success"
+    [disabled]="isSaving()"
+    (click)="onSaveAll()"
+  >
+    @if (isSaving()) {
+    <span
+      class="spinner-border spinner-border-sm me-2"
+      aria-hidden="true"
+    ></span>
+    } @else {
+    <i class="fa-solid fa-fw fa-check"></i>
+    } {{ isSaving() ? 'Saving...' : 'Save' }}
   </button>
 </div>

@@ -22,9 +22,9 @@
 </div>
 } @else {
 <div class="ps-strip">
-  @for (step of steps(); track step) {
+  @for (step of steps(); track step.Id) {
   <app-process-step-from
-    [lineId]="0"
+    [lineId]="line.Id"
     [step]="step"
     [machineOptions]="machineOptions"
   >

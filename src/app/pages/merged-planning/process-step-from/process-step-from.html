@@ -1,109 +1,96 @@
-<div
-  class="card step-card"
-  [class.step-card-enabled]="enabled"
-  [class.step-card-saved]="saved"
->
-  <div class="card-header step-card-header" [class.enabled]="enabled">
-    <label class="step-toggle" [for]="'enableStep-' + lineId + '-' + step.Name">
-      <input
-        class="form-check-input"
-        type="checkbox"
-        [id]="'enableStep-' + lineId + '-' + step.Name"
-        [name]="'enableStep-' + lineId + '-' + step.Name"
-        [(ngModel)]="enabled"
-        (ngModelChange)="onEnabledChange()"
-        [attr.aria-label]="'Enable ' + step.Name"
-      />
-      <span class="step-name" [title]="step.Name">{{ step.Name }}</span>
-    </label>
-    @if (saved) {
-    <i class="fa-solid fa-circle-check step-saved-icon" title="Saved"></i>
-    }
-  </div>
-
-  <div class="card-body p-2 step-fields-grid">
-    <div>
-      <label class="form-label">Machine No</label>
-      <select
-        class="form-select form-select-sm"
-        [class.is-invalid]="submitted && !machineNumber.trim()"
-        [(ngModel)]="machineNumber"
-        (ngModelChange)="onFieldChange()"
-        name="machineNumber-{{ step.Name }}"
-        [disabled]="!enabled"
+<div class="card step-card" [class.step-card-enabled]="enabled">
+  <form [formGroup]="form">
+    <div class="card-header step-card-header" [class.enabled]="enabled">
+      <label
+        class="step-toggle"
+        [for]="'enableStep-' + lineId + '-' + step.Name"
       >
-        <option value="">Select machine</option>
-        @if (machineOptions.length === 0) {
-        <option disabled>No machines available</option>
-        } @for (machine of machineOptions; track machine.Id) {
-        <option [value]="machine.Name">
-          {{ machine.Id }}@if (machine.Name) { — {{ machine.Name }}}
-        </option>
+        <input
+          class="form-check-input"
+          type="checkbox"
+          [id]="'enableStep-' + lineId + '-' + step.Name"
+          [name]="'enableStep-' + lineId + '-' + step.Name"
+          formControlName="enabled"
+          [attr.aria-label]="'Enable ' + step.Name"
+        />
+
+        <span class="step-name" [title]="step.Name"> {{ step.Name }} </span>
+      </label>
+    </div>
+
+    <div class="card-body p-2 step-fields-grid">
+      <div>
+        <label class="form-label">Machine No</label>
+
+        <select
+          class="form-select form-select-sm"
+          [class.is-invalid]="submitted && !machineNumber"
+          formControlName="machineId"
+          name="machineNumber-{{ step.Name }}"
+        >
+          <option [ngValue]="0">Select machine</option>
+
+          @if (machineOptions.length === 0) {
+          <option disabled>No machines available</option>
+          } @for (machine of machineOptions; track machine.Id) {
+          <option [ngValue]="machine.Id">{{ machine.Name }}</option>
+          }
+        </select>
+
+        @if (submitted && !machineNumber) {
+        <div class="invalid-feedback">Required.</div>
         }
-      </select>
-      @if (submitted && !machineNumber.trim()) {
-      <div class="invalid-feedback">Required.</div>
-      }
-    </div>
+      </div>
 
-    <div>
-      <label class="form-label">Allocated Time</label>
-      <input
-        type="text"
-        class="form-control form-control-sm bg-light"
-        [value]="totalAllocatedTime"
-        readonly
-        [disabled]="!enabled"
-        placeholder="—"
-        title="Calculated automatically from the start and end dates"
-      />
-    </div>
+      <div>
+        <label class="form-label">Allocated Time</label>
 
-    <div>
-      <label class="form-label">Start Date</label>
-      <input
-        type="date"
-        class="form-control form-control-sm"
-        [class.is-invalid]="submitted && !startDate"
-        [(ngModel)]="startDate"
-        (ngModelChange)="onFieldChange()"
-        name="startDate-{{ step.Name }}"
-        [disabled]="!enabled"
-      />
-      @if (submitted && !startDate) {
-      <div class="invalid-feedback">Required.</div>
-      }
-    </div>
+        <input
+          type="text"
+          class="form-control form-control-sm bg-light"
+          [value]="totalAllocatedTime"
+          readonly
+          [disabled]="!enabled"
+          placeholder="—"
+          title="Calculated automatically from the start and end dates"
+        />
+      </div>
 
-    <div>
-      <label class="form-label">End Date</label>
-      <input
-        type="date"
-        class="form-control form-control-sm"
-        [class.is-invalid]="submitted && (!endDate || isDateRangeInvalid)"
-        [(ngModel)]="endDate"
-        (ngModelChange)="onFieldChange()"
-        name="endDate-{{ step.Name }}"
-        [disabled]="!enabled"
-      />
-      @if (submitted && !endDate) {
-      <div class="invalid-feedback">Required.</div>
-      } @else if (submitted && isDateRangeInvalid) {
-      <div class="invalid-feedback">End date cannot be before start date.</div>
-      }
-    </div>
+      <div>
+        <label class="form-label">Start Date</label>
 
-    <!-- <button
-      type="button"
-      class="btn btn-success btn-sm w-100"
-      (click)="onSave()"
-    >
-      <i
-        class="fa-solid"
-        [class.fa-check]="!saved"
-        [class.fa-rotate-right]="saved"
-      ></i>
-      {{ saved ? 'Update' : 'Save' }}
-    </button> -->
-  </div>
+        <input
+          type="date"
+          class="form-control form-control-sm"
+          [class.is-invalid]="submitted && !startDate"
+          formControlName="startDate"
+          name="startDate-{{ step.Name }}"
+        />
+
+        @if (submitted && !startDate) {
+        <div class="invalid-feedback">Required.</div>
+        }
+      </div>
+
+      <div>
+        <label class="form-label">End Date</label>
+
+        <input
+          type="date"
+          class="form-control form-control-sm"
+          [class.is-invalid]="submitted && (!endDate || isDateRangeInvalid)"
+          formControlName="endDate"
+          name="endDate-{{ step.Name }}"
+        />
+
+        @if (submitted && !endDate) {
+        <div class="invalid-feedback">Required.</div>
+        } @else if (submitted && isDateRangeInvalid) {
+        <div class="invalid-feedback">
+          End date cannot be before start date.
+        </div>
+        }
+      </div>
+    </div>
+  </form>
 </div>

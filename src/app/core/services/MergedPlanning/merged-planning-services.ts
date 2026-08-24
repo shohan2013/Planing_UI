@@ -11,6 +11,12 @@ import {
   IMergedPlanning,
   IMergedPlanningDetails,
 } from '../../model/MergedPlanning/merged-planning-model';
+import {
+  IProductionPlanHeader,
+  IProductionPlanLine,
+  IProductionPlanSaveRequest,
+} from '../../model/MergedPlanning/planning-processes-model';
+import { IApiResponse } from '../../model/Response/ApiResponse';
 
 @Injectable({
   providedIn: 'root',
@@ -34,6 +40,20 @@ export class MergedPlanningServices {
   ): Observable<IMergedPlanningDetails> {
     return this.http.get<IMergedPlanningDetails>(
       `${environment.API_URL}${GlobalConstant.API_END_POINTS.MergedPlanningDetails}/${headerId}`,
+    );
+  }
+
+  SavePlan(
+    header: IProductionPlanHeader,
+    lines: IProductionPlanLine[],
+  ): Observable<IApiResponse> {
+    const payload: IProductionPlanSaveRequest = {
+      Header: header,
+      Lines: lines,
+    };
+    return this.http.post<IApiResponse>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.SavePlans}`,
+      payload,
     );
   }
 }

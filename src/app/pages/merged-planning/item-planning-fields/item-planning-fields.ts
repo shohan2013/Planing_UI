@@ -1,69 +1,88 @@
 import {
   Component,
-  EventEmitter,
   Input,
   OnChanges,
-  Output,
+  OnInit,
   SimpleChanges,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { IPriority } from 'src/app/core/model/Common/Priority/Priority';
 import { IRecipe } from 'src/app/core/model/Common/Recipe/Recipe';
-import {
-  IItemPlanningInput,
-  IMergedPlanningLine,
-} from 'src/app/core/model/MergedPlanning/merged-planning-model';
+import { IMergedPlanningLine } from 'src/app/core/model/MergedPlanning/merged-planning-model';
+import { IItemPlanningInput } from 'src/app/core/model/MergedPlanning/planning-processes-model';
+import { ItemPlanningStateService } from 'src/app/core/services/MergedPlanning/item-planning-state-service';
 
 @Component({
   selector: 'app-item-planning-fields',
   standalone: true,
-  imports: [FormsModule],
+  imports: [ReactiveFormsModule],
   templateUrl: './item-planning-fields.html',
   styleUrl: './item-planning-fields.scss',
 })
-export class ItemPlanningFields implements OnChanges {
+export class ItemPlanningFields implements OnInit, OnChanges {
   @Input({ required: true }) line!: IMergedPlanningLine;
   @Input() priorities: IPriority[] = [];
   @Input() recipeVersions: IRecipe[] = [];
-  @Output() valueChange = new EventEmitter<IItemPlanningInput>();
 
-  takenQty: number | null = null;
-  advanceProductionQty: number | null = null;
-  recipeVersionId: number | null = null;
-  priorityId: number | null = null;
+  form = new FormGroup({
+    takenQty: new FormControl<number | null>(null),
+    advanceProductionQty: new FormControl<number | null>(null),
+    recipeVersionId: new FormControl<number | null>(null),
+    priorityId: new FormControl<number | null>(null),
+  });
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (!changes['line'] || !this.line) return;
+  constructor(private itemPlanningStateService: ItemPlanningStateService) {}
 
-    this.takenQty = this.line.TakenQty ?? null;
-    this.advanceProductionQty = this.line.AdvanceProductionQty ?? null;
-    this.recipeVersionId = this.line.RecipeVersionId ?? null;
-    this.priorityId = this.line.PriorityId ?? null;
+  ngOnInit(): void {
+    this.form.valueChanges.subscribe(() => {
+      this.updateState();
+    });
   }
 
-  get isTakenQtyInvalid(): boolean {
-    return (
-      this.takenQty !== null &&
-      (this.takenQty < 0 || this.takenQty > this.line.Quantity)
+  ngOnChanges(changes: SimpleChanges): void {
+    if (!changes['line'] || !this.line) {
+      return;
+    }
+
+    this.form.patchValue(
+      {
+        takenQty: this.line.TakenQty ?? null,
+        advanceProductionQty: this.line.AdvanceProductionQty ?? null,
+        recipeVersionId: this.line.RecipeVersionId ?? null,
+        priorityId: this.line.PriorityId ?? null,
+      },
+      {
+        emitEvent: false,
+      },
     );
   }
 
+  get isTakenQtyInvalid(): boolean {
+    const value = this.form.controls.takenQty.value;
+    return value !== null && (value < 0 || value > this.line.Quantity);
+  }
+
   get isAdvanceQtyInvalid(): boolean {
-    return this.advanceProductionQty !== null && this.advanceProductionQty < 0;
+    const value = this.form.controls.advanceProductionQty.value;
+    return value !== null && value < 0;
   }
 
   get isValid(): boolean {
     return !this.isTakenQtyInvalid && !this.isAdvanceQtyInvalid;
   }
 
-  onValueChange(): void {
-    this.valueChange.emit({
+  private updateState(): void {
+    if (!this.isValid) return;
+    const value = this.form.getRawValue();
+    const item: IItemPlanningInput = {
       LineId: this.line.Id,
-      TakenQty: this.takenQty,
-      AdvanceProductionQty: this.advanceProductionQty,
-      RecipeVersionId: this.recipeVersionId,
-      PriorityId: this.priorityId,
+      TakenQty: value.takenQty,
+      AdvanceProductionQty: value.advanceProductionQty,
+      RecipeVersionId: value.recipeVersionId,
+      PriorityId: value.priorityId,
       IsValid: this.isValid,
-    });
+    };
+
+    this.itemPlanningStateService.updateItem(item);
   }
 }

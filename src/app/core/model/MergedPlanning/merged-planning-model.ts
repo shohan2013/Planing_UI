@@ -15,6 +15,7 @@ export interface IMergedPlanning {
 
 export interface IMergedPlanningLine {
   Id: number;
+  ProductId: number;
   ProductName: string | null;
   UOM: string | null;
   Quantity: number;
@@ -24,15 +25,6 @@ export interface IMergedPlanningLine {
   AdvanceProductionQty?: number | null;
   RecipeVersionId?: number | null;
   PriorityId?: number | null;
-}
-
-export interface IItemPlanningInput {
-  LineId: number;
-  TakenQty: number | null;
-  AdvanceProductionQty: number | null;
-  RecipeVersionId: number | null;
-  PriorityId: number | null;
-  IsValid: boolean;
 }
 
 export interface IMergedPlanningDetails {

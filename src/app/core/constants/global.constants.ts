@@ -1,3 +1,5 @@
+import { MergedPlanning } from 'src/app/pages/merged-planning/merged-planning';
+
 export const GlobalConstant = {
   API_END_POINTS: {
     LOGIN: 'Login/Login',
@@ -64,6 +66,7 @@ export const GlobalConstant = {
     MergeDOs: 'MergeDeliveryOrder/MergeDOs',
     MergedPlanning: 'MergedPlanning/GetAllData',
     MergedPlanningDetails: 'MergedPlanning/GetDataById',
+    SavePlans: 'MergedPlanning/AddProductionPlan',
   },
 
   URL: { API_URL: 'https://localhost:7111/api/' },
