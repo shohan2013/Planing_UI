@@ -1,24 +1,53 @@
-<div class="card step-card" [class.step-card-enabled]="enabled">
+<div class="card step-card" [class.step-card-ready]="isReadyToDrop">
   <form [formGroup]="form">
-    <div class="card-header step-card-header" [class.enabled]="enabled">
-      <label
-        class="step-toggle"
-        [for]="'enableStep-' + lineId + '-' + step.Name"
-      >
-        <input
-          class="form-check-input"
-          type="checkbox"
-          [id]="'enableStep-' + lineId + '-' + step.Name"
-          [name]="'enableStep-' + lineId + '-' + step.Name"
-          formControlName="enabled"
-          [attr.aria-label]="'Enable ' + step.Name"
-        />
+    <div class="card-header step-card-header" [class.ready]="isReadyToDrop">
+      <span class="step-name" [title]="step.Name">{{ step.Name }}</span>
 
-        <span class="step-name" [title]="step.Name"> {{ step.Name }} </span>
-      </label>
+      @if (isReadyToDrop) {
+      <span class="ready-hint">
+        <i class="fa-solid fa-circle-check"></i>
+        Ready
+      </span>
+      }
     </div>
 
     <div class="card-body p-2 step-fields-grid">
+      <div>
+        <label class="form-label">Start Date &amp; Time</label>
+
+        <input
+          type="datetime-local"
+          class="form-control form-control-sm"
+          [class.is-invalid]="submitted && !startDate"
+          formControlName="startDate"
+          name="startDate-{{ step.Name }}"
+        />
+
+        @if (submitted && !startDate) {
+        <div class="invalid-feedback">Required.</div>
+        }
+      </div>
+
+      <div>
+        <label class="form-label">End Date &amp; Time</label>
+
+        <input
+          type="datetime-local"
+          class="form-control form-control-sm"
+          [class.is-invalid]="submitted && (!endDate || isDateRangeInvalid)"
+          formControlName="endDate"
+          name="endDate-{{ step.Name }}"
+        />
+
+        @if (submitted && !endDate) {
+        <div class="invalid-feedback">Required.</div>
+        } @else if (submitted && isDateRangeInvalid) {
+        <div class="invalid-feedback">
+          End date cannot be before start date.
+        </div>
+        }
+      </div>
+
       <div>
         <label class="form-label">Machine No</label>
 
@@ -45,50 +74,15 @@
       <div>
         <label class="form-label">Allocated Time</label>
 
-        <input
-          type="text"
-          class="form-control form-control-sm bg-light"
-          [value]="totalAllocatedTime"
-          readonly
-          [disabled]="!enabled"
-          placeholder="—"
-          title="Calculated automatically from the start and end dates"
-        />
-      </div>
-
-      <div>
-        <label class="form-label">Start Date</label>
-
-        <input
-          type="date"
-          class="form-control form-control-sm"
-          [class.is-invalid]="submitted && !startDate"
-          formControlName="startDate"
-          name="startDate-{{ step.Name }}"
-        />
-
-        @if (submitted && !startDate) {
-        <div class="invalid-feedback">Required.</div>
-        }
-      </div>
-
-      <div>
-        <label class="form-label">End Date</label>
-
-        <input
-          type="date"
-          class="form-control form-control-sm"
-          [class.is-invalid]="submitted && (!endDate || isDateRangeInvalid)"
-          formControlName="endDate"
-          name="endDate-{{ step.Name }}"
-        />
-
-        @if (submitted && !endDate) {
-        <div class="invalid-feedback">Required.</div>
-        } @else if (submitted && isDateRangeInvalid) {
-        <div class="invalid-feedback">
-          End date cannot be before start date.
+        @if (allocatedTimeBreakdown; as t) {
+        <div class="allocated-time-breakdown">
+          <span class="time-part"><b>{{ t.days }}</b>d</span>
+          <span class="time-part"><b>{{ t.hours }}</b>h</span>
+          <span class="time-part"><b>{{ t.minutes }}</b>m</span>
+          <span class="time-part"><b>{{ t.seconds }}</b>s</span>
         </div>
+        } @else {
+        <div class="allocated-time-breakdown empty">—</div>
         }
       </div>
     </div>

@@ -15,6 +15,7 @@ import { DateTimePipe } from 'src/app/shared/pipes/date-time-pipe';
 import { MergedPlanningServices } from 'src/app/core/services/MergedPlanning/merged-planning-services';
 import { ProductionSteps } from '../production-steps/production-steps';
 import { ItemPlanningFields } from '../item-planning-fields/item-planning-fields';
+import { PlanningDesk } from '../planning-desk/planning-desk';
 import { CommonService } from 'src/app/core/services/Common/CommonService';
 import { IPriority } from 'src/app/core/model/Common/Priority/Priority';
 import {
@@ -42,7 +43,13 @@ import { IApiResponse } from 'src/app/core/model/Response/ApiResponse';
 @Component({
   selector: 'app-merged-planning-view',
   standalone: true,
-  imports: [DateTimePipe, DecimalPipe, ProductionSteps, ItemPlanningFields],
+  imports: [
+    DateTimePipe,
+    DecimalPipe,
+    ProductionSteps,
+    ItemPlanningFields,
+    PlanningDesk,
+  ],
   templateUrl: './merged-planning-view.html',
   styleUrl: './merged-planning-view.scss',
   providers: [ItemPlanningStateService, ProcessStepStateService],
@@ -66,6 +73,7 @@ export class MergedPlanningView implements OnInit, OnDestroy {
   stepsLoadError = signal(false);
   isSaving = signal(false);
   productionSteps = signal<IBusinessFlowForPlanning[]>([]);
+  isDragging = signal(false);
 
   constructor(
     private mergedPlanningService: MergedPlanningServices,

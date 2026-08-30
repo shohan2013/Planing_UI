@@ -21,19 +21,66 @@
   No production steps configured for this business/unit.
 </div>
 } @else {
-<div class="ps-strip">
-  @for (step of steps(); track step.Id) {
-  <app-process-step-from
-    [lineId]="line.Id"
-    [step]="step"
-    [machineOptions]="machineOptions"
+
+<div class="ps-selector">
+  <label class="form-label">Planning Process</label>
+
+  <select
+    class="form-select form-select-sm"
+    [(ngModel)]="selectedStepId"
+    (ngModelChange)="onStepSelected()"
   >
-  </app-process-step-from>
+    <option [ngValue]="null">Select a process to plan…</option>
+
+    @for (step of availableSteps; track step.Id) {
+    <option [ngValue]="step.Id">{{ step.Name }}</option>
+    }
+  </select>
+
+  @if (availableSteps.length === 0 && droppedSteps.length > 0) {
+  <div class="ps-all-planned">
+    <i class="fa-solid fa-circle-check"></i>
+    All processes have been planned for this item.
+  </div>
   }
 </div>
 
-<div class="ps-scroll-hint">
-  <i class="fa-solid fa-arrows-left-right"></i>
-  Scroll to see more steps
+@if (selectedStep) {
+<div class="ps-active-form">
+  <div
+    class="ps-drag-wrapper"
+    [class.ps-drag-ready]="!!pendingFormValue"
+    [class.ps-drag-dropped]="dropSucceeded()"
+    cdkDrag
+    cdkDragBoundary=".mpv-layout"
+    cdkDragPreviewContainer="global"
+    [cdkDragData]="pendingFormValue"
+    [cdkDragDisabled]="!pendingFormValue"
+    (cdkDragStarted)="dragStateChange.emit(true)"
+    (cdkDragMoved)="onFormDragMoved($event)"
+    (cdkDragEnded)="onFormDragEnded($event)"
+  >
+    <app-process-step-from
+      [lineId]="line!.Id"
+      [step]="selectedStep!"
+      [machineOptions]="machineOptions"
+      (formValueChange)="onFormChange($event)"
+    >
+    </app-process-step-from>
+  </div>
 </div>
+}
+
+@if (droppedSteps.length > 0) {
+<div class="ps-chip-row">
+  @for (step of droppedSteps; track step.stepId) {
+  <span class="ps-chip">
+    <i class="fa-solid fa-check-circle"></i>
+    {{ step.stepName }} · {{ getMachineName(step.machineId) }} ·
+    {{ getAllocatedTimeLabel(step) }}
+  </span>
+  }
+</div>
+}
+
 }

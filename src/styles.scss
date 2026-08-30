@@ -3,6 +3,14 @@
 @import "bootstrap/dist/css/bootstrap.min.css";
 @import "@ng-select/ng-select/themes/default.theme.css";
 @import "@fortawesome/fontawesome-free/css/all.min.css";
+/* Required for any @angular/cdk overlay-based feature (drag-drop's
+   cdkDragPreviewContainer="global" included) to get correct base
+   positioning (position: fixed, sizing) on .cdk-overlay-container.
+   Without this, .cdk-overlay-container has no `position` set at all,
+   so any z-index rule on it is a no-op — the drag preview then simply
+   follows normal DOM stacking order and can render behind later
+   siblings/positioned ancestors like a Bootstrap modal. */
+@import "@angular/cdk/overlay-prebuilt.css";
 
 /* Fix content jumping issue */
 .app-main__inner {
@@ -623,4 +631,57 @@ ngb-typeahead-window .dropdown-item:hover,
 ngb-typeahead-window .dropdown-item.active {
   color: #212529 !important;
   background-color: #e9ecef !important;
+}
+
+/*==========================================MERGED PLANNING — CDK DRAG PREVIEW=====================
+  cdkDragPreviewContainer="global" does NOT append the preview into
+  .cdk-overlay-container — CDK's own source (_getPreviewInsertionPoint)
+  resolves 'global' straight to `document.body`. So a z-index on
+  .cdk-overlay-container is targeting the wrong element entirely and has no
+  effect on this preview.
+
+  Worse: CDK sets the preview's z-index as an INLINE style directly on the
+  .cdk-drag-preview element itself (defaulting to 1000 — see PreviewRef in
+  @angular/cdk/fesm2022/drag-drop.mjs). An inline style beats any external
+  stylesheet rule regardless of selector specificity, UNLESS that rule is
+  !important — which is why two earlier attempts at raising the overlay
+  container's z-index had no visible effect: they were the wrong element,
+  the wrong mechanism, or both.
+
+  Since .cdk-drag-preview is appended straight to <body>, its actual stacking
+  is a plain sibling comparison against every other top-level layer in the
+  app (Bootstrap modal ~1055, ngb-typeahead-window 2000, toasts, etc.) — not
+  just the modal. Use a value clearly above all of them so the dragged card
+  is guaranteed to render on top regardless of what else is open. */
+.cdk-drag-preview {
+  /* Must beat CDK's own inline z-index (default 1000, set directly on this
+     element's style attribute) so the preview renders above every other
+     layered UI element in the app, not just the modal it was dragged from. */
+  z-index: 999999 !important;
+  box-sizing: border-box;
+  border-radius: 6px;
+  overflow: hidden;
+  background: red;
+  /* Must let pointer-events pass through so document.elementFromPoint() at
+     the drop position (used by production-steps' geometry-based drop
+     detection) hits the real element underneath the floating preview,
+     not the preview itself. */
+  pointer-events: none;
+  box-shadow:
+    0 5px 5px -3px rgba(0, 0, 0, 0.2),
+    0 8px 10px 1px rgba(0, 0, 0, 0.14),
+    0 3px 14px 2px rgba(0, 0, 0, 0.12);
+}
+
+.cdk-drag-placeholder {
+  opacity: 0.3;
+}
+
+.cdk-drag-animating {
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.cdk-drop-list-dragging .desk-card:not(.cdk-drag-placeholder),
+.cdk-drop-list-dragging .step-card:not(.cdk-drag-placeholder) {
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
 }

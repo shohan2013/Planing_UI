@@ -1,4 +1,5 @@
 import { Injectable, signal } from '@angular/core';
+import { moveItemInArray } from '@angular/cdk/drag-drop';
 import { IProcessStepInput } from '../../model/MergedPlanning/planning-processes-model';
 
 @Injectable({
@@ -25,6 +26,25 @@ export class ProcessStepStateService {
     this._processSteps.update((steps) =>
       steps.filter((x) => !(x.lineId === lineId && x.stepId === stepId)),
     );
+  }
+
+  getStepsForLine(lineId: number): IProcessStepInput[] {
+    return this._processSteps().filter((x) => x.lineId === lineId);
+  }
+
+  reorderWithinLine(
+    lineId: number,
+    previousIndex: number,
+    currentIndex: number,
+  ): void {
+    this._processSteps.update((steps) => {
+      const lineSteps = steps.filter((x) => x.lineId === lineId);
+      const otherSteps = steps.filter((x) => x.lineId !== lineId);
+
+      moveItemInArray(lineSteps, previousIndex, currentIndex);
+
+      return [...otherSteps, ...lineSteps];
+    });
   }
 
   clear(): void {

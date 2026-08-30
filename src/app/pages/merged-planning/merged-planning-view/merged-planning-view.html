@@ -95,48 +95,42 @@
     </div>
   </div>
 
-  <fieldset class="border rounded-3 p-2 mt-3 mb-0">
-    <legend class="float-none w-auto mb-0 mx-auto">
-      <h6 class="fw-bold mb-0">PRODUCTION PLANNING INSERTION FORM</h6>
-    </legend>
+  <div class="mpv-layout">
+    <fieldset class="border rounded-3 p-2 mt-3 mb-0 mpv-items-fieldset">
+      <legend class="float-none w-auto mb-0 mx-auto">
+        <h6 class="fw-bold mb-0">PRODUCTION PLANNING INSERTION FORM</h6>
+      </legend>
 
-    <div class="table-responsive mpv-table-scroll">
-      <table class="custom-table">
-        <thead>
-          <tr>
-            <th class="index-column">#</th>
-            <th class="product-column">PRODUCT DETAILS</th>
-            <th class="item-planning-column">ITEM PLANNING</th>
-            <th class="planning-column">PLANNING PROCESS</th>
-          </tr>
-        </thead>
-        <tbody>
-          @if (lines().length === 0) {
-          <tr>
-            <td colspan="4" class="text-center py-4">
-              <i class="fas fa-folder-open fa-4x text-secondary mb-3"></i>
-              <br />
-              <h6>No Line Items Found.</h6>
-            </td>
-          </tr>
-          } @else { @for (line of lines(); track line.Id; let i = $index) {
-          <tr>
-            <td>{{ i + 1 }}</td>
-            <td class="text-start">
+      <div class="mpv-items-col">
+        @if (lines().length === 0) {
+        <div class="text-center py-4">
+          <i class="fas fa-folder-open fa-4x text-secondary mb-3"></i>
+          <br />
+          <h6>No Line Items Found.</h6>
+        </div>
+        } @else { @for (line of lines(); track line.Id; let i = $index) {
+        <div class="mpv-item-card">
+          <div class="mpv-item-header">
+            <span class="mpv-item-index">{{ i + 1 }}</span>
+            <div>
               <div class="mpv-product-name">{{ line.ProductName }}</div>
               <div class="mpv-product-meta">
                 {{ line.UOM }} &nbsp;•&nbsp; Qty: {{ line.Quantity | number:
                 '1.2-2' }} &nbsp;•&nbsp; Rate: {{ line.Rate | number: '1.2-2' }}
               </div>
-            </td>
-            <td class="text-start align-top">
+            </div>
+          </div>
+
+          <div class="mpv-item-body">
+            <div class="mpv-item-planning-col">
               <app-item-planning-fields
                 [line]="line"
                 [priorities]="priorities()"
                 [recipeVersions]="recipeVersions()"
               ></app-item-planning-fields>
-            </td>
-            <td class="text-start align-top mpv-process-cell">
+            </div>
+
+            <div class="mpv-process-col">
               <app-production-steps
                 [line]="line"
                 [steps]="productionSteps()"
@@ -144,14 +138,31 @@
                 [loadError]="stepsLoadError()"
                 [machineOptions]="Machines()"
                 (GetSteps)="loadProductionSteps()"
+                (dragStateChange)="isDragging.set($event)"
               ></app-production-steps>
-            </td>
-          </tr>
-          } }
-        </tbody>
-      </table>
-    </div>
-  </fieldset>
+            </div>
+          </div>
+        </div>
+        } }
+      </div>
+    </fieldset>
+
+    <fieldset class="border rounded-3 p-2 mt-3 mb-0 mpv-desk-fieldset">
+      <legend class="float-none w-auto mb-0 mx-auto">
+        <h6 class="fw-bold mb-0">PLANNING DESK</h6>
+      </legend>
+
+      <div class="mpv-desk-col">
+        <app-planning-desk
+          [lines]="lines()"
+          [machineOptions]="Machines()"
+          [isSaving]="isSaving()"
+          [isDragging]="isDragging()"
+          (save)="onSaveAll()"
+        ></app-planning-desk>
+      </div>
+    </fieldset>
+  </div>
   }
 </div>
 
@@ -159,21 +170,5 @@
   <button type="button" class="btn btn-secondary" (click)="close()">
     <i class="fa-solid fa-fw fa-xmark"></i>
     Close
-  </button>
-
-  <button
-    type="button"
-    class="btn btn-success"
-    [disabled]="isSaving()"
-    (click)="onSaveAll()"
-  >
-    @if (isSaving()) {
-    <span
-      class="spinner-border spinner-border-sm me-2"
-      aria-hidden="true"
-    ></span>
-    } @else {
-    <i class="fa-solid fa-fw fa-check"></i>
-    } {{ isSaving() ? 'Saving...' : 'Save' }}
   </button>
 </div>
