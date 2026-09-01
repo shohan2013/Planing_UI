@@ -146,20 +146,119 @@
         } }
       </div>
     </fieldset>
-
     <fieldset class="border rounded-3 p-2 mt-3 mb-0 mpv-desk-fieldset">
       <legend class="float-none w-auto mb-0 mx-auto">
         <h6 class="fw-bold mb-0">PLANNING DESK</h6>
       </legend>
 
       <div class="mpv-desk-col">
-        <app-planning-desk
-          [lines]="lines()"
-          [machineOptions]="Machines()"
-          [isSaving]="isSaving()"
-          [isDragging]="isDragging()"
-          (save)="onSaveAll()"
-        ></app-planning-desk>
+        <div class="planning-desk" [class.desk-drag-active]="isDragging()">
+          <div class="desk-toolbar">
+            <div class="desk-hint">
+              <i class="fa-solid fa-circle-info"></i>
+              @if (isDragging()) { Drop anywhere in this panel — it attaches to
+              its own item automatically. } @else { Drag a filled process form
+              here to plan an item. }
+            </div>
+
+            @if (totalPlannedSteps() > 0) {
+            <span class="desk-count">{{ totalPlannedSteps() }} planned</span>
+            }
+          </div>
+
+          <div class="desk-body">
+            @if (totalPlannedSteps() === 0 && !isDragging()) {
+            <div class="desk-empty-state">
+              <i class="fa-solid fa-inbox"></i>
+              <div class="desk-empty-title">Planning Desk is empty</div>
+              <div class="desk-empty-text">
+                Fill in a process form for an item and drag it here to build the
+                plan.
+              </div>
+            </div>
+            } @for (line of lines(); track line.Id) { @if
+            (stepsForLine(line.Id).length > 0) {
+            <div class="desk-line-group has-steps">
+              <div class="desk-line-header">
+                <i class="fa-solid fa-box"></i>
+                <span class="desk-line-name" [title]="line.ProductName">
+                  {{ line.ProductName }}
+                </span>
+                <span class="desk-line-count"
+                  >{{ stepsForLine(line.Id).length }}</span
+                >
+              </div>
+
+              <div
+                class="desk-drop-list"
+                cdkDropList
+                [id]="deskListIdFor(line.Id)"
+                [cdkDropListData]="stepsForLine(line.Id)"
+                (cdkDropListDropped)="onDeskDrop($event, line.Id)"
+              >
+                @for (step of stepsForLine(line.Id); track step.stepId) {
+                <div
+                  class="desk-card"
+                  [class.desk-card-new]="isNewlyAddedStep(step.stepId)"
+                  cdkDrag
+                  cdkDragPreviewContainer="global"
+                  [cdkDragBoundary]="'.desk-body'"
+                >
+                  <div class="desk-card-header" cdkDragHandle>
+                    <i class="fa-solid fa-grip-vertical drag-handle"></i>
+                    <span class="desk-card-title" [title]="step.stepName">
+                      {{ step.stepName }}
+                    </span>
+                    <button
+                      type="button"
+                      class="desk-card-remove"
+                      title="Remove"
+                      (click)="removeStep(line.Id, step.stepId)"
+                    >
+                      <i class="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
+
+                  <div class="desk-card-body">
+                    <div class="desk-card-machine">
+                      <i class="fa-solid fa-industry"></i>
+                      <span>{{ getMachineName(step.machineId) }}</span>
+                    </div>
+
+                    @if (getAllocatedTimeBreakdown(step); as t) {
+                    <div class="desk-card-time">
+                      <span><b>{{ t.days }}</b>d</span>
+                      <span><b>{{ t.hours }}</b>h</span>
+                      <span><b>{{ t.minutes }}</b>m</span>
+                      <span><b>{{ t.seconds }}</b>s</span>
+                    </div>
+                    }
+                  </div>
+                </div>
+                }
+              </div>
+            </div>
+            } }
+          </div>
+
+          <div class="desk-footer">
+            <button
+              type="button"
+              class="btn btn-success w-100"
+              [disabled]="isSaving()"
+              (click)="onSaveAll()"
+            >
+              @if (isSaving()) {
+              <span
+                class="spinner-border spinner-border-sm me-2"
+                aria-hidden="true"
+              ></span>
+              } @else {
+              <i class="fa-solid fa-fw fa-check"></i>
+              } {{ isSaving() ? 'Saving...' : 'Save All Plans' }}
+            </button>
+          </div>
+        </div>
       </div>
     </fieldset>
   </div>

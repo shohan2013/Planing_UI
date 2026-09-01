@@ -11,11 +11,11 @@ import {
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { single, Subject, takeUntil } from 'rxjs';
+import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { DateTimePipe } from 'src/app/shared/pipes/date-time-pipe';
 import { MergedPlanningServices } from 'src/app/core/services/MergedPlanning/merged-planning-services';
 import { ProductionSteps } from '../production-steps/production-steps';
 import { ItemPlanningFields } from '../item-planning-fields/item-planning-fields';
-import { PlanningDesk } from '../planning-desk/planning-desk';
 import { CommonService } from 'src/app/core/services/Common/CommonService';
 import { IPriority } from 'src/app/core/model/Common/Priority/Priority';
 import {
@@ -30,6 +30,7 @@ import { ItemPlanningStateService } from 'src/app/core/services/MergedPlanning/i
 import { ProcessStepStateService } from 'src/app/core/services/MergedPlanning/process-step-state-service';
 import {
   IItemPlanningInput,
+  IProcessStepInput,
   IProductionPlanHeader,
   IProductionPlanLine,
 } from 'src/app/core/model/MergedPlanning/planning-processes-model';
@@ -46,9 +47,9 @@ import { IApiResponse } from 'src/app/core/model/Response/ApiResponse';
   imports: [
     DateTimePipe,
     DecimalPipe,
+    DragDropModule,
     ProductionSteps,
     ItemPlanningFields,
-    PlanningDesk,
   ],
   templateUrl: './merged-planning-view.html',
   styleUrl: './merged-planning-view.scss',
@@ -258,5 +259,71 @@ export class MergedPlanningView implements OnInit, OnDestroy {
         this.isSaving.set(false);
       },
     });
+  }
+
+  // ---------- Planning Desk (merged from planning-desk component) ----------
+
+  deskListIdFor(lineId: number): string {
+    return 'desk-list-' + lineId;
+  }
+
+  stepsForLine(lineId: number): IProcessStepInput[] {
+    return this.processStepState.getStepsForLine(lineId);
+  }
+
+  totalPlannedSteps(): number {
+    return this.processStepState.processSteps().length;
+  }
+
+  isNewlyAddedStep(stepId: number): boolean {
+    return this.processStepState.recentlyAddedStepIds().has(stepId);
+  }
+
+  onDeskDrop(event: CdkDragDrop<IProcessStepInput[]>, lineId: number): void {
+    if (event.previousIndex === event.currentIndex) return;
+
+    this.processStepState.reorderWithinLine(
+      lineId,
+      event.previousIndex,
+      event.currentIndex,
+    );
+  }
+
+  removeStep(lineId: number, stepId: number): void {
+    this.processStepState.removeProcessStep(lineId, stepId);
+  }
+
+  getMachineName(machineId: number): string {
+    return (
+      this.Machines().find((m) => m.Id === machineId)?.Name ?? `#${machineId}`
+    );
+  }
+
+  getAllocatedTimeBreakdown(step: IProcessStepInput): {
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+  } | null {
+    if (!step.startDate || !step.endDate) return null;
+
+    const start = new Date(step.startDate);
+    const end = new Date(step.endDate);
+
+    let totalSeconds = Math.floor((end.getTime() - start.getTime()) / 1000);
+    if (totalSeconds < 0) return null;
+
+    const days = Math.floor(totalSeconds / 86400);
+    totalSeconds -= days * 86400;
+
+    const hours = Math.floor(totalSeconds / 3600);
+    totalSeconds -= hours * 3600;
+
+    const minutes = Math.floor(totalSeconds / 60);
+    totalSeconds -= minutes * 60;
+
+    const seconds = totalSeconds;
+
+    return { days, hours, minutes, seconds };
   }
 }

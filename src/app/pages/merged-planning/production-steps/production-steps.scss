@@ -53,26 +53,26 @@
   cursor: grabbing;
 }
 
-/* This cdkDrag has no enclosing cdkDropList, so CDK never builds its usual
-   floating preview clone (the clone is only created when a `dropContainer`
-   is present — see @angular/cdk PreviewRef._startDragSequence). Instead CDK
-   just applies a translate3d transform to this actual element in place,
-   still inside its original flex position ahead of the Desk fieldset in the
-   DOM — so with no z-index/position of its own, the later Desk sibling
-   paints on top of it the moment the drag carries it across that panel.
-   Giving the real dragging element its own stacking context here keeps it
-   floating above every panel it passes over during the drag. */
+/* The enclosing cdkDropList (see production-steps.html) makes CDK build a
+   real floating preview clone in the global overlay container, appended to
+   document.body — so it already escapes .mpv-items-col's overflow clipping
+   and paints above every panel. This stacking context is a fallback for the
+   dimmed origin element left behind in its original flex position while the
+   clone is dragged. */
 .ps-drag-wrapper.cdk-drag-dragging {
   position: relative;
   z-index: 999999;
   pointer-events: none;
 }
 
-/* Hides the origin element instantly once a drop succeeds, so CDK's
-   built-in snap-back animation (which would otherwise play while Angular
-   catches up and removes this form) never becomes visible. */
+/* Fades the origin element out once a drop succeeds, so CDK's built-in
+   snap-back animation (which would otherwise play while Angular catches up
+   and removes this form) never becomes visible. A short fade reads as an
+   intentional hand-off to the Desk instead of the hard visibility cut this
+   used to be. */
 .ps-drag-wrapper.ps-drag-dropped {
-  visibility: hidden;
+  opacity: 0;
+  transition: opacity 100ms ease-out;
   pointer-events: none;
 }
 

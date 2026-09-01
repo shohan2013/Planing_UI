@@ -7,8 +7,10 @@ import { IProcessStepInput } from '../../model/MergedPlanning/planning-processes
 })
 export class ProcessStepStateService {
   private readonly _processSteps = signal<IProcessStepInput[]>([]);
+  private readonly _recentlyAddedStepIds = signal<Set<number>>(new Set());
 
   readonly processSteps = this._processSteps.asReadonly();
+  readonly recentlyAddedStepIds = this._recentlyAddedStepIds.asReadonly();
 
   updateProcessStep(step: IProcessStepInput): void {
     this._processSteps.update((steps) => {
@@ -16,10 +18,29 @@ export class ProcessStepStateService {
         (x) => x.lineId === step.lineId && x.stepId == step.stepId,
       );
 
-      if (index === -1) return [...steps, step];
+      if (index === -1) {
+        this.markRecentlyAdded(step.stepId);
+        return [...steps, step];
+      }
 
       return steps.map((x, i) => (i === index ? step : x));
     });
+  }
+
+  // Marks a step as "just added" so the desk card entrance animation can be
+  // scoped to genuine additions only, never to a reorder-triggered DOM move
+  // (which would otherwise replay the keyframe animation and flash the card).
+  private markRecentlyAdded(stepId: number): void {
+    this._recentlyAddedStepIds.update((ids) => new Set(ids).add(stepId));
+
+    setTimeout(() => {
+      this._recentlyAddedStepIds.update((ids) => {
+        if (!ids.has(stepId)) return ids;
+        const next = new Set(ids);
+        next.delete(stepId);
+        return next;
+      });
+    }, 200);
   }
 
   removeProcessStep(lineId: number, stepId: number): void {

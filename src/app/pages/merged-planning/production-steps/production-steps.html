@@ -46,7 +46,7 @@
 </div>
 
 @if (selectedStep) {
-<div class="ps-active-form">
+<div class="ps-active-form" cdkDropList [cdkDropListEnterPredicate]="denyEnter">
   <div
     class="ps-drag-wrapper"
     [class.ps-drag-ready]="!!pendingFormValue"
@@ -58,6 +58,7 @@
     [cdkDragDisabled]="!pendingFormValue"
     (cdkDragStarted)="dragStateChange.emit(true)"
     (cdkDragMoved)="onFormDragMoved($event)"
+    (cdkDragReleased)="onFormDragReleased($event)"
     (cdkDragEnded)="onFormDragEnded($event)"
   >
     <app-process-step-from
