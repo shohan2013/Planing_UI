@@ -1,0 +1,116 @@
+<!-- KPI cards -->
+<div class="row g-3 mb-4">
+  <div class="col-md-6 col-xl-3">
+    <div class="card mb-0 widget-content bg-tempting-azure">
+      <div class="widget-content-wrapper text-white">
+        <div class="widget-content-left">
+          <div class="widget-heading">Total Machines</div>
+          <div class="widget-subheading">Currently tracked</div>
+        </div>
+        <div class="widget-content-right">
+          <div class="widget-numbers text-white">
+            {{ summary.TotalMachines }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 col-xl-3">
+    <div class="card mb-0 widget-content bg-happy-green">
+      <div class="widget-content-wrapper text-white">
+        <div class="widget-content-left">
+          <div class="widget-heading">Avg. Utilization</div>
+          <div class="widget-subheading">Allocated vs total time</div>
+        </div>
+        <div class="widget-content-right">
+          <div class="widget-numbers text-white">
+            {{ summary.AvgUtilizationPercent }}%
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 col-xl-3">
+    <div class="card mb-0 widget-content bg-arielle-smile">
+      <div class="widget-content-wrapper text-white">
+        <div class="widget-content-left">
+          <div class="widget-heading">Free Time</div>
+          <div class="widget-subheading">Available capacity</div>
+        </div>
+        <div class="widget-content-right">
+          <div class="widget-numbers text-white">
+            {{ summary.TotalFreeHours }}h
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 col-xl-3">
+    <div class="card mb-0 widget-content bg-ripe-malinka">
+      <div class="widget-content-wrapper text-white">
+        <div class="widget-content-left">
+          <div class="widget-heading">Downtime</div>
+          <div class="widget-subheading">Lost production time</div>
+        </div>
+        <div class="widget-content-right">
+          <div class="widget-numbers text-white">
+            {{ summary.TotalDowntimeHours }}h
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Charts -->
+<div class="row g-3">
+  <div class="col-lg-4">
+    <div class="card h-100 border-0 shadow-sm">
+      <div class="card-header bg-white border-0 pb-0">
+        <h6 class="fw-bold mb-0">Overall Time Distribution</h6>
+      </div>
+      <div class="card-body">
+        <div style="height: 260px">
+          <canvas
+            baseChart
+            [type]="'doughnut'"
+            [data]="utilizationDoughnutData()"
+            [options]="doughnutOptions"
+          ></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="card h-100 border-0 shadow-sm">
+      <div class="card-header bg-white border-0 pb-0">
+        <h6 class="fw-bold mb-0">Utilization % by Machine</h6>
+      </div>
+      <div class="card-body">
+        @if (loading) {
+          <div class="text-center text-muted py-5">
+            <i class="fa-solid fa-spinner fa-spin fa-2x mb-2"></i>
+            <div>Loading machine data...</div>
+          </div>
+        } @else if (machines.length === 0) {
+          <div class="text-center text-muted py-5">
+            No machine data found for the selected filters.
+          </div>
+        } @else {
+          <div [style.height.px]="Math.max(220, machines.length * 42)">
+            <canvas
+              baseChart
+              [type]="'bar'"
+              [data]="utilizationBarData()"
+              [options]="barOptions"
+            ></canvas>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

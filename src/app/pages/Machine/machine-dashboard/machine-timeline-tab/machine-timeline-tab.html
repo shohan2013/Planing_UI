@@ -1,0 +1,59 @@
+<div class="card border-0 shadow-sm">
+  <div
+    class="card-header bg-white border-0 d-flex align-items-center justify-content-between"
+  >
+    <h6 class="fw-bold mb-0">Machine Time Slot Timeline</h6>
+    <div class="d-flex align-items-center gap-3 small">
+      <span class="legend-dot" [style.background]="slotColors.Allocated"></span>
+      Allocated
+      <span class="legend-dot" [style.background]="slotColors.Free"></span>
+      Free
+      <span class="legend-dot" [style.background]="slotColors.Downtime"></span>
+      Downtime
+    </div>
+  </div>
+
+  <div class="card-body">
+    @if (loading) {
+      <div class="text-center text-muted py-5">
+        <i class="fa-solid fa-spinner fa-spin fa-2x mb-2"></i>
+        <div>Loading machine data...</div>
+      </div>
+    } @else if (machines.length === 0) {
+      <div class="text-center text-muted py-5">
+        No machine data found for the selected filters.
+      </div>
+    } @else {
+      @for (machine of machines; track trackByMachine($index, machine)) {
+        <div class="machine-row mb-4">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <div class="d-flex align-items-center gap-2">
+              <i class="fa-solid fa-gears text-primary"></i>
+              <span class="fw-semibold">{{ machine.MachineName }}</span>
+            </div>
+
+            <div class="d-flex align-items-center gap-3 small text-muted">
+              <span [class]="utilizationBadgeClass(machine.UtilizationPercent)">
+                {{ machine.UtilizationPercent }}% Utilized
+              </span>
+              <span>Allocated: {{ (machine.AllocatedMinutes / 60) | number: '1.1-1' }}h</span>
+              <span>Free: {{ (machine.FreeMinutes / 60) | number: '1.1-1' }}h</span>
+              <span>Downtime: {{ (machine.DowntimeMinutes / 60) | number: '1.1-1' }}h</span>
+            </div>
+          </div>
+
+          <div class="timeline-bar">
+            @for (segment of slotSegments(machine); track $index) {
+              <div
+                class="timeline-segment"
+                [style.width.%]="segment.widthPercent"
+                [style.background]="slotColors[segment.type]"
+                [title]="segment.tooltip"
+              ></div>
+            }
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>

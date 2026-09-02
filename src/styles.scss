@@ -12,6 +12,12 @@
    siblings/positioned ancestors like a Bootstrap modal. */
 @import "@angular/cdk/overlay-prebuilt.css";
 
+.page-header {
+  font-size: 20px;
+  font-weight: 1700 !important;
+  margin: 20px 0 0px 20px;
+}
+
 /* Fix content jumping issue */
 .app-main__inner {
   position: relative !important;

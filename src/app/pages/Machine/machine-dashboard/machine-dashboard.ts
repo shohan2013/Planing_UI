@@ -1,33 +1,19 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ChartConfiguration, ChartData } from 'chart.js';
-import { BaseChartDirective } from 'ng2-charts';
 import { Subject, takeUntil } from 'rxjs';
 
 import { IBusiness } from 'src/app/core/model/Common/BusinessType/BusinessType';
 import { IUnit } from 'src/app/core/model/Common/Unit/Unit';
-import {
-  IMachineDashboardSummary,
-  IMachineUtilization,
-  MachineSlotType,
-} from 'src/app/core/model/Common/Machine/machine-utilization';
+import { IMachineDashboardSummary, IMachineUtilization } from 'src/app/core/model/Common/Machine/machine-utilization';
 
 import { CommonService } from 'src/app/core/services/Common/CommonService';
 import { MachineDashboardService } from 'src/app/core/services/Machine/machine-dashboard.service';
 
-interface ISlotStyle {
-  type: MachineSlotType;
-  label: string;
-  widthPercent: number;
-  tooltip: string;
-}
+import { MachineOverviewTab } from './machine-overview-tab/machine-overview-tab';
+import { MachineTimelineTab } from './machine-timeline-tab/machine-timeline-tab';
 
-const SLOT_COLORS: Record<MachineSlotType, string> = {
-  Allocated: '#3ac47d',
-  Free: '#16aaff',
-  Downtime: '#d92550',
-};
+type MachineDashboardTab = 'overview' | 'timeline';
 
 function toDateInputValue(date: Date): string {
   return date.toISOString().slice(0, 10);
@@ -36,7 +22,7 @@ function toDateInputValue(date: Date): string {
 @Component({
   selector: 'app-machine-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, BaseChartDirective],
+  imports: [CommonModule, FormsModule, MachineOverviewTab, MachineTimelineTab],
   templateUrl: './machine-dashboard.html',
   styleUrl: './machine-dashboard.scss',
 })
@@ -45,6 +31,8 @@ export class MachineDashboard implements OnInit, OnDestroy {
   readonly businesses = signal<IBusiness[]>([]);
   readonly businessesLoading = signal(false);
   readonly loading = signal(false);
+
+  readonly activeTab = signal<MachineDashboardTab>('overview');
 
   selectedUnitId = 0;
   selectedBusinessId = 0;
@@ -62,94 +50,6 @@ export class MachineDashboard implements OnInit, OnDestroy {
 
   readonly machines = signal<IMachineUtilization[]>([]);
 
-  readonly slotColors = SLOT_COLORS;
-  readonly Math = Math;
-
-  readonly utilizationDoughnutData = computed<ChartData<'doughnut'>>(() => {
-    const list = this.machines();
-    const allocated = list.reduce((s, m) => s + m.AllocatedMinutes, 0);
-    const free = list.reduce((s, m) => s + m.FreeMinutes, 0);
-    const downtime = list.reduce((s, m) => s + m.DowntimeMinutes, 0);
-
-    return {
-      labels: ['Allocated', 'Free', 'Downtime'],
-      datasets: [
-        {
-          data: [allocated, free, downtime],
-          backgroundColor: [
-            SLOT_COLORS.Allocated,
-            SLOT_COLORS.Free,
-            SLOT_COLORS.Downtime,
-          ],
-          borderWidth: 0,
-          hoverOffset: 6,
-        },
-      ],
-    };
-  });
-
-  readonly doughnutOptions: ChartConfiguration<'doughnut'>['options'] = {
-    responsive: true,
-    maintainAspectRatio: false,
-    cutout: '68%',
-    plugins: {
-      legend: {
-        position: 'bottom',
-        labels: { boxWidth: 12, usePointStyle: true, pointStyle: 'circle' },
-      },
-      tooltip: {
-        callbacks: {
-          label: (ctx) => {
-            const minutes = ctx.parsed as number;
-            const hours = Math.round((minutes / 60) * 10) / 10;
-            return ` ${ctx.label}: ${hours} hrs`;
-          },
-        },
-      },
-    },
-  };
-
-  readonly utilizationBarData = computed<ChartData<'bar'>>(() => {
-    const list = this.machines();
-    return {
-      labels: list.map((m) => m.MachineName),
-      datasets: [
-        {
-          label: 'Utilization %',
-          data: list.map((m) => m.UtilizationPercent),
-          backgroundColor: list.map((m) => this.utilizationColor(m.UtilizationPercent)),
-          borderRadius: 6,
-          maxBarThickness: 28,
-        },
-      ],
-    };
-  });
-
-  readonly barOptions: ChartConfiguration<'bar'>['options'] = {
-    indexAxis: 'y',
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      x: {
-        min: 0,
-        max: 100,
-        ticks: { callback: (v) => `${v}%` },
-        grid: { display: true },
-      },
-      y: {
-        grid: { display: false },
-      },
-    },
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        callbacks: {
-          label: (ctx) => ` Utilization: ${ctx.parsed.x}%`,
-        },
-      },
-    },
-  };
-
   private readonly destroy$ = new Subject<void>();
 
   constructor(
@@ -165,6 +65,10 @@ export class MachineDashboard implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  setActiveTab(tab: MachineDashboardTab): void {
+    this.activeTab.set(tab);
   }
 
   onUnitChange(unitId: number): void {
@@ -190,39 +94,6 @@ export class MachineDashboard implements OnInit, OnDestroy {
 
   refresh(): void {
     this.loadDashboard();
-  }
-
-  slotSegments(machine: IMachineUtilization): ISlotStyle[] {
-    if (machine.TotalMinutes <= 0) return [];
-
-    return machine.Slots.map((slot) => {
-      const start = new Date(slot.StartTime);
-      const end = new Date(slot.EndTime);
-      const minutes = Math.max(1, (end.getTime() - start.getTime()) / 60000);
-
-      return {
-        type: slot.Type,
-        label: slot.Label,
-        widthPercent: (minutes / machine.TotalMinutes) * 100,
-        tooltip: `${slot.Type} — ${slot.Label}\n${start.toLocaleString()} → ${end.toLocaleString()}`,
-      };
-    });
-  }
-
-  utilizationColor(percent: number): string {
-    if (percent >= 75) return SLOT_COLORS.Allocated;
-    if (percent >= 45) return '#f7b924';
-    return SLOT_COLORS.Downtime;
-  }
-
-  utilizationBadgeClass(percent: number): string {
-    if (percent >= 75) return 'badge bg-success';
-    if (percent >= 45) return 'badge bg-warning text-dark';
-    return 'badge bg-danger';
-  }
-
-  trackByMachine(_: number, machine: IMachineUtilization): number {
-    return machine.MachineId;
   }
 
   private loadUnits(): void {

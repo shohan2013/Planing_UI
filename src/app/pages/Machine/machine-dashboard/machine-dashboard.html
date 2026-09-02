@@ -1,242 +1,151 @@
 <div class="user-card">
   <div class="page-header">
     <h5>
-      <i class="fa-solid fa-fw fa-industry"></i>
-      <b>MACHINE UTILIZATION DASHBOARD</b>
+      <i class="fa-solid fa-chart-bar"></i>
+      <b> MACHINE UTILIZATION DASHBOARD</b>
     </h5>
   </div>
-
   <hr />
-
   <div class="card-body">
-    <!-- Filters -->
+    <!-- Shared header: filters + tab nav, used by both tabs -->
     <div class="card mb-4 border-0 shadow-sm">
       <div class="card-body py-3">
-        <div class="d-flex flex-wrap align-items-end gap-3">
+        <div class="d-flex flex-wrap align-items-center gap-3">
           <div style="width: 220px">
-            <label class="form-label mb-1 fw-semibold text-muted small">Unit</label>
-            <select
-              class="form-select"
-              [ngModel]="selectedUnitId"
-              (ngModelChange)="onUnitChange($event)"
-            >
-              <option [ngValue]="0">All Units</option>
-              @for (unit of units(); track unit.Id) {
+            <div class="input-group">
+              <div class="input-group-text">
+                <i class="fa-solid fa-filter"></i>
+              </div>
+
+              <select
+                class="form-select"
+                [ngModel]="selectedUnitId"
+                (ngModelChange)="onUnitChange($event)"
+              >
+                <option [ngValue]="0">All Units</option>
+                @for (unit of units(); track unit.Id) {
                 <option [ngValue]="unit.Id">{{ unit.Name }}</option>
-              }
-            </select>
+                }
+              </select>
+            </div>
           </div>
 
           <div style="width: 220px">
-            <label class="form-label mb-1 fw-semibold text-muted small">Business</label>
-            <select
-              class="form-select"
-              [ngModel]="selectedBusinessId"
-              (ngModelChange)="onBusinessChange($event)"
-              [disabled]="selectedUnitId === 0 || businessesLoading()"
-            >
-              <option [ngValue]="0">
-                {{ businessesLoading() ? 'Loading...' : 'All Businesses' }}
-              </option>
-              @for (business of businesses(); track business.Id) {
+            <div class="input-group">
+              <div class="input-group-text">
+                <i class="fa-solid fa-building"></i>
+              </div>
+
+              <select
+                class="form-select"
+                [ngModel]="selectedBusinessId"
+                (ngModelChange)="onBusinessChange($event)"
+                [disabled]="selectedUnitId === 0 || businessesLoading()"
+              >
+                <option [ngValue]="0">
+                  {{ businessesLoading() ? 'Loading...' : 'All Businesses' }}
+                </option>
+                @for (business of businesses(); track business.Id) {
                 <option [ngValue]="business.Id">{{ business.Name }}</option>
-              }
-            </select>
+                }
+              </select>
+            </div>
           </div>
 
-          <div style="width: 180px">
-            <label class="form-label mb-1 fw-semibold text-muted small">From Date</label>
-            <input
-              type="date"
-              class="form-control"
-              [ngModel]="fromDate"
-              (ngModelChange)="fromDate = $event; onDateChange()"
-              [max]="toDate"
-            />
+          <div style="width: 190px">
+            <div class="input-group">
+              <div class="input-group-text">
+                <i class="fa-solid fa-calendar-day"></i>
+              </div>
+
+              <input
+                type="date"
+                class="form-control"
+                placeholder="From Date"
+                [ngModel]="fromDate"
+                (ngModelChange)="fromDate = $event; onDateChange()"
+                [max]="toDate"
+              />
+            </div>
           </div>
 
-          <div style="width: 180px">
-            <label class="form-label mb-1 fw-semibold text-muted small">To Date</label>
-            <input
-              type="date"
-              class="form-control"
-              [ngModel]="toDate"
-              (ngModelChange)="toDate = $event; onDateChange()"
-              [min]="fromDate"
-            />
+          <div style="width: 190px">
+            <div class="input-group">
+              <div class="input-group-text">
+                <i class="fa-solid fa-calendar-check"></i>
+              </div>
+
+              <input
+                type="date"
+                class="form-control"
+                placeholder="To Date"
+                [ngModel]="toDate"
+                (ngModelChange)="toDate = $event; onDateChange()"
+                [min]="fromDate"
+              />
+            </div>
           </div>
 
           <button
             type="button"
-            class="btn btn-primary btn-shadow d-inline-flex align-items-center ms-auto"
+            class="btn btn-success btn-shadow d-inline-flex align-items-center ms-auto"
             (click)="refresh()"
             [disabled]="loading()"
           >
-            <i class="fa-solid fa-fw fa-arrows-rotate me-2" [class.fa-spin]="loading()"></i>
+            <i
+              class="fa-solid fa-fw fa-arrows-rotate me-2"
+              [class.fa-spin]="loading()"
+            ></i>
             Refresh
           </button>
         </div>
+
+        <hr class="my-3" />
+
+        <!-- Tab nav -->
+        <ul class="nav nav-tabs machine-dashboard-tabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button
+              type="button"
+              class="nav-link"
+              [class.active]="activeTab() === 'overview'"
+              role="tab"
+              [attr.aria-selected]="activeTab() === 'overview'"
+              (click)="setActiveTab('overview')"
+            >
+              <i class="fa-solid fa-fw fa-chart-pie me-1"></i>
+              Overview
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
+              type="button"
+              class="nav-link"
+              [class.active]="activeTab() === 'timeline'"
+              role="tab"
+              [attr.aria-selected]="activeTab() === 'timeline'"
+              (click)="setActiveTab('timeline')"
+            >
+              <i class="fa-solid fa-fw fa-timeline me-1"></i>
+              Timeline
+            </button>
+          </li>
+        </ul>
       </div>
     </div>
 
-    <!-- KPI cards -->
-    <div class="row g-3 mb-4">
-      <div class="col-md-6 col-xl-3">
-        <div class="card mb-0 widget-content bg-tempting-azure">
-          <div class="widget-content-wrapper text-white">
-            <div class="widget-content-left">
-              <div class="widget-heading">Total Machines</div>
-              <div class="widget-subheading">Currently tracked</div>
-            </div>
-            <div class="widget-content-right">
-              <div class="widget-numbers text-white">
-                {{ summary().TotalMachines }}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-md-6 col-xl-3">
-        <div class="card mb-0 widget-content bg-happy-green">
-          <div class="widget-content-wrapper text-white">
-            <div class="widget-content-left">
-              <div class="widget-heading">Avg. Utilization</div>
-              <div class="widget-subheading">Allocated vs total time</div>
-            </div>
-            <div class="widget-content-right">
-              <div class="widget-numbers text-white">
-                {{ summary().AvgUtilizationPercent }}%
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-md-6 col-xl-3">
-        <div class="card mb-0 widget-content bg-arielle-smile">
-          <div class="widget-content-wrapper text-white">
-            <div class="widget-content-left">
-              <div class="widget-heading">Free Time</div>
-              <div class="widget-subheading">Available capacity</div>
-            </div>
-            <div class="widget-content-right">
-              <div class="widget-numbers text-white">
-                {{ summary().TotalFreeHours }}h
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-md-6 col-xl-3">
-        <div class="card mb-0 widget-content bg-ripe-malinka">
-          <div class="widget-content-wrapper text-white">
-            <div class="widget-content-left">
-              <div class="widget-heading">Downtime</div>
-              <div class="widget-subheading">Lost production time</div>
-            </div>
-            <div class="widget-content-right">
-              <div class="widget-numbers text-white">
-                {{ summary().TotalDowntimeHours }}h
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Charts -->
-    <div class="row g-3 mb-4">
-      <div class="col-lg-4">
-        <div class="card h-100 border-0 shadow-sm">
-          <div class="card-header bg-white border-0 pb-0">
-            <h6 class="fw-bold mb-0">Overall Time Distribution</h6>
-          </div>
-          <div class="card-body">
-            <div style="height: 260px">
-              <canvas
-                baseChart
-                [type]="'doughnut'"
-                [data]="utilizationDoughnutData()"
-                [options]="doughnutOptions"
-              ></canvas>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-lg-8">
-        <div class="card h-100 border-0 shadow-sm">
-          <div class="card-header bg-white border-0 pb-0">
-            <h6 class="fw-bold mb-0">Utilization % by Machine</h6>
-          </div>
-          <div class="card-body">
-            <div [style.height.px]="Math.max(220, machines().length * 42)">
-              <canvas
-                baseChart
-                [type]="'bar'"
-                [data]="utilizationBarData()"
-                [options]="barOptions"
-              ></canvas>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Timeline / Gantt -->
-    <div class="card border-0 shadow-sm">
-      <div class="card-header bg-white border-0 d-flex align-items-center justify-content-between">
-        <h6 class="fw-bold mb-0">Machine Time Slot Timeline</h6>
-        <div class="d-flex align-items-center gap-3 small">
-          <span class="legend-dot" [style.background]="slotColors.Allocated"></span> Allocated
-          <span class="legend-dot" [style.background]="slotColors.Free"></span> Free
-          <span class="legend-dot" [style.background]="slotColors.Downtime"></span> Downtime
-        </div>
-      </div>
-
-      <div class="card-body">
-        @if (loading()) {
-          <div class="text-center text-muted py-5">
-            <i class="fa-solid fa-spinner fa-spin fa-2x mb-2"></i>
-            <div>Loading machine data...</div>
-          </div>
-        } @else if (machines().length === 0) {
-          <div class="text-center text-muted py-5">No machine data found for the selected filters.</div>
-        } @else {
-          @for (machine of machines(); track trackByMachine($index, machine)) {
-            <div class="machine-row mb-4">
-              <div class="d-flex align-items-center justify-content-between mb-2">
-                <div class="d-flex align-items-center gap-2">
-                  <i class="fa-solid fa-gears text-primary"></i>
-                  <span class="fw-semibold">{{ machine.MachineName }}</span>
-                </div>
-
-                <div class="d-flex align-items-center gap-3 small text-muted">
-                  <span [class]="utilizationBadgeClass(machine.UtilizationPercent)">
-                    {{ machine.UtilizationPercent }}% Utilized
-                  </span>
-                  <span>Allocated: {{ (machine.AllocatedMinutes / 60) | number: '1.1-1' }}h</span>
-                  <span>Free: {{ (machine.FreeMinutes / 60) | number: '1.1-1' }}h</span>
-                  <span>Downtime: {{ (machine.DowntimeMinutes / 60) | number: '1.1-1' }}h</span>
-                </div>
-              </div>
-
-              <div class="timeline-bar">
-                @for (segment of slotSegments(machine); track $index) {
-                  <div
-                    class="timeline-segment"
-                    [style.width.%]="segment.widthPercent"
-                    [style.background]="slotColors[segment.type]"
-                    [title]="segment.tooltip"
-                  ></div>
-                }
-              </div>
-            </div>
-          }
-        }
-      </div>
-    </div>
+    <!-- Tab content -->
+    @if (activeTab() === 'overview') {
+    <app-machine-overview-tab
+      [summary]="summary()"
+      [machines]="machines()"
+      [loading]="loading()"
+    ></app-machine-overview-tab>
+    } @else {
+    <app-machine-timeline-tab
+      [machines]="machines()"
+      [loading]="loading()"
+    ></app-machine-timeline-tab>
+    }
   </div>
 </div>
