@@ -40,7 +40,6 @@ import {
   ForgotPasswordBoxedComponent,
   LoginBoxedComponent,
   RegisterBoxedComponent,
-
   // Chart components
   ChartjsComponent,
 } from './components.barrel';
@@ -89,7 +88,14 @@ const routes: Routes = [
       {
         path: 'planning',
         loadComponent: () =>
-          import('./pages/planning/planning').then((m) => m.Planning),
+          import('./pages/Planning/planning').then((m) => m.Planning),
+      },
+      {
+        path: 'machineDashboard',
+        loadComponent: () =>
+          import('./pages/Machine/machine-dashboard/machine-dashboard').then(
+            (m) => m.MachineDashboard,
+          ),
       },
 
       // Elements
