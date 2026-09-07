@@ -1,64 +1,112 @@
 <!-- KPI cards -->
-<div class="row g-3 mb-4">
+<div class="row g-4 mb-4 kpi-row">
   <div class="col-md-6 col-xl-3">
-    <div class="card mb-0 widget-content bg-tempting-azure">
-      <div class="widget-content-wrapper text-white">
-        <div class="widget-content-left">
-          <div class="widget-heading">Total Machines</div>
-          <div class="widget-subheading">Currently tracked</div>
-        </div>
-        <div class="widget-content-right">
-          <div class="widget-numbers text-white">
-            {{ summary.TotalMachines }}
-          </div>
+    <div class="kpi-card kpi-card-machines">
+      <div class="kpi-icon kpi-icon-machines">
+        <i class="fa-solid fa-industry"></i>
+      </div>
+      <div class="kpi-body">
+        <div class="kpi-label">Total Machines</div>
+        <div class="kpi-value-row">
+          <span class="kpi-value">{{ summary.TotalMachines }}</span>
+          <span
+            class="kpi-trend"
+            [class.trend-positive]="trends().machines.sentiment === 'positive'"
+            [class.trend-negative]="trends().machines.sentiment === 'negative'"
+            [class.trend-neutral]="trends().machines.sentiment === 'neutral'"
+          >
+            <i
+              class="fa-solid"
+              [class.fa-arrow-up]="trends().machines.direction === 'up'"
+              [class.fa-arrow-down]="trends().machines.direction === 'down'"
+              [class.fa-minus]="trends().machines.direction === 'flat'"
+            ></i>
+            {{ trends().machines.direction === 'flat' ? '0%' : trends().machines.percent + '%' }}
+          </span>
         </div>
       </div>
     </div>
   </div>
 
   <div class="col-md-6 col-xl-3">
-    <div class="card mb-0 widget-content bg-happy-green">
-      <div class="widget-content-wrapper text-white">
-        <div class="widget-content-left">
-          <div class="widget-heading">Avg. Utilization</div>
-          <div class="widget-subheading">Allocated vs total time</div>
-        </div>
-        <div class="widget-content-right">
-          <div class="widget-numbers text-white">
-            {{ summary.AvgUtilizationPercent }}%
-          </div>
+    <div class="kpi-card kpi-card-utilization">
+      <div class="kpi-icon kpi-icon-utilization">
+        <i class="fa-solid fa-gauge-high"></i>
+      </div>
+      <div class="kpi-body">
+        <div class="kpi-label">Avg. Utilization</div>
+        <div class="kpi-value-row">
+          <span class="kpi-value">{{ summary.AvgUtilizationPercent }}%</span>
+          <span
+            class="kpi-trend"
+            [class.trend-positive]="trends().utilization.sentiment === 'positive'"
+            [class.trend-negative]="trends().utilization.sentiment === 'negative'"
+            [class.trend-neutral]="trends().utilization.sentiment === 'neutral'"
+          >
+            <i
+              class="fa-solid"
+              [class.fa-arrow-up]="trends().utilization.direction === 'up'"
+              [class.fa-arrow-down]="trends().utilization.direction === 'down'"
+              [class.fa-minus]="trends().utilization.direction === 'flat'"
+            ></i>
+            {{ trends().utilization.direction === 'flat' ? '0%' : trends().utilization.percent + '%' }}
+          </span>
         </div>
       </div>
     </div>
   </div>
 
   <div class="col-md-6 col-xl-3">
-    <div class="card mb-0 widget-content bg-arielle-smile">
-      <div class="widget-content-wrapper text-white">
-        <div class="widget-content-left">
-          <div class="widget-heading">Free Time</div>
-          <div class="widget-subheading">Available capacity</div>
-        </div>
-        <div class="widget-content-right">
-          <div class="widget-numbers text-white">
-            {{ summary.TotalFreeHours }}h
-          </div>
+    <div class="kpi-card kpi-card-free">
+      <div class="kpi-icon kpi-icon-free">
+        <i class="fa-solid fa-clock"></i>
+      </div>
+      <div class="kpi-body">
+        <div class="kpi-label">Free Time</div>
+        <div class="kpi-value-row">
+          <span class="kpi-value">{{ summary.TotalFreeHours }}h</span>
+          <span
+            class="kpi-trend"
+            [class.trend-positive]="trends().free.sentiment === 'positive'"
+            [class.trend-negative]="trends().free.sentiment === 'negative'"
+            [class.trend-neutral]="trends().free.sentiment === 'neutral'"
+          >
+            <i
+              class="fa-solid"
+              [class.fa-arrow-up]="trends().free.direction === 'up'"
+              [class.fa-arrow-down]="trends().free.direction === 'down'"
+              [class.fa-minus]="trends().free.direction === 'flat'"
+            ></i>
+            {{ trends().free.direction === 'flat' ? '0%' : trends().free.percent + '%' }}
+          </span>
         </div>
       </div>
     </div>
   </div>
 
   <div class="col-md-6 col-xl-3">
-    <div class="card mb-0 widget-content bg-ripe-malinka">
-      <div class="widget-content-wrapper text-white">
-        <div class="widget-content-left">
-          <div class="widget-heading">Downtime</div>
-          <div class="widget-subheading">Lost production time</div>
-        </div>
-        <div class="widget-content-right">
-          <div class="widget-numbers text-white">
-            {{ summary.TotalDowntimeHours }}h
-          </div>
+    <div class="kpi-card kpi-card-downtime">
+      <div class="kpi-icon kpi-icon-downtime">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <div class="kpi-body">
+        <div class="kpi-label">Downtime</div>
+        <div class="kpi-value-row">
+          <span class="kpi-value">{{ summary.TotalDowntimeHours }}h</span>
+          <span
+            class="kpi-trend"
+            [class.trend-positive]="trends().downtime.sentiment === 'positive'"
+            [class.trend-negative]="trends().downtime.sentiment === 'negative'"
+            [class.trend-neutral]="trends().downtime.sentiment === 'neutral'"
+          >
+            <i
+              class="fa-solid"
+              [class.fa-arrow-up]="trends().downtime.direction === 'up'"
+              [class.fa-arrow-down]="trends().downtime.direction === 'down'"
+              [class.fa-minus]="trends().downtime.direction === 'flat'"
+            ></i>
+            {{ trends().downtime.direction === 'flat' ? '0%' : trends().downtime.percent + '%' }}
+          </span>
         </div>
       </div>
     </div>

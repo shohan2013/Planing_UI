@@ -5,9 +5,9 @@
     font-weight: 600;
     color: #6c757d;
     border: none;
-    border-bottom: 2px solid transparent;
+    border-bottom: 3px solid transparent;
     border-radius: 0;
-    padding: 0.5rem 1rem;
+    padding: 0.2rem 1rem;
 
     &.active {
       color: var(--bs-primary, #3f6ad8);
@@ -20,4 +20,9 @@
       border-bottom-color: rgba(0, 0, 0, 0.1);
     }
   }
+}
+
+.nav-tabs {
+  border-bottom: none;
+  justify-content: center;
 }

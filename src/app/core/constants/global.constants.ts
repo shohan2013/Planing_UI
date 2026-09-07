@@ -1,4 +1,4 @@
-import { MergedPlanning } from 'src/app/pages/merged-planning/merged-planning';
+import { MergedPlanning } from 'src/app/pages/MergedPlanning/merged-planning';
 
 export const GlobalConstant = {
   API_END_POINTS: {
@@ -68,6 +68,8 @@ export const GlobalConstant = {
     MergedPlanning: 'MergedPlanning/GetAllData',
     MergedPlanningDetails: 'MergedPlanning/GetDataById',
     SavePlans: 'MergedPlanning/AddProductionPlan',
+    PlanningHistory: 'PlanningHistory/GetAllData',
+    PlanningHistoryDetails: 'PlanningHistory/GetDataById',
   },
 
   URL: { API_URL: 'https://localhost:7111/api/' },

@@ -1,0 +1,130 @@
+.item-planning-card {
+  padding: 8px 10px;
+  border: 1px solid #e2e5e9;
+  border-radius: 6px;
+  background: #f8f9fa;
+}
+
+.item-planning-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 10px;
+}
+
+.qty-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.qty-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 4px 6px;
+  border: 1px solid #e2e5e9;
+  border-radius: 5px;
+  background: #fff;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.qty-chip-label {
+  color: #6c757d;
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.qty-chip-value {
+  color: #212529;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.qty-chip-remaining {
+  border-color: #54ad5e;
+  background: #f0f9f1;
+}
+
+.qty-chip-remaining .qty-chip-value {
+  color: #2e7d34;
+}
+
+.qty-chip-depleted {
+  border-color: #f0ad4e;
+  background: #fff8ec;
+}
+
+.qty-chip-depleted .qty-chip-value {
+  color: #b06d00;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 4px;
+  color: #6c757d;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.form-control,
+.form-select,
+.input-group-text {
+  font-size: 12px;
+}
+
+.input-group-text {
+  max-width: 58px;
+  overflow: hidden;
+  color: #f8f9fa;
+  text-overflow: ellipsis;
+}
+
+.field-error {
+  margin-top: 3px;
+  color: #dc3545;
+  font-size: 10px;
+}
+
+.field-tooltip {
+  position: relative;
+}
+
+.field-tooltip .tooltip-text {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 6px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: #212529;
+  color: #fff;
+  font-size: 10px;
+  font-style: normal;
+  line-height: 1.3;
+  white-space: normal;
+  width: max-content;
+  max-width: 180px;
+  text-align: center;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 10;
+}
+
+.field-tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+@media (max-width: 575.98px) {
+  .item-planning-grid {
+    grid-template-columns: 1fr;
+  }
+}

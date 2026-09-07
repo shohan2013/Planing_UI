@@ -49,6 +49,12 @@ export class ProcessStepStateService {
     );
   }
 
+  removeStepsForLine(lineId: number): void {
+    this._processSteps.update((steps) =>
+      steps.filter((x) => x.lineId !== lineId),
+    );
+  }
+
   getStepsForLine(lineId: number): IProcessStepInput[] {
     return this._processSteps().filter((x) => x.lineId === lineId);
   }

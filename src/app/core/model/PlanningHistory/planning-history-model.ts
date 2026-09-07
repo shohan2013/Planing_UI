@@ -1,19 +1,15 @@
-export interface IMergedPlanning {
+export interface IPlanningHistory {
   Id: number;
+  PPNO: string;
   DOCode: string;
+  CreatedBy: string;
   DocumentStatus: string;
-  Remarks: string | null;
-  DocumentCreatedDate: Date;
-  DocumentCreatedBy: string;
-  IsCombineDO: boolean;
-  BusinessId: number;
-  Business: string;
+  CreatedDate: Date;
   Unit: string;
-  UnitId: number;
-  IsActive: boolean;
+  Business: string;
 }
 
-export interface IMergedPlanningLine {
+export interface IPlanningHistoryLine {
   Id: number;
   ProductId: number;
   ProductName: string | null;
@@ -28,7 +24,7 @@ export interface IMergedPlanningLine {
   PriorityId?: number | null;
 }
 
-export interface IMergedPlanningDetails {
-  Header: IMergedPlanning;
-  Lines: IMergedPlanningLine[];
+export interface IPlanningHistoryDetails {
+  Header: IPlanningHistory;
+  Lines: IPlanningHistoryLine[];
 }

@@ -1,0 +1,97 @@
+@if (isLoading()) {
+<div class="ps-status">
+  <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+  Loading production steps...
+</div>
+} @else if (loadError()) {
+<div class="ps-status ps-status-error">
+  <i class="fa-solid fa-triangle-exclamation"></i>
+  Couldn't load production steps.
+  <button
+    type="button"
+    class="btn btn-link btn-sm p-0 ms-1"
+    (click)="GetSteps.emit()"
+  >
+    Retry
+  </button>
+</div>
+} @else if (steps().length === 0) {
+<div class="ps-status">
+  <i class="fa-regular fa-circle-question"></i>
+  No production steps configured for this business/unit.
+</div>
+} @else {
+
+<div class="ps-selector">
+  <label class="form-label">Planning Process</label>
+
+  <div class="field-tooltip">
+    <select
+      class="form-select form-select-sm"
+      [(ngModel)]="selectedStepId"
+      (ngModelChange)="onStepSelected()"
+      [disabled]="!isLineReadyForPlanning"
+    >
+      <option [ngValue]="null">Select a process to plan…</option>
+
+      @for (step of availableSteps; track step.Id) {
+      <option [ngValue]="step.Id">{{ step.Name }}</option>
+      }
+    </select>
+
+    @if (!isLineReadyForPlanning) {
+    <span class="tooltip-text"
+      >Enter a valid Taken Qty for this item before planning a
+      process.</span
+    >
+    }
+  </div>
+
+  @if (isLineReadyForPlanning && availableSteps.length === 0 && droppedSteps.length > 0) {
+  <div class="ps-all-planned">
+    <i class="fa-solid fa-circle-check"></i>
+    All processes have been planned for this item.
+  </div>
+  }
+</div>
+
+@if (selectedStep && isLineReadyForPlanning) {
+<div class="ps-active-form" cdkDropList [cdkDropListEnterPredicate]="denyEnter">
+  <div
+    class="ps-drag-wrapper"
+    [class.ps-drag-ready]="!!pendingFormValue"
+    [class.ps-drag-dropped]="dropSucceeded()"
+    cdkDrag
+    cdkDragBoundary=".mpv-layout"
+    cdkDragPreviewContainer="global"
+    [cdkDragData]="pendingFormValue"
+    [cdkDragDisabled]="!pendingFormValue"
+    (cdkDragStarted)="dragStateChange.emit(true)"
+    (cdkDragMoved)="onFormDragMoved($event)"
+    (cdkDragReleased)="onFormDragReleased($event)"
+    (cdkDragEnded)="onFormDragEnded($event)"
+  >
+    <app-process-step-from
+      [lineId]="line!.Id"
+      [step]="selectedStep!"
+      [machineOptions]="machineOptions"
+      (formValueChange)="onFormChange($event)"
+    >
+    </app-process-step-from>
+  </div>
+</div>
+}
+
+@if (droppedSteps.length > 0) {
+<div class="ps-chip-row">
+  @for (step of droppedSteps; track step.stepId) {
+  <span class="ps-chip">
+    <i class="fa-solid fa-check-circle"></i>
+    {{ step.stepName }} · {{ getMachineName(step.machineId) }} ·
+    {{ getAllocatedTimeLabel(step) }}
+  </span>
+  }
+</div>
+}
+
+}

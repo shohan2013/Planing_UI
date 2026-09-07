@@ -1,0 +1,117 @@
+<div class="modal-header">
+  <h5 class="modal-title">
+    <i class="fa-solid fa-clock-rotate-left me-2" style="color: #198754"></i>
+    Planning History @if (header()) {
+    <span class="do-code ms-2">{{ header()!.DOCode }}</span>
+    }
+  </h5>
+
+  <button type="button" class="btn-close" (click)="close()"></button>
+</div>
+
+<div class="modal-body">
+  @if (isLoading()) {
+  <div class="loading-container">
+    <span
+      class="spinner-border spinner-border-sm me-2"
+      aria-hidden="true"
+    ></span>
+    Loading Planning History...
+  </div>
+  } @else if (loadError()) {
+  <div
+    class="alert alert-danger d-flex justify-content-between align-items-center"
+  >
+    <span>Failed to load planning history. Please try again.</span>
+
+    <button
+      type="button"
+      class="btn btn-danger btn-sm"
+      (click)="GetPlanningHistoryDetails()"
+    >
+      Retry
+    </button>
+  </div>
+  } @else if (header()) {
+  <!-- DO Header details -->
+  <div class="border rounded-3 p-3 mb-3 mt-0">
+    <div class="mpv-detail-strip">
+      <div class="mpv-detail-item">
+        <span class="mpv-detail-label">PP No</span>
+        <span class="mpv-detail-value">{{ header()!.PPNO }}</span>
+      </div>
+
+      <div class="mpv-detail-item">
+        <span class="mpv-detail-label">Unit</span>
+        <span class="mpv-detail-value">{{ header()!.Unit }}</span>
+      </div>
+
+      <div class="mpv-detail-item">
+        <span class="mpv-detail-label">Business</span>
+        <span class="mpv-detail-value">{{ header()!.Business }}</span>
+      </div>
+
+      <div class="mpv-detail-item">
+        <span class="mpv-detail-label">Created By</span>
+        <span class="mpv-detail-value">{{ header()!.CreatedBy }}</span>
+      </div>
+
+      <div class="mpv-detail-item">
+        <span class="mpv-detail-label">Created Date</span>
+        <span class="mpv-detail-value"
+          >{{ header()!.CreatedDate | dateTime }}</span
+        >
+      </div>
+
+      <div class="mpv-detail-item">
+        <span class="mpv-detail-label">Status</span>
+        <span class="mpv-detail-value"> {{ header()!.DocumentStatus }} </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lines -->
+  <div class="table-responsive">
+    <table class="custom-table">
+      <thead>
+        <tr>
+          <th style="width: 50px">#</th>
+          <th>PRODUCT</th>
+          <th>UOM</th>
+          <th>QUANTITY</th>
+          <th>PLANNED QTY</th>
+          <th>TAKEN QTY</th>
+          <th>RATE</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (lines().length === 0) {
+        <tr>
+          <td colspan="7" class="text-center py-4">
+            <i class="fas fa-folder-open fa-4x text-secondary mb-3"></i>
+            <br />
+            <h6>No Line Items Found.</h6>
+          </td>
+        </tr>
+        } @else { @for (line of lines(); track line.Id; let i = $index) {
+        <tr>
+          <td>{{ i + 1 }}</td>
+          <td>{{ line.ProductName }}</td>
+          <td>{{ line.UOM }}</td>
+          <td>{{ line.Quantity | number: '1.2-2' }}</td>
+          <td>{{ line.PlannedQuantity | number: '1.2-2' }}</td>
+          <td>{{ line.TakenQty ?? '-' }}</td>
+          <td>{{ line.Rate | number: '1.2-2' }}</td>
+        </tr>
+        } }
+      </tbody>
+    </table>
+  </div>
+  }
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary btn-sm" (click)="close()">
+    Close
+  </button>
+</div>

@@ -9,6 +9,37 @@ import {
 } from 'src/app/core/model/Common/Machine/machine-utilization';
 import { SLOT_COLORS, utilizationColor } from '../machine-dashboard.constants';
 
+type TrendDirection = 'up' | 'down' | 'flat';
+type TrendSentiment = 'positive' | 'negative' | 'neutral';
+
+interface IKpiTrend {
+  direction: TrendDirection;
+  percent: number;
+  sentiment: TrendSentiment;
+}
+
+const FLAT_TREND: IKpiTrend = { direction: 'flat', percent: 0, sentiment: 'neutral' };
+
+function computeTrend(
+  current: number,
+  previous: number,
+  goodDirection: TrendDirection,
+): IKpiTrend {
+  if (previous === current) return FLAT_TREND;
+
+  const direction: TrendDirection = current > previous ? 'up' : 'down';
+  const percent =
+    previous === 0
+      ? 100
+      : Math.round((Math.abs(current - previous) / previous) * 1000) / 10;
+
+  return {
+    direction,
+    percent,
+    sentiment: direction === goodDirection ? 'positive' : 'negative',
+  };
+}
+
 @Component({
   selector: 'app-machine-overview-tab',
   standalone: true,
@@ -26,12 +57,47 @@ export class MachineOverviewTab {
   });
 
   private readonly machinesSignal = signal<IMachineUtilization[]>([]);
+  private previousSummary: IMachineDashboardSummary | null = null;
+
+  readonly trends = signal<{
+    machines: IKpiTrend;
+    utilization: IKpiTrend;
+    free: IKpiTrend;
+    downtime: IKpiTrend;
+  }>({
+    machines: FLAT_TREND,
+    utilization: FLAT_TREND,
+    free: FLAT_TREND,
+    downtime: FLAT_TREND,
+  });
 
   @Input() loading = false;
 
   @Input()
   set summary(value: IMachineDashboardSummary | null) {
-    if (value) this.summarySignal.set(value);
+    if (!value) return;
+
+    if (this.previousSummary) {
+      const prev = this.previousSummary;
+
+      this.trends.set({
+        machines: computeTrend(value.TotalMachines, prev.TotalMachines, 'up'),
+        utilization: computeTrend(
+          value.AvgUtilizationPercent,
+          prev.AvgUtilizationPercent,
+          'up',
+        ),
+        free: computeTrend(value.TotalFreeHours, prev.TotalFreeHours, 'up'),
+        downtime: computeTrend(
+          value.TotalDowntimeHours,
+          prev.TotalDowntimeHours,
+          'down',
+        ),
+      });
+    }
+
+    this.previousSummary = value;
+    this.summarySignal.set(value);
   }
   get summary(): IMachineDashboardSummary {
     return this.summarySignal();

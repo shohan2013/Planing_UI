@@ -1,0 +1,273 @@
+<div class="modal-header">
+  <h5 class="modal-title">
+    <svg
+      width="17"
+      height="17"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="rgb(84, 173, 94)"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <!-- Clipboard outline -->
+      <rect x="5" y="3" width="14" height="18" rx="2"></rect>
+      <!-- Clip -->
+      <path d="M9 3v2a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1V3"></path>
+      <!-- Route/steps mark -->
+      <path d="M8 12h3l-1 2 3-3-1-2h3"></path>
+    </svg>
+    Production Planning for @if (header()) {
+    <span class="do-code ms-2">{{ header()!.DOCode }}</span>
+    }
+  </h5>
+
+  <button type="button" class="btn-close" (click)="close()"></button>
+</div>
+
+<div class="modal-body">
+  @if (isLoading()) {
+  <div class="loading-container">
+    <span
+      class="spinner-border spinner-border-sm me-2"
+      aria-hidden="true"
+    ></span>
+    Loading Order Details...
+  </div>
+  } @else if (loadError()) {
+  <div
+    class="alert alert-danger d-flex justify-content-between align-items-center"
+  >
+    <span>Failed to load order details. Please try again.</span>
+
+    <button
+      type="button"
+      class="btn btn-danger btn-sm"
+      (click)="GetMergedPlanningDetails()"
+    >
+      Retry
+    </button>
+  </div>
+  } @else if (header()) {
+  <!-- DO Header details — plain professional label/value strip, no inputs -->
+  <div class="border rounded-3 p-3 mb-2 mt-0">
+    <div class="mpv-detail-strip">
+      <div class="mpv-detail-item">
+        <span class="mpv-detail-label">Type</span>
+        <span class="mpv-detail-value">
+          @if (header()!.IsCombineDO) {
+          <span class="combine-badge">
+            <i class="fa-solid fa-code-merge"></i>
+            Combined
+          </span>
+          } @else {
+          <span class="single-badge">Single</span>
+          }
+        </span>
+      </div>
+
+      <div class="mpv-detail-item">
+        <span class="mpv-detail-label">Unit</span>
+        <span class="mpv-detail-value">{{ header()!.Unit }}</span>
+      </div>
+
+      <div class="mpv-detail-item">
+        <span class="mpv-detail-label">Business</span>
+        <span class="mpv-detail-value">{{ header()!.Business }}</span>
+      </div>
+
+      <div class="mpv-detail-item">
+        <span class="mpv-detail-label">Created By</span>
+        <span class="mpv-detail-value">{{ header()!.DocumentCreatedBy }}</span>
+      </div>
+
+      <div class="mpv-detail-item">
+        <span class="mpv-detail-label">Created Date</span>
+        <span class="mpv-detail-value"
+          >{{ header()!.DocumentCreatedDate | dateTime }}</span
+        >
+      </div>
+
+      <div class="mpv-detail-item">
+        <span class="mpv-detail-label">Status</span>
+        <span class="mpv-detail-value"> {{ header()!.DocumentStatus }} </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="mpv-layout">
+    <fieldset class="border rounded-3 p-2 mt-3 mb-0 mpv-items-fieldset">
+      <legend class="float-none w-auto mb-0 mx-auto">
+        <h6 class="fw-bold mb-0">PRODUCTION PLANNING INSERTION FORM</h6>
+      </legend>
+
+      <div class="mpv-items-col">
+        @if (lines().length === 0) {
+        <div class="text-center py-4">
+          <i class="fas fa-folder-open fa-4x text-secondary mb-3"></i>
+          <br />
+          <h6>No Line Items Found.</h6>
+        </div>
+        } @else { @for (line of lines(); track line.Id; let i = $index) {
+        <div class="mpv-item-card">
+          <div class="mpv-item-header">
+            <span class="mpv-item-index">{{ i + 1 }}</span>
+            <div>
+              <div class="mpv-product-name">{{ line.ProductName }}</div>
+              <div class="mpv-product-meta">
+                &nbsp;•&nbsp; UOM : {{ line.UOM }} &nbsp;•&nbsp; Rate: {{
+                line.Rate | number: '1.2-2' }}
+              </div>
+            </div>
+          </div>
+
+          <div class="mpv-item-body">
+            <div class="mpv-item-planning-col">
+              <app-item-planning-fields
+                [line]="line"
+                [priorities]="priorities()"
+                [recipeVersions]="recipeVersions()"
+              ></app-item-planning-fields>
+            </div>
+
+            <div class="mpv-process-col">
+              <app-production-steps
+                [line]="line"
+                [steps]="productionSteps()"
+                [isLoading]="stepsLoading()"
+                [loadError]="stepsLoadError()"
+                [machineOptions]="Machines()"
+                (GetSteps)="loadProductionSteps()"
+                (dragStateChange)="isDragging.set($event)"
+              ></app-production-steps>
+            </div>
+          </div>
+        </div>
+        } }
+      </div>
+    </fieldset>
+    <fieldset class="border rounded-3 p-2 mt-3 mb-0 mpv-desk-fieldset">
+      <legend class="float-none w-auto mb-0 mx-auto">
+        <h6 class="fw-bold mb-0">PLANNING DESK</h6>
+      </legend>
+
+      <div class="mpv-desk-col">
+        <div class="planning-desk" [class.desk-drag-active]="isDragging()">
+          <div class="desk-toolbar">
+            <div class="desk-hint">
+              <i class="fa-solid fa-circle-info"></i>
+              @if (isDragging()) { Drop anywhere in this panel — it attaches to
+              its own item automatically. } @else { Drag a filled process form
+              here to plan an item. }
+            </div>
+
+            @if (totalPlannedSteps() > 0) {
+            <span class="desk-count">{{ totalPlannedSteps() }} planned</span>
+            }
+          </div>
+
+          <div class="desk-body">
+            @if (totalPlannedSteps() === 0 && !isDragging()) {
+            <div class="desk-empty-state">
+              <i class="fa-solid fa-inbox"></i>
+              <div class="desk-empty-title">Planning Desk is empty</div>
+              <div class="desk-empty-text">
+                Fill in a process form for an item and drag it here to build the
+                plan.
+              </div>
+            </div>
+            } @for (line of lines(); track line.Id) { @if
+            (stepsForLine(line.Id).length > 0) {
+            <div class="desk-line-group has-steps">
+              <div class="desk-line-header">
+                <i class="fa-solid fa-box"></i>
+                <span class="desk-line-name" [title]="line.ProductName">
+                  {{ line.ProductName }}
+                </span>
+                <span class="desk-line-count"
+                  >{{ stepsForLine(line.Id).length }}</span
+                >
+              </div>
+
+              <div
+                class="desk-drop-list"
+                cdkDropList
+                [id]="deskListIdFor(line.Id)"
+                [cdkDropListData]="stepsForLine(line.Id)"
+                (cdkDropListDropped)="onDeskDrop($event, line.Id)"
+              >
+                @for (step of stepsForLine(line.Id); track step.stepId) {
+                <div
+                  class="desk-card"
+                  [class.desk-card-new]="isNewlyAddedStep(step.stepId)"
+                  cdkDrag
+                  cdkDragPreviewContainer="global"
+                  [cdkDragBoundary]="'.desk-body'"
+                >
+                  <div class="desk-card-header" cdkDragHandle>
+                    <i class="fa-solid fa-grip-vertical drag-handle"></i>
+                    <span class="desk-card-title" [title]="step.stepName">
+                      {{ step.stepName }}
+                    </span>
+                    <button
+                      type="button"
+                      class="desk-card-remove"
+                      title="Remove"
+                      (click)="removeStep(line.Id, step.stepId)"
+                    >
+                      <i class="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
+
+                  <div class="desk-card-body">
+                    <div class="desk-card-machine">
+                      <i class="fa-solid fa-industry"></i>
+                      <span>{{ getMachineName(step.machineId) }}</span>
+                    </div>
+
+                    @if (getAllocatedTimeBreakdown(step); as t) {
+                    <div class="desk-card-time">
+                      <span><b>{{ t.days }}</b>d</span>
+                      <span><b>{{ t.hours }}</b>h</span>
+                      <span><b>{{ t.minutes }}</b>m</span>
+                      <span><b>{{ t.seconds }}</b>s</span>
+                    </div>
+                    }
+                  </div>
+                </div>
+                }
+              </div>
+            </div>
+            } }
+          </div>
+
+          <div class="desk-footer">
+            <button
+              type="button"
+              class="btn btn-success w-100"
+              [disabled]="isSaving()"
+              (click)="onSaveAll()"
+            >
+              @if (isSaving()) {
+              <span
+                class="spinner-border spinner-border-sm me-2"
+                aria-hidden="true"
+              ></span>
+              } @else {
+              <i class="fa-solid fa-fw fa-check"></i>
+              } {{ isSaving() ? 'Saving...' : 'Save All Plans' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+  </div>
+  }
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">
+    <i class="fa-solid fa-fw fa-xmark"></i>
+    Close
+  </button>
+</div>
