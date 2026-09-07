@@ -26,7 +26,12 @@ import { PlanningHistoryView } from '../planning-history-view/planning-history-v
 @Component({
   selector: 'app-planning-history-list',
   standalone: true,
-  imports: [FormsModule, DateTimePipe, PaginationComponent, PlanningHistoryView],
+  imports: [
+    FormsModule,
+    DateTimePipe,
+    PaginationComponent,
+    PlanningHistoryView,
+  ],
   templateUrl: './planning-history-list.html',
   styleUrl: './planning-history-list.scss',
 })

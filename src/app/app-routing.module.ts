@@ -88,9 +88,7 @@ const routes: Routes = [
       {
         path: 'planning',
         loadComponent: () =>
-          import('./pages/PlanningHistory/planning-landing').then(
-            (m) => m.Planning,
-          ),
+          import('./pages/Planning/planning-landing').then((m) => m.Planning),
       },
       {
         path: 'machineDashboard',

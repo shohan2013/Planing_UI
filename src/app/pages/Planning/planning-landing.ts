@@ -4,7 +4,7 @@ import { debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
 import { CommonService } from 'src/app/core/services/Common/CommonService';
 import { DeliveryOrders } from '../SalesOrder/sales-orders';
 import { MergedPlanning } from '../MergedPlanning/merged-planning';
-import { PlanningHistoryList } from './planning-history-list/planning-history-list';
+import { PlanningHistoryList } from '../PlanningHistory/planning-history-list/planning-history-list';
 @Component({
   selector: 'app-planning',
   imports: [DeliveryOrders, MergedPlanning, PlanningHistoryList],
