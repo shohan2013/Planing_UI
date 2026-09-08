@@ -70,6 +70,7 @@ export const GlobalConstant = {
     SavePlans: 'MergedPlanning/AddProductionPlan',
     PlanningHistory: 'PlanningHistory/GetAllData',
     PlanningHistoryDetails: 'PlanningHistory/GetDataById',
+    UpdatePlan: 'PlanningHistory/UpdateProductionPlan',
   },
 
   URL: { API_URL: 'https://localhost:7111/api/' },

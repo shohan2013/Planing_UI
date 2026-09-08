@@ -10,7 +10,9 @@ import {
 import {
   IPlanningHistory,
   IPlanningHistoryDetails,
+  IPlanningHistoryUpdateRequest,
 } from '../../model/PlanningHistory/planning-history-model';
+import { IApiResponse } from '../../model/Response/ApiResponse';
 
 @Injectable({
   providedIn: 'root',
@@ -31,6 +33,16 @@ export class PlanningHistoryServices {
   GetPlanningHistoryDetails(headerId: number): Observable<IPlanningHistoryDetails> {
     return this.http.get<IPlanningHistoryDetails>(
       `${environment.API_URL}${GlobalConstant.API_END_POINTS.PlanningHistoryDetails}/${headerId}`,
+    );
+  }
+
+  UpdatePlan(
+    headerId: number,
+    request: IPlanningHistoryUpdateRequest,
+  ): Observable<IApiResponse> {
+    return this.http.put<IApiResponse>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.UpdatePlan}/${headerId}`,
+      request,
     );
   }
 }

@@ -2,7 +2,7 @@
   <!-- Planning Hint -->
   <div class="planning-hint">
     <i class="fa-solid fa-circle-info"></i>
-    <span> View past planning history for Delivery Orders </span>
+    <span> View and edit saved production plans for Delivery Orders </span>
   </div>
 
   <div class="card-body">
@@ -116,10 +116,10 @@
                 <button
                   type="button"
                   class="action-btn btn-view"
-                  title="View Planning"
-                  (click)="openHistory(item)"
+                  title="Edit Planning"
+                  (click)="openPlan(item)"
                 >
-                  <i class="fa-solid fa-eye"></i>
+                  <i class="fa-solid fa-pen-to-square"></i>
                 </button>
               </div>
             </td>
@@ -144,10 +144,11 @@
   </div>
 </div>
 
-<ng-template #planningHistoryViewModal let-c="close" let-d="dismiss">
-  <app-planning-history-view
+<ng-template #planningEditModal let-c="close" let-d="dismiss">
+  <app-planning-edit-view
     [headerId]="selectedHeaderId()"
     (closeView)="d('Cross click')"
+    (planUpdated)="onPlanUpdated()"
   >
-  </app-planning-history-view>
+  </app-planning-edit-view>
 </ng-template>

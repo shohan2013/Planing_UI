@@ -1,0 +1,193 @@
+<div class="modal-header">
+  <h5 class="modal-title">
+    <svg
+      width="17"
+      height="17"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="rgb(84, 173, 94)"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <!-- Clipboard outline -->
+      <rect x="5" y="3" width="14" height="18" rx="2"></rect>
+      <!-- Clip -->
+      <path d="M9 3v2a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1V3"></path>
+      <!-- Route/steps mark -->
+      <path d="M8 12h3l-1 2 3-3-1-2h3"></path>
+    </svg>
+    Edit Production Plan for @if (header()) {
+    <span class="do-code ms-2">{{ header()!.DOCode }}</span>
+    }
+  </h5>
+
+  <button type="button" class="btn-close" (click)="close()"></button>
+</div>
+
+<div class="modal-body">
+  @if (isLoading()) {
+  <div class="loading-container">
+    <span
+      class="spinner-border spinner-border-sm me-2"
+      aria-hidden="true"
+    ></span>
+    Loading Plan Details...
+  </div>
+  } @else if (loadError()) {
+  <div
+    class="alert alert-danger d-flex justify-content-between align-items-center"
+  >
+    <span>Failed to load plan details. Please try again.</span>
+
+    <button
+      type="button"
+      class="btn btn-danger btn-sm"
+      (click)="GetPlanningHistoryDetails()"
+    >
+      Retry
+    </button>
+  </div>
+  } @else if (header()) {
+  <!-- Plan header details — plain professional label/value strip, no inputs -->
+  <div class="border rounded-3 p-3 mb-2 mt-0">
+    <div class="mpv-detail-strip">
+      <div class="mpv-detail-item">
+        <span class="mpv-detail-label">PP No</span>
+        <span class="mpv-detail-value">{{ header()!.PPNO }}</span>
+      </div>
+
+      <div class="mpv-detail-item">
+        <span class="mpv-detail-label">Type</span>
+        <span class="mpv-detail-value">
+          @if (header()!.IsCombineDO) {
+          <span class="combine-badge">
+            <i class="fa-solid fa-code-merge"></i>
+            Combined
+          </span>
+          } @else {
+          <span class="single-badge">Single</span>
+          }
+        </span>
+      </div>
+
+      <div class="mpv-detail-item">
+        <span class="mpv-detail-label">Unit</span>
+        <span class="mpv-detail-value">{{ header()!.Unit }}</span>
+      </div>
+
+      <div class="mpv-detail-item">
+        <span class="mpv-detail-label">Business</span>
+        <span class="mpv-detail-value">{{ header()!.Business }}</span>
+      </div>
+
+      <div class="mpv-detail-item">
+        <span class="mpv-detail-label">Created By</span>
+        <span class="mpv-detail-value">{{ header()!.CreatedBy }}</span>
+      </div>
+
+      <div class="mpv-detail-item">
+        <span class="mpv-detail-label">Created Date</span>
+        <span class="mpv-detail-value"
+          >{{ header()!.CreatedDate | dateTime }}</span
+        >
+      </div>
+
+      <div class="mpv-detail-item">
+        <span class="mpv-detail-label">Status</span>
+        <span class="mpv-detail-value"> {{ header()!.DocumentStatus }} </span>
+      </div>
+    </div>
+  </div>
+
+  <fieldset class="border rounded-3 p-2 mt-3 mb-0">
+    <legend class="float-none w-auto mb-0 mx-auto">
+      <h6 class="fw-bold mb-0">PRODUCTION PLANNING EDIT FORM</h6>
+    </legend>
+
+    <div class="mpv-table-scroll">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th class="index-column">#</th>
+            <th class="product-column">ITEM</th>
+            <th class="planning-column">PLANNING PROCESS</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (lines().length === 0) {
+          <tr>
+            <td colspan="3" class="text-center py-4">
+              <i class="fas fa-folder-open fa-4x text-secondary mb-3"></i>
+              <br />
+              <h6>No Line Items Found.</h6>
+            </td>
+          </tr>
+          } @else { @for (line of lines(); track line.Id; let i = $index) {
+          <tr>
+            <td class="align-top">{{ i + 1 }}</td>
+            <td class="text-start align-top">
+              <!-- Fixed-height caption so Item Planning and Planning
+                   Process both start flush at the same offset below it
+                   (see the matching invisible spacer in the next cell). -->
+              <div class="mpv-item-caption">
+                <div class="mpv-product-name">{{ line.ProductName }}</div>
+                <div class="mpv-product-meta">
+                  {{ line.UOM }} &nbsp;•&nbsp; Qty: {{ line.Quantity | number:
+                  '1.2-2' }} &nbsp;•&nbsp; Rate: {{ line.Rate | number:
+                  '1.2-2' }}
+                </div>
+              </div>
+
+              <app-item-planning-fields
+                [line]="line"
+                [priorities]="priorities()"
+                [recipeVersions]="recipeVersions()"
+              ></app-item-planning-fields>
+            </td>
+            <td class="text-start align-top mpv-process-cell">
+              <div class="mpv-item-caption mpv-item-caption-spacer"></div>
+
+              <app-planning-process-steps
+                [lineId]="line.Id"
+                [steps]="productionSteps()"
+                [isLoading]="stepsLoading()"
+                [loadError]="stepsLoadError()"
+                [machineOptions]="machines()"
+                [savedSteps]="line.Steps ?? []"
+                (GetSteps)="loadProductionSteps()"
+              ></app-planning-process-steps>
+            </td>
+          </tr>
+          } }
+        </tbody>
+      </table>
+    </div>
+  </fieldset>
+  }
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">
+    <i class="fa-solid fa-fw fa-xmark"></i>
+    Close
+  </button>
+
+  @if (header()) {
+  <button
+    type="button"
+    class="btn btn-success"
+    [disabled]="isSaving()"
+    (click)="onSaveAll()"
+  >
+    @if (isSaving()) {
+    <span
+      class="spinner-border spinner-border-sm me-2"
+      aria-hidden="true"
+    ></span>
+    } @else {
+    <i class="fa-solid fa-fw fa-check"></i>
+    } {{ isSaving() ? 'Saving...' : 'Save Changes' }}
+  </button>
+  }
+</div>

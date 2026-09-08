@@ -21,17 +21,12 @@ import { CommonService } from 'src/app/core/services/Common/CommonService';
 import { PlanningHistoryServices } from 'src/app/core/services/PlanningHistory/planning-history-services';
 import { PaginationComponent } from 'src/app/shared/pagination/pagination.component';
 import { DateTimePipe } from 'src/app/shared/pipes/date-time-pipe';
-import { PlanningHistoryView } from '../planning-history-view/planning-history-view';
+import { PlanningEditView } from '../planning-edit-view/planning-edit-view';
 
 @Component({
   selector: 'app-planning-history-list',
   standalone: true,
-  imports: [
-    FormsModule,
-    DateTimePipe,
-    PaginationComponent,
-    PlanningHistoryView,
-  ],
+  imports: [FormsModule, DateTimePipe, PaginationComponent, PlanningEditView],
   templateUrl: './planning-history-list.html',
   styleUrl: './planning-history-list.scss',
 })
@@ -45,8 +40,8 @@ export class PlanningHistoryList
   selectedUnitId: Number = 0;
   selectedBusinessId: Number = 0;
 
-  @ViewChild('planningHistoryViewModal')
-  planningHistoryViewModal!: TemplateRef<any>;
+  @ViewChild('planningEditModal')
+  planningEditModal!: TemplateRef<any>;
   selectedHeaderId = signal<number | null>(null);
 
   constructor(
@@ -102,12 +97,17 @@ export class PlanningHistoryList
       });
   }
 
-  openHistory(item: IPlanningHistory): void {
+  openPlan(item: IPlanningHistory): void {
     this.selectedHeaderId.set(item.Id);
-    this.modalService.open(this.planningHistoryViewModal, {
+    this.modalService.open(this.planningEditModal, {
       scrollable: true,
-      size: 'lg',
+      fullscreen: true,
+      windowClass: 'fullscreen-modal',
     });
+  }
+
+  onPlanUpdated(): void {
+    this.retry();
   }
 
   ngOnDestroy(): void {

@@ -10,6 +10,7 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { single, Subject, takeUntil } from 'rxjs';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { DateTimePipe } from 'src/app/shared/pipes/date-time-pipe';
@@ -48,6 +49,7 @@ import { IApiResponse } from 'src/app/core/model/Response/ApiResponse';
     DateTimePipe,
     DecimalPipe,
     DragDropModule,
+    FormsModule,
     ProductionSteps,
     ItemPlanningFields,
   ],
@@ -307,6 +309,22 @@ export class MergedPlanningView implements OnInit, OnDestroy {
 
   removeStep(lineId: number, stepId: number): void {
     this.processStepState.removeProcessStep(lineId, stepId);
+  }
+
+  updateDeskStepField(
+    step: IProcessStepInput,
+    field: 'startDate' | 'endDate' | 'machineId',
+    value: string | number,
+  ): void {
+    this.processStepState.updateProcessStep({
+      ...step,
+      [field]: field === 'machineId' ? Number(value) : value,
+    });
+  }
+
+  isDeskStepDateRangeInvalid(step: IProcessStepInput): boolean {
+    if (!step.startDate || !step.endDate) return false;
+    return step.endDate < step.startDate;
   }
 
   getMachineName(machineId: number): string {

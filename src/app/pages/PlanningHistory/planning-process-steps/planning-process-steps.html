@@ -1,0 +1,79 @@
+@if (isLoading) {
+<div class="ps-status">
+  <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+  Loading production steps...
+</div>
+} @else if (loadError) {
+<div class="ps-status ps-status-error">
+  <i class="fa-solid fa-triangle-exclamation"></i>
+  Couldn't load production steps.
+  <button
+    type="button"
+    class="btn btn-link btn-sm p-0 ms-1"
+    (click)="GetSteps.emit()"
+  >
+    Retry
+  </button>
+</div>
+} @else if (steps.length === 0) {
+<div class="ps-status">
+  <i class="fa-regular fa-circle-question"></i>
+  No production steps configured for this business/unit.
+</div>
+} @else {
+
+<div class="pps-cards" #cardsContainer>
+  @for (step of activeSteps; track step.Id) {
+  <div class="pps-card-wrap">
+    <app-process-step-from
+      [lineId]="lineId"
+      [step]="step"
+      [machineOptions]="machineOptions"
+      [initialValue]="initialValueFor(step.Id)"
+      (formValueChange)="onFormChange($event)"
+    ></app-process-step-from>
+
+    <button
+      type="button"
+      class="pps-remove-btn"
+      title="Remove step"
+      (click)="removeStep(step.Id)"
+    >
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+  }
+
+  <!-- Sits right after the last card — auto-scroll (see addStep()) brings
+       it into view alongside the newly added card, no floating/pinned
+       positioning needed. -->
+  <div class="pps-add-panel">
+    <label class="pps-add-label">Add Process Step</label>
+
+    <select class="form-select form-select-sm" [(ngModel)]="newStepId">
+      <option [ngValue]="null">Select a process…</option>
+      @for (step of availableStepsToAdd; track step.Id) {
+      <option [ngValue]="step.Id">{{ step.Name }}</option>
+      }
+    </select>
+
+    <button
+      type="button"
+      class="btn btn-outline-success btn-sm pps-add-btn"
+      [disabled]="newStepId === null"
+      (click)="addStep()"
+    >
+      <i class="fa-solid fa-plus"></i>
+      Add
+    </button>
+  </div>
+</div>
+
+@if (activeSteps.length === 0) {
+<div class="pps-empty">
+  <i class="fa-regular fa-circle-question"></i>
+  No process steps planned for this item yet.
+</div>
+}
+
+}

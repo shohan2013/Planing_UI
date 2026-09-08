@@ -24,6 +24,8 @@ export class ProcessStepFrom implements OnInit, OnChanges {
   @Input() lineId!: number;
   @Input() step!: IBusinessFlowForPlanning;
   @Input() machineOptions: IMachine[] = [];
+  /** Seeds the form with an already-saved value (e.g. editing a saved plan) instead of starting blank. */
+  @Input() initialValue: IProcessStepInput | null = null;
 
   @Output() formValueChange = new EventEmitter<IProcessStepInput | null>();
 
@@ -45,18 +47,20 @@ export class ProcessStepFrom implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['step'] && this.step) {
+      const seed = this.initialValue;
+
       this.form.reset(
         {
-          machineId: 0,
-          startDate: '',
-          endDate: '',
+          machineId: seed?.machineId ?? 0,
+          startDate: seed?.startDate ?? '',
+          endDate: seed?.endDate ?? '',
         },
         {
           emitEvent: false,
         },
       );
 
-      this.formValueChange.emit(null);
+      this.formValueChange.emit(this.dragData);
     }
   }
 

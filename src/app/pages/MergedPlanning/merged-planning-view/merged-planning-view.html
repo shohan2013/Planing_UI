@@ -220,19 +220,70 @@
                   </div>
 
                   <div class="desk-card-body">
-                    <div class="desk-card-machine">
-                      <i class="fa-solid fa-industry"></i>
-                      <span>{{ getMachineName(step.machineId) }}</span>
+                    <div class="desk-card-field">
+                      <label>Start Date &amp; Time</label>
+                      <input
+                        type="datetime-local"
+                        class="form-control form-control-sm"
+                        [class.is-invalid]="isDeskStepDateRangeInvalid(step)"
+                        [ngModel]="step.startDate"
+                        (ngModelChange)="
+                          updateDeskStepField(step, 'startDate', $event)
+                        "
+                        name="deskStartDate-{{ step.stepId }}"
+                      />
                     </div>
 
-                    @if (getAllocatedTimeBreakdown(step); as t) {
-                    <div class="desk-card-time">
-                      <span><b>{{ t.days }}</b>d</span>
-                      <span><b>{{ t.hours }}</b>h</span>
-                      <span><b>{{ t.minutes }}</b>m</span>
-                      <span><b>{{ t.seconds }}</b>s</span>
+                    <div class="desk-card-field">
+                      <label>End Date &amp; Time</label>
+                      <input
+                        type="datetime-local"
+                        class="form-control form-control-sm"
+                        [class.is-invalid]="isDeskStepDateRangeInvalid(step)"
+                        [ngModel]="step.endDate"
+                        (ngModelChange)="
+                          updateDeskStepField(step, 'endDate', $event)
+                        "
+                        name="deskEndDate-{{ step.stepId }}"
+                      />
+                      @if (isDeskStepDateRangeInvalid(step)) {
+                      <div class="desk-card-error">
+                        End date cannot be before start date.
+                      </div>
+                      }
                     </div>
-                    }
+
+                    <div class="desk-card-field">
+                      <label>Machine No</label>
+                      <select
+                        class="form-select form-select-sm"
+                        [ngModel]="step.machineId"
+                        (ngModelChange)="
+                          updateDeskStepField(step, 'machineId', $event)
+                        "
+                        name="deskMachine-{{ step.stepId }}"
+                      >
+                        @for (machine of Machines(); track machine.Id) {
+                        <option [ngValue]="machine.Id">
+                          {{ machine.Name }}
+                        </option>
+                        }
+                      </select>
+                    </div>
+
+                    <div class="desk-card-field">
+                      <label>Allocated Time</label>
+                      @if (getAllocatedTimeBreakdown(step); as t) {
+                      <div class="desk-card-time">
+                        <span><b>{{ t.days }}</b>d</span>
+                        <span><b>{{ t.hours }}</b>h</span>
+                        <span><b>{{ t.minutes }}</b>m</span>
+                        <span><b>{{ t.seconds }}</b>s</span>
+                      </div>
+                      } @else {
+                      <div class="desk-card-time empty">—</div>
+                      }
+                    </div>
                   </div>
                 </div>
                 }
