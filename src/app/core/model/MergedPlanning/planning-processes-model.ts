@@ -14,6 +14,8 @@ export interface IProcessStepInput {
   startDate: string | null;
   endDate: string | null;
   machineId: number;
+  /** 1-based position of this step within its line's Planning Desk order; persisted as OrderNo. */
+  orderNo: number;
 }
 
 export interface IProductionPlanHeader {
@@ -42,6 +44,7 @@ export interface IProductionPlanConfigures {
   StartDate: string | null;
   EndDate: string | null;
   MachineId: number | null;
+  OrderNo: number;
 }
 
 export interface IProductionPlanSaveRequest {

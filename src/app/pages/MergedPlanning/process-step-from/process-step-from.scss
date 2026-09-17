@@ -24,18 +24,18 @@
   background: #adb5bd;
   color: #fff;
   font-size: 12px;
+  cursor: grab;
   transition:
     background-color 160ms ease,
     border-color 160ms ease;
 }
 
-.step-card-header.ready {
-  background: #4daa57;
-  cursor: grab;
+.step-card-header:active {
+  cursor: grabbing;
 }
 
-.step-card-header.ready:active {
-  cursor: grabbing;
+.step-card-header.ready {
+  background: #4daa57;
 }
 
 .drag-handle {

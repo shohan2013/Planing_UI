@@ -103,11 +103,9 @@ export class PlanningEditView implements OnInit, OnChanges, OnDestroy {
       .subscribe({
         next: (data) =>
           this.priorities.set(
-            data.length
-              ? data.filter((priority) => priority.IsActive !== false)
-              : this.dummyPriorities(),
+            data.filter((priority) => priority.IsActive !== false),
           ),
-        error: () => this.priorities.set(this.dummyPriorities()),
+        error: () => this.priorities.set([]),
       });
   }
 
@@ -122,6 +120,7 @@ export class PlanningEditView implements OnInit, OnChanges, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data: IPlanningHistoryDetails) => {
+          console.log(data);
           this.header.set(data.Header);
           this.lines.set(data.Lines);
           this.loadProductionSteps();
@@ -129,26 +128,16 @@ export class PlanningEditView implements OnInit, OnChanges, OnDestroy {
           this.loadRecipes();
           this.isLoading.set(false);
         },
-        // Backend endpoint isn't wired up yet — fall back to dummy data so
-        // the editable form can be exercised end to end in the meantime.
         error: () => {
-          const dummy = this.dummyDetails(this.headerId!);
-          this.header.set(dummy.Header);
-          this.lines.set(dummy.Lines);
-          this.loadProductionSteps();
-          this.loadMachines();
-          this.loadRecipes();
           this.isLoading.set(false);
+          this.loadError.set(true);
         },
       });
   }
 
   loadProductionSteps(): void {
     const header = this.header();
-    if (!header?.UnitId || !header?.BusinessId) {
-      this.productionSteps.set(this.dummySteps());
-      return;
-    }
+    if (!header?.UnitId || !header?.BusinessId) return;
 
     this.stepsLoading.set(true);
     this.stepsLoadError.set(false);
@@ -158,191 +147,40 @@ export class PlanningEditView implements OnInit, OnChanges, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
-          this.productionSteps.set(data.length ? data : this.dummySteps());
+          this.productionSteps.set(data);
           this.stepsLoading.set(false);
         },
         error: () => {
-          this.productionSteps.set(this.dummySteps());
           this.stepsLoading.set(false);
-          this.stepsLoadError.set(false);
+          this.stepsLoadError.set(true);
         },
       });
   }
 
   loadMachines(): void {
     const header = this.header();
-    if (!header?.UnitId || !header?.BusinessId) {
-      this.machines.set(this.dummyMachines());
-      return;
-    }
+    if (!header?.UnitId || !header?.BusinessId) return;
 
     this.commonService
       .GetMachine(header.UnitId, header.BusinessId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (data) =>
-          this.machines.set(data.length ? data : this.dummyMachines()),
-        error: () => this.machines.set(this.dummyMachines()),
+        next: (data) => this.machines.set(data),
+        error: () => this.machines.set([]),
       });
   }
 
   loadRecipes(): void {
     const header = this.header();
-    if (!header?.UnitId || !header?.BusinessId) {
-      this.recipeVersions.set(this.dummyRecipes());
-      return;
-    }
+    if (!header?.UnitId || !header?.BusinessId) return;
 
     this.commonService
       .GetRecipe(header.UnitId, header.BusinessId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (data) =>
-          this.recipeVersions.set(data.length ? data : this.dummyRecipes()),
-        error: () => this.recipeVersions.set(this.dummyRecipes()),
+        next: (data) => this.recipeVersions.set(data),
+        error: () => this.recipeVersions.set([]),
       });
-  }
-
-  // ---------- Dummy data (used until the real endpoints are wired up) ----------
-
-  private dummyDetails(headerId: number): IPlanningHistoryDetails {
-    return {
-      Header: {
-        Id: headerId,
-        PPNO: `PP-${1000 + headerId}`,
-        DOCode: `DO-${2000 + headerId}`,
-        CreatedBy: 'John Doe',
-        DocumentStatus: 'Pending',
-        CreatedDate: new Date(),
-        Unit: 'Unit 1',
-        Business: 'Bakery',
-        UnitId: 1,
-        BusinessId: 1,
-        IsCombineDO: true,
-      },
-      Lines: [
-        {
-          Id: 1,
-          ProductId: 101,
-          ProductName: 'Whole Wheat Bread',
-          UOM: 'KG',
-          Quantity: 500,
-          PlannedQuantity: 150,
-          Rate: 45.5,
-          Remarks: null,
-          TakenQty: 200,
-          AdvanceProductionQty: null,
-          RecipeVersionId: 1,
-          PriorityId: 1,
-          Steps: [
-            {
-              stepId: 1,
-              stepName: 'Mixing',
-              startDate: '2026-09-10T08:00',
-              endDate: '2026-09-10T10:00',
-              machineId: 1,
-            },
-            {
-              stepId: 2,
-              stepName: 'Baking',
-              startDate: '2026-09-10T10:30',
-              endDate: '2026-09-10T13:00',
-              machineId: 2,
-            },
-          ],
-        },
-        {
-          Id: 2,
-          ProductId: 102,
-          ProductName: 'Butter Croissant',
-          UOM: 'PCS',
-          Quantity: 1000,
-          PlannedQuantity: 300,
-          Rate: 12.75,
-          Remarks: null,
-          TakenQty: 400,
-          AdvanceProductionQty: null,
-          RecipeVersionId: 2,
-          PriorityId: 2,
-          Steps: [
-            {
-              stepId: 1,
-              stepName: 'Mixing',
-              startDate: '2026-09-10T09:00',
-              endDate: '2026-09-10T11:00',
-              machineId: 1,
-            },
-          ],
-        },
-        {
-          Id: 3,
-          ProductId: 103,
-          ProductName: 'Chocolate Muffin',
-          UOM: 'PCS',
-          Quantity: 800,
-          PlannedQuantity: 0,
-          Rate: 18.0,
-          Remarks: null,
-          TakenQty: null,
-          AdvanceProductionQty: null,
-          RecipeVersionId: null,
-          PriorityId: null,
-          Steps: [],
-        },
-      ],
-    };
-  }
-
-  private dummyMachines(): IMachine[] {
-    return [
-      { Id: 1, Name: 'Mixer #1' },
-      { Id: 2, Name: 'Oven #1' },
-      { Id: 3, Name: 'Packing Line #1' },
-    ] as IMachine[];
-  }
-
-  private dummyRecipes(): IRecipe[] {
-    return [
-      { Id: 1, Name: 'Standard Recipe v1' },
-      { Id: 2, Name: 'Premium Recipe v2' },
-    ] as IRecipe[];
-  }
-
-  private dummyPriorities(): IPriority[] {
-    return [
-      { Id: 1, PriorityName: 'High' },
-      { Id: 2, PriorityName: 'Medium' },
-      { Id: 3, PriorityName: 'Low' },
-    ] as IPriority[];
-  }
-
-  private dummySteps(): IBusinessFlowForPlanning[] {
-    return [
-      {
-        Id: 1,
-        UnitId: 1,
-        BusinessId: 1,
-        Name: 'Mixing',
-        Slno: 1,
-        IsActive: true,
-      },
-      {
-        Id: 2,
-        UnitId: 1,
-        BusinessId: 1,
-        Name: 'Baking',
-        Slno: 2,
-        IsActive: true,
-      },
-      {
-        Id: 3,
-        UnitId: 1,
-        BusinessId: 1,
-        Name: 'Packing',
-        Slno: 3,
-        IsActive: true,
-      },
-    ] as IBusinessFlowForPlanning[];
   }
 
   get UserEnroll(): number {
@@ -363,7 +201,9 @@ export class PlanningEditView implements OnInit, OnChanges, OnDestroy {
           return null;
         }
 
-        const steps = processSteps.filter((x) => x.lineId === line.Id);
+        const steps = processSteps
+          .filter((x) => x.lineId === line.Id)
+          .sort((a, b) => a.orderNo - b.orderNo);
 
         return {
           Id: line.Id,
@@ -382,6 +222,7 @@ export class PlanningEditView implements OnInit, OnChanges, OnDestroy {
                   StartDate: step.startDate,
                   EndDate: step.endDate,
                   MachineId: step.machineId,
+                  OrderNo: step.orderNo,
                 }))
               : null,
         };
@@ -404,8 +245,8 @@ export class PlanningEditView implements OnInit, OnChanges, OnDestroy {
 
     const request: IPlanningHistoryUpdateRequest = {
       Header: {
-        DOStatusId: header?.Id ?? 0,
-        DocCreatedBy: this.UserEnroll,
+        PPId: header?.Id ?? 0,
+        DocUpdatedBy: this.UserEnroll,
         BusinessId: header?.BusinessId ?? 0,
         UnitId: header?.UnitId ?? 0,
       },

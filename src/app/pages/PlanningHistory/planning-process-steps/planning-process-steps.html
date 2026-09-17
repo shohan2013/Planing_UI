@@ -23,30 +23,39 @@
 } @else {
 
 <div class="pps-cards" #cardsContainer>
-  @for (step of activeSteps; track step.Id) {
-  <div class="pps-card-wrap">
-    <app-process-step-from
-      [lineId]="lineId"
-      [step]="step"
-      [machineOptions]="machineOptions"
-      [initialValue]="initialValueFor(step.Id)"
-      (formValueChange)="onFormChange($event)"
-    ></app-process-step-from>
+  <div
+    class="pps-drop-list"
+    cdkDropList
+    cdkDropListOrientation="horizontal"
+    [cdkDropListData]="activeSteps"
+    (cdkDropListDropped)="onDrop($event)"
+  >
+    @for (step of activeSteps; track step.Id) {
+    <div class="pps-card-wrap" cdkDrag cdkDragPreviewContainer="global">
+      <app-process-step-from
+        [lineId]="lineId"
+        [step]="step"
+        [machineOptions]="machineOptions"
+        [initialValue]="initialValueFor(step.Id)"
+        (formValueChange)="onFormChange($event)"
+      ></app-process-step-from>
 
-    <button
-      type="button"
-      class="pps-remove-btn"
-      title="Remove step"
-      (click)="removeStep(step.Id)"
-    >
-      <i class="fa-solid fa-xmark"></i>
-    </button>
+      <button
+        type="button"
+        class="pps-remove-btn"
+        title="Remove step"
+        (click)="removeStep(step.Id)"
+      >
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    }
   </div>
-  }
 
   <!-- Sits right after the last card — auto-scroll (see addStep()) brings
        it into view alongside the newly added card, no floating/pinned
-       positioning needed. -->
+       positioning needed. Kept outside the cdkDropList so CDK doesn't treat
+       it as a manageable drag item and shove it around during reordering. -->
   <div class="pps-add-panel">
     <label class="pps-add-label">Add Process Step</label>
 

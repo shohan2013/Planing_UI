@@ -53,12 +53,7 @@
   <div class="border rounded-3 p-3 mb-2 mt-0">
     <div class="mpv-detail-strip">
       <div class="mpv-detail-item">
-        <span class="mpv-detail-label">PP No</span>
-        <span class="mpv-detail-value">{{ header()!.PPNO }}</span>
-      </div>
-
-      <div class="mpv-detail-item">
-        <span class="mpv-detail-label">Type</span>
+        <span class="mpv-detail-label">DO Type</span>
         <span class="mpv-detail-value">
           @if (header()!.IsCombineDO) {
           <span class="combine-badge">
@@ -69,6 +64,11 @@
           <span class="single-badge">Single</span>
           }
         </span>
+      </div>
+
+      <div class="mpv-detail-item">
+        <span class="mpv-detail-label">PP No</span>
+        <span class="mpv-detail-value">{{ header()!.PPNO }}</span>
       </div>
 
       <div class="mpv-detail-item">
@@ -134,8 +134,8 @@
                 <div class="mpv-product-name">{{ line.ProductName }}</div>
                 <div class="mpv-product-meta">
                   {{ line.UOM }} &nbsp;•&nbsp; Qty: {{ line.Quantity | number:
-                  '1.2-2' }} &nbsp;•&nbsp; Rate: {{ line.Rate | number:
-                  '1.2-2' }}
+                  '1.2-2' }} &nbsp;•&nbsp; Rate: {{ line.Rate | number: '1.2-2'
+                  }}
                 </div>
               </div>
 

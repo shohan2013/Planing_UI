@@ -13,11 +13,14 @@ export interface IPlanningHistory {
 }
 
 export interface IPlanningHistoryStep {
-  stepId: number;
-  stepName: string;
-  startDate: string | null;
-  endDate: string | null;
-  machineId: number;
+  Id: number;
+  StepId: number;
+  StepName: string;
+  StartDate: string | null;
+  EndDate: string | null;
+  MachineId: number;
+  ProductionPlanLineId?: number;
+  OrderNo?: number;
 }
 
 export interface IPlanningHistoryLine {
@@ -47,6 +50,7 @@ export interface IPlanningHistoryUpdateConfigure {
   StartDate: string | null;
   EndDate: string | null;
   MachineId: number | null;
+  OrderNo: number;
 }
 
 export interface IPlanningHistoryUpdateLine {
@@ -64,8 +68,8 @@ export interface IPlanningHistoryUpdateLine {
 
 export interface IPlanningHistoryUpdateRequest {
   Header: {
-    DOStatusId: number;
-    DocCreatedBy: number;
+    PPId: number;
+    DocUpdatedBy: number;
     BusinessId: number;
     UnitId: number;
     Remarks?: string | null;

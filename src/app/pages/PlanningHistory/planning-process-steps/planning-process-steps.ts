@@ -12,6 +12,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { IBusinessFlowForPlanning } from 'src/app/core/model/Common/BusinessFlow/production-steps-model';
 import { IMachine } from 'src/app/core/model/Common/Machine/machine';
 import { IProcessStepInput } from 'src/app/core/model/MergedPlanning/planning-processes-model';
@@ -30,7 +31,7 @@ import { ProcessStepFrom } from '../../MergedPlanning/process-step-from/process-
 @Component({
   selector: 'app-planning-process-steps',
   standalone: true,
-  imports: [FormsModule, ProcessStepFrom],
+  imports: [FormsModule, ProcessStepFrom, DragDropModule],
   templateUrl: './planning-process-steps.html',
   styleUrl: './planning-process-steps.scss',
 })
@@ -56,24 +57,47 @@ export class PlanningProcessSteps implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['savedSteps'] && this.savedSteps?.length) {
-      for (const saved of this.savedSteps) {
+      this.savedSteps.forEach((saved, index) => {
         this.processStepStateService.updateProcessStep({
           lineId: this.lineId,
-          stepId: saved.stepId,
-          stepName: saved.stepName,
-          machineId: saved.machineId,
-          startDate: saved.startDate,
-          endDate: saved.endDate,
+          stepId: saved.StepId,
+          stepName: saved.StepName,
+          machineId: saved.MachineId,
+          startDate: saved.StartDate,
+          endDate: saved.EndDate,
+          orderNo: saved.OrderNo ?? index + 1,
         });
-      }
+      });
 
-      this.activeStepIds.set(this.savedSteps.map((s) => s.stepId));
+      this.activeStepIds.set(this.savedSteps.map((s) => s.StepId));
     }
   }
 
   get activeSteps(): IBusinessFlowForPlanning[] {
     const ids = new Set(this.activeStepIds());
-    return this.steps.filter((s) => ids.has(s.Id));
+    const orderNoFor = new Map(
+      this.processStepStateService
+        .getStepsForLine(this.lineId)
+        .map((x) => [x.stepId, x.orderNo]),
+    );
+
+    return this.steps
+      .filter((s) => ids.has(s.Id))
+      .sort(
+        (a, b) =>
+          (orderNoFor.get(a.Id) ?? Number.MAX_SAFE_INTEGER) -
+          (orderNoFor.get(b.Id) ?? Number.MAX_SAFE_INTEGER),
+      );
+  }
+
+  onDrop(event: CdkDragDrop<IBusinessFlowForPlanning[]>): void {
+    if (event.previousIndex === event.currentIndex) return;
+
+    this.processStepStateService.reorderWithinLine(
+      this.lineId,
+      event.previousIndex,
+      event.currentIndex,
+    );
   }
 
   get availableStepsToAdd(): IBusinessFlowForPlanning[] {

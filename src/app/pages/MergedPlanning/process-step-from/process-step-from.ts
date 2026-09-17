@@ -8,6 +8,7 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { CdkDragHandle } from '@angular/cdk/drag-drop';
 
 import { IProcessStepInput } from 'src/app/core/model/MergedPlanning/planning-processes-model';
 import { IBusinessFlowForPlanning } from 'src/app/core/model/Common/BusinessFlow/production-steps-model';
@@ -16,7 +17,7 @@ import { IMachine } from 'src/app/core/model/Common/Machine/machine';
 @Component({
   selector: 'app-process-step-from',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, CdkDragHandle],
   templateUrl: './process-step-from.html',
   styleUrl: './process-step-from.scss',
 })
@@ -140,6 +141,9 @@ export class ProcessStepFrom implements OnInit, OnChanges {
       machineId: this.machineNumber,
       startDate: this.startDate,
       endDate: this.endDate,
+      // Placeholder — ProcessStepStateService.updateProcessStep assigns the
+      // real position (append on add, preserved on edit) when this is stored.
+      orderNo: this.initialValue?.orderNo ?? 0,
     };
   }
 

@@ -48,6 +48,14 @@
   background: #747e88;
 }
 
+.pps-drop-list {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  gap: 10px;
+}
+
 .pps-card-wrap {
   position: relative;
   /* Wide enough for the Start/End datetime-local inputs to show their full
@@ -87,6 +95,19 @@
   text-transform: uppercase;
   letter-spacing: 0.3px;
   color: #6c757d;
+}
+
+.cdk-drag-preview {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  border-radius: 6px;
+}
+
+.cdk-drag-placeholder {
+  opacity: 0.3;
+}
+
+.cdk-drop-list-dragging .pps-card-wrap:not(.cdk-drag-placeholder) {
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
 }
 
 .pps-remove-btn {

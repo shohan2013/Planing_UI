@@ -199,7 +199,9 @@ export class MergedPlanningView implements OnInit, OnDestroy {
           return null;
         }
 
-        const steps = processSteps.filter((x) => x.lineId === line.Id);
+        const steps = processSteps
+          .filter((x) => x.lineId === line.Id)
+          .sort((a, b) => a.orderNo - b.orderNo);
 
         return {
           ProductId: line.ProductId,
@@ -219,6 +221,7 @@ export class MergedPlanningView implements OnInit, OnDestroy {
                   StartDate: step.startDate,
                   EndDate: step.endDate,
                   MachineId: step.machineId,
+                  OrderNo: step.orderNo,
                 }))
               : null,
         };

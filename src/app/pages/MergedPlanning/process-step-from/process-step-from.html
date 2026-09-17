@@ -1,6 +1,10 @@
 <div class="card step-card" [class.step-card-ready]="isReadyToDrop">
   <form [formGroup]="form">
-    <div class="card-header step-card-header" [class.ready]="isReadyToDrop">
+    <div
+      class="card-header step-card-header"
+      [class.ready]="isReadyToDrop"
+      cdkDragHandle
+    >
       <span class="step-name" [title]="step.Name">{{ step.Name }}</span>
 
       @if (isReadyToDrop) {
