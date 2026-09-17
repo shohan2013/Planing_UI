@@ -45,21 +45,21 @@ export interface IPlanningHistoryDetails {
 }
 
 export interface IPlanningHistoryUpdateConfigure {
+  Id: number;
   BusinessConfigureId: number;
   ProductId: number;
   StartDate: string | null;
   EndDate: string | null;
   MachineId: number | null;
   OrderNo: number;
+  IsActive: boolean;
 }
 
 export interface IPlanningHistoryUpdateLine {
   Id: number;
-  ProductId: number;
   Quantity: number;
   TakenQuantity: number;
   AdvanceProductionQuantity: number | null;
-  Rate: number;
   RecipeVersionId: number | null;
   PriorityId: number | null;
   Remarks?: string | null;
@@ -68,7 +68,6 @@ export interface IPlanningHistoryUpdateLine {
 
 export interface IPlanningHistoryUpdateRequest {
   Header: {
-    PPId: number;
     DocUpdatedBy: number;
     BusinessId: number;
     UnitId: number;

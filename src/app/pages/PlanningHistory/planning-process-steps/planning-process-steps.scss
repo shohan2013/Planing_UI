@@ -97,6 +97,10 @@
   color: #6c757d;
 }
 
+.pps-card-not-ready ::ng-deep .step-card-header {
+  cursor: default;
+}
+
 .cdk-drag-preview {
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
   border-radius: 6px;

@@ -113,6 +113,13 @@ export class PlanningProcessSteps implements OnChanges {
     );
   }
 
+  // A card only carries state here once its form is fully valid (see
+  // onFormChange) — so its presence doubles as the "ready" flag that gates
+  // both dragging and inclusion in the save payload.
+  isStepReady(stepId: number): boolean {
+    return this.initialValueFor(stepId) !== null;
+  }
+
   addStep(): void {
     if (this.newStepId === null) return;
 
@@ -138,9 +145,14 @@ export class PlanningProcessSteps implements OnChanges {
     this.processStepStateService.removeProcessStep(this.lineId, stepId);
   }
 
-  onFormChange(value: IProcessStepInput | null): void {
+  onFormChange(value: IProcessStepInput | null, stepId: number): void {
     if (value) {
       this.processStepStateService.updateProcessStep(value);
+    } else if (this.isStepReady(stepId)) {
+      // Was valid, isn't any more (e.g. a date got cleared) — drop it from
+      // state so it stops being draggable and stops going out in the save
+      // payload until it's valid again.
+      this.processStepStateService.removeProcessStep(this.lineId, stepId);
     }
   }
 }
