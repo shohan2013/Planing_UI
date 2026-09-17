@@ -14,7 +14,7 @@ import {
 
 @Directive({
   selector: '[menuPermission]',
-  standalone: true,
+  standalone: true, 
 })
 export class MenuPermissionDirective {
   private readonly templateRef =

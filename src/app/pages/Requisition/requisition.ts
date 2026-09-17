@@ -258,7 +258,7 @@ export class Requisition
         fullscreen: true,
         backdrop: 'static',
         keyboard: false,
-        windowClass: 'requisition-fullscreen-modal',
+        // ZwindowClass: 'requisition-fullscreen-modal',
       });
 
       this.formModalRef = modalRef;

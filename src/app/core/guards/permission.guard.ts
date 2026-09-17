@@ -10,14 +10,13 @@ import { AuthorizationService } from 'src/app/core/services/Authorization/author
 export const permissionGuard: CanActivateChildFn = (
   childRoute,
 ) => {
-  const authorizationService = inject(
-    AuthorizationService,
-  );
 
+
+  const authorizationService = inject( AuthorizationService,);
   const router = inject(Router);
 
-  const routePath =
-    childRoute.routeConfig?.path ?? '';
+
+  const routePath = childRoute.routeConfig?.path ?? '';
 
   return authorizationService.ensureLoaded().pipe(
     map(() => {

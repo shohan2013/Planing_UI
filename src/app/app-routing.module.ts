@@ -56,9 +56,10 @@ const routes: Routes = [
     path: '',
     component: BaseLayoutComponent,
 
-  canActivateChild: [permissionGuard],
+    canActivateChild: [permissionGuard],
 
-    children: [
+    children: 
+    [
       // Dashboards
       //{path: 'pages/login-boxed', component: LoginBoxedComponent, data: {extraParameter: ''}},
       { path: '', redirectTo: '/pages/login-boxed', pathMatch: 'full' },
@@ -75,13 +76,13 @@ const routes: Routes = [
         data: { extraParameter: 'dashboardsMenu' },
       },
 
-  {
-    path: 'permission-required',
-    loadComponent: () =>
-      import(
-        './pages/permission-required/permission-required'
-      ).then((m) => m.PermissionRequired),
-  },
+      {
+        path: 'permission-required',
+        loadComponent: () =>
+          import(
+            './pages/permission-required/permission-required'
+          ).then((m) => m.PermissionRequired),
+      },
 
 
 
@@ -215,6 +216,9 @@ const routes: Routes = [
       },
     ],
   },
+
+//////////////////////////////////////////////////////////////////////
+
   {
     path: '',
     component: PagesLayoutComponent,
@@ -238,7 +242,7 @@ const routes: Routes = [
     ],
   },
 
-
+////////////////////////////////////
 
 
   {
@@ -248,6 +252,10 @@ const routes: Routes = [
   },
   { path: '**', redirectTo: '' },
 ];
+
+
+
+
 
 @NgModule({
   imports: [

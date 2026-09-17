@@ -56,6 +56,12 @@ export class AuthorizationService {
 
   constructor(private readonly http: HttpClient) {}
 
+
+
+
+
+
+
   loadPermissions(): Observable<UserMenuPermission[]> {
     const enroll = this.getCurrentEnroll();
 
@@ -66,6 +72,8 @@ export class AuthorizationService {
         () => new Error('Authenticated user Enroll was not found.'),
       );
     }
+
+
 
     if (this.loadedEnroll === enroll) {
       return of(
@@ -80,6 +88,10 @@ export class AuthorizationService {
       return this.loadingRequest$;
     }
 
+
+
+
+
     const url =
       `${environment.API_URL}` +
       `${GlobalConstant.API_END_POINTS.UserMenuPermission}` +
@@ -91,7 +103,7 @@ export class AuthorizationService {
       .get<UserMenuPermission[]>(url)
       .pipe(
         tap((permissions) => {
-            console.log('THE Permissions loaded:', permissions);
+            
           /*
            * Do not store the response if the authenticated
            * user changed while the request was running.
@@ -100,8 +112,9 @@ export class AuthorizationService {
             return;
           }
 
-          const permissionMap =
-            new Map<string, UserMenuPermission>();
+          
+          const permissionMap = new Map<string, UserMenuPermission>();
+          console.log('Permissions API response:', permissions);
 
           for (const permission of permissions ?? []) {
             const routerLink = this.normalizeRouterLink(
@@ -151,6 +164,13 @@ export class AuthorizationService {
         */
         return permission?.CanView ?? true;
         }
+
+
+
+
+
+
+
 
 
     hasPermission(
@@ -204,15 +224,22 @@ export class AuthorizationService {
     this.loadingRequest$ = undefined;
   }
 
+
+
+
+
   private getCurrentEnroll(): number | null {
-    const enroll = Number(
-      localStorage.getItem('Enroll'),
-    );
+    const enroll = Number(localStorage.getItem('Enroll'),);
 
     return Number.isInteger(enroll) && enroll > 0
       ? enroll
       : null;
   }
+
+
+
+
+
 
     private normalizeRouterLink(
     routerLink: string,
