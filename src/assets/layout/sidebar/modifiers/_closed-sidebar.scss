@@ -1,3 +1,4 @@
+@use "sass:math";
 // Closed Sidebar
 
 @keyframes fadeInScale {
@@ -58,7 +59,7 @@
 
 
     .v-sidebar-menu {
-      padding: 0 ($layout-spacer-x / 3);
+      padding: 0 (math.div($layout-spacer-x, 3));
 
       .vsm-dropdown {
         display: none;

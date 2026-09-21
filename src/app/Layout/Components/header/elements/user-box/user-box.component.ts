@@ -1,12 +1,17 @@
 import { Component } from '@angular/core';
 import { ThemeOptions } from '../../../../../theme-options';
 import { LoginService } from 'src/app/core/services/login/login.service';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
+
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 @Component({
   selector: 'app-user-box',
   templateUrl: './user-box.component.html',
-  standalone: false,
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, NgbModule, FontAwesomeModule]
 })
 export class UserBoxComponent {
    Name!:string;

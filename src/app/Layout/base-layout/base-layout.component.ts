@@ -4,10 +4,19 @@ import { ConfigService } from '../../ThemeOptions/store/config.service';
 import { ConfigState } from '../../ThemeOptions/store/config.state';
 import {ThemeOptions} from '../../theme-options';
 
+
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { HeaderComponent } from '../Components/header/header.component';
+import { SidebarComponent } from '../Components/sidebar/sidebar.component';
+import { FooterComponent } from '../Components/footer/footer.component';
 @Component({
   selector: 'app-base-layout',
   templateUrl: './base-layout.component.html',
-  standalone: false,
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, NgbModule, FontAwesomeModule, HeaderComponent, SidebarComponent, FooterComponent]
 })
 export class BaseLayoutComponent {
 

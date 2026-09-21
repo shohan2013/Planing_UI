@@ -1,0 +1,18 @@
+// Drop-in replacements for the deprecated global darken()/lighten().
+// Same result as the originals (lightness is clamped to 0%-100%).
+@use "sass:color";
+@use "sass:math";
+
+@function darken-color($color, $amount) {
+  @return color.change(
+    $color,
+    $lightness: math.max(0%, color.channel($color, "lightness", $space: hsl) - $amount)
+  );
+}
+
+@function lighten-color($color, $amount) {
+  @return color.change(
+    $color,
+    $lightness: math.min(100%, color.channel($color, "lightness", $space: hsl) + $amount)
+  );
+}

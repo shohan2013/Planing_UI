@@ -1,5 +1,4 @@
-import { NgModule } from '@angular/core';
-import { Routes,RouterModule } from '@angular/router';
+import { Routes } from '@angular/router';
 
 import { BaseLayoutComponent } from './Layout/base-layout/base-layout.component';
 import { PagesLayoutComponent } from './Layout/pages-layout/pages-layout.component';
@@ -46,7 +45,7 @@ ChartjsComponent,
 
 import { permissionGuard } from 'src/app/core/guards/auth/permission.guard';
 
-const routes: Routes = [
+export const routes: Routes = [
   {
     path: '',
     component: BaseLayoutComponent,
@@ -246,18 +245,8 @@ const routes: Routes = [
   {
     // Documentation section — lazy-loaded so it stays out of the initial bundle
     path: 'docs',
-    loadChildren: () => import('./docs/docs.module').then((m) => m.DocsModule),
+    loadChildren: () => import('./docs/docs.routes').then((m) => m.DOCS_ROUTES),
   },
   { path: '**', redirectTo: '' },
 ];
 
-@NgModule({
-  imports: [
-    RouterModule.forRoot(routes, {
-      scrollPositionRestoration: 'enabled',
-      anchorScrolling: 'enabled',
-    }),
-  ],
-  exports: [RouterModule],
-})
-export class AppRoutingModule {}

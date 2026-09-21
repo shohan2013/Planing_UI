@@ -1,10 +1,17 @@
 import { Component } from '@angular/core';
 import { ChartConfiguration,ChartType,ChartEvent } from 'chart.js';
 
+
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { BaseChartDirective } from 'ng2-charts';
 @Component({
   selector: 'app-bar-chart',
   templateUrl: './bar-chart.component.html',
-  standalone: false})
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, NgbModule, FontAwesomeModule, BaseChartDirective]})
 export class BarChartComponent {
   public chartData: ChartConfiguration<'bar'>['data'] = {
     labels: ['2006', '2007', '2008', '2009', '2010', '2011', '2012'],

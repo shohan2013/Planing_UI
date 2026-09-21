@@ -1,10 +1,17 @@
 import { Component } from '@angular/core';
 import { ChartConfiguration,ChartType,ChartEvent } from 'chart.js';
 
+
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { BaseChartDirective } from 'ng2-charts';
 @Component({
   selector: 'app-polar-area-chart',
   templateUrl: './polar-area-chart.component.html',
-  standalone: false,  styleUrls: ['./polar-area-chart.component.scss']
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, NgbModule, FontAwesomeModule, BaseChartDirective],  styleUrls: ['./polar-area-chart.component.scss']
 })
 export class PolarAreaChartComponent {
   // PolarArea chart using ng2-charts v6 API

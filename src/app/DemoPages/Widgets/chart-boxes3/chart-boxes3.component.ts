@@ -2,10 +2,17 @@ import { Component,viewChild } from '@angular/core';
 import { ChartData,ChartOptions,ChartType } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 
+
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { PageTitleComponent } from '../../../Layout/Components/page-title/page-title.component';
 @Component({
   selector: 'app-chart-boxes3',
   templateUrl: './chart-boxes3.component.html',
-  standalone: false,
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, NgbModule, FontAwesomeModule, BaseChartDirective, PageTitleComponent],
   styles: []
 })
 export class ChartBoxes3Component {

@@ -1,4 +1,5 @@
-@if index($hamburger-types, arrowalt) {
+@use "sass:list";
+@if list.index($hamburger-types, arrowalt) {
   /*
    * Arrow Alt
    */

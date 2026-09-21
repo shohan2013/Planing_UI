@@ -1,4 +1,5 @@
-@if index($hamburger-types, spring-r) {
+@use "sass:list";
+@if list.index($hamburger-types, spring-r) {
   /*
    * Spring Reverse
    */

@@ -1,4 +1,5 @@
-@if index($hamburger-types, slider-r) {
+@use "sass:list";
+@if list.index($hamburger-types, slider-r) {
   /*
    * Slider Reverse
    */

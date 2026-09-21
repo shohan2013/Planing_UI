@@ -1,11 +1,14 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { DOCS_NAV } from '../docs-nav';
 
+
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 @Component({
   selector: 'app-docs-layout',
   templateUrl: './docs-layout.component.html',
   styleUrls: ['./docs-layout.component.scss'],
-  standalone: false,
+  imports: [CommonModule, RouterModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DocsLayoutComponent {

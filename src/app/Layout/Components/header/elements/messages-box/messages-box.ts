@@ -1,10 +1,16 @@
 import { Component } from '@angular/core';
 
+
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 @Component({
   selector: 'app-messages-box',
   templateUrl: './messages-box.html',
   styleUrls: ['./messages-box.scss'],
-  standalone: false
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, NgbModule, FontAwesomeModule]
 })
 export class MessagesBoxComponent {
   messages = [

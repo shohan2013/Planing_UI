@@ -1,5 +1,4 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 
 import { DocsLayoutComponent } from './layout/docs-layout.component';
 import { DocsHomeComponent } from './pages/docs-home.component';
@@ -14,7 +13,7 @@ import { DocsChartsComponent } from './pages/docs-charts.component';
 import { ToolingComponent } from './pages/tooling.component';
 import { ChangelogComponent } from './pages/changelog.component';
 
-const routes: Routes = [
+export const DOCS_ROUTES: Routes = [
   {
     path: '',
     component: DocsLayoutComponent,
@@ -35,8 +34,3 @@ const routes: Routes = [
   },
 ];
 
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule],
-})
-export class DocsRoutingModule {}

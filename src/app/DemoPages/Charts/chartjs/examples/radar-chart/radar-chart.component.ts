@@ -1,10 +1,17 @@
 import { Component } from '@angular/core';
 import { ChartType,ChartConfiguration,ChartEvent } from 'chart.js';
 
+
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { BaseChartDirective } from 'ng2-charts';
 @Component({
   selector: 'app-radar-chart',
   templateUrl: './radar-chart.component.html',
-  standalone: false,
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, NgbModule, FontAwesomeModule, BaseChartDirective],
   styleUrls: ['./radar-chart.component.scss']
 })
 export class RadarChartComponent {

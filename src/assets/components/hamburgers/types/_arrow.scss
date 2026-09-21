@@ -1,4 +1,5 @@
-@if index($hamburger-types, arrow) {
+@use "sass:list";
+@if list.index($hamburger-types, arrow) {
   /*
    * Arrow
    */

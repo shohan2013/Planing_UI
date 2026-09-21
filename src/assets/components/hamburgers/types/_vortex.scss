@@ -1,4 +1,5 @@
-@if index($hamburger-types, vortex) {
+@use "sass:list";
+@if list.index($hamburger-types, vortex) {
   /*
    * Vortex
    */

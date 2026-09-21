@@ -1,3 +1,4 @@
+@use "sass:math";
 // DEMO
 
 // Icons demo
@@ -36,7 +37,7 @@
 
   p {
     color: $gray-500;
-    font-size: ($font-size-sm / 1.2);
+    font-size: (math.div($font-size-sm, 1.2));
     margin: 5px 0 0;
   }
 }

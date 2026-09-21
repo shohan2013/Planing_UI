@@ -1,9 +1,13 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
+
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { CodeBlockComponent } from '../code-block/code-block.component';
 @Component({
   selector: 'app-docs-charts',
   templateUrl: './docs-charts.component.html',
-  standalone: false,
+  imports: [CommonModule, RouterModule, CodeBlockComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DocsChartsComponent {

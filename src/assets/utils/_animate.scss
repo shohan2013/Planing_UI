@@ -1,6 +1,6 @@
-@import "../../../node_modules/animate-sass/helpers/mixins";
-@import "../../../node_modules/animate-sass/helpers/settings";
-@import "../../../node_modules/animate-sass/helpers/base";
+@import "animate-sass/helpers/mixins";
+@import "animate-sass/helpers/settings";
+@import "animate-sass/helpers/base";
 
 $base-duration              : .2s;
 
@@ -164,16 +164,16 @@ $use-lightSpeedOut: true;
 //@import "../../../../node_modules/animate-sass/animations/bounce-exit/bounceOutUp";
 
 // FADE
-@import "../../../node_modules/animate-sass/animations/fade-enter/fadeIn";
-@import "../../../node_modules/animate-sass/animations/fade-enter/fadeInDown";
+@import "animate-sass/animations/fade-enter/fadeIn";
+@import "animate-sass/animations/fade-enter/fadeInDown";
 //@import "../../../../node_modules/animate-sass/animations/fade-enter/fadeInDownBig";
 //@import "../../../../node_modules/animate-sass/animations/fade-enter/fadeInLeft";
 //@import "../../../../node_modules/animate-sass/animations/fade-enter/fadeInLeftBig";
 //@import "../../../../node_modules/animate-sass/animations/fade-enter/fadeInRight";
 //@import "../../../../node_modules/animate-sass/animations/fade-enter/fadeInRightBig";
-@import "../../../node_modules/animate-sass/animations/fade-enter/fadeInUp";
+@import "animate-sass/animations/fade-enter/fadeInUp";
 //@import "../../../../node_modules/animate-sass/animations/fade-enter/fadeInUpBig";
-@import "../../../node_modules/animate-sass/animations/fade-exit/fadeOut";
+@import "animate-sass/animations/fade-exit/fadeOut";
 //@import "../../../../node_modules/animate-sass/animations/fade-exit/fadeOutDown";
 //@import "../../../../node_modules/animate-sass/animations/fade-exit/fadeOutDownBig";
 //@import "../../../../node_modules/animate-sass/animations/fade-exit/fadeOutLeft";
@@ -191,8 +191,8 @@ $use-lightSpeedOut: true;
 //@import "../../../../node_modules/animate-sass/animations/flippers/flipOutY";
 
 // LIGHTSPEED
-@import "../../../node_modules/animate-sass/animations/lightspeed/lightSpeedIn";
-@import "../../../node_modules/animate-sass/animations/lightspeed/lightSpeedOut";
+@import "animate-sass/animations/lightspeed/lightSpeedIn";
+@import "animate-sass/animations/lightspeed/lightSpeedOut";
 
 // ROTATE
 //@import "../../../../node_modules/animate-sass/animations/rotate-enter/rotateIn";

@@ -1,4 +1,5 @@
-@if index($hamburger-types, 3 dxy-r) {
+@use "sass:list";
+@if list.index($hamburger-types, 3 dxy-r) {
   /*
    * 3DXY Reverse
    */

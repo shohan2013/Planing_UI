@@ -1,4 +1,5 @@
-@if index($hamburger-types, elastic-r) {
+@use "sass:list";
+@if list.index($hamburger-types, elastic-r) {
   /*
    * Elastic Reverse
    */

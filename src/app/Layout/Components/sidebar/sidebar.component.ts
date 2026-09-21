@@ -3,15 +3,20 @@ import {ThemeOptions} from '../../../theme-options';
 import {Observable} from 'rxjs';
 import { ConfigService } from '../../../ThemeOptions/store/config.service';
 import { ConfigState } from '../../../ThemeOptions/store/config.state';
-import {ActivatedRoute} from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 
 import { SideBarService } from 'src/app/core/services/SideBar/side-bar-service';
 import { ISideBarMenu } from 'src/app/core/model/SideBar/SideBar';
 
+
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 @Component({
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
-  standalone: false,
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, NgbModule, FontAwesomeModule],
   styles: [`
     /* Override the existing styles with important to ensure animation works */
     .vsm-dropdown {

@@ -7,6 +7,8 @@ import {
 } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 export type CodeLanguage = 'bash' | 'ts' | 'html' | 'scss' | 'css' | 'json' | 'text';
 
 const TS_KEYWORDS =
@@ -163,7 +165,7 @@ function highlight(code: string, lang: CodeLanguage): string {
   selector: 'app-code-block',
   templateUrl: './code-block.component.html',
   styleUrls: ['./code-block.component.scss'],
-  standalone: false,
+  imports: [CommonModule, RouterModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CodeBlockComponent {

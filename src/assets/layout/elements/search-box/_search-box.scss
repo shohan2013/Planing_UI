@@ -1,10 +1,11 @@
+@use "sass:math";
 // Search Box
 
 $search-box-size: 42px;
 
 .search-wrapper {
   position: relative;
-  margin-right: ($nav-link-padding-x / 1.5);
+  margin-right: (math.div($nav-link-padding-x, 1.5));
   opacity: 0;
   animation: searchReveal 0.5s ease-out 0.3s forwards;
 
