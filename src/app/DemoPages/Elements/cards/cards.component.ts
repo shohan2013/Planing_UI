@@ -1,5 +1,5 @@
-import {Component, ViewChild, TemplateRef} from '@angular/core';
-import {DomSanitizer} from '@angular/platform-browser';
+import { Component } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
 
 const PrimaryWhite = '#fff';
 const SecondaryGrey = '#ccc';

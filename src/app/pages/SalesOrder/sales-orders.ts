@@ -1,22 +1,18 @@
 import {
-  Component,
-  EventEmitter,
-  OnDestroy,
-  OnInit,
-  Output,
-  signal,
+Component,OnDestroy,
+OnInit,signal
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Observable, Subject, takeUntil, tap } from 'rxjs';
+import { Observable,Subject,takeUntil,tap } from 'rxjs';
 import { IBusiness } from 'src/app/core/model/Common/BusinessType/BusinessType';
 import {
-  ServerQueryRequest,
-  ServerQueryResponse,
+ServerQueryRequest,
+ServerQueryResponse,
 } from 'src/app/core/model/Common/Pagination/ServerQueryRequest';
 import { IUnit } from 'src/app/core/model/Common/Unit/Unit';
 import {
-  IDeliveryOrder,
-  IMergeDeliveryOrderRequest,
+IDeliveryOrder,
+IMergeDeliveryOrderRequest,
 } from 'src/app/core/model/SalesOrder/sales-order-model';
 import { ServerSideFilteredPaginatedComponent } from 'src/app/core/server-side-filtered-paginated/server-side-filtered-paginated.component';
 import { CommonService } from 'src/app/core/services/Common/CommonService';

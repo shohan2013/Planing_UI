@@ -1,4 +1,4 @@
-import { Component, Input, Output } from '@angular/core';
+import { Component } from '@angular/core';
 import { ThemeOptions } from '../../../../../theme-options';
 import { LoginService } from 'src/app/core/services/login/login.service';
 import { Router } from '@angular/router';

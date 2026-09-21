@@ -1,24 +1,17 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal } from '@angular/core';
+import { Component,OnInit,signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgSelectModule } from '@ng-select/ng-select';
 import {
-  debounceTime,
-  distinctUntilChanged,
-  Observable,
-  Subject,
-  switchMap,
-  takeUntil,
+debounceTime,
+distinctUntilChanged,Subject,
+switchMap,
+takeUntil
 } from 'rxjs';
 
-import {
-  ServerQueryRequest,
-  ServerQueryResponse,
-} from 'src/app/core/model/Common/Pagination/ServerQueryRequest';
 
 import { IPermission } from 'src/app/core/model/Permission/Permission';
-import { ServerSideFilteredPaginatedComponent } from 'src/app/core/server-side-filtered-paginated/server-side-filtered-paginated.component';
 import { AccessService } from 'src/app/core/services/Access/access-service';
 import { CommonService } from 'src/app/core/services/Common/CommonService';
 

@@ -1,4 +1,3 @@
-import { MergedPlanning } from 'src/app/pages/MergedPlanning/merged-planning';
 
 export const GlobalConstant = {
   API_END_POINTS: {

@@ -1,13 +1,13 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, of } from 'rxjs';
-import { catchError, debounceTime, switchMap, tap } from 'rxjs/operators';
+import { Component,computed,inject,signal } from '@angular/core';
+import { takeUntilDestroyed,toObservable } from '@angular/core/rxjs-interop';
+import { ActivatedRoute,Router } from '@angular/router';
+import { Observable,of } from 'rxjs';
+import { catchError,debounceTime,switchMap,tap } from 'rxjs/operators';
 import { BasePaginatedTableComponent } from '../base-paginated-table/base-paginated-table.component';
 import {
-  FilterState,
-  ServerQueryRequest,
-  ServerQueryResponse,
+FilterState,
+ServerQueryRequest,
+ServerQueryResponse,
 } from '../model/Common/Pagination/ServerQueryRequest';
 
 @Component({ template: '' })

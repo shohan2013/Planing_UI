@@ -1,30 +1,28 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy,Component } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
-  AbstractControl,
-  FormControl,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-  Validators,
+AbstractControl,
+FormControl,
+FormGroup,
+FormsModule,
+ReactiveFormsModule,
+Validators,
 } from '@angular/forms';
-import { ModalDismissReasons, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { ModalDismissReasons,NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { finalize, Observable, Subject, takeUntil } from 'rxjs';
+import { finalize,Observable,Subject,takeUntil } from 'rxjs';
 import {
-  ServerQueryRequest,
-  ServerQueryResponse,
+ServerQueryRequest,
+ServerQueryResponse,
 } from 'src/app/core/model/Common/Pagination/ServerQueryRequest';
-import { IMenu } from 'src/app/core/model/Menu/Menu';
-import { ISubMenu, ISubMenuView } from 'src/app/core/model/SubMenu/SubMenu';
+import { ISubMenu,ISubMenuView } from 'src/app/core/model/SubMenu/SubMenu';
 import { ServerSideFilteredPaginatedComponent } from 'src/app/core/server-side-filtered-paginated/server-side-filtered-paginated.component';
 import { CommonService } from 'src/app/core/services/Common/CommonService';
 import { SubMenuService } from 'src/app/core/services/SubMenu/sub-menu-service';
 import { PaginationComponent } from 'src/app/shared/pagination/pagination.component';
 import { InputHelper } from 'src/app/shared/pipes/NumberInputOnly';
 import { MenuModel } from 'src/app/core/model/Common/Menus/Menu';
-import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-submenu',

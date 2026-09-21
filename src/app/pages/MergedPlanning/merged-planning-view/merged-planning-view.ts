@@ -1,18 +1,15 @@
 import {
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  OnDestroy,
-  OnInit,
-  Output,
-  signal,
-  SimpleChanges,
+Component,
+EventEmitter,
+Input,OnDestroy,
+OnInit,
+Output,
+signal
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { single, Subject, takeUntil } from 'rxjs';
-import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
+import { Subject,takeUntil } from 'rxjs';
+import { CdkDragDrop,DragDropModule } from '@angular/cdk/drag-drop';
 import { DateTimePipe } from 'src/app/shared/pipes/date-time-pipe';
 import { MergedPlanningServices } from 'src/app/core/services/MergedPlanning/merged-planning-services';
 import { ProductionSteps } from '../production-steps/production-steps';
@@ -20,9 +17,9 @@ import { ItemPlanningFields } from '../item-planning-fields/item-planning-fields
 import { CommonService } from 'src/app/core/services/Common/CommonService';
 import { IPriority } from 'src/app/core/model/Common/Priority/Priority';
 import {
-  IMergedPlanning,
-  IMergedPlanningDetails,
-  IMergedPlanningLine,
+IMergedPlanning,
+IMergedPlanningDetails,
+IMergedPlanningLine,
 } from 'src/app/core/model/MergedPlanning/merged-planning-model';
 import { IBusinessFlowForPlanning } from 'src/app/core/model/Common/BusinessFlow/production-steps-model';
 import { IMachine } from 'src/app/core/model/Common/Machine/machine';
@@ -30,10 +27,10 @@ import { IRecipe } from 'src/app/core/model/Common/Recipe/Recipe';
 import { ItemPlanningStateService } from 'src/app/core/services/MergedPlanning/item-planning-state-service';
 import { ProcessStepStateService } from 'src/app/core/services/MergedPlanning/process-step-state-service';
 import {
-  IItemPlanningInput,
-  IProcessStepInput,
-  IProductionPlanHeader,
-  IProductionPlanLine,
+IItemPlanningInput,
+IProcessStepInput,
+IProductionPlanHeader,
+IProductionPlanLine,
 } from 'src/app/core/model/MergedPlanning/planning-processes-model';
 import { ToastrService } from 'ngx-toastr';
 import { IApiResponse } from 'src/app/core/model/Response/ApiResponse';

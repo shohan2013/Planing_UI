@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ChartType, ChartConfiguration, ChartEvent, ActiveElement } from 'chart.js';
+import { ChartType,ChartConfiguration,ChartEvent } from 'chart.js';
 
 @Component({
   selector: 'app-scatter-chart',

@@ -1,5 +1,5 @@
-import { Component, viewChild } from '@angular/core';
-import { ChartConfiguration, ChartType, ChartEvent, ActiveElement } from 'chart.js';
+import { Component,viewChild } from '@angular/core';
+import { ChartConfiguration,ChartType,ChartEvent } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 
 @Component({

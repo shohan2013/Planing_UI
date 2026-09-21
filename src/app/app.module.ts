@@ -1,22 +1,22 @@
 
-import {NgModule} from '@angular/core';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {RouterModule} from '@angular/router';
+import { NgModule } from '@angular/core';
+import { FormsModule,ReactiveFormsModule } from '@angular/forms';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { RouterModule } from '@angular/router';
 import { StoreModule } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { configReducer } from './ThemeOptions/store/config.reducer.ngrx';
 import { ConfigService } from './ThemeOptions/store/config.service';
 import { environment } from '../environments/environment';
-import {AppRoutingModule} from './app-routing.module';
+import { AppRoutingModule } from './app-routing.module';
 
-import {CommonModule} from '@angular/common';
-import {HTTP_INTERCEPTORS, HttpClientModule, provideHttpClient, withInterceptors, withXsrfConfiguration} from '@angular/common/http';
-import {AppComponent} from './app.component';
+import { CommonModule } from '@angular/common';
+import { HttpClientModule,provideHttpClient,withInterceptors,withXsrfConfiguration } from '@angular/common/http';
+import { AppComponent } from './app.component';
 
 // BOOTSTRAP COMPONENTS
-import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
-import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { provideCharts,withDefaultRegisterables } from 'ng2-charts';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 // Feature Modules
@@ -31,22 +31,22 @@ import { ChartsModule } from './charts.module';
 import { SharedModule } from './shared.module';
 
 // LAYOUT
-import {BaseLayoutComponent} from './Layout/base-layout/base-layout.component';
-import {PagesLayoutComponent} from './Layout/pages-layout/pages-layout.component';
+import { BaseLayoutComponent } from './Layout/base-layout/base-layout.component';
+import { PagesLayoutComponent } from './Layout/pages-layout/pages-layout.component';
 
 // HEADER
-import {HeaderComponent} from './Layout/Components/header/header.component';
-import {SearchBoxComponent} from './Layout/Components/header/elements/search-box/search-box.component';
-import {UserBoxComponent} from './Layout/Components/header/elements/user-box/user-box.component';
-import {NotificationsBoxComponent} from './Layout/Components/header/elements/notifications-box/notifications-box';
-import {MessagesBoxComponent} from './Layout/Components/header/elements/messages-box/messages-box';
+import { HeaderComponent } from './Layout/Components/header/header.component';
+import { SearchBoxComponent } from './Layout/Components/header/elements/search-box/search-box.component';
+import { UserBoxComponent } from './Layout/Components/header/elements/user-box/user-box.component';
+import { NotificationsBoxComponent } from './Layout/Components/header/elements/notifications-box/notifications-box';
+import { MessagesBoxComponent } from './Layout/Components/header/elements/messages-box/messages-box';
 
 // SIDEBAR
-import {SidebarComponent} from './Layout/Components/sidebar/sidebar.component';
-import {LogoComponent} from './Layout/Components/sidebar/elements/logo/logo.component';
+import { SidebarComponent } from './Layout/Components/sidebar/sidebar.component';
+import { LogoComponent } from './Layout/Components/sidebar/elements/logo/logo.component';
 
 // FOOTER
-import {FooterComponent} from './Layout/Components/footer/footer.component';
+import { FooterComponent } from './Layout/Components/footer/footer.component';
 
 // All component imports are handled by feature modules
 
@@ -54,7 +54,7 @@ import {FooterComponent} from './Layout/Components/footer/footer.component';
 import { ToastrModule } from 'ngx-toastr';
 
 // ThemeOptions
-import {ThemeOptions} from './theme-options';
+import { ThemeOptions } from './theme-options';
 import { authintercepthor } from './core/guards/auth/authinterceptor';
 import { errorInterceptor } from './core/guards/auth/errorInterceptor';
 import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';

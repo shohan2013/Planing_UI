@@ -22,7 +22,6 @@ import { IEnroll } from '../../model/Common/Enroll/Enroll';
 import { IApproveMatrixGroupList } from '../../model/Common/ApproveMatrixGroupList/ApproveMatrixGroupList';
 import { environment } from 'src/environments/environment';
 import { IBusinessFlowForPlanning } from '../../model/Common/BusinessFlow/production-steps-model';
-import { ServerQueryResponse } from '../../model/Common/Pagination/ServerQueryRequest';
 import { IMachine } from '../../model/Common/Machine/machine';
 import { IRecipe } from '../../model/Common/Recipe/Recipe';
 

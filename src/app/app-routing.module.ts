@@ -43,7 +43,6 @@ import {
   // Chart components
   ChartjsComponent,
 } from './components.barrel';
-import { authGuard } from './core/guards/auth/auth.guard';
 import { Requisition } from './pages/Requisition/requisition';
 
 const routes: Routes = [
