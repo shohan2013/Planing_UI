@@ -60,17 +60,17 @@
             role="tabpanel"
             aria-labelledby="basic-tab1-tab"
           >
-            @if (activeTab() === 'mergeOrSplit') {
+            @if (renderedTab() === 'mergeOrSplit') {
             <app-delivery-orders> </app-delivery-orders>
             }
           </div>
           <div
             class="tab-pane fade show active"
-            id="basic-tab1"
+            id="basic-tab2"
             role="tabpanel"
-            aria-labelledby="basic-tab1-tab"
+            aria-labelledby="basic-tab2-tab"
           >
-            @if (activeTab() === 'planning') {
+            @if (renderedTab() === 'planning') {
             <app-merged-planning> </app-merged-planning>
             }
           </div>
@@ -80,7 +80,7 @@
             role="tabpanel"
             aria-labelledby="basic-tab3-tab"
           >
-            @if (activeTab() === 'planningHistory') {
+            @if (renderedTab() === 'planningHistory') {
             <app-planning-history-list> </app-planning-history-list>
             }
           </div>
