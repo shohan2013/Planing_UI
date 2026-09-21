@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, signal } from '@angular/core';
-
-import { IMachineUtilization } from 'src/app/core/model/Common/Machine/machine-utilization';
 import {
   SLOT_COLORS,
   utilizationBadgeClass,
-} from '../machine-dashboard.constants';
-import { ISlotStyle } from '../machine-dashboard.model';
+} from '../../../../core/model/MachineDashboard/machine-dashboard.constants';
+import {
+  IMachineUtilization,
+  ISlotStyle,
+} from '../../../../core/model/MachineDashboard/machine-dashboard.model';
 
 @Component({
   selector: 'app-machine-timeline-tab',

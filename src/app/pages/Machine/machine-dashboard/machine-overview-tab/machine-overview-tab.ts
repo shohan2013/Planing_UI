@@ -4,10 +4,13 @@ import { ChartConfiguration, ChartData } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 
 import {
+  SLOT_COLORS,
+  utilizationColor,
+} from '../../../../core/model/MachineDashboard/machine-dashboard.constants';
+import {
   IMachineDashboardSummary,
   IMachineUtilization,
-} from 'src/app/core/model/Common/Machine/machine-utilization';
-import { SLOT_COLORS, utilizationColor } from '../machine-dashboard.constants';
+} from 'src/app/core/model/MachineDashboard/machine-dashboard.model';
 
 type TrendDirection = 'up' | 'down' | 'flat';
 type TrendSentiment = 'positive' | 'negative' | 'neutral';
@@ -18,7 +21,11 @@ interface IKpiTrend {
   sentiment: TrendSentiment;
 }
 
-const FLAT_TREND: IKpiTrend = { direction: 'flat', percent: 0, sentiment: 'neutral' };
+const FLAT_TREND: IKpiTrend = {
+  direction: 'flat',
+  percent: 0,
+  sentiment: 'neutral',
+};
 
 function computeTrend(
   current: number,
@@ -165,7 +172,9 @@ export class MachineOverviewTab {
         {
           label: 'Utilization %',
           data: list.map((m) => m.UtilizationPercent),
-          backgroundColor: list.map((m) => utilizationColor(m.UtilizationPercent)),
+          backgroundColor: list.map((m) =>
+            utilizationColor(m.UtilizationPercent),
+          ),
           borderRadius: 6,
           maxBarThickness: 28,
         },

@@ -5,19 +5,30 @@ import { Subject, takeUntil } from 'rxjs';
 
 import { IBusiness } from 'src/app/core/model/Common/BusinessType/BusinessType';
 import { IUnit } from 'src/app/core/model/Common/Unit/Unit';
-import { IMachineDashboardSummary, IMachineUtilization } from 'src/app/core/model/Common/Machine/machine-utilization';
 
 import { CommonService } from 'src/app/core/services/Common/CommonService';
-import { MachineDashboardService } from 'src/app/core/services/Machine/machine-dashboard.service';
+import { MachineDashboardService } from 'src/app/core/services/MachineDashboard/machine-dashboard.service';
 
 import { MachineOverviewTab } from './machine-overview-tab/machine-overview-tab';
 import { MachineTimelineTab } from './machine-timeline-tab/machine-timeline-tab';
+import {
+  IMachineDashboardSummary,
+  IMachineUtilization,
+} from 'src/app/core/model/MachineDashboard/machine-dashboard.model';
 
 type MachineDashboardTab = 'overview' | 'timeline';
 
 function toDateInputValue(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
+
+const EMPTY_SUMMARY: IMachineDashboardSummary = {
+  TotalMachines: 0,
+  AvgUtilizationPercent: 0,
+  TotalAllocatedHours: 0,
+  TotalFreeHours: 0,
+  TotalDowntimeHours: 0,
+};
 
 @Component({
   selector: 'app-machine-dashboard',
@@ -137,11 +148,13 @@ export class MachineDashboard implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
-          this.summary.set(data.Summary);
-          this.machines.set(data.Machines);
+          this.summary.set(data?.Summary ?? EMPTY_SUMMARY);
+          this.machines.set(data?.Machines ?? []);
           this.loading.set(false);
         },
         error: () => {
+          this.summary.set(EMPTY_SUMMARY);
+          this.machines.set([]);
           this.loading.set(false);
         },
       });
