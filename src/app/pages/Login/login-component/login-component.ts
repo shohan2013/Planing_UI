@@ -43,7 +43,6 @@ constructor(public loginservice:LoginService,private router:Router,private toast
     error:(error) => {
       console.log('Error :',error);
     }
-      
     });
   }
 
