@@ -1,49 +1,48 @@
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { Routes,RouterModule } from '@angular/router';
 
 import { BaseLayoutComponent } from './Layout/base-layout/base-layout.component';
 import { PagesLayoutComponent } from './Layout/pages-layout/pages-layout.component';
 
 // Import all components from barrel file
 import {
-  // Dashboard components
-  AnalyticsComponent,
+// Dashboard components
+AnalyticsComponent,
 
-  // Elements components
-  StandardComponent,
-  DropdownsComponent,
-  CardsComponent,
-  ListGroupsComponent,
-  TimelineComponent,
-  IconsComponent,
+// Elements components
+StandardComponent,
+DropdownsComponent,
+CardsComponent,
+ListGroupsComponent,
+TimelineComponent,
+IconsComponent,
 
-  // Components
-  AccordionsComponent,
-  TabsComponent,
-  CarouselComponent,
-  ModalsComponent,
-  ProgressBarComponent,
-  TooltipsPopoversComponent,
+// Components
+AccordionsComponent,
+TabsComponent,
+CarouselComponent,
+ModalsComponent,
+ProgressBarComponent,
+TooltipsPopoversComponent,
 
-  // Form components
-  ControlsComponent,
-  LayoutComponent,
+// Form components
+ControlsComponent,
+LayoutComponent,
 
-  // Table components
-  RegularComponent,
-  TablesMainComponent,
+// Table components
+RegularComponent,
+TablesMainComponent,
 
-  // Widget components
-  ChartBoxes3Component,
+// Widget components
+ChartBoxes3Component,
 
-  // User pages components
-  ForgotPasswordBoxedComponent,
-  LoginBoxedComponent,
-  RegisterBoxedComponent,
-  // Chart components
-  ChartjsComponent,
+// User pages components
+ForgotPasswordBoxedComponent,
+LoginBoxedComponent,
+RegisterBoxedComponent,
+// Chart components
+ChartjsComponent,
 } from './components.barrel';
-import { Requisition } from './pages/Requisition/requisition';
 
 import { permissionGuard } from 'src/app/core/guards/auth/permission.guard';
 

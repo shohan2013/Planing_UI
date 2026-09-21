@@ -1,13 +1,10 @@
-import { Component, OnDestroy, signal } from '@angular/core';
+import { Component,OnDestroy,signal } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import {
-  catchError,
-  debounceTime,
-  distinctUntilChanged,
-  Subject,
-  switchMap,
+debounceTime,
+distinctUntilChanged,
+Subject
 } from 'rxjs';
-import { CommonService } from 'src/app/core/services/Common/CommonService';
 import { DeliveryOrders } from '../SalesOrder/sales-orders';
 import { MergedPlanning } from '../MergedPlanning/merged-planning';
 import { PlanningHistoryList } from '../PlanningHistory/planning-history-list/planning-history-list';
