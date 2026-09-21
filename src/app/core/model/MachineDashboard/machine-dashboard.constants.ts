@@ -1,4 +1,4 @@
-import { MachineSlotType } from 'src/app/core/model/Common/Machine/machine-utilization';
+export type MachineSlotType = 'Allocated' | 'Free' | 'Downtime';
 
 export const SLOT_COLORS: Record<MachineSlotType, string> = {
   Allocated: '#3ac47d',

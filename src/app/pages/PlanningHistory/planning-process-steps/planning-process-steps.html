@@ -31,13 +31,19 @@
     (cdkDropListDropped)="onDrop($event)"
   >
     @for (step of activeSteps; track step.Id) {
-    <div class="pps-card-wrap" cdkDrag cdkDragPreviewContainer="global">
+    <div
+      class="pps-card-wrap"
+      [class.pps-card-not-ready]="!isStepReady(step.Id)"
+      cdkDrag
+      cdkDragPreviewContainer="global"
+      [cdkDragDisabled]="!isStepReady(step.Id)"
+    >
       <app-process-step-from
         [lineId]="lineId"
         [step]="step"
         [machineOptions]="machineOptions"
         [initialValue]="initialValueFor(step.Id)"
-        (formValueChange)="onFormChange($event)"
+        (formValueChange)="onFormChange($event, step.Id)"
       ></app-process-step-from>
 
       <button

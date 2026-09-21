@@ -23,6 +23,7 @@ import {
   IPlanningHistory,
   IPlanningHistoryDetails,
   IPlanningHistoryLine,
+  IPlanningHistoryUpdateConfigure,
   IPlanningHistoryUpdateLine,
   IPlanningHistoryUpdateRequest,
 } from 'src/app/core/model/PlanningHistory/planning-history-model';
@@ -187,6 +188,12 @@ export class PlanningEditView implements OnInit, OnChanges, OnDestroy {
     return Number(localStorage.getItem('Enroll'));
   }
 
+  // Each active step is matched back to its originally-saved config (by
+  // StepId) so an edit to an already-saved step keeps its row id (in-place
+  // update); a step the user newly added has no match and goes out with
+  // Id: 0 (insert). Anything originally saved that's no longer active is
+  // still sent, but as IsActive: false with its original id, so the
+  // backend deactivates that row instead of just losing track of it.
   private buildUpdateLines(): IPlanningHistoryUpdateLine[] {
     const itemPlanning = this.itemPlanningState.items();
     const processSteps = this.processStepState.processSteps();
@@ -201,30 +208,55 @@ export class PlanningEditView implements OnInit, OnChanges, OnDestroy {
           return null;
         }
 
-        const steps = processSteps
+        const activeSteps = processSteps
           .filter((x) => x.lineId === line.Id)
           .sort((a, b) => a.orderNo - b.orderNo);
 
+        const originalSteps = line.Steps ?? [];
+        const activeStepIds = new Set(activeSteps.map((s) => s.stepId));
+
+        const deactivatedConfigures: IPlanningHistoryUpdateConfigure[] =
+          originalSteps
+            .filter((s) => !activeStepIds.has(s.StepId))
+            .map((s) => ({
+              Id: s.Id,
+              BusinessConfigureId: s.StepId,
+              ProductId: line.ProductId,
+              StartDate: s.StartDate,
+              EndDate: s.EndDate,
+              MachineId: s.MachineId,
+              OrderNo: s.OrderNo ?? 0,
+              IsActive: false,
+            }));
+
+        const activeConfigures: IPlanningHistoryUpdateConfigure[] =
+          activeSteps.map((step) => {
+            const original = originalSteps.find(
+              (s) => s.StepId === step.stepId,
+            );
+
+            return {
+              Id: original?.Id ?? 0,
+              BusinessConfigureId: step.stepId,
+              ProductId: line.ProductId,
+              StartDate: step.startDate,
+              EndDate: step.endDate,
+              MachineId: step.machineId,
+              OrderNo: step.orderNo,
+              IsActive: true,
+            };
+          });
+
+        const configures = [...activeConfigures, ...deactivatedConfigures];
+
         return {
           Id: line.Id,
-          ProductId: line.ProductId,
           Quantity: line.Quantity,
           TakenQuantity: item.TakenQty,
           AdvanceProductionQuantity: item.AdvanceProductionQty ?? 0,
-          Rate: line.Rate,
           RecipeVersionId: item.RecipeVersionId ?? 0,
           PriorityId: item.PriorityId ?? 0,
-          ProductionPlanConfigures:
-            steps.length > 0
-              ? steps.map((step) => ({
-                  BusinessConfigureId: step.stepId,
-                  ProductId: line.ProductId,
-                  StartDate: step.startDate,
-                  EndDate: step.endDate,
-                  MachineId: step.machineId,
-                  OrderNo: step.orderNo,
-                }))
-              : null,
+          ProductionPlanConfigures: configures.length > 0 ? configures : null,
         };
       })
       .filter((line): line is IPlanningHistoryUpdateLine => line !== null);
@@ -245,7 +277,6 @@ export class PlanningEditView implements OnInit, OnChanges, OnDestroy {
 
     const request: IPlanningHistoryUpdateRequest = {
       Header: {
-        PPId: header?.Id ?? 0,
         DocUpdatedBy: this.UserEnroll,
         BusinessId: header?.BusinessId ?? 0,
         UnitId: header?.UnitId ?? 0,
@@ -255,6 +286,7 @@ export class PlanningEditView implements OnInit, OnChanges, OnDestroy {
 
     this.isSaving.set(true);
 
+    console.log(request);
     this.planningHistoryService
       .UpdatePlan(this.headerId, request)
       .pipe(takeUntil(this.destroy$))

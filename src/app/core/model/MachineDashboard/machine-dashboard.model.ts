@@ -1,4 +1,11 @@
-export type MachineSlotType = 'Allocated' | 'Free' | 'Downtime';
+import { MachineSlotType } from './machine-dashboard.constants';
+
+export interface ISlotStyle {
+  type: MachineSlotType;
+  label: string;
+  widthPercent: number;
+  tooltip: string;
+}
 
 export interface IMachineSlot {
   Type: MachineSlotType;
