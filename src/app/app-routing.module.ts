@@ -45,9 +45,7 @@ import {
 } from './components.barrel';
 import { Requisition } from './pages/Requisition/requisition';
 
-import { permissionGuard } from 'src/app/core/guards/permission.guard';
-
-
+import { permissionGuard } from 'src/app/core/guards/auth/permission.guard';
 
 const routes: Routes = [
   {
@@ -56,15 +54,15 @@ const routes: Routes = [
 
     canActivateChild: [permissionGuard],
 
-    children: 
-    [
+    children: [
       // Dashboards
       //{path: 'pages/login-boxed', component: LoginBoxedComponent, data: {extraParameter: ''}},
       { path: '', redirectTo: '/pages/login-boxed', pathMatch: 'full' },
       {
         path: 'dashboards/analytics',
 
-        redirectTo: 'requisition', pathMatch: 'full',
+        redirectTo: 'requisition',
+        pathMatch: 'full',
         // component: Requisition,
         // data: { extraParameter: 'dashboardsMenu' },
       },
@@ -77,13 +75,10 @@ const routes: Routes = [
       {
         path: 'permission-required',
         loadComponent: () =>
-          import(
-            './pages/permission-required/permission-required'
-          ).then((m) => m.PermissionRequired),
+          import('./pages/permission-required/permission-required').then(
+            (m) => m.PermissionRequired,
+          ),
       },
-
-
-
 
       {
         path: 'permission',
@@ -222,7 +217,7 @@ const routes: Routes = [
     ],
   },
 
-//////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////
 
   {
     path: '',
@@ -247,8 +242,7 @@ const routes: Routes = [
     ],
   },
 
-////////////////////////////////////
-
+  ////////////////////////////////////
 
   {
     // Documentation section — lazy-loaded so it stays out of the initial bundle
@@ -257,10 +251,6 @@ const routes: Routes = [
   },
   { path: '**', redirectTo: '' },
 ];
-
-
-
-
 
 @NgModule({
   imports: [
