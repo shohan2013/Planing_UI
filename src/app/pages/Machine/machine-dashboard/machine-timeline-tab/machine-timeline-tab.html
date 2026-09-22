@@ -1,6 +1,6 @@
-<div class="card border-0 shadow-sm">
+<div class="card border-0 shadow-sm timeline-card">
   <div
-    class="card-header bg-white border-0 d-flex align-items-center justify-content-between"
+    class="card-header timeline-card-header bg-white border-0 d-flex align-items-center justify-content-between"
   >
     <h6 class="fw-bold mb-0">Machine Time Slot Timeline</h6>
     <div class="d-flex align-items-center gap-3 small">
@@ -8,12 +8,10 @@
       Allocated
       <span class="legend-dot" [style.background]="slotColors.Free"></span>
       Free
-      <span class="legend-dot" [style.background]="slotColors.Downtime"></span>
-      Downtime
     </div>
   </div>
 
-  <div class="card-body">
+  <div class="card-body timeline-card-body">
     @if (loading) {
       <div class="text-center text-muted py-5">
         <i class="fa-solid fa-spinner fa-spin fa-2x mb-2"></i>
@@ -38,7 +36,12 @@
               </span>
               <span>Allocated: {{ (machine.AllocatedMinutes / 60) | number: '1.1-1' }}h</span>
               <span>Free: {{ (machine.FreeMinutes / 60) | number: '1.1-1' }}h</span>
-              <span>Downtime: {{ (machine.DowntimeMinutes / 60) | number: '1.1-1' }}h</span>
+              <span
+                class="fw-semibold"
+                [style.color]="slotColors.Downtime"
+              >
+                Downtime: {{ (machine.DowntimeMinutes / 60) | number: '1.1-1' }}h
+              </span>
             </div>
           </div>
 

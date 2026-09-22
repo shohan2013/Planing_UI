@@ -26,3 +26,58 @@
   border-bottom: none;
   justify-content: center;
 }
+
+// Fit the dashboard to the viewport; only the data cards scroll internally.
+:host {
+  display: block;
+}
+
+.md-shell {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 140px);
+  min-height: 480px;
+}
+
+.md-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding-top: 0;
+
+  > .card {
+    flex: 0 0 auto;
+  }
+
+  > app-machine-overview-tab,
+  > app-machine-timeline-tab {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  > .alert,
+  > .text-center {
+    flex: 0 0 auto;
+  }
+}
+
+// .md-body {
+//   padding-bottom: 0rem;
+// }
+
+// Compact top area: more room for the charts. Title itself uses the shared
+// .page-header style from styles.scss, same as the other business pages.
+.md-shell {
+  // The shared .page-header (styles.scss) is taller than the old compact
+  // one this used to override, so give it back the extra viewport budget.
+  height: calc(100vh - 140px);
+
+  > hr {
+    margin: 0.4rem 0;
+  }
+
+  .md-body {
+    padding: 0 0.75rem 0.5rem;
+  }
+}
