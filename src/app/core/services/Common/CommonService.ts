@@ -24,6 +24,7 @@ import { environment } from 'src/environments/environment';
 import { IBusinessFlowForPlanning } from '../../model/Common/BusinessFlow/production-steps-model';
 import { IMachine } from '../../model/Common/Machine/machine';
 import { IRecipe } from '../../model/Common/Recipe/Recipe';
+import { IActiveRole } from '../../model/Role/Role';
 
 @Injectable({
   providedIn: 'root',
@@ -201,4 +202,18 @@ export class CommonService {
       `${environment.API_URL}${GlobalConstant.API_END_POINTS.Recipe}?UnitId=${unitId}&BusinessId=${BusinessesId}`,
     );
   }
+
+
+
+    getActiveRoles(): Observable<IActiveRole[]> {
+      return this.http.get<IActiveRole[]>(
+        `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.activeRoles}`,
+      );
+    }
+
+
+
+
+
+
 }

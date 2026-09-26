@@ -1,0 +1,108 @@
+@import url(../../../../styles.scss);
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+/* Remove unnecessary outer spacing. */
+
+:host > .card-body {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Main Role Management card */
+
+.main-card {
+  width: 100%;
+  margin: 0 !important;
+  overflow: hidden;
+}
+
+/*
+  The card body containing the tabs and tab content
+  must not introduce additional padding.
+*/
+.main-card > .card-body {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: 1rem;
+}
+
+/* Role Management tabs */
+
+.role-management-tabs {
+  display: flex;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-bottom: 0;
+  white-space: nowrap;
+}
+
+.role-management-tabs .nav-item {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0;
+}
+
+.role-management-tabs .nav-link {
+  margin: 0;
+  padding: 0.8rem 1.5rem;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+/* Remove the gap between tabs and tab content. */
+
+.role-management-tabs + .tab-content {
+  width: 100%;
+  margin: 0;
+  padding: 0 !important;
+}
+
+.role-management-tabs
+  + .tab-content
+  .tab-pane {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.role-management-tabs
+  + .tab-content
+  app-role-assign,
+.role-management-tabs
+  + .tab-content
+  app-role-permission {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/*
+  Make the child card begin exactly underneath
+  the active tab.
+*/
+.role-management-tabs
+  + .tab-content
+  .user-card {
+  width: 100%;
+  margin: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* Responsive tabs */
+
+@media (max-width: 767.98px) {
+  .role-management-tabs .nav-link {
+    padding: 0.7rem 1rem;
+  }
+}

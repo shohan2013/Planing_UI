@@ -1,0 +1,66 @@
+<div class="card-body">
+  <div class="col-md-12">
+    <div class="card main-card mb-3">
+      <div class="card-header">
+        <h5>ROLE MANAGEMENT</h5>
+      </div>
+
+      <div class="card-body">
+        <ul class="nav nav-tabs role-management-tabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button
+              type="button"
+              class="nav-link"
+              role="tab"
+              [class.active]="activeTab() === 'role-assign'"
+              [attr.aria-selected]="
+                activeTab() === 'role-assign'
+              "
+              (click)="onTabChange('role-assign')"
+            >
+              ROLES
+            </button>
+          </li>
+
+          <li class="nav-item" role="presentation">
+            <button
+              type="button"
+              class="nav-link"
+              role="tab"
+              [class.active]="
+                activeTab() === 'role-permission'
+              "
+              [attr.aria-selected]="
+                activeTab() === 'role-permission'
+              "
+              (click)="onTabChange('role-permission')"
+            >
+              ROLE PERMISSION
+            </button>
+          </li>
+        </ul>
+
+        <div class="tab-content">
+          @if (activeTab() === 'role-assign') {
+            <div
+              class="tab-pane fade show active"
+              role="tabpanel"
+            >
+              <app-role-assign></app-role-assign>
+            </div>
+          }
+
+          @if (activeTab() === 'role-permission') {
+            <div
+              class="tab-pane fade show active"
+              role="tabpanel"
+            >
+              <app-role-permission></app-role-permission>
+               <!-- Role Permission will be implemented later. -->
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

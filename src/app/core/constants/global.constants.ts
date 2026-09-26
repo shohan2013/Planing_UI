@@ -61,6 +61,24 @@ export const GlobalConstant = {
     Recipe: 'Common/GetRecipe',
     MachineUtilization: 'MachineDashboard/GetMachineUtilization',
 
+
+
+  /*===========================ROLE===================================== */
+
+    activeRoles: 'Common/ActiveRoles',
+    assignRole: 'Role/Assign',
+    terminateRoleView: 'Role/TerminateView',
+    terminateRole: 'Role/Terminate',
+
+
+    getRolePermissions: 'RolePermission',
+    rolePermissionMatrix: 'RolePermission/Matrix',
+    viewRolePermission: 'RolePermission/View',
+    addRolePermission: 'RolePermission',
+    updateRolePermission: 'RolePermission',
+    deleteRolePermission: 'RolePermission/Delete',
+
+
     /*==============================PLANNING====================================*/
     DeliveryOrders: 'SalesOrderLanding/GetDOData',
     DeliveryOrderLine: 'SalesOrderLanding/GetDOLineData',
