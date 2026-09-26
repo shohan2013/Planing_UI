@@ -4,6 +4,8 @@
 
 .modal-body {
   padding-right: 30px;
+    background-color: #fff;
+
 }
 
 .modal-body .form-label,
@@ -80,6 +82,20 @@ fieldset legend {
 .custom-table td {
   vertical-align: middle;
 }
+
+.btn-complete {
+  color: #315fde;
+  background-color: #dbeafe;
+  border-color: #2a75d1;
+}
+
+.btn-complete:hover {
+  color: #5072e0;
+  background-color: #bfdbfe;
+  border-color: #5d93d1;
+}
+
+
 
 @media (max-width: 767.98px) {
   .modal-body {

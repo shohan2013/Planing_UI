@@ -50,6 +50,7 @@ export class Requisition
   readonly businesses = signal<IBusiness[]>([]);
   readonly businessesLoading = signal(false);
   readonly deletingReqId = signal<number | null>(null);
+  readonly completingReqId = signal<number | null>(null);
 
   private viewModalRef: NgbModalRef | null = null;
   private formModalRef: NgbModalRef | null = null;
@@ -184,6 +185,63 @@ export class Requisition
       });
   }
 
+
+
+completeRequisition(reqId: number): void {
+  if (
+    this.completingReqId() !== null ||
+    this.deletingReqId() !== null
+  ) {
+    return;
+  }
+
+  const confirmed = confirm(
+    'Are you sure you want to complete this requisition?',
+  );
+
+  if (!confirmed) return;
+
+  this.completingReqId.set(reqId);
+
+  this.requisitionService
+    .completeData(reqId)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (response) => {
+        this.completingReqId.set(null);
+
+        if (response.Status) {
+          this.toastr.success(response.Message);
+          this.retry();
+          return;
+        }
+
+        this.toastr.error(
+          response.Message || 'Unable to complete the requisition.',
+        );
+      },
+      error: (error) => {
+        this.completingReqId.set(null);
+
+        this.toastr.error(
+          error?.error?.detail ??
+          error?.error?.Detail ??
+          error?.error?.message ??
+          error?.error?.Message ??
+          'Unable to complete the requisition.',
+        );
+      },
+    });
+}
+
+
+
+
+
+
+
+
+
   getDocStatusName(docStatusId: number): string {
     switch (docStatusId) {
       case 1:
@@ -194,6 +252,9 @@ export class Requisition
 
       case 3:
         return 'Reject';
+        
+      case 4:
+        return 'Complete';
 
       default:
         return '-';

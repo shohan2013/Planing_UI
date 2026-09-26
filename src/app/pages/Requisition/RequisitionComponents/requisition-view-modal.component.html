@@ -77,7 +77,8 @@
                 [ngClass]="{
                   'status-pending': header.DocStatusId === 1,
                   'status-approve': header.DocStatusId === 2,
-                  'status-reject': header.DocStatusId === 3
+                  'status-reject': header.DocStatusId === 3,
+                  'status-complete': header.DocStatusId === 4
                 }"
               >
                 <span class="g-dot"></span>
@@ -99,10 +100,11 @@
             <th>ITEM</th>
             <th>UOM</th>
             <th>QUANTITY</th>
+            <th>REMAINING STOCK QUANTITY</th>
             <th>STOCK QUANTITY</th>
             <th>SALES QUANTITY</th>
             <th>REMARKS</th>
-            <th>STATUS</th>
+            <!-- <th>STATUS</th> -->
           </tr>
         </thead>
 
@@ -120,10 +122,31 @@
                 <td>{{ line.ItemName || '-' }}</td>
                 <td>{{ line.UOMName || '-' }}</td>
                 <td>{{ line.Quantity }}</td>
+
+                <td
+                  [style.background-color]="
+                    line.RemainingQuantity !== null && line.RemainingQuantity < 0
+                      ? '#fff1f2'
+                      : null
+                  "
+                >
+                  {{
+                    line.RemainingQuantity === null
+                      ? '-'
+                      : line.RemainingQuantity < 0
+                        ? -line.RemainingQuantity
+                        : line.RemainingQuantity
+                  }}
+                </td>
+
+
+
+
                 <td>{{ line.StockQuantity ?? 0 }}</td>
                 <td>{{ line.SalesQuantity ?? 0 }}</td>
                 <td>{{ line.Remarks || '-' }}</td>
 
+                <!--
                 <td>
                   <span
                     class="g-status g-status-lg"
@@ -137,6 +160,12 @@
                     {{ getDocStatusName(line.DocStatusId) }}
                   </span>
                 </td>
+                -->
+
+
+
+
+
               </tr>
             }
           }

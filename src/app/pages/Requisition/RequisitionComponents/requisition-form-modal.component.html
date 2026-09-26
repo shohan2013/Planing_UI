@@ -298,6 +298,8 @@
         <div [formGroup]="lineFormGroup">
           <div class="table-responsive">
             <table class="custom-table">
+
+<!--
               <colgroup>
                 <col style="width: 13%" />
                 <col style="width: 22%" />
@@ -308,6 +310,8 @@
                 <col style="width: 16%" />
                 <col style="width: 7%" />
               </colgroup>
+-->
+
 
               <thead>
                 <tr>
@@ -546,19 +550,22 @@
                   </td>
 
                   <td>
-                    <button
-                      type="button"
-                      class="btn btn-success"
-                      title="Add Line"
-                      [disabled]="
-                        !canAddLine ||
-                        isSubmitting
-                      "
-                      (click)="addLine()"
-                    >
-                      <i class="fa-solid fa-plus"></i>
-                      Add
-                    </button>
+
+
+<button
+  type="button"
+  class="btn btn-success text-nowrap"
+  title="Add Line"
+  [disabled]="
+    !canAddLine ||
+    isSubmitting
+  "
+  (click)="addLine()"
+>
+  <i class="fa-solid fa-plus me-1"></i> Add
+</button>
+
+
                   </td>
                 </tr>
               </tbody>
@@ -583,6 +590,8 @@
       @if (lines.length > 0) {
         <div class="table-responsive mt-3">
           <table class="custom-table">
+
+            <!--
             <colgroup>
               <col style="width: 4%" />
               <col style="width: 12%" />
@@ -599,6 +608,8 @@
 
               <col style="width: 4%" />
             </colgroup>
+-->
+
 
             <thead>
               <tr>
@@ -607,13 +618,20 @@
                 <th>ITEM</th>
                 <th>UOM</th>
                 <th>QUANTITY</th>
+
+                @if (isEditMode) {
+                  <th>REMAINING QUANTITY</th>
+                }
+
                 <th>STOCK QUANTITY</th>
                 <th>SALES QUANTITY</th>
                 <th>REMARKS</th>
 
-                @if (isEditMode) {
+
+
+                <!-- @if (isEditMode) {
                   <th>STATUS</th>
-                }
+                } -->
 
                 <th>ACTION</th>
               </tr>
@@ -658,6 +676,26 @@
                     }}
                   </td>
 
+
+
+                  @if (isEditMode) {
+                    <td
+                      [style.background-color]="
+                        line.get('RemainingQuantity')?.value < 0 ? '#fff1f2' : null
+                      "
+                    >
+                      {{
+                        line.get('RemainingQuantity')?.value == null
+                          ? '-'
+                          : line.get('RemainingQuantity')?.value < 0
+                            ? -line.get('RemainingQuantity')?.value
+                            : line.get('RemainingQuantity')?.value
+                      }}
+                    </td>
+                  }     
+
+
+
                   <td>
                     {{
                       line.get('StockQuantity')?.value
@@ -677,6 +715,7 @@
                     }}
                   </td>
 
+                  <!--
                   @if (isEditMode) {
                     <td>
                       <span
@@ -690,6 +729,11 @@
                             +line.get('DocStatusId')?.value === 3
                         }"
                       >
+                    
+
+
+
+
                         <span class="g-dot"></span>
 
                         {{
@@ -700,7 +744,9 @@
                       </span>
                     </td>
                   }
+                   -->
 
+  
                   <td class="text-end">
                     <button
                       type="button"
@@ -759,7 +805,8 @@
         class="btn btn-success"
         [disabled]="
           isSubmitting ||
-          unitDataLoading()
+          unitDataLoading() ||
+          (isEditMode && header?.DocStatusId === 4)
         "
       >
         @if (isSubmitting) {
@@ -788,5 +835,19 @@
         }}
       </button>
     }
+
+    @if (isEditMode && state() !== 'initializing') {
+      <button
+        [disabled]="isSubmitting || header?.DocStatusId === 4"
+        type="button"
+        class="btn btn-complete me-3"
+        (click)="complete()"
+      >
+        Complete
+      </button>
+    }
+
+
+
   </div>
 </form>

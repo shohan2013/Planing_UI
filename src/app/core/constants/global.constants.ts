@@ -33,6 +33,7 @@ export const GlobalConstant = {
     getRequisitionLines: 'Requisition/GetLinesByReqId',
     updateRequisition: 'Requisition/update',
     deleteRequisition: 'Requisition/Delete',
+    completeRequisition: "Requisition/complete",
 
     /*===========================COMMON===================================== */
     Common: 'Common',

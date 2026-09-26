@@ -164,7 +164,9 @@
                       'status-approve':
                         item.DocStatusId === 2,
                       'status-reject':
-                        item.DocStatusId === 3
+                        item.DocStatusId === 3,
+                      'status-complete':
+                        item.DocStatusId === 4
                     }"
               >
                 <span class="g-dot"></span>
@@ -228,10 +230,34 @@
                   <i class="fa-solid fa-trash-can"></i>
                   }
                 </button>
+
+                <button
+                  type="button"
+                  class="action-btn btn-complete"
+                  title="Complete"
+                  [disabled]="
+                    item.DocStatusId === 4 ||
+                    deletingReqId() !== null ||
+                    completingReqId() !== null
+                  "
+                  (click)="completeRequisition(item.ReqID)"
+                >
+                  @if (completingReqId() === item.ReqID) {
+                    <span
+                      class="spinner-border spinner-border-sm"
+                      aria-hidden="true"
+                    ></span>
+                  } @else {
+                    <i class="fa-solid fa-circle-check"></i>
+                  }
+                </button>
+
+                
               </div>
             </td>
           </tr>
-          } }
+          }
+        }
         </tbody>
       </table>
     </div>

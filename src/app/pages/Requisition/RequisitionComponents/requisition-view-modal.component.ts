@@ -62,6 +62,11 @@ type ViewModalState = 'loading' | 'ready' | 'failed';
         color: #c53030;
         background-color: #fdecec;
       }
+
+      .status-complete {
+        color: #1d4ed8;
+        background-color: #dbeafe;
+      }
     `,
   ],
 })
@@ -118,6 +123,8 @@ export class RequisitionViewModalComponent implements OnInit {
         return 'Approve';
       case 3:
         return 'Reject';
+      case 4:
+        return 'Complete';
       default:
         return '-';
     }
