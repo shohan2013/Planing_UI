@@ -1,6 +1,7 @@
 import {
   Component,
   EventEmitter,
+  OnInit,
   input,
   Input,
   Output,
@@ -19,6 +20,8 @@ import { ProcessStepFrom } from '../process-step-from/process-step-from';
 import { IMachine } from 'src/app/core/model/Common/Machine/machine';
 import { IProcessStepInput } from 'src/app/core/model/MergedPlanning/planning-processes-model';
 import { ProcessStepStateService } from 'src/app/core/services/MergedPlanning/process-step-state-service';
+import { CommonService } from 'src/app/core/services/Common/CommonService';
+import { IPrePlannedRoute } from 'src/app/core/model/Common/BusinessFlow/pre-planned-route-model';
 import { ItemPlanningStateService } from 'src/app/core/services/MergedPlanning/item-planning-state-service';
 
 @Component({
@@ -28,7 +31,7 @@ import { ItemPlanningStateService } from 'src/app/core/services/MergedPlanning/i
   templateUrl: './production-steps.html',
   styleUrl: './production-steps.scss',
 })
-export class ProductionSteps {
+export class ProductionSteps implements OnInit {
   @Input() line: IMergedPlanningLine | null = null;
   @Input() machineOptions: IMachine[] = [];
 
@@ -58,7 +61,11 @@ export class ProductionSteps {
 
   private hoveredDropTarget: HTMLElement | null = null;
 
+  prePlannedRoutes = signal<IPrePlannedRoute[]>([]);
+  selectedRouteId = signal<number | null>(null);
+
   constructor(
+    private commonService: CommonService,
     public processStepStateService: ProcessStepStateService,
     private itemPlanningStateService: ItemPlanningStateService,
   ) {}
@@ -182,6 +189,58 @@ export class ProductionSteps {
     return this.steps().find((s) => s.Id === this.selectedStepId());
   }
 
+  ngOnInit(): void {
+    if (!this.line?.ProductId) return;
+
+    this.commonService.GetPrePlannedRoutes(this.line.ProductId).subscribe({
+      next: (routes) => this.prePlannedRoutes.set(routes ?? []),
+      error: () => this.prePlannedRoutes.set([]),
+    });
+  }
+
+  /**
+   * Adds every not-yet-planned step of the chosen route to the Planning Desk
+   * in route order, with empty dates/machine for the user to fill in there.
+   */
+  onRouteSelected(): void {
+    const routeId = this.selectedRouteId();
+    const line = this.line;
+    if (routeId == null || !line) return;
+
+    this.commonService.GetPrePlannedRouteSteps(routeId).subscribe({
+      next: (routeSteps) => {
+        const planned = new Set(this.droppedSteps.map((x) => x.stepId));
+        const ordered = [...(routeSteps ?? [])].sort((a, b) => a.Slno - b.Slno);
+
+        for (const rs of ordered) {
+          const stepId = rs.BusinessFlowConfiguration;
+          if (planned.has(stepId)) continue;
+
+          // Match against the Planning Process dropdown data (this.steps()),
+          // which may not have loaded yet or may not include this route's
+          // step ids (different business/unit) — skip rather than throw.
+          const step = this.steps().find((s) => s.Id === stepId);
+          if (!step) continue;
+
+          this.processStepStateService.updateProcessStep({
+            lineId: line.Id,
+            stepId: step.Id,
+            stepName: step.Name ?? '',
+            startDate: null,
+            endDate: null,
+            machineId: 0,
+            orderNo: step.Slno,
+          });
+        }
+
+        this.selectedStepId.set(null);
+        this.pendingFormValue = null;
+        this.selectedRouteId.set(null);
+      },
+      error: () => this.selectedRouteId.set(null),
+    });
+  }
+
   onStepSelected(): void {
     this.pendingFormValue = null;
     this.dropSucceeded.set(false);
@@ -211,6 +270,17 @@ export class ProductionSteps {
     const minutes = Math.floor(totalSeconds / 60);
 
     return `${days}d ${hours}h ${minutes}m`;
+  }
+
+  /**
+   * Mirrors merged-planning-view's isDeskStepValid: a step is Ready only once
+   * Start Date, End Date (in a non-reversed range), and Machine are all set.
+   * Pre-planned-route steps land here empty and stay "incomplete" until the
+   * user fills them in on the Planning Desk.
+   */
+  isStepValid(step: IProcessStepInput): boolean {
+    if (!step.startDate || !step.endDate || !step.machineId) return false;
+    return step.endDate >= step.startDate;
   }
 
   getMachineName(machineId: number): string {

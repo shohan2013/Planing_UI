@@ -398,6 +398,11 @@
   cursor: grabbing;
 }
 
+/* Step is missing/invalid start date, end date, or machine — not ready to save. */
+.desk-card-header.desk-card-header-incomplete {
+  background: #8a94a6;
+}
+
 .drag-handle {
   flex: 0 0 auto;
   font-size: 10px;

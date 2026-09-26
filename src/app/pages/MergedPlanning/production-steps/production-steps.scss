@@ -126,3 +126,9 @@
   font-size: 11px;
   font-weight: 600;
 }
+
+/* Step is missing Start Date, End Date, a valid range, or a Machine — not ready to save. */
+.ps-chip.ps-chip-incomplete {
+  background: #e2e3e5;
+  color: #495057;
+}

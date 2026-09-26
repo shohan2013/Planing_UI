@@ -23,7 +23,8 @@ import { IApproveMatrixGroupList } from '../../model/Common/ApproveMatrixGroupLi
 import { environment } from 'src/environments/environment';
 import { IBusinessFlowForPlanning } from '../../model/Common/BusinessFlow/production-steps-model';
 import { IMachine } from '../../model/Common/Machine/machine';
-import { IRecipe } from '../../model/Common/Recipe/Recipe';
+import { IPrePlannedRoute, IPrePlannedRouteStep } from '../../model/Common/BusinessFlow/pre-planned-route-model';
+import { IRecipe }from '../../model/Common/Recipe/Recipe';
 
 @Injectable({
   providedIn: 'root',
@@ -193,6 +194,18 @@ export class CommonService {
   GetMachine(unitId: number, BusinessesId: number): Observable<IMachine[]> {
     return this.http.get<IMachine[]>(
       `${environment.API_URL}${GlobalConstant.API_END_POINTS.Machine}?UnitId=${unitId}&BusinessId=${BusinessesId}`,
+    );
+  }
+
+  GetPrePlannedRoutes(productId: number): Observable<IPrePlannedRoute[]> {
+    return this.http.get<IPrePlannedRoute[]>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.PrePlannedRoute}?ProductId=${productId}`,
+    );
+  }
+
+  GetPrePlannedRouteSteps(routeId: number): Observable<IPrePlannedRouteStep[]> {
+    return this.http.get<IPrePlannedRouteStep[]>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.PrePlannedRouteSteps}?RouteId=${routeId}`,
     );
   }
 
