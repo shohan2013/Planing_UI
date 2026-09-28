@@ -7,6 +7,7 @@ import { LoginService } from '../../../core/services/login/login.service';
 import { Subject, takeUntil } from 'rxjs';
 import { faL } from '@fortawesome/free-solid-svg-icons';
 
+
 @Component({
   selector: 'app-login-boxed',
   templateUrl: './login-boxed.component.html',

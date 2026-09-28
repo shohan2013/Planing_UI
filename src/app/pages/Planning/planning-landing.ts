@@ -5,6 +5,7 @@ import { CommonService } from 'src/app/core/services/Common/CommonService';
 import { DeliveryOrders } from '../SalesOrder/sales-orders';
 import { MergedPlanning } from '../MergedPlanning/merged-planning';
 import { PlanningHistoryList } from '../PlanningHistory/planning-history-list/planning-history-list';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 @Component({
   selector: 'app-planning',
   imports: [DeliveryOrders, MergedPlanning, PlanningHistoryList],
@@ -13,13 +14,26 @@ import { PlanningHistoryList } from '../PlanningHistory/planning-history-list/pl
 })
 export class Planning implements OnDestroy {
   private destroy$ = new Subject<void>();
-
-  constructor(private modalService: NgbModal) {}
+  private tabChange$ = new Subject<string>();
+  
+  constructor(private modalService: NgbModal) {
+     this.tabChange$
+      .pipe(
+        debounceTime(1000),
+        distinctUntilChanged(),
+        takeUntilDestroyed()
+      )
+      .subscribe((tab) => {
+        this.renderedTab.set(tab);
+      });
+  }
 
   activeTab = signal<string>('mergeOrSplit');
+   renderedTab = signal<string>('mergeOrSplit');
 
   onTabChange(tab: string) {
     this.activeTab.set(tab);
+    this.tabChange$.next(tab);
   }
 
   PermissionModal(content: any) {
