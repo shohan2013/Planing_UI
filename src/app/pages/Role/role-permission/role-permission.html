@@ -1,0 +1,1024 @@
+<div class="user-card">
+  <div class="card-header">
+    <h5>ROLE PERMISSION</h5>
+  </div>
+
+  <div class="card-body">
+    <div class="d-flex gap-3">
+      <div class="flex-fill">
+        <button
+          type="button"
+          class="btn-shadow d-inline-flex align-items-center btn btn-success ms-1"
+          [disabled]="
+            matrixLoading() ||
+            viewLoading() ||
+            saving()
+          "
+          (click)="openCreateModal(roleFormModal)"
+        >
+          <i
+            class="fa-solid fa-fw fa-plus"
+            aria-hidden="true"
+          ></i>
+          Create New
+        </button>
+      </div>
+
+      <div class="flex-fill">
+        <div class="input-group">
+          <div class="input-group-text">
+            <i
+              class="fa-solid fa-fw fa-earth-americas"
+              aria-hidden="true"
+            ></i>
+          </div>
+
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Search by Role Name..."
+            [value]="globalSearch()"
+            (input)="
+              updateSearch(
+                $any($event.target).value
+              )
+            "
+          />
+        </div>
+      </div>
+    </div>
+
+    <br />
+
+    @if (error()) {
+      <div
+        class="alert alert-danger d-flex justify-content-between align-items-center"
+      >
+        <span>{{ error() }}</span>
+
+        <button
+          type="button"
+          class="btn btn-danger btn-sm"
+          (click)="retry()"
+        >
+          Retry
+        </button>
+      </div>
+    }
+
+    <div class="table-responsive position-relative">
+      @if (isLoading()) {
+        <div class="table-loading-overlay">
+          <div
+            class="text-center d-flex flex-column align-items-center gap-2"
+          >
+            <div class="fancy-spinner">
+              <div class="spinner-track"></div>
+              <div class="spinner-glow-ring"></div>
+              <div class="spinner-inner-dot"></div>
+            </div>
+
+            <div class="mt-2 fw-semibold text-primary">
+              Loading data...
+            </div>
+          </div>
+        </div>
+      }
+
+      <table class="custom-table">
+        <thead>
+          <tr style="font-style: italic">
+            <th class="text-center text-nowrap">
+              #
+            </th>
+
+            <th class="text-center text-nowrap">
+              ROLE
+            </th>
+
+            <th class="text-center text-nowrap">
+              CREATED BY
+            </th>
+
+            <th class="text-center text-nowrap">
+              CREATED DATE
+            </th>
+
+            <th class="text-center text-nowrap">
+              UPDATED BY
+            </th>
+
+            <th class="text-center text-nowrap">
+              UPDATED DATE
+            </th>
+
+            <th class="text-center text-nowrap">
+              ACTION
+            </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @if (
+            !isLoading() &&
+            paginatedItems().length === 0
+          ) {
+            <tr>
+              <td
+                colspan="7"
+                class="text-center py-4"
+              >
+                <i
+                  class="fas fa-folder-open fa-4x text-secondary mb-3"
+                  aria-hidden="true"
+                ></i>
+
+                <br />
+
+                <h6 class="emptymsg">
+                  No Records Found.
+                </h6>
+              </td>
+            </tr>
+          }
+
+          @for (
+            role of paginatedItems();
+            track role.ID
+          ) {
+            <tr>
+              <td class="text-center text-nowrap">
+                {{
+                  (currentPage() - 1) *
+                    pageSize() +
+                    $index +
+                    1
+                }}
+              </td>
+
+              <td class="text-nowrap">
+                {{ role.RoleName }}
+              </td>
+
+              <td class="text-center text-nowrap">
+                {{ role.CreatedBy }}
+              </td>
+
+              <td class="text-center text-nowrap">
+                {{
+                  role.CreatedDate
+                    | date: 'dd-MMM-yyyy'
+                }}
+              </td>
+
+              <td class="text-center text-nowrap">
+                {{ role.UpdatedBy ?? '-' }}
+              </td>
+
+              <td class="text-center text-nowrap">
+                {{
+                  role.UpdatedDate
+                    ? (
+                        role.UpdatedDate
+                          | date: 'dd-MMM-yyyy'
+                      )
+                    : '-'
+                }}
+              </td>
+
+              <td class="text-center text-nowrap">
+                <div class="action-buttons">
+                  <button
+                    type="button"
+                    class="action-btn btn-view"
+                    title="View"
+                    [disabled]="
+                      viewLoading() ||
+                      matrixLoading() ||
+                      saving()
+                    "
+                    (click)="
+                      openViewModal(
+                        viewRoleModal,
+                        role
+                      )
+                    "
+                  >
+                    <i
+                      class="fa-solid fa-magnifying-glass-plus"
+                    ></i>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="action-btn btn-edit"
+                    title="Edit"
+                    [disabled]="
+                      viewLoading() ||
+                      matrixLoading() ||
+                      saving()
+                    "
+                    (click)="
+                      openEditModal(
+                        roleFormModal,
+                        role
+                      )
+                    "
+                  >
+                    <i
+                      class="fa-regular fa-pen-to-square"
+                    ></i>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="action-btn btn-delete"
+                    title="Delete"
+                    [disabled]="
+                      deletingRoleId() !== null ||
+                      saving()
+                    "
+                    (click)="deleteRole(role)"
+                  >
+                    @if (
+                      deletingRoleId() === role.ID
+                    ) {
+                      <span
+                        class="spinner-border spinner-border-sm"
+                        aria-hidden="true"
+                      ></span>
+                    } @else {
+                      <i
+                        class="fa-solid fa-trash-can"
+                      ></i>
+                    }
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-footer">
+      <div class="shrink-0">
+        <app-pagination
+          [(currentPage)]="currentPage"
+          [(pageSize)]="pageSize"
+          [totalItems]="totalItems()"
+          (pageChanged)="onPageChange($event)"
+          (pageSizeChanged)="
+            onPageSizeChange($event)
+          "
+        >
+        </app-pagination>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create/Edit Role Permission Modal -->
+<ng-template #roleFormModal>
+  <form
+    class="role-permission-modal"
+    [formGroup]="roleForm"
+    (ngSubmit)="submitForm()"
+  >
+    <div class="modal-header">
+      <h5 class="modal-title">
+        {{ formTitle() }}
+      </h5>
+
+      <button
+        type="button"
+        class="btn-close"
+        aria-label="Close"
+        [disabled]="saving()"
+        (click)="closeFormModal()"
+      ></button>
+    </div>
+
+    <div class="modal-body role-permission-modal-body">
+      <div class="role-name-section">
+        <label
+          for="roleName"
+          class="form-label"
+        >
+          Role Name
+          <span class="text-danger">*</span>
+        </label>
+
+        <div class="role-name-input-wrapper">
+          <input
+            id="roleName"
+            type="text"
+            class="form-control"
+            formControlName="RoleName"
+            placeholder="Enter Role Name..."
+            [class.is-invalid]="
+              formSubmitted() &&
+              formControls['RoleName'].invalid
+            "
+          />
+
+          <span class="role-name-change-slot">
+            @if (isRoleNameChanged()) {
+              <i
+                class="fa-solid fa-circle-info text-warning"
+                title="Role name was changed"
+                aria-hidden="true"
+              ></i>
+            }
+          </span>
+
+          @if (
+            formSubmitted() &&
+            formControls['RoleName'].errors?.[
+              'required'
+            ]
+          ) {
+            <div class="invalid-feedback">
+              Role Name is required.
+            </div>
+          }
+        </div>
+      </div>
+
+      <hr class="permission-section-divider" />
+
+      <fieldset class="permission-matrix-fieldset">
+        <legend>
+          Permission Matrix
+        </legend>
+
+        <div class="permission-matrix-search-row">
+          <div class="matrix-search">
+            <div class="input-group">
+              <div class="input-group-text">
+                <i
+                  class="fa-solid fa-fw fa-magnifying-glass"
+                  aria-hidden="true"
+                ></i>
+              </div>
+
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Search Menu or Submenu..."
+                [value]="formMatrixSearch()"
+                (input)="
+                  onFormMatrixSearch(
+                    $any($event.target).value
+                  )
+                "
+              />
+
+              @if (formMatrixSearch()) {
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  title="Clear search"
+                  (click)="onFormMatrixSearch('')"
+                >
+                  <i
+                    class="fa-solid fa-xmark"
+                    aria-hidden="true"
+                  ></i>
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="permission-matrix-scroll position-relative"
+        >
+          @if (matrixLoading()) {
+            <div class="table-loading-overlay">
+              <div
+                class="text-center d-flex flex-column align-items-center gap-2"
+              >
+                <div class="fancy-spinner">
+                  <div class="spinner-track"></div>
+                  <div class="spinner-glow-ring"></div>
+                  <div class="spinner-inner-dot"></div>
+                </div>
+
+                <div class="mt-2 fw-semibold text-primary">
+                  Loading permission matrix...
+                </div>
+              </div>
+            </div>
+          }
+
+          <table
+            class="custom-table permission-matrix-table"
+          >
+            <thead>
+              <tr style="font-style: italic">
+                <th class="text-center text-nowrap">
+                  #
+                </th>
+
+                <th class="text-center text-nowrap">
+                  MENU
+                </th>
+
+                <th class="text-center text-nowrap">
+                  SUBMENU
+                </th>
+
+                <th class="text-center text-nowrap">
+                  VIEW
+                </th>
+
+                <th class="text-center text-nowrap">
+                  INSERT
+                </th>
+
+                <th class="text-center text-nowrap">
+                  UPDATE
+                </th>
+
+                <th class="text-center text-nowrap">
+                  DELETE
+                </th>
+
+                <th class="text-center text-nowrap">
+                  PRINT
+                </th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @if (
+                !matrixLoading() &&
+                filteredFormPermissions().length === 0
+              ) {
+                <tr>
+                  <td
+                    colspan="8"
+                    class="text-center py-5"
+                  >
+                    <i
+                      class="fas fa-folder-open fa-3x text-secondary mb-3"
+                      aria-hidden="true"
+                    ></i>
+
+                    <br />
+
+                    <h6 class="emptymsg">
+                      No Menu or Submenu Found.
+                    </h6>
+                  </td>
+                </tr>
+              }
+
+              @for (
+                permission of
+                  filteredFormPermissions();
+                track permission.SubMenuID
+              ) {
+                <tr>
+                  <td class="text-center text-nowrap">
+                    {{ $index + 1 }}
+                  </td>
+
+                  <td class="text-nowrap">
+                    {{
+                      permission.MenuID === null
+                        ? '-'
+                        : permission.MenuName
+                    }}
+                  </td>
+
+                  <td class="text-nowrap">
+                    {{ permission.SubMenuName }}
+                  </td>
+
+                  <td class="text-center text-nowrap">
+                    <div class="permission-toggle-cell">
+                      <span class="change-indicator-slot">
+                        @if (
+                          isPermissionChanged(
+                            permission.SubMenuID,
+                            'CanView'
+                          )
+                        ) {
+                          <i
+                            class="fa-solid fa-circle-info text-warning"
+                            title="View permission was changed"
+                          ></i>
+                        }
+                      </span>
+
+                      <div
+                        class="form-check form-switch m-0"
+                      >
+                        <input
+                          type="checkbox"
+                          class="form-check-input"
+                          [checked]="permission.CanView"
+                          [disabled]="
+                            matrixLoading() ||
+                            saving()
+                          "
+                          (change)="
+                            onPermissionChange(
+                              permission.SubMenuID,
+                              'CanView',
+                              $any($event.target)
+                                .checked
+                            )
+                          "
+                          aria-label="View permission"
+                        />
+                      </div>
+                    </div>
+                  </td>
+
+                  <td class="text-center text-nowrap">
+                    <div class="permission-toggle-cell">
+                      <span class="change-indicator-slot">
+                        @if (
+                          isPermissionChanged(
+                            permission.SubMenuID,
+                            'CanInsert'
+                          )
+                        ) {
+                          <i
+                            class="fa-solid fa-circle-info text-warning"
+                            title="Insert permission was changed"
+                          ></i>
+                        }
+                      </span>
+
+                      <div
+                        class="form-check form-switch m-0"
+                      >
+                        <input
+                          type="checkbox"
+                          class="form-check-input"
+                          [checked]="permission.CanInsert"
+                          [disabled]="
+                            matrixLoading() ||
+                            saving()
+                          "
+                          (change)="
+                            onPermissionChange(
+                              permission.SubMenuID,
+                              'CanInsert',
+                              $any($event.target)
+                                .checked
+                            )
+                          "
+                          aria-label="Insert permission"
+                        />
+                      </div>
+                    </div>
+                  </td>
+
+                  <td class="text-center text-nowrap">
+                    <div class="permission-toggle-cell">
+                      <span class="change-indicator-slot">
+                        @if (
+                          isPermissionChanged(
+                            permission.SubMenuID,
+                            'CanUpdate'
+                          )
+                        ) {
+                          <i
+                            class="fa-solid fa-circle-info text-warning"
+                            title="Update permission was changed"
+                          ></i>
+                        }
+                      </span>
+
+                      <div
+                        class="form-check form-switch m-0"
+                      >
+                        <input
+                          type="checkbox"
+                          class="form-check-input"
+                          [checked]="permission.CanUpdate"
+                          [disabled]="
+                            matrixLoading() ||
+                            saving()
+                          "
+                          (change)="
+                            onPermissionChange(
+                              permission.SubMenuID,
+                              'CanUpdate',
+                              $any($event.target)
+                                .checked
+                            )
+                          "
+                          aria-label="Update permission"
+                        />
+                      </div>
+                    </div>
+                  </td>
+
+                  <td class="text-center text-nowrap">
+                    <div class="permission-toggle-cell">
+                      <span class="change-indicator-slot">
+                        @if (
+                          isPermissionChanged(
+                            permission.SubMenuID,
+                            'CanDelete'
+                          )
+                        ) {
+                          <i
+                            class="fa-solid fa-circle-info text-warning"
+                            title="Delete permission was changed"
+                          ></i>
+                        }
+                      </span>
+
+                      <div
+                        class="form-check form-switch m-0"
+                      >
+                        <input
+                          type="checkbox"
+                          class="form-check-input"
+                          [checked]="permission.CanDelete"
+                          [disabled]="
+                            matrixLoading() ||
+                            saving()
+                          "
+                          (change)="
+                            onPermissionChange(
+                              permission.SubMenuID,
+                              'CanDelete',
+                              $any($event.target)
+                                .checked
+                            )
+                          "
+                          aria-label="Delete permission"
+                        />
+                      </div>
+                    </div>
+                  </td>
+
+                  <td class="text-center text-nowrap">
+                    <div class="permission-toggle-cell">
+                      <span class="change-indicator-slot">
+                        @if (
+                          isPermissionChanged(
+                            permission.SubMenuID,
+                            'CanPrint'
+                          )
+                        ) {
+                          <i
+                            class="fa-solid fa-circle-info text-warning"
+                            title="Print permission was changed"
+                          ></i>
+                        }
+                      </span>
+
+                      <div
+                        class="form-check form-switch m-0"
+                      >
+                        <input
+                          type="checkbox"
+                          class="form-check-input"
+                          [checked]="permission.CanPrint"
+                          [disabled]="
+                            matrixLoading() ||
+                            saving()
+                          "
+                          (change)="
+                            onPermissionChange(
+                              permission.SubMenuID,
+                              'CanPrint',
+                              $any($event.target)
+                                .checked
+                            )
+                          "
+                          aria-label="Print permission"
+                        />
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </fieldset>
+    </div>
+
+    <div class="modal-footer">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        [disabled]="saving()"
+        (click)="closeFormModal()"
+      >
+        <i
+          class="fa-solid fa-fw fa-xmark"
+          aria-hidden="true"
+        ></i>
+        Close
+      </button>
+
+      <button
+        type="submit"
+        class="btn btn-success"
+        [disabled]="
+          saving() ||
+          matrixLoading()
+        "
+      >
+        @if (saving()) {
+          <span
+            class="spinner-border spinner-border-sm me-2"
+            aria-hidden="true"
+          ></span>
+
+          Saving...
+        } @else {
+          <i
+            class="fa-solid fa-fw fa-check"
+            aria-hidden="true"
+          ></i>
+
+          {{ submitButtonText() }}
+        }
+      </button>
+    </div>
+  </form>
+</ng-template>
+
+<!-- View Role Permission Modal -->
+<ng-template #viewRoleModal>
+  <div class="role-permission-modal">
+    <div class="modal-header">
+      <h5 class="modal-title">
+        VIEW ROLE
+      </h5>
+
+      <button
+        type="button"
+        class="btn-close"
+        aria-label="Close"
+        (click)="closeViewModal()"
+      ></button>
+    </div>
+
+    <div class="modal-body role-permission-modal-body">
+      @if (viewLoading()) {
+        <div class="role-modal-loading">
+          <div
+            class="spinner-border text-success"
+            role="status"
+          >
+            <span class="visually-hidden">
+              Loading role details...
+            </span>
+          </div>
+        </div>
+      } @else if (viewRoleDetails(); as details) {
+        <div class="role-name-section">
+          <label
+            for="viewRoleName"
+            class="form-label"
+          >
+            Role Name
+          </label>
+
+          <div class="role-name-input-wrapper">
+            <input
+              id="viewRoleName"
+              type="text"
+              class="form-control"
+              [value]="details.RoleName"
+              readonly
+            />
+
+            <span class="role-name-change-slot"></span>
+          </div>
+        </div>
+
+        <hr class="permission-section-divider" />
+
+        <fieldset class="permission-matrix-fieldset">
+          <legend>
+            Permission Matrix
+          </legend>
+
+          <div class="permission-matrix-search-row">
+            <div class="matrix-search">
+              <div class="input-group">
+                <div class="input-group-text">
+                  <i
+                    class="fa-solid fa-fw fa-magnifying-glass"
+                    aria-hidden="true"
+                  ></i>
+                </div>
+
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Search Menu or Submenu..."
+                  [value]="viewMatrixSearch()"
+                  (input)="
+                    onViewMatrixSearch(
+                      $any($event.target).value
+                    )
+                  "
+                />
+
+                @if (viewMatrixSearch()) {
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    title="Clear search"
+                    (click)="onViewMatrixSearch('')"
+                  >
+                    <i
+                      class="fa-solid fa-xmark"
+                      aria-hidden="true"
+                    ></i>
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="permission-matrix-scroll position-relative"
+          >
+            <table
+              class="custom-table permission-matrix-table"
+            >
+              <thead>
+                <tr style="font-style: italic">
+                  <th class="text-center text-nowrap">
+                    #
+                  </th>
+
+                  <th class="text-center text-nowrap">
+                    MENU
+                  </th>
+
+                  <th class="text-center text-nowrap">
+                    SUBMENU
+                  </th>
+
+                  <th class="text-center text-nowrap">
+                    VIEW
+                  </th>
+
+                  <th class="text-center text-nowrap">
+                    INSERT
+                  </th>
+
+                  <th class="text-center text-nowrap">
+                    UPDATE
+                  </th>
+
+                  <th class="text-center text-nowrap">
+                    DELETE
+                  </th>
+
+                  <th class="text-center text-nowrap">
+                    PRINT
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody>
+                @if (
+                  filteredViewPermissions().length === 0
+                ) {
+                  <tr>
+                    <td
+                      colspan="8"
+                      class="text-center py-5"
+                    >
+                      <i
+                        class="fas fa-folder-open fa-3x text-secondary mb-3"
+                        aria-hidden="true"
+                      ></i>
+
+                      <br />
+
+                      <h6 class="emptymsg">
+                        No Menu or Submenu Found.
+                      </h6>
+                    </td>
+                  </tr>
+                } @else {
+                  @for (
+                    permission of
+                      filteredViewPermissions();
+                    track permission.SubMenuID
+                  ) {
+                    <tr>
+                      <td class="text-center text-nowrap">
+                        {{ $index + 1 }}
+                      </td>
+
+                      <td class="text-nowrap">
+                        {{
+                          permission.MenuID === null
+                            ? '-'
+                            : permission.MenuName
+                        }}
+                      </td>
+
+                      <td class="text-nowrap">
+                        {{ permission.SubMenuName }}
+                      </td>
+
+                      <td class="text-center text-nowrap">
+                        <div class="permission-radio-cell">
+                          <input
+                            type="radio"
+                            class="form-check-input"
+                            [checked]="permission.CanView"
+                            disabled
+                            tabindex="-1"
+                            aria-label="View permission"
+                          />
+                        </div>
+                      </td>
+
+                      <td class="text-center text-nowrap">
+                        <div class="permission-radio-cell">
+                          <input
+                            type="radio"
+                            class="form-check-input"
+                            [checked]="permission.CanInsert"
+                            disabled
+                            tabindex="-1"
+                            aria-label="Insert permission"
+                          />
+                        </div>
+                      </td>
+
+                      <td class="text-center text-nowrap">
+                        <div class="permission-radio-cell">
+                          <input
+                            type="radio"
+                            class="form-check-input"
+                            [checked]="permission.CanUpdate"
+                            disabled
+                            tabindex="-1"
+                            aria-label="Update permission"
+                          />
+                        </div>
+                      </td>
+
+                      <td class="text-center text-nowrap">
+                        <div class="permission-radio-cell">
+                          <input
+                            type="radio"
+                            class="form-check-input"
+                            [checked]="permission.CanDelete"
+                            disabled
+                            tabindex="-1"
+                            aria-label="Delete permission"
+                          />
+                        </div>
+                      </td>
+
+                      <td class="text-center text-nowrap">
+                        <div class="permission-radio-cell">
+                          <input
+                            type="radio"
+                            class="form-check-input"
+                            [checked]="permission.CanPrint"
+                            disabled
+                            tabindex="-1"
+                            aria-label="Print permission"
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+        </fieldset>
+      }
+    </div>
+
+    <div class="modal-footer">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="closeViewModal()"
+      >
+        <i
+          class="fa-solid fa-fw fa-xmark"
+          aria-hidden="true"
+        ></i>
+        Close
+      </button>
+    </div>
+  </div>
+</ng-template>

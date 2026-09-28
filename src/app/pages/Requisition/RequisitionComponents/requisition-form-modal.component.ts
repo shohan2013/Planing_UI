@@ -35,6 +35,7 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
+import { MenuPermissionDirective } from 'src/app/core/directives/menu-permission.directive';
 
 import { IBusiness } from 'src/app/core/model/Common/BusinessType/BusinessType';
 import { IDropdownBind } from 'src/app/core/model/Common/dropdown-bind';
@@ -47,6 +48,7 @@ import {
   IViewRequisitionHeader,
   IViewRequisitionLine,
 } from 'src/app/core/model/Requisition/ViewRequisition';
+import { PermissionAction } from 'src/app/core/services/Authorization/authorization.service';
 import { CommonService } from 'src/app/core/services/Common/CommonService';
 import { RequisitionService } from 'src/app/core/services/Requisition/requisition.service';
 
@@ -66,11 +68,15 @@ type FormModalState =
     FormsModule,
     ReactiveFormsModule,
     NgbTypeaheadModule,
+    MenuPermissionDirective,
   ],
   templateUrl: './requisition-form-modal.component.html',
   styleUrl: './requisition-form-modal.component.scss',
 })
 export class RequisitionFormModalComponent implements OnInit {
+
+  readonly PermissionAction = PermissionAction;
+
   @Input({ required: true })
   mode: RequisitionFormMode = 'create';
 
@@ -245,6 +251,40 @@ export class RequisitionFormModalComponent implements OnInit {
     );
   }
 
+
+
+
+
+
+complete(): void {
+  if (!this.header || this.isSubmitting) return;
+
+  this.state.set('submitting');
+
+  this.requisitionService
+    .completeData(this.header.ReqID)
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe({
+      next: (response) => {
+        if (response.Status) {
+          this.toastr.success(response.Message);
+          this.activeModal.close({ changed: true });
+        } else {
+          this.state.set('ready');
+          this.toastr.error(response.Message || 'Unable to complete requisition.');
+        }
+      },
+      error: (error: HttpErrorResponse) => {
+        this.state.set('ready');
+        this.toastr.error(
+          this.getErrorMessage(error, 'Unable to complete requisition.'),
+        );
+      },
+    });
+}
+
+
+
   close(): void {
     if (this.isSubmitting) {
       return;
@@ -326,6 +366,20 @@ export class RequisitionFormModalComponent implements OnInit {
       lineValue.ProductTypeId,
     );
 
+//  Restrict adding the same item multiple times for product type 2 (Item) in same requisition
+if (
+  productTypeId === 2 &&
+  this.lines.controls.some(
+    (line) =>
+      Number(line.get('ProductTypeId')?.value) === productTypeId &&
+      Number(line.get('ItemId')?.value) === Number(lineValue.ItemId),
+  )
+) {
+  this.toastr.warning('Item already exists in this requisition.');
+  return;
+}
+
+
     const selectedUOM =
       this.uoms().find(
         (uom) =>
@@ -374,6 +428,8 @@ export class RequisitionFormModalComponent implements OnInit {
       Quantity: new FormControl(
         Number(lineValue.Quantity),
       ),
+
+      RemainingQuantity: new FormControl<number | null>(null),
 
       StockQuantity: new FormControl(
         Number(
@@ -486,6 +542,23 @@ export class RequisitionFormModalComponent implements OnInit {
 
     const item =
       event.item as IItem;
+
+
+//  Validation - no same item can be added in the same requisition
+if (
+  this.lines.controls.some(
+    (line) =>
+      Number(line.get('ProductTypeId')?.value) === 2 &&
+      Number(line.get('ItemId')?.value) === Number(item.Id),
+  )
+) {
+  event.preventDefault();
+  this.toastr.warning('Item already exists in this requisition.');
+  return;
+}
+
+
+
 
     this.lineFormGroup.patchValue(
       {
@@ -1354,6 +1427,12 @@ export class RequisitionFormModalComponent implements OnInit {
                   line.Quantity,
                 ),
               ),
+
+            RemainingQuantity: new FormControl<number | null>(
+              line.RemainingQuantity,
+            ),
+
+
 
             StockQuantity:
               new FormControl(

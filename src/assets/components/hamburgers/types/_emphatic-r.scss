@@ -1,4 +1,5 @@
-@if index($hamburger-types, emphatic-r) {
+@use "sass:list";
+@if list.index($hamburger-types, emphatic-r) {
   /*
    * Emphatic Reverse
    */

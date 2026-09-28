@@ -1,4 +1,5 @@
-@if index($hamburger-types, 3 dy) {
+@use "sass:list";
+@if list.index($hamburger-types, 3 dy) {
   /*
    * 3DY
    */

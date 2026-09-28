@@ -27,6 +27,7 @@ export interface IViewRequisitionLine {
   UOMId: number;
   UOMName: string;
   Quantity: number;
+  RemainingQuantity: number | null;
   StockQuantity: number | null;
   SalesQuantity: number | null;
   Remarks: string | null;

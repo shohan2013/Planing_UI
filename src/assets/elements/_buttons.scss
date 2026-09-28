@@ -47,7 +47,7 @@
 // Links
 
 $link-color: $primary;
-$link-hover-color: darken($link-color, 15%);
+$link-hover-color: darken-color($link-color, 15%);
 
 .btn {
   position: relative;
@@ -55,5 +55,5 @@ $link-hover-color: darken($link-color, 15%);
 }
 
 .btn-light {
-  border-color: darken(#f5f5f5, 10%);
+  border-color: darken-color(#f5f5f5, 10%);
 }

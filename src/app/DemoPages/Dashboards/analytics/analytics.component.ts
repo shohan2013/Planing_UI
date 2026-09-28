@@ -3,10 +3,18 @@ import { faTh, faCheck, faTrash, faAngleDown, faAngleUp } from '@fortawesome/fre
 import { ChartConfiguration } from 'chart.js';
 
 
+
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { BaseChartDirective } from 'ng2-charts';
+import { PageTitleComponent } from '../../../Layout/Components/page-title/page-title.component';
 @Component({
   selector: 'app-analytics',
   templateUrl: './analytics.component.html',
-  standalone: false})
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, NgbModule, FontAwesomeModule, BaseChartDirective, PageTitleComponent]})
 export class AnalyticsComponent {
 
   faTh = faTh;

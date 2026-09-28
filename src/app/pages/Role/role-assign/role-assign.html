@@ -1,0 +1,270 @@
+<div class="user-card">
+  <div class="card-header">
+    <h5>ASSIGN ROLE</h5>
+  </div>
+
+  <div class="card-body">
+    <!-- Compact role selection -->
+    <div class="row mb-3">
+      <div class="col-lg-6 col-md-8">
+        <ng-select
+          id="roleSelection"
+          class="compact-role-select"
+          [items]="activeRoles()"
+          bindLabel="RoleName"
+          bindValue="ID"
+          [ngModel]="selectedRoleId()"
+          (ngModelChange)="onRoleChange($event)"
+          placeholder="Search and select a Role..."
+          [searchable]="true"
+          [clearable]="true"
+          [loading]="rolesLoading()"
+          [disabled]="processingAction() !== null"
+          notFoundText="No active Role found"
+        >
+        </ng-select>
+      </div>
+    </div>
+
+    <!-- Employee search -->
+    <div class="employee-search-panel">
+      <div class="employee-search-heading">
+        <h6>Select Employees</h6>
+
+        <span class="selected-count">
+          {{ selectedEmployees().length }}
+          selected
+        </span>
+      </div>
+
+      <ng-select
+        [items]="employeeResults()"
+        bindLabel="Name"
+        bindValue="Id"
+        [ngModel]="selectedEmployeeId()"
+        [searchFn]="employeeSearchFilter"
+        (search)="onEmployeeSearch($event)"
+        (ngModelChange)="onEmployeeSelect($event)"
+        placeholder="Search Employee by Name or Enroll..."
+        [searchable]="true"
+        [clearable]="true"
+        [loading]="employeeSearchLoading()"
+        [disabled]="processingAction() !== null"
+        notFoundText="Type at least 2 characters to search"
+      >
+        <ng-template
+          ng-option-tmp
+          let-item="item"
+        >
+          <div class="employee-option-text">
+            <strong>{{ item.Name }}</strong>
+
+            <span class="ms-2 text-muted">
+              ({{ item.Id }})
+            </span>
+          </div>
+        </ng-template>
+
+        <ng-template
+          ng-label-tmp
+          let-item="item"
+        >
+          {{ item.Name }} ({{ item.Id }})
+        </ng-template>
+      </ng-select>
+    </div>
+
+    <!-- Selected employee table -->
+    <div class="selected-employee-table mt-3">
+      <div
+        class="table-responsive role-assign-table-scroll"
+        style="
+          max-height: 360px;
+          overflow-x: auto;
+          overflow-y: auto;
+        "
+      >
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th class="text-center serial-column">
+                #
+              </th>
+
+              <th class="text-center enroll-column">
+                ENROLL
+              </th>
+
+              <th class="text-center">
+                EMPLOYEE NAME
+              </th>
+
+              <th class="text-center action-column">
+                ACTION
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @if (selectedEmployees().length === 0) {
+              <tr>
+                <td
+                  colspan="4"
+                  class="empty-state text-center"
+                >
+                  <h6 class="mb-1">
+                    No Employees Selected
+                  </h6>
+
+                  <p class="mb-0">
+                    Search and select at least one
+                    employee to continue.
+                  </p>
+                </td>
+              </tr>
+            } @else {
+              @for (
+                employee of selectedEmployees();
+                track employee.Id
+              ) {
+                <tr>
+                  <td class="text-center">
+                    {{ $index + 1 }}
+                  </td>
+
+                  <td
+                    class="text-center employee-enroll"
+                  >
+                    {{ employee.Id }}
+                  </td>
+
+                  <td class="text-center employee-name">
+                    {{ employee.Name }}
+                  </td>
+
+                  <td class="text-center">
+                    <button
+                      type="button"
+                      class="action-btn btn-delete"
+                      title="Remove employee from list"
+                      [disabled]="
+                        processingAction() !== null
+                      "
+                      (click)="
+                        removeEmployee(+employee.Id)
+                      "
+                    >
+                      <i
+                        class="fa-solid fa-trash-can"
+                        aria-hidden="true"
+                      ></i>
+                    </button>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Bottom actions -->
+    <div
+      class="action-toolbar d-flex justify-content-between align-items-center gap-3 mt-3"
+    >
+      <!-- Terminate actions on the left -->
+      <div
+        class="terminate-actions d-flex align-items-center gap-2"
+      >
+        <button
+          type="button"
+          class="btn btn-warning"
+          [disabled]="!canTerminate()"
+          (click)="terminateView()"
+        >
+          @if (isProcessing('terminate-view')) {
+            <span
+              class="spinner-border spinner-border-sm me-2"
+              aria-hidden="true"
+            ></span>
+
+            Terminating View...
+          } @else {
+            <i
+              class="fa-solid fa-eye-slash me-2"
+              aria-hidden="true"
+            ></i>
+
+            Terminate View
+          }
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-danger"
+          [disabled]="!canTerminate()"
+          (click)="terminate()"
+        >
+          @if (isProcessing('terminate')) {
+            <span
+              class="spinner-border spinner-border-sm me-2"
+              aria-hidden="true"
+            ></span>
+
+            Terminating...
+          } @else {
+            <i
+              class="fa-solid fa-ban me-2"
+              aria-hidden="true"
+            ></i>
+
+            Terminate
+          }
+        </button>
+      </div>
+
+      <!-- Clear and Assign on the right -->
+      <div
+        class="primary-actions d-flex align-items-center gap-2"
+      >
+        <button
+          type="button"
+          class="btn btn-secondary"
+          [disabled]="
+            processingAction() !== null ||
+            (
+              selectedRoleId() === null &&
+              selectedEmployees().length === 0
+            )
+          "
+          (click)="clearSelections()"
+        >
+          Clear
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-success"
+          [disabled]="!canAssign()"
+          (click)="assignRole()"
+        >
+          @if (isProcessing('assign')) {
+            <span
+              class="spinner-border spinner-border-sm me-2"
+              aria-hidden="true"
+            ></span>
+
+            Assigning...
+          } @else {
+            <i
+              class="fa-solid fa-check me-2"
+              aria-hidden="true"
+            ></i>
+
+            Assign
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -22,9 +22,13 @@ import { IEnroll } from '../../model/Common/Enroll/Enroll';
 import { IApproveMatrixGroupList } from '../../model/Common/ApproveMatrixGroupList/ApproveMatrixGroupList';
 import { environment } from 'src/environments/environment';
 import { IBusinessFlowForPlanning } from '../../model/Common/BusinessFlow/production-steps-model';
-import { ServerQueryResponse } from '../../model/Common/Pagination/ServerQueryRequest';
 import { IMachine } from '../../model/Common/Machine/machine';
+import {
+  IPrePlannedRoute,
+  IPrePlannedRouteStep,
+} from '../../model/Common/BusinessFlow/pre-planned-route-model';
 import { IRecipe } from '../../model/Common/Recipe/Recipe';
+import { IActiveRole } from '../../model/Role/Role';
 
 @Injectable({
   providedIn: 'root',
@@ -197,9 +201,27 @@ export class CommonService {
     );
   }
 
+  GetPrePlannedRoutes(productId: number): Observable<IPrePlannedRoute[]> {
+    return this.http.get<IPrePlannedRoute[]>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.PrePlannedRoute}?ProductId=${productId}`,
+    );
+  }
+
+  GetPrePlannedRouteSteps(routeId: number): Observable<IPrePlannedRouteStep[]> {
+    return this.http.get<IPrePlannedRouteStep[]>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.PrePlannedRouteSteps}?RouteId=${routeId}`,
+    );
+  }
+
   GetRecipe(unitId: number, BusinessesId: number): Observable<IRecipe[]> {
     return this.http.get<IRecipe[]>(
       `${environment.API_URL}${GlobalConstant.API_END_POINTS.Recipe}?UnitId=${unitId}&BusinessId=${BusinessesId}`,
+    );
+  }
+
+  getActiveRoles(): Observable<IActiveRole[]> {
+    return this.http.get<IActiveRole[]>(
+      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.activeRoles}`,
     );
   }
 }

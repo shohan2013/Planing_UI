@@ -1,15 +1,16 @@
-<div class="user-card">
+<div class="user-card md-shell">
   <div class="page-header">
     <h5>
-      <i class="fa-solid fa-chart-bar"></i>
-      <b> MACHINE UTILIZATION DASHBOARD</b>
+      <i class="fa-solid fa-fw fa-chart-bar"></i>
+      <b>MACHINE UTILIZATION DASHBOARD</b>
     </h5>
   </div>
-  <hr />
-  <div class="card-body">
+  <br />
+  <!-- <hr /> -->
+  <div class="card-body md-body">
     <!-- Shared header: filters + tab nav, used by both tabs -->
-    <div class="card mb-4 border-0 shadow-sm">
-      <div class="card-body py-3">
+    <div class="card mb-2 border-0 shadow-sm">
+      <div class="card-body py-2">
         <div class="d-flex flex-wrap align-items-center gap-3">
           <div style="width: 220px">
             <div class="input-group">
@@ -22,7 +23,7 @@
                 [ngModel]="selectedUnitId"
                 (ngModelChange)="onUnitChange($event)"
               >
-                <option [ngValue]="0">All Units</option>
+                <option [ngValue]="0" disabled>Select Unit</option>
                 @for (unit of units(); track unit.Id) {
                 <option [ngValue]="unit.Id">{{ unit.Name }}</option>
                 }
@@ -42,8 +43,8 @@
                 (ngModelChange)="onBusinessChange($event)"
                 [disabled]="selectedUnitId === 0 || businessesLoading()"
               >
-                <option [ngValue]="0">
-                  {{ businessesLoading() ? 'Loading...' : 'All Businesses' }}
+                <option [ngValue]="0" disabled>
+                  {{ businessesLoading() ? 'Loading...' : 'Select Business' }}
                 </option>
                 @for (business of businesses(); track business.Id) {
                 <option [ngValue]="business.Id">{{ business.Name }}</option>
@@ -90,7 +91,7 @@
             type="button"
             class="btn btn-success btn-shadow d-inline-flex align-items-center ms-auto"
             (click)="refresh()"
-            [disabled]="loading()"
+            [disabled]="loading() || selectedUnitId === 0 || selectedBusinessId === 0"
           >
             <i
               class="fa-solid fa-fw fa-arrows-rotate me-2"
@@ -135,11 +136,27 @@
     </div>
 
     <!-- Tab content -->
-    @if (activeTab() === 'overview') {
+    @if (selectedUnitId === 0 || selectedBusinessId === 0) {
+    <div class="alert alert-info text-center mb-0">
+      <i class="fa-solid fa-circle-info me-2"></i>
+      Please select a Unit and a Business to view the dashboard.
+    </div>
+    } @else if (loading() || !hasLoaded()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-success" role="status"></div>
+      <div class="mt-2 text-muted">Loading dashboard...</div>
+    </div>
+    } @else if (machines().length === 0) {
+    <div class="alert alert-warning text-center mb-0">
+      <i class="fa-solid fa-triangle-exclamation me-2"></i>
+      No data found for the selected Unit, Business and date range.
+    </div>
+    } @else if (activeTab() === 'overview') {
     <app-machine-overview-tab
       [summary]="summary()"
       [machines]="machines()"
       [loading]="loading()"
+      [kpiTrends]="trends()"
     ></app-machine-overview-tab>
     } @else {
     <app-machine-timeline-tab

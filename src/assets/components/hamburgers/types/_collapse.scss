@@ -1,4 +1,5 @@
-@if index($hamburger-types, collapse) {
+@use "sass:list";
+@if list.index($hamburger-types, collapse) {
   /*
    * Collapse
    */

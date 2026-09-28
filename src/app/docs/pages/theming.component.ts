@@ -1,9 +1,13 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
+
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { CodeBlockComponent } from '../code-block/code-block.component';
 @Component({
   selector: 'app-docs-theming',
   templateUrl: './theming.component.html',
-  standalone: false,
+  imports: [CommonModule, RouterModule, CodeBlockComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ThemingComponent {

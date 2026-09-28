@@ -1,4 +1,5 @@
-@if index($hamburger-types, minus) {
+@use "sass:list";
+@if list.index($hamburger-types, minus) {
   /*
    * Minus
    */

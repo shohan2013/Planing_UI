@@ -1,0 +1,488 @@
+:host {
+  display: block;
+}
+
+/* =========================================================
+   Fullscreen modal
+   ========================================================= */
+
+.role-permission-modal {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background-color: #ffffff;
+}
+
+/*
+  Only layout is controlled.
+  Header typography remains global.
+*/
+.role-permission-modal > .modal-header {
+  box-sizing: border-box;
+  flex: 0 0 52px;
+  align-items: center;
+  min-height: 52px;
+  padding: 0.5rem 1.5rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+/* =========================================================
+   Compact footer
+   ========================================================= */
+
+.role-permission-modal > .modal-footer {
+  display: flex;
+  box-sizing: border-box;
+  flex: 0 0 52px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 52px;
+  margin: 0;
+  padding: 6px 1.5rem;
+  overflow: hidden;
+  border-top: 1px solid #dee2e6;
+  background-color: #ffffff;
+}
+
+.role-permission-modal
+  > .modal-footer
+  .btn {
+  height: 38px;
+  min-width: 96px;
+  min-height: 38px;
+  margin: 0;
+  padding: 0.35rem 0.85rem;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+/* =========================================================
+   Modal body
+   ========================================================= */
+
+.role-permission-modal-body {
+  display: flex;
+  box-sizing: border-box;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-height: 0;
+  padding: 0.75rem 1.5rem;
+  overflow: hidden;
+}
+
+/* =========================================================
+   Compact Role Name row
+   ========================================================= */
+
+.role-name-section {
+  display: grid;
+  flex: 0 0 auto;
+  grid-template-columns: 110px minmax(0, 1fr);
+  align-items: center;
+  column-gap: 0.75rem;
+}
+
+.role-name-section .form-label {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.role-name-input-wrapper {
+  position: relative;
+  min-width: 0;
+}
+
+.role-name-input-wrapper .form-control {
+  height: 38px;
+  min-height: 38px;
+  padding: 0.4rem 2.75rem 0.4rem 0.75rem;
+  font-size: 1rem;
+}
+
+.role-name-input-wrapper
+  .form-control[readonly] {
+  background-color: #f8f9fa;
+}
+
+.role-name-change-slot {
+  position: absolute;
+  top: 50%;
+  right: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  transform: translateY(-50%);
+}
+
+.role-name-input-wrapper
+  .is-invalid
+  ~ .role-name-change-slot {
+  right: 2.3rem;
+}
+
+.role-name-input-wrapper
+  .invalid-feedback {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 2;
+}
+
+/* =========================================================
+   Permission section
+   ========================================================= */
+
+.permission-section-divider {
+  flex: 0 0 auto;
+  margin: 0.65rem 0 0.75rem;
+  border: 0;
+  border-top: 1px solid #ced4da;
+  opacity: 1;
+}
+
+.permission-matrix-fieldset {
+  display: flex;
+  box-sizing: border-box;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0 0.75rem 0.65rem;
+  overflow: hidden;
+  border: 1px solid #ced4da;
+  border-radius: 0.5rem;
+}
+
+.permission-matrix-fieldset > legend {
+  float: none;
+  width: auto;
+  margin: 0;
+  padding: 0 0.65rem;
+  color: #343a40;
+  background-color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+/* =========================================================
+   Compact right-aligned search
+   ========================================================= */
+
+.permission-matrix-search-row {
+  display: flex;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  justify-content: flex-end;
+  width: 100%;
+  padding: 0.4rem 0 0.5rem;
+}
+
+.matrix-search {
+  width: 33.333%;
+  min-width: 280px;
+  max-width: 520px;
+}
+
+.matrix-search .input-group {
+  width: 100%;
+}
+
+.matrix-search .input-group-text {
+  min-width: 38px;
+  justify-content: center;
+  padding: 0.35rem 0.65rem;
+  color: #ffffff;
+  background-color: #4daa57;
+  border-color: #4daa57;
+  font-size: 0.9rem;
+}
+
+.matrix-search .form-control {
+  height: 36px;
+  min-height: 36px;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.9rem;
+}
+
+.matrix-search .btn {
+  min-width: 36px;
+  height: 36px;
+  padding: 0.35rem 0.65rem;
+}
+
+/* =========================================================
+   Scrollable table container
+   ========================================================= */
+
+.permission-matrix-scroll {
+  position: relative;
+  flex: 1 1 0;
+  width: 100%;
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: scroll;
+  border: 1px solid #dee2e6;
+  border-radius: 0.35rem;
+}
+
+/* =========================================================
+   Compact permission table
+   ========================================================= */
+
+.permission-matrix-table {
+  width: 100%;
+  min-width: 760px;
+  margin: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.75rem;
+}
+
+.permission-matrix-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+
+.permission-matrix-table thead th {
+  height: 32px;
+  padding: 0.25rem 0.4rem;
+  vertical-align: middle;
+  background-color: #e3e1e1;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.permission-matrix-table tbody td {
+  height: 32px;
+  padding: 0.2rem 0.4rem;
+  vertical-align: middle;
+  font-size: 0.75rem;
+  line-height: 1.1;
+}
+
+.permission-matrix-table th:first-child,
+.permission-matrix-table td:first-child {
+  width: 42px;
+}
+
+.permission-matrix-table th:nth-child(2),
+.permission-matrix-table td:nth-child(2) {
+  width: 18%;
+}
+
+.permission-matrix-table th:nth-child(3),
+.permission-matrix-table td:nth-child(3) {
+  width: 28%;
+}
+
+.permission-matrix-table th:nth-child(n + 4),
+.permission-matrix-table td:nth-child(n + 4) {
+  width: 10.8%;
+}
+
+/* =========================================================
+   Create/Edit switches
+   ========================================================= */
+
+.permission-toggle-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  min-width: 48px;
+}
+
+.change-indicator-slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  min-width: 12px;
+  font-size: 0.7rem;
+}
+
+.permission-toggle-cell .form-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  margin: 0;
+  padding-left: 0;
+}
+
+.permission-toggle-cell .form-switch {
+  min-height: 0;
+  margin: 0;
+  padding-left: 0;
+}
+
+.permission-toggle-cell
+  .form-switch
+  .form-check-input {
+  width: 1.8rem;
+  height: 0.95rem;
+  margin: 0;
+  cursor: pointer;
+}
+
+.permission-toggle-cell
+  .form-check-input:disabled {
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   View-only radio buttons
+   ========================================================= */
+
+.permission-radio-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.permission-radio-cell .form-check-input {
+  width: 0.9rem;
+  height: 0.9rem;
+  margin: 0;
+  pointer-events: none;
+}
+
+.permission-radio-cell
+  .form-check-input:disabled {
+  opacity: 1;
+}
+
+.permission-radio-cell
+  .form-check-input:checked {
+  background-color: #4daa57;
+  border-color: #4daa57;
+}
+
+.permission-radio-cell
+  .form-check-input:not(:checked) {
+  background-color: #ffffff;
+  border-color: #adb5bd;
+}
+
+/* =========================================================
+   Loading states
+   ========================================================= */
+
+.role-modal-loading {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+.permission-matrix-scroll
+  .table-loading-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(
+    255,
+    255,
+    255,
+    0.88
+  );
+}
+
+/* =========================================================
+   Scrollbar
+   ========================================================= */
+
+.permission-matrix-scroll::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+.permission-matrix-scroll::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+}
+
+.permission-matrix-scroll::-webkit-scrollbar-thumb {
+  background-color: #adb5bd;
+  border: 2px solid #f1f1f1;
+  border-radius: 8px;
+}
+
+.permission-matrix-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: #868e96;
+}
+
+.permission-matrix-scroll {
+  scrollbar-width: auto;
+  scrollbar-color: #adb5bd #f1f1f1;
+}
+
+/* =========================================================
+   Responsive layout
+   ========================================================= */
+
+@media (max-width: 991.98px) {
+  .matrix-search {
+    width: 45%;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .role-permission-modal > .modal-header {
+    padding-right: 1rem;
+    padding-left: 1rem;
+  }
+
+  .role-permission-modal
+    > .modal-footer {
+    padding-right: 1rem;
+    padding-left: 1rem;
+  }
+
+  .role-permission-modal-body {
+    padding: 0.65rem 1rem;
+  }
+
+  .role-name-section {
+    grid-template-columns: 90px minmax(0, 1fr);
+  }
+
+  .permission-section-divider {
+    margin: 0.55rem 0 0.65rem;
+  }
+
+  .permission-matrix-fieldset {
+    padding-right: 0.5rem;
+    padding-bottom: 0.5rem;
+    padding-left: 0.5rem;
+  }
+
+  .permission-matrix-search-row {
+    padding: 0.35rem 0 0.45rem;
+  }
+
+  .matrix-search {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+  }
+
+  .permission-matrix-table {
+    min-width: 760px;
+  }
+}

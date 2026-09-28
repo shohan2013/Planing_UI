@@ -1,10 +1,11 @@
+@use "sass:math";
 // Footer base
 
 .app-footer {
   height: $app-header-height;
 
   .app-footer__inner {
-    padding: 0 $layout-spacer-x 0 ($layout-spacer-x / 2);
+    padding: 0 $layout-spacer-x 0 (math.div($layout-spacer-x, 2));
     height: $app-header-height;
 
     display: flex;

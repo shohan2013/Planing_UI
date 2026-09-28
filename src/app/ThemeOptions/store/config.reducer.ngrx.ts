@@ -1,5 +1,5 @@
-import { createReducer, on } from '@ngrx/store';
-import { ConfigState, initialConfigState } from './config.state';
+import { createReducer,on } from '@ngrx/store';
+import { initialConfigState } from './config.state';
 import * as ConfigActions from './config.actions.ngrx';
 
 export const configReducer = createReducer(

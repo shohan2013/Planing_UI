@@ -23,10 +23,14 @@ import { DateTimePipe } from '../../shared/pipes/date-time-pipe';
 import { RequisitionViewModalComponent } from './RequisitionComponents/requisition-view-modal.component';
 import { RequisitionFormModalComponent } from './RequisitionComponents/requisition-form-modal.component';
 
+
+import { MenuPermissionDirective } from 'src/app/core/directives/menu-permission.directive';/////
+import { PermissionAction } from 'src/app/core/services/Authorization/authorization.service';/////
+
 @Component({
   selector: 'app-requisition',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaginationComponent, DateTimePipe],
+  imports: [CommonModule, FormsModule, PaginationComponent, DateTimePipe  ,MenuPermissionDirective],
   templateUrl: './requisition.html',
   styleUrl: './requisition.scss',
 })
@@ -34,6 +38,11 @@ export class Requisition
   extends ServerSideFilteredPaginatedComponent<IViewRequisitionHeader>
   implements OnInit, OnDestroy
 {
+
+
+  readonly PermissionAction = PermissionAction;  /////
+
+
   selectedUnitFilterId = 0;
   selectedBusinessFilterId = 0;
 
@@ -41,6 +50,7 @@ export class Requisition
   readonly businesses = signal<IBusiness[]>([]);
   readonly businessesLoading = signal(false);
   readonly deletingReqId = signal<number | null>(null);
+  readonly completingReqId = signal<number | null>(null);
 
   private viewModalRef: NgbModalRef | null = null;
   private formModalRef: NgbModalRef | null = null;
@@ -175,6 +185,63 @@ export class Requisition
       });
   }
 
+
+
+completeRequisition(reqId: number): void {
+  if (
+    this.completingReqId() !== null ||
+    this.deletingReqId() !== null
+  ) {
+    return;
+  }
+
+  const confirmed = confirm(
+    'Are you sure you want to complete this requisition?',
+  );
+
+  if (!confirmed) return;
+
+  this.completingReqId.set(reqId);
+
+  this.requisitionService
+    .completeData(reqId)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (response) => {
+        this.completingReqId.set(null);
+
+        if (response.Status) {
+          this.toastr.success(response.Message);
+          this.retry();
+          return;
+        }
+
+        this.toastr.error(
+          response.Message || 'Unable to complete the requisition.',
+        );
+      },
+      error: (error) => {
+        this.completingReqId.set(null);
+
+        this.toastr.error(
+          error?.error?.detail ??
+          error?.error?.Detail ??
+          error?.error?.message ??
+          error?.error?.Message ??
+          'Unable to complete the requisition.',
+        );
+      },
+    });
+}
+
+
+
+
+
+
+
+
+
   getDocStatusName(docStatusId: number): string {
     switch (docStatusId) {
       case 1:
@@ -185,6 +252,9 @@ export class Requisition
 
       case 3:
         return 'Reject';
+        
+      case 4:
+        return 'Complete';
 
       default:
         return '-';
@@ -249,7 +319,7 @@ export class Requisition
         fullscreen: true,
         backdrop: 'static',
         keyboard: false,
-        windowClass: 'requisition-fullscreen-modal',
+        // ZwindowClass: 'requisition-fullscreen-modal',
       });
 
       this.formModalRef = modalRef;

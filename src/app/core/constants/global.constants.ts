@@ -1,4 +1,3 @@
-import { MergedPlanning } from 'src/app/pages/MergedPlanning/merged-planning';
 
 export const GlobalConstant = {
   API_END_POINTS: {
@@ -34,6 +33,7 @@ export const GlobalConstant = {
     getRequisitionLines: 'Requisition/GetLinesByReqId',
     updateRequisition: 'Requisition/update',
     deleteRequisition: 'Requisition/Delete',
+    completeRequisition: "Requisition/complete",
 
     /*===========================COMMON===================================== */
     Common: 'Common',
@@ -59,7 +59,27 @@ export const GlobalConstant = {
     ProductionStepsForPlanning: 'Common/GetBusinessConfigure',
     Machine: 'Common/GetMachine',
     Recipe: 'Common/GetRecipe',
+    PrePlannedRoute: 'Common/GetPrePlannedRoute',
+    PrePlannedRouteSteps: 'Common/GetPrePlannedRouteSteps',
     MachineUtilization: 'MachineDashboard/GetMachineUtilization',
+
+
+
+  /*===========================ROLE===================================== */
+
+    activeRoles: 'Common/ActiveRoles',
+    assignRole: 'Role/Assign',
+    terminateRoleView: 'Role/TerminateView',
+    terminateRole: 'Role/Terminate',
+
+
+    getRolePermissions: 'RolePermission',
+    rolePermissionMatrix: 'RolePermission/Matrix',
+    viewRolePermission: 'RolePermission/View',
+    addRolePermission: 'RolePermission',
+    updateRolePermission: 'RolePermission',
+    deleteRolePermission: 'RolePermission/Delete',
+
 
     /*==============================PLANNING====================================*/
     DeliveryOrders: 'SalesOrderLanding/GetDOData',

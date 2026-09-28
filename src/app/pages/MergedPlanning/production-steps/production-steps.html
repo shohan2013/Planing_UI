@@ -23,28 +23,49 @@
 } @else {
 
 <div class="ps-selector">
-  <label class="form-label">Planning Process</label>
+  <div class="d-flex gap-2">
+    <div class="flex-fill">
+      <label class="form-label">Planning Process</label>
 
-  <div class="field-tooltip">
-    <select
-      class="form-select form-select-sm"
-      [(ngModel)]="selectedStepId"
-      (ngModelChange)="onStepSelected()"
-      [disabled]="!isLineReadyForPlanning"
-    >
-      <option [ngValue]="null">Select a process to plan…</option>
+      <div class="field-tooltip">
+        <select
+          class="form-select form-select-sm"
+          [(ngModel)]="selectedStepId"
+          (ngModelChange)="onStepSelected()"
+          [disabled]="!isLineReadyForPlanning"
+        >
+          <option [ngValue]="null">Select a process to plan…</option>
 
-      @for (step of availableSteps; track step.Id) {
-      <option [ngValue]="step.Id">{{ step.Name }}</option>
-      }
-    </select>
+          @for (step of availableSteps; track step.Id) {
+          <option [ngValue]="step.Id">{{ step.Name }}</option>
+          }
+        </select>
 
-    @if (!isLineReadyForPlanning) {
-    <span class="tooltip-text"
-      >Enter a valid Taken Qty for this item before planning a
-      process.</span
-    >
-    }
+        @if (!isLineReadyForPlanning) {
+        <span class="tooltip-text"
+          >Enter a valid Taken Qty for this item before planning a
+          process.</span
+        >
+        }
+      </div>
+    </div>
+
+    <div class="flex-fill">
+      <label class="form-label">Pre-Planned Route</label>
+
+      <select
+        class="form-select form-select-sm"
+        [(ngModel)]="selectedRouteId"
+        (ngModelChange)="onRouteSelected()"
+        [disabled]="!isLineReadyForPlanning || prePlannedRoutes().length === 0"
+      >
+        <option [ngValue]="null">Select a route…</option>
+
+        @for (route of prePlannedRoutes(); track route.Id) {
+        <option [ngValue]="route.Id">{{ route.Name }}</option>
+        }
+      </select>
+    </div>
   </div>
 
   @if (isLineReadyForPlanning && availableSteps.length === 0 && droppedSteps.length > 0) {
@@ -85,8 +106,16 @@
 @if (droppedSteps.length > 0) {
 <div class="ps-chip-row">
   @for (step of droppedSteps; track step.stepId) {
-  <span class="ps-chip">
-    <i class="fa-solid fa-check-circle"></i>
+  <span
+    class="ps-chip"
+    [class.ps-chip-incomplete]="!isStepValid(step)"
+    [title]="isStepValid(step) ? '' : 'Missing Start Date, End Date, or Machine'"
+  >
+    <i
+      class="fa-solid"
+      [class.fa-check-circle]="isStepValid(step)"
+      [class.fa-triangle-exclamation]="!isStepValid(step)"
+    ></i>
     {{ step.stepName }} · {{ getMachineName(step.machineId) }} ·
     {{ getAllocatedTimeLabel(step) }}
   </span>

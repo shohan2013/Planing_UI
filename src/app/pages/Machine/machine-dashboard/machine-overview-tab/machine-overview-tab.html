@@ -1,27 +1,43 @@
-<!-- KPI cards -->
-<div class="row g-4 mb-4 kpi-row">
+<!-- KPI cards: mirror the donut's selection — a selected machine's own
+     figures when one is picked, the fleet totals otherwise. -->
+<div class="row g-3 mb-3 kpi-row">
+  @if (selectedMachine()) {
+    <div class="col-12 kpi-selected-banner">
+      <i class="fa-solid fa-gears"></i>
+      Showing KPIs for <b>{{ selectedMachine()!.MachineName }}</b>
+      <button
+        type="button"
+        class="btn-clear-selection"
+        (click)="clearSelectedMachine()"
+        title="Show all machines"
+      >
+        <i class="fa-solid fa-xmark"></i> Show all
+      </button>
+    </div>
+  }
+
   <div class="col-md-6 col-xl-3">
     <div class="kpi-card kpi-card-machines">
       <div class="kpi-icon kpi-icon-machines">
         <i class="fa-solid fa-industry"></i>
       </div>
       <div class="kpi-body">
-        <div class="kpi-label">Total Machines</div>
+        <div class="kpi-label">{{ selectedMachine() ? 'Machines' : 'Total Machines' }}</div>
         <div class="kpi-value-row">
-          <span class="kpi-value">{{ summary.TotalMachines }}</span>
+          <span class="kpi-value">{{ displaySummary().TotalMachines }}</span>
           <span
             class="kpi-trend"
-            [class.trend-positive]="trends().machines.sentiment === 'positive'"
-            [class.trend-negative]="trends().machines.sentiment === 'negative'"
-            [class.trend-neutral]="trends().machines.sentiment === 'neutral'"
+            [class.trend-positive]="displayTrends().machines.sentiment === 'positive'"
+            [class.trend-negative]="displayTrends().machines.sentiment === 'negative'"
+            [class.trend-neutral]="displayTrends().machines.sentiment === 'neutral'"
           >
             <i
               class="fa-solid"
-              [class.fa-arrow-up]="trends().machines.direction === 'up'"
-              [class.fa-arrow-down]="trends().machines.direction === 'down'"
-              [class.fa-minus]="trends().machines.direction === 'flat'"
+              [class.fa-arrow-up]="displayTrends().machines.direction === 'up'"
+              [class.fa-arrow-down]="displayTrends().machines.direction === 'down'"
+              [class.fa-minus]="displayTrends().machines.direction === 'flat'"
             ></i>
-            {{ trends().machines.direction === 'flat' ? '0%' : trends().machines.percent + '%' }}
+            {{ displayTrends().machines.direction === 'flat' ? '0%' : displayTrends().machines.percent + '%' }}
           </span>
         </div>
       </div>
@@ -34,22 +50,22 @@
         <i class="fa-solid fa-gauge-high"></i>
       </div>
       <div class="kpi-body">
-        <div class="kpi-label">Avg. Utilization</div>
+        <div class="kpi-label">{{ selectedMachine() ? 'Utilization' : 'Avg. Utilization' }}</div>
         <div class="kpi-value-row">
-          <span class="kpi-value">{{ summary.AvgUtilizationPercent }}%</span>
+          <span class="kpi-value">{{ displaySummary().AvgUtilizationPercent }}%</span>
           <span
             class="kpi-trend"
-            [class.trend-positive]="trends().utilization.sentiment === 'positive'"
-            [class.trend-negative]="trends().utilization.sentiment === 'negative'"
-            [class.trend-neutral]="trends().utilization.sentiment === 'neutral'"
+            [class.trend-positive]="displayTrends().utilization.sentiment === 'positive'"
+            [class.trend-negative]="displayTrends().utilization.sentiment === 'negative'"
+            [class.trend-neutral]="displayTrends().utilization.sentiment === 'neutral'"
           >
             <i
               class="fa-solid"
-              [class.fa-arrow-up]="trends().utilization.direction === 'up'"
-              [class.fa-arrow-down]="trends().utilization.direction === 'down'"
-              [class.fa-minus]="trends().utilization.direction === 'flat'"
+              [class.fa-arrow-up]="displayTrends().utilization.direction === 'up'"
+              [class.fa-arrow-down]="displayTrends().utilization.direction === 'down'"
+              [class.fa-minus]="displayTrends().utilization.direction === 'flat'"
             ></i>
-            {{ trends().utilization.direction === 'flat' ? '0%' : trends().utilization.percent + '%' }}
+            {{ displayTrends().utilization.direction === 'flat' ? '0%' : displayTrends().utilization.percent + '%' }}
           </span>
         </div>
       </div>
@@ -64,20 +80,20 @@
       <div class="kpi-body">
         <div class="kpi-label">Free Time</div>
         <div class="kpi-value-row">
-          <span class="kpi-value">{{ summary.TotalFreeHours }}h</span>
+          <span class="kpi-value">{{ displaySummary().TotalFreeHours }}h</span>
           <span
             class="kpi-trend"
-            [class.trend-positive]="trends().free.sentiment === 'positive'"
-            [class.trend-negative]="trends().free.sentiment === 'negative'"
-            [class.trend-neutral]="trends().free.sentiment === 'neutral'"
+            [class.trend-positive]="displayTrends().free.sentiment === 'positive'"
+            [class.trend-negative]="displayTrends().free.sentiment === 'negative'"
+            [class.trend-neutral]="displayTrends().free.sentiment === 'neutral'"
           >
             <i
               class="fa-solid"
-              [class.fa-arrow-up]="trends().free.direction === 'up'"
-              [class.fa-arrow-down]="trends().free.direction === 'down'"
-              [class.fa-minus]="trends().free.direction === 'flat'"
+              [class.fa-arrow-up]="displayTrends().free.direction === 'up'"
+              [class.fa-arrow-down]="displayTrends().free.direction === 'down'"
+              [class.fa-minus]="displayTrends().free.direction === 'flat'"
             ></i>
-            {{ trends().free.direction === 'flat' ? '0%' : trends().free.percent + '%' }}
+            {{ displayTrends().free.direction === 'flat' ? '0%' : displayTrends().free.percent + '%' }}
           </span>
         </div>
       </div>
@@ -92,20 +108,20 @@
       <div class="kpi-body">
         <div class="kpi-label">Downtime</div>
         <div class="kpi-value-row">
-          <span class="kpi-value">{{ summary.TotalDowntimeHours }}h</span>
+          <span class="kpi-value">{{ displaySummary().TotalDowntimeHours }}h</span>
           <span
             class="kpi-trend"
-            [class.trend-positive]="trends().downtime.sentiment === 'positive'"
-            [class.trend-negative]="trends().downtime.sentiment === 'negative'"
-            [class.trend-neutral]="trends().downtime.sentiment === 'neutral'"
+            [class.trend-positive]="displayTrends().downtime.sentiment === 'positive'"
+            [class.trend-negative]="displayTrends().downtime.sentiment === 'negative'"
+            [class.trend-neutral]="displayTrends().downtime.sentiment === 'neutral'"
           >
             <i
               class="fa-solid"
-              [class.fa-arrow-up]="trends().downtime.direction === 'up'"
-              [class.fa-arrow-down]="trends().downtime.direction === 'down'"
-              [class.fa-minus]="trends().downtime.direction === 'flat'"
+              [class.fa-arrow-up]="displayTrends().downtime.direction === 'up'"
+              [class.fa-arrow-down]="displayTrends().downtime.direction === 'down'"
+              [class.fa-minus]="displayTrends().downtime.direction === 'flat'"
             ></i>
-            {{ trends().downtime.direction === 'flat' ? '0%' : trends().downtime.percent + '%' }}
+            {{ displayTrends().downtime.direction === 'flat' ? '0%' : displayTrends().downtime.percent + '%' }}
           </span>
         </div>
       </div>
@@ -114,31 +130,41 @@
 </div>
 
 <!-- Charts -->
-<div class="row g-3">
-  <div class="col-lg-4">
-    <div class="card h-100 border-0 shadow-sm">
-      <div class="card-header bg-white border-0 pb-0">
-        <h6 class="fw-bold mb-0">Overall Time Distribution</h6>
+<div class="charts-row">
+  <div class="time-distribution-col">
+    <div class="card border-0 shadow-sm time-distribution-card">
+      <div class="card-header bg-white border-0 pb-0 time-distribution-header">
+        <h6 class="fw-bold mb-0">
+          {{ selectedMachine() ? selectedMachine()!.MachineName : 'Overall Time Distribution' }}
+        </h6>
       </div>
-      <div class="card-body">
-        <div style="height: 260px">
-          <canvas
-            baseChart
-            [type]="'doughnut'"
-            [data]="utilizationDoughnutData()"
-            [options]="doughnutOptions"
-          ></canvas>
+      <div class="card-body time-distribution-body">
+        <div class="time-distribution-chart">
+          <div
+            #donutBox
+            class="time-distribution-chart-inner"
+            [style.width.px]="donutSize()"
+            [style.height.px]="donutSize()"
+          >
+            <canvas
+              baseChart
+              [type]="'doughnut'"
+              [data]="utilizationDoughnutData()"
+              [options]="doughnutOptions"
+            ></canvas>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="col-lg-8">
-    <div class="card h-100 border-0 shadow-sm">
+  <div class="utilization-col">
+    <div class="card border-0 shadow-sm utilization-card">
       <div class="card-header bg-white border-0 pb-0">
         <h6 class="fw-bold mb-0">Utilization % by Machine</h6>
+        <small class="text-muted d-block">Click a bar to see that machine's time distribution</small>
       </div>
-      <div class="card-body">
+      <div class="card-body utilization-body">
         @if (loading) {
           <div class="text-center text-muted py-5">
             <i class="fa-solid fa-spinner fa-spin fa-2x mb-2"></i>
@@ -149,14 +175,16 @@
             No machine data found for the selected filters.
           </div>
         } @else {
-          <div [style.height.px]="Math.max(220, machines.length * 42)">
+          <div class="utilization-scroll"><div [style.height.px]="Math.max(220, machines.length * 42)">
             <canvas
+              #barChartRef="base-chart"
               baseChart
               [type]="'bar'"
               [data]="utilizationBarData()"
               [options]="barOptions"
+              (chartClick)="onBarClick($event)"
             ></canvas>
-          </div>
+          </div></div>
         }
       </div>
     </div>

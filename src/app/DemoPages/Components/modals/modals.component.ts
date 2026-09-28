@@ -1,10 +1,16 @@
 import {Component} from '@angular/core';
-import {NgbModal, ModalDismissReasons} from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, ModalDismissReasons, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
+
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { PageTitleComponent } from '../../../Layout/Components/page-title/page-title.component';
 @Component({
   selector: 'app-modals',
   templateUrl: './modals.component.html',
-  standalone: false})
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, NgbModule, FontAwesomeModule, PageTitleComponent]})
 export class ModalsComponent {
 
   heading = 'Modals';

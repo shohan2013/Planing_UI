@@ -1,6 +1,9 @@
 
 // BOOTSTRAP 5.3
 
+// 0. Local helpers (replacements for deprecated global color functions)
+@import "utils/color-compat";
+
 // 1. Functions — so overrides can use them
 @import "bootstrap/scss/functions";
 

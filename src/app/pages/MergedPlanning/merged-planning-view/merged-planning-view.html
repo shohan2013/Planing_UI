@@ -204,7 +204,11 @@
                   cdkDragPreviewContainer="global"
                   [cdkDragBoundary]="'.desk-body'"
                 >
-                  <div class="desk-card-header" cdkDragHandle>
+                  <div
+                    class="desk-card-header"
+                    [class.desk-card-header-incomplete]="!isDeskStepValid(step)"
+                    cdkDragHandle
+                  >
                     <i class="fa-solid fa-grip-vertical drag-handle"></i>
                     <span class="desk-card-title" [title]="step.stepName">
                       {{ step.stepName }}
@@ -263,6 +267,8 @@
                         "
                         name="deskMachine-{{ step.stepId }}"
                       >
+                        <option [ngValue]="0">Select machine</option>
+
                         @for (machine of Machines(); track machine.Id) {
                         <option [ngValue]="machine.Id">
                           {{ machine.Name }}

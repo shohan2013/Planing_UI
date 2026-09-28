@@ -1,10 +1,14 @@
-import { Component, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component,OnDestroy,signal } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
-import { CommonService } from 'src/app/core/services/Common/CommonService';
+import {
+debounceTime,
+distinctUntilChanged,
+Subject
+} from 'rxjs';
 import { DeliveryOrders } from '../SalesOrder/sales-orders';
 import { MergedPlanning } from '../MergedPlanning/merged-planning';
 import { PlanningHistoryList } from '../PlanningHistory/planning-history-list/planning-history-list';
+
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 @Component({
   selector: 'app-planning',
@@ -33,6 +37,7 @@ export class Planning implements OnDestroy {
 
   onTabChange(tab: string) {
     this.activeTab.set(tab);
+    this.tabChange$.next(tab);
     this.tabChange$.next(tab);
   }
 

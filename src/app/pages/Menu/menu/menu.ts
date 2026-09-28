@@ -1,30 +1,24 @@
 import { CommonModule } from '@angular/common';
 import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  DestroyRef,
-  inject,
-  OnDestroy,
-  OnInit,
-  signal,
+ChangeDetectionStrategy,
+Component
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
-  AbstractControl,
-  FormControl,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-  Validators,
+AbstractControl,
+FormControl,
+FormGroup,
+FormsModule,
+ReactiveFormsModule,
+Validators,
 } from '@angular/forms';
-import { ModalDismissReasons, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { ModalDismissReasons,NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { finalize, Observable, Subject, takeUntil } from 'rxjs';
+import { finalize,Observable,Subject,takeUntil } from 'rxjs';
 import { Module } from 'src/app/core/model/Common/Module/Module';
 import {
-  ServerQueryRequest,
-  ServerQueryResponse,
+ServerQueryRequest,
+ServerQueryResponse,
 } from 'src/app/core/model/Common/Pagination/ServerQueryRequest';
 import { IMenu } from 'src/app/core/model/Menu/Menu';
 import { ServerSideFilteredPaginatedComponent } from 'src/app/core/server-side-filtered-paginated/server-side-filtered-paginated.component';

@@ -4,3 +4,9 @@ export interface IApiResponse {
   Message: string;
   ResponseTime: Date;
 }
+
+
+
+export interface IApiResponseWithData<T> extends IApiResponse {
+  Data: T | null;
+}

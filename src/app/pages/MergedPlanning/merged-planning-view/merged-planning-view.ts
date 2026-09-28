@@ -2,16 +2,14 @@ import {
   Component,
   EventEmitter,
   Input,
-  OnChanges,
   OnDestroy,
   OnInit,
   Output,
   signal,
-  SimpleChanges,
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { single, Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { DateTimePipe } from 'src/app/shared/pipes/date-time-pipe';
 import { MergedPlanningServices } from 'src/app/core/services/MergedPlanning/merged-planning-services';
@@ -142,7 +140,7 @@ export class MergedPlanningView implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
-          console.log(data);
+          //console.log(data);
           this.productionSteps.set(data);
           this.stepsLoading.set(false);
         },
@@ -200,7 +198,7 @@ export class MergedPlanningView implements OnInit, OnDestroy {
         }
 
         const steps = processSteps
-          .filter((x) => x.lineId === line.Id)
+          .filter((x) => x.lineId === line.Id && this.isDeskStepValid(x))
           .sort((a, b) => a.orderNo - b.orderNo);
 
         return {
@@ -241,6 +239,13 @@ export class MergedPlanningView implements OnInit, OnDestroy {
     };
   }
 
+  /** Count of desk steps still missing Start/End Date, a valid range, or a Machine. */
+  private countIncompleteSteps(): number {
+    return this.processStepState
+      .processSteps()
+      .filter((step) => !this.isDeskStepValid(step)).length;
+  }
+
   onSaveAll(): void {
     const header = this.buildProductionPlanHeaderToSave();
     const lines = this.buildProductionPlanLinesToSave();
@@ -250,6 +255,24 @@ export class MergedPlanningView implements OnInit, OnDestroy {
         'Enter a valid Taken Qty for at least one item before saving.',
       );
       return;
+    }
+
+    const hasAnyValidStep = lines.some(
+      (line) => (line.ProductionPlanConfigures?.length ?? 0) > 0,
+    );
+
+    if (!hasAnyValidStep) {
+      this.toastr.error('Plan at least one valid process step before saving.');
+      return;
+    }
+
+    const incompleteCount = this.countIncompleteSteps();
+    if (incompleteCount > 0) {
+      const proceed = confirm(
+        `${incompleteCount} planning step(s) are missing Start Date, End Date, or Machine and will NOT be saved.\n\nDo you want to continue and save only the valid steps?`,
+      );
+
+      if (!proceed) return;
     }
 
     this.isSaving.set(true);
@@ -328,6 +351,22 @@ export class MergedPlanningView implements OnInit, OnDestroy {
   isDeskStepDateRangeInvalid(step: IProcessStepInput): boolean {
     if (!step.startDate || !step.endDate) return false;
     return step.endDate < step.startDate;
+  }
+
+  /**
+   * A step is Ready/Valid only once all 4 of its inputs are filled in on the
+   * desk card: Start Date, End Date, a valid (non-reversed) range, and a
+   * chosen Machine. Pre-planned-route steps land here empty (see
+   * production-steps.ts onRouteSelected) and stay "incomplete" until the user
+   * fills them in.
+   */
+  isDeskStepValid(step: IProcessStepInput): boolean {
+    return (
+      !!step.startDate &&
+      !!step.endDate &&
+      !this.isDeskStepDateRangeInvalid(step) &&
+      !!step.machineId
+    );
   }
 
   getMachineName(machineId: number): string {

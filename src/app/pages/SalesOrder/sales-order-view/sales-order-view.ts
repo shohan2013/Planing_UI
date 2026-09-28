@@ -1,22 +1,18 @@
 import {
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  OnDestroy,
-  OnInit,
-  Output,
-  output,
-  signal,
-  SimpleChanges,
+Component,
+EventEmitter,
+Input,
+OnChanges,
+OnDestroy,Output,signal,
+SimpleChanges
 } from '@angular/core';
 import {
-  IDeliveryOrder,
-  IDeliveryOrderLine,
+IDeliveryOrder,
+IDeliveryOrderLine,
 } from 'src/app/core/model/SalesOrder/sales-order-model';
 import { DeliveryOrderService } from 'src/app/core/services/SalesOrder/sales-order-service';
 import { DateTimePipe } from '../../../shared/pipes/date-time-pipe';
-import { single, Subject, takeUntil } from 'rxjs';
+import { Subject,takeUntil } from 'rxjs';
 import { DecimalPipe } from '@angular/common';
 
 @Component({

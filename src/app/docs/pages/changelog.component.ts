@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 interface Release {
   version: string;
   date: string;
@@ -10,7 +12,7 @@ interface Release {
 @Component({
   selector: 'app-docs-changelog',
   templateUrl: './changelog.component.html',
-  standalone: false,
+  imports: [CommonModule, RouterModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChangelogComponent {

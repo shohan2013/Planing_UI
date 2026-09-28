@@ -1,0 +1,445 @@
+@import url(../../../../styles.scss);
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+/* =========================================================
+   Assign Role card
+   ========================================================= */
+
+.user-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.user-card > .card-body {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+  padding: 1rem 1.5rem;
+}
+
+/* =========================================================
+   Compact Role dropdown
+   ========================================================= */
+
+.role-selection-row {
+  display: flex;
+  width: 100%;
+  margin: 0 0 0.85rem;
+}
+
+.role-selection {
+  width: 50%;
+  min-width: 320px;
+  max-width: 700px;
+}
+
+.compact-role-select {
+  width: 100%;
+}
+
+.compact-role-select.ng-select
+  .ng-select-container {
+  min-height: 38px;
+  height: 38px;
+}
+
+.compact-role-select.ng-select
+  .ng-value-container {
+  padding-left: 0.75rem;
+}
+
+.compact-role-select.ng-select
+  .ng-placeholder,
+.compact-role-select.ng-select
+  .ng-value-label {
+  font-size: 0.95rem;
+}
+
+.compact-role-select.ng-select
+  .ng-input {
+  top: 7px;
+}
+
+.compact-role-select.ng-select
+  .ng-clear-wrapper,
+.compact-role-select.ng-select
+  .ng-arrow-wrapper {
+  height: 36px;
+}
+
+.compact-role-select
+  .ng-dropdown-panel
+  .ng-option {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.95rem;
+}
+
+/*
+  The latest HTML uses Bootstrap column classes
+  instead of .role-selection.
+*/
+.card-body > .row:first-child {
+  flex: 0 0 auto;
+  margin-bottom: 0.85rem !important;
+}
+
+/* =========================================================
+   Employee search
+   ========================================================= */
+
+.employee-search-panel {
+  flex: 0 0 auto;
+  width: 100%;
+  margin: 0;
+}
+
+.employee-search-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
+}
+
+.employee-search-heading h6 {
+  margin: 0;
+}
+
+.selected-count {
+  color: #495057;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.employee-search-panel > .ng-select {
+  width: 100%;
+}
+
+.employee-search-panel
+  > .ng-select
+  .ng-select-container {
+  min-height: 40px;
+  height: 40px;
+}
+
+.employee-search-panel
+  > .ng-select
+  .ng-value-container {
+  padding-left: 0.75rem;
+}
+
+.employee-search-panel
+  > .ng-select
+  .ng-input {
+  top: 8px;
+}
+
+.employee-search-panel
+  > .ng-select
+  .ng-clear-wrapper,
+.employee-search-panel
+  > .ng-select
+  .ng-arrow-wrapper {
+  height: 38px;
+}
+
+.employee-option-text {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.employee-option-text strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   Selected employee table
+   ========================================================= */
+
+.selected-employee-table {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+  margin: 1rem 0 0;
+  padding: 0;
+}
+
+/*
+  Override the global .table-responsive min-height.
+  This wrapper owns the vertical and horizontal scrollbars.
+*/
+.role-assign-table-scroll {
+  position: relative;
+  width: 100%;
+  height: clamp(260px, 42vh, 420px);
+  min-height: 260px !important;
+  max-height: 420px;
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  overflow-y: scroll;
+  border: 1px solid #dee2e6;
+  border-radius: 0.35rem;
+}
+
+.role-assign-table-scroll .custom-table {
+  width: 100%;
+  min-width: 700px;
+  margin: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+/* Sticky table heading */
+
+.role-assign-table-scroll
+  .custom-table
+  thead {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+
+.role-assign-table-scroll
+  .custom-table
+  thead
+  th {
+  height: 42px;
+  padding: 0.5rem 0.65rem;
+  vertical-align: middle;
+  background-color: #e3e1e1;
+  white-space: nowrap;
+}
+
+.role-assign-table-scroll
+  .custom-table
+  tbody
+  td {
+  height: 42px;
+  padding: 0.45rem 0.65rem;
+  vertical-align: middle;
+}
+
+/* Table column widths */
+
+.role-assign-table-scroll
+  .serial-column {
+  width: 7%;
+  min-width: 60px;
+}
+
+.role-assign-table-scroll
+  .enroll-column {
+  width: 20%;
+  min-width: 150px;
+}
+
+.role-assign-table-scroll
+  .action-column {
+  width: 12%;
+  min-width: 100px;
+}
+
+.employee-enroll,
+.employee-name {
+  white-space: nowrap;
+}
+
+.employee-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* =========================================================
+   Empty employee table
+   ========================================================= */
+
+.role-assign-table-scroll .empty-state {
+  height: 150px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.role-assign-table-scroll
+  .empty-state
+  h6 {
+  margin: 0 0 0.4rem;
+}
+
+.role-assign-table-scroll
+  .empty-state
+  p {
+  margin: 0;
+  color: #6c757d;
+}
+
+/* =========================================================
+   Remove employee action
+   ========================================================= */
+
+.role-assign-table-scroll .action-btn {
+  margin: 0 auto;
+}
+
+/* =========================================================
+   Bottom action toolbar
+   ========================================================= */
+
+.action-toolbar {
+  display: flex;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin: 0.85rem 0 0 !important;
+  padding: 0;
+}
+
+/* Terminate View and Terminate stay on the left. */
+
+.terminate-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Clear and Assign stay on the right. */
+
+.primary-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.action-toolbar .btn {
+  min-height: 40px;
+  margin: 0;
+  padding: 0.45rem 1rem;
+  white-space: nowrap;
+}
+
+.terminate-actions .btn-warning {
+  color: #212529;
+}
+
+.primary-actions .btn-secondary {
+  min-width: 90px;
+}
+
+.primary-actions .btn-success {
+  min-width: 105px;
+}
+
+/* =========================================================
+   Employee table scrollbar
+   ========================================================= */
+
+.role-assign-table-scroll::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+.role-assign-table-scroll::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+}
+
+.role-assign-table-scroll::-webkit-scrollbar-thumb {
+  background-color: #adb5bd;
+  border: 2px solid #f1f1f1;
+  border-radius: 8px;
+}
+
+.role-assign-table-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: #868e96;
+}
+
+.role-assign-table-scroll {
+  scrollbar-width: auto;
+  scrollbar-color: #adb5bd #f1f1f1;
+}
+
+/* =========================================================
+   Responsive Role Assign layout
+   ========================================================= */
+
+@media (max-width: 991.98px) {
+  .role-selection {
+    width: 65%;
+  }
+
+  .role-assign-table-scroll {
+    height: 40vh;
+    max-height: 380px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .user-card > .card-body {
+    padding: 0.85rem 1rem;
+  }
+
+  .role-selection {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+  }
+
+  .role-assign-table-scroll {
+    height: 38vh;
+    min-height: 230px !important;
+    max-height: 340px;
+  }
+
+  .role-assign-table-scroll
+    .custom-table {
+    min-width: 700px;
+  }
+
+  .action-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .terminate-actions,
+  .primary-actions {
+    display: flex;
+    width: 100%;
+  }
+
+  .terminate-actions .btn,
+  .primary-actions .btn {
+    flex: 1 1 0;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .employee-search-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .terminate-actions,
+  .primary-actions {
+    flex-direction: column;
+  }
+
+  .terminate-actions .btn,
+  .primary-actions .btn {
+    width: 100%;
+  }
+}

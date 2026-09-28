@@ -1,5 +1,10 @@
 import {Component} from '@angular/core';
 
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 interface Country {
   name: string;
   flag: string;
@@ -37,7 +42,7 @@ const COUNTRIES: Country[] = [
 @Component({
   selector: 'app-regular',
   templateUrl: './regular.component.html',
-  standalone: false,  styles: []
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, NgbModule, FontAwesomeModule],  styles: []
 })
 export class RegularComponent {
 

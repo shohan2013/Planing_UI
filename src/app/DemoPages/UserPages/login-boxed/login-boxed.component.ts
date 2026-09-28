@@ -1,17 +1,19 @@
-import { Component, Input, OnDestroy } from '@angular/core';
+import { Component,OnDestroy } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormControl, FormGroup, Validators, AbstractControl } from '@angular/forms';
-import { Router } from '@angular/router';
+import { FormControl, FormGroup, Validators, AbstractControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
 import { LoginService } from '../../../core/services/login/login.service';
-import { Subject, takeUntil } from 'rxjs';
-import { faL } from '@fortawesome/free-solid-svg-icons';
+import { Subject,takeUntil } from 'rxjs';
 
 
+
+import { CommonModule } from '@angular/common';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 @Component({
   selector: 'app-login-boxed',
   templateUrl: './login-boxed.component.html',
-  standalone: false,
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, NgbModule, FontAwesomeModule],
   styles: []
 })
 

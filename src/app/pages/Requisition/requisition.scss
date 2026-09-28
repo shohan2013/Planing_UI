@@ -78,3 +78,18 @@
   color: #c53030;
   background-color: #fdecec;
 }
+
+
+.btn-complete {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.btn-complete:hover:not(:disabled) {
+  background: #bfdbfe;
+}
+
+.status-complete {
+  color: #43c785;
+  background-color: #eaf7ef;
+}
