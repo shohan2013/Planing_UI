@@ -78,6 +78,12 @@ export const routes: Routes = [
           ),
       },
 
+
+      {
+        path: 'roles',
+        loadComponent: () =>import('./pages/Role/roles/roles').then((m) => m.Roles),
+      },
+
       {
         path: 'permission',
         loadComponent: () =>

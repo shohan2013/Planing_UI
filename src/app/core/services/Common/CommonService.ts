@@ -23,8 +23,12 @@ import { IApproveMatrixGroupList } from '../../model/Common/ApproveMatrixGroupLi
 import { environment } from 'src/environments/environment';
 import { IBusinessFlowForPlanning } from '../../model/Common/BusinessFlow/production-steps-model';
 import { IMachine } from '../../model/Common/Machine/machine';
-import { IPrePlannedRoute, IPrePlannedRouteStep } from '../../model/Common/BusinessFlow/pre-planned-route-model';
-import { IRecipe }from '../../model/Common/Recipe/Recipe';
+import {
+  IPrePlannedRoute,
+  IPrePlannedRouteStep,
+} from '../../model/Common/BusinessFlow/pre-planned-route-model';
+import { IRecipe } from '../../model/Common/Recipe/Recipe';
+import { IActiveRole } from '../../model/Role/Role';
 
 @Injectable({
   providedIn: 'root',
@@ -212,6 +216,12 @@ export class CommonService {
   GetRecipe(unitId: number, BusinessesId: number): Observable<IRecipe[]> {
     return this.http.get<IRecipe[]>(
       `${environment.API_URL}${GlobalConstant.API_END_POINTS.Recipe}?UnitId=${unitId}&BusinessId=${BusinessesId}`,
+    );
+  }
+
+  getActiveRoles(): Observable<IActiveRole[]> {
+    return this.http.get<IActiveRole[]>(
+      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.activeRoles}`,
     );
   }
 }

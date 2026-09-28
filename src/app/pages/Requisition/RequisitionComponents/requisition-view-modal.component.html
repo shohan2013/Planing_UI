@@ -9,11 +9,9 @@
   ></button>
 </div>
 
-<div class="modal-body">
+<div class="modal-body requisition-modal-body">
   @if (state === 'loading') {
-    <div
-      class="d-flex justify-content-center align-items-center py-5"
-    >
+    <div class="d-flex justify-content-center align-items-center py-5">
       <div class="spinner-border text-success" role="status">
         <span class="visually-hidden">
           Loading requisition lines...
@@ -25,124 +23,188 @@
       Unable to display the requisition.
     </div>
   } @else {
-    <div class="table-responsive">
-      <table class="custom-table-header">
-        <tbody>
-          <tr>
-            <th>Requisition Number</th>
-            <td>{{ header.RequisitionNumber || '-' }}</td>
-          </tr>
+    <section class="requisition-card">
+      <div class="section-heading">
+        <span class="section-icon" aria-hidden="true">
+          <i class="fa-solid fa-circle-info"></i>
+        </span>
 
-          <tr>
-            <th>Unit</th>
-            <td>{{ header.UnitName || '-' }}</td>
-          </tr>
+        <div>
+          <h6>Requisition Information</h6>
+          <p>General details and schedule</p>
+        </div>
+      </div>
 
-          <tr>
-            <th>Business</th>
-            <td>{{ header.BusinessName || '-' }}</td>
-          </tr>
+      <div class="row g-3">
+        <div class="col-12 col-md-4">
+          <div class="detail-tile">
+            <div class="detail-label">Requisition Number</div>
+            <div class="detail-value detail-highlight">
+              {{ header.RequisitionNumber || '-' }}
+            </div>
+          </div>
+        </div>
 
-          <tr>
-            <th>Requisition Date</th>
-            <td>
+        <div class="col-12 col-md-4">
+          <div class="detail-tile">
+            <div class="detail-label">Unit</div>
+            <div class="detail-value">
+              {{ header.UnitName || '-' }}
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+          <div class="detail-tile">
+            <div class="detail-label">Business</div>
+            <div class="detail-value">
+              {{ header.BusinessName || '-' }}
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+          <div class="detail-tile">
+            <div class="detail-label">Requisition Date</div>
+            <div class="detail-value">
               {{ header.ReqDate | date: 'dd-MMM-yyyy' }}
-            </td>
-          </tr>
+            </div>
+          </div>
+        </div>
 
-          <tr>
-            <th>Start Date</th>
-            <td>
+        <div class="col-12 col-md-4">
+          <div class="detail-tile">
+            <div class="detail-label">Start Date</div>
+            <div class="detail-value">
               {{ header.StartDate | date: 'dd-MMM-yyyy' }}
-            </td>
-          </tr>
+            </div>
+          </div>
+        </div>
 
-          <tr>
-            <th>End Date</th>
-            <td>
+        <div class="col-12 col-md-4">
+          <div class="detail-tile">
+            <div class="detail-label">End Date</div>
+            <div class="detail-value">
               {{ header.EndDate | date: 'dd-MMM-yyyy' }}
-            </td>
-          </tr>
+            </div>
+          </div>
+        </div>
 
-          <tr>
-            <th>Remarks</th>
-            <td>{{ header.Remarks || '-' }}</td>
-          </tr>
-
-          <tr>
-            <th>Status</th>
-            <td>
+        <div class="col-12 col-md-4">
+          <div class="detail-tile">
+            <div class="detail-label">Status</div>
+            <div class="detail-value">
               <span
                 class="g-status g-status-lg"
                 [ngClass]="{
                   'status-pending': header.DocStatusId === 1,
                   'status-approve': header.DocStatusId === 2,
-                  'status-reject': header.DocStatusId === 3
+                  'status-reject': header.DocStatusId === 3,
+                  'status-complete': header.DocStatusId === 4
                 }"
               >
                 <span class="g-dot"></span>
                 {{ getDocStatusName(header.DocStatusId) }}
               </span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-    <h6 class="mt-4">Product Requisition</h6>
+    <section class="requisition-card">
+      <div class="section-heading">
+        <span class="section-icon" aria-hidden="true">
+          <i class="fa-regular fa-message"></i>
+        </span>
 
-    <div class="table-responsive">
-      <table class="custom-table">
-        <thead>
-          <tr>
-            <th>PRODUCT TYPE</th>
-            <th>ITEM</th>
-            <th>UOM</th>
-            <th>QUANTITY</th>
-            <th>STOCK QUANTITY</th>
-            <th>SALES QUANTITY</th>
-            <th>REMARKS</th>
-            <th>STATUS</th>
-          </tr>
-        </thead>
+        <div>
+          <h6>Remarks</h6>
+        </div>
+      </div>
 
-        <tbody>
-          @if (lines.length === 0) {
+      <div class="remarks-content">
+        {{ header.Remarks || '-' }}
+      </div>
+    </section>
+
+    <section class="requisition-card">
+      <div class="section-heading">
+        <span class="section-icon" aria-hidden="true">
+          <i class="fa-solid fa-list"></i>
+        </span>
+
+        <div>
+          <h6>Product Requisition</h6>
+          <p>Items included in this requisition</p>
+        </div>
+      </div>
+
+      <div class="table-responsive product-table-wrapper">
+        <table class="custom-table product-table">
+          <thead>
             <tr>
-              <td colspan="8" class="text-center py-4">
-                No active Requisition Lines found.
-              </td>
+              <th>Product Type</th>
+              <th>Item</th>
+              <th>UOM</th>
+              <th class="number-column">Quantity</th>
+              <th class="number-column">Remaining Stock Quantity</th>
+              <th class="number-column">Stock Quantity</th>
+              <th class="number-column">Sales Quantity</th>
+              <th>Remarks</th>
             </tr>
-          } @else {
-            @for (line of lines; track line.ID) {
-              <tr>
-                <td>{{ line.ProductTypeName || '-' }}</td>
-                <td>{{ line.ItemName || '-' }}</td>
-                <td>{{ line.UOMName || '-' }}</td>
-                <td>{{ line.Quantity }}</td>
-                <td>{{ line.StockQuantity ?? 0 }}</td>
-                <td>{{ line.SalesQuantity ?? 0 }}</td>
-                <td>{{ line.Remarks || '-' }}</td>
+          </thead>
 
-                <td>
-                  <span
-                    class="g-status g-status-lg"
-                    [ngClass]="{
-                      'status-pending': line.DocStatusId === 1,
-                      'status-approve': line.DocStatusId === 2,
-                      'status-reject': line.DocStatusId === 3
-                    }"
-                  >
-                    <span class="g-dot"></span>
-                    {{ getDocStatusName(line.DocStatusId) }}
-                  </span>
+          <tbody>
+            @if (lines.length === 0) {
+              <tr>
+                <td colspan="8" class="empty-table-message">
+                  No active Requisition Lines found.
                 </td>
               </tr>
+            } @else {
+              @for (line of lines; track line.ID) {
+                <tr>
+                  <td>{{ line.ProductTypeName || '-' }}</td>
+                  <td class="item-name">
+                    {{ line.ItemName || '-' }}
+                  </td>
+                  <td>{{ line.UOMName || '-' }}</td>
+                  <td class="number-column">
+                    {{ line.Quantity }}
+                  </td>
+
+                  <td class="number-column">
+                    <span
+                      [class.negative-quantity]="
+                        line.RemainingQuantity !== null &&
+                        line.RemainingQuantity < 0
+                      "
+                    >
+                      {{
+                        line.RemainingQuantity === null
+                          ? '-'
+                          : line.RemainingQuantity < 0
+                            ? -line.RemainingQuantity
+                            : line.RemainingQuantity
+                      }}
+                    </span>
+                  </td>
+
+                  <td class="number-column">
+                    {{ line.StockQuantity ?? 0 }}
+                  </td>
+                  <td class="number-column">
+                    {{ line.SalesQuantity ?? 0 }}
+                  </td>
+                  <td>{{ line.Remarks || '-' }}</td>
+                </tr>
+              }
             }
-          }
-        </tbody>
-      </table>
-    </div>
+          </tbody>
+        </table>
+      </div>
+    </section>
   }
 </div>
 
