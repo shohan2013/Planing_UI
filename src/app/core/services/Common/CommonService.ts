@@ -25,6 +25,7 @@ import { IBusinessFlowForPlanning } from '../../model/Common/BusinessFlow/produc
 import { IMachine } from '../../model/Common/Machine/machine';
 import { IRecipe } from '../../model/Common/Recipe/Recipe';
 import { IActiveRole } from '../../model/Role/Role';
+import { IWorkType } from '../../model/WorkType/WorkType';
 
 @Injectable({
   providedIn: 'root',
@@ -211,6 +212,12 @@ export class CommonService {
       );
     }
 
+
+    getWorkTypes(): Observable<IWorkType[]> {
+      return this.http.get<IWorkType[]>(
+        `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.WorkType}`,
+      );
+    }
 
 
 

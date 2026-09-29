@@ -60,7 +60,7 @@ export const GlobalConstant = {
     Machine: 'Common/GetMachine',
     Recipe: 'Common/GetRecipe',
     MachineUtilization: 'MachineDashboard/GetMachineUtilization',
-
+    WorkType: 'Common/WorkType',
 
 
   /*===========================ROLE===================================== */

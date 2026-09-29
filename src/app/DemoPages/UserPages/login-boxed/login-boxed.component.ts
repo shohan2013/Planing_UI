@@ -54,7 +54,9 @@ export class LoginBoxedComponent implements OnDestroy{
                     localStorage.setItem('Designation', data.query.DesignationName);
                     localStorage.setItem('Enroll', data.query.Enroll);
                     localStorage.setItem('Email', data.query.Email);
-                    this.router.navigate(['/dashboards/analytics']);
+                    // this.router.navigate(['/dashboards/analytics']);
+                    this.router.navigate(['/requisition']);
+                    
                     this.isLoading = false;
                 }
                 else

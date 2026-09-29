@@ -26,6 +26,7 @@ export class DeliveryOrderView implements OnChanges, OnDestroy {
   private destroy$ = new Subject<void>();
   @Input() isOpen = false;
   @Input() order: IDeliveryOrder | null = null;
+  @Input() workTypeCode = 'DO';
   @Output() closeView = new EventEmitter<void>();
 
   lines = signal<IDeliveryOrderLine[]>([]);
@@ -43,7 +44,7 @@ export class DeliveryOrderView implements OnChanges, OnDestroy {
     if (!this.order?.SOID) return;
 
     this.deliveryOrderService
-      .GetDeliveryOrdersDetails(this.order.SOID)
+      .GetDeliveryOrdersDetails(this.order.SOID, this.workTypeCode)
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
         console.log(data);

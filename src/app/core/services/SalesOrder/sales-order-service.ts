@@ -20,19 +20,20 @@ import { IApiResponse } from '../../model/Response/ApiResponse';
 export class DeliveryOrderService {
   constructor(private http: HttpClient) {}
 
-  GetDeliverOrders(
-    request: ServerQueryRequest,
-    unitId: Number,
-    BusinessesId: Number,
-  ): Observable<ServerQueryResponse<IDeliveryOrder>> {
+
+
+  GetDeliverOrders(request: ServerQueryRequest, unitId: Number, BusinessesId: Number, workTypeCode: string,) : Observable<ServerQueryResponse<IDeliveryOrder>> 
+  {
     return this.http.get<ServerQueryResponse<IDeliveryOrder>>(
-      `${environment.API_URL}${GlobalConstant.API_END_POINTS.DeliveryOrders}?GlobalSearch=${request.globalSearch}&PageIndex=${request.page}&PageSize=${request.pageSize}&UnitId=${unitId}&BusinessId=${BusinessesId}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.DeliveryOrders}?GlobalSearch=${request.globalSearch}&PageIndex=${request.page}&PageSize=${request.pageSize}&UnitId=${unitId}&BusinessId=${BusinessesId}&WorkTypeCode=${workTypeCode}`,
     );
   }
 
-  GetDeliveryOrdersDetails(SOID: Number): Observable<IDeliveryOrderLine[]> {
+
+
+  GetDeliveryOrdersDetails(SOID: Number, workTypeCode: string): Observable<IDeliveryOrderLine[]> {
     return this.http.get<IDeliveryOrderLine[]>(
-      `${environment.API_URL}${GlobalConstant.API_END_POINTS.DeliveryOrderLine}/${SOID}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.DeliveryOrderLine}/${SOID}?WorkTypeCode=${workTypeCode}`,
     );
   }
 
