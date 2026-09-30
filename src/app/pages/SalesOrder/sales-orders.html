@@ -4,8 +4,29 @@
     <span> Select DO or Requisition to merge </span>
   </div>
   <div class="card-body">
+
     <div class="d-flex justify-content-end align-items-center gap-3 mb-3">
-      <div style="width: 25%">
+      <div style="width: 20%">
+        <div class="input-group">
+          <div class="input-group-text">
+            <i class="fa-solid fa-filter"></i>
+          </div>
+
+          <select
+            class="form-select"
+            [(ngModel)]="selectedWorkTypeId"
+            (ngModelChange)="onWorkTypeFilterChange()"
+            aria-label="Type"
+          >
+            @for (workType of workTypes; track workType.Id) {
+            <option [ngValue]="workType.Id">{{ workType.Name }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div style="width: 20%">
+
         <div class="input-group">
           <div class="input-group-text">
             <i class="fa-solid fa-filter"></i>
@@ -224,6 +245,7 @@
 <app-delivery-order-view
   [isOpen]="viewOpen()"
   [order]="OrderForView()"
+  [workTypeCode]="selectedWorkTypeCode"
   (closeView)="closeView()"
 ></app-delivery-order-view>
 }

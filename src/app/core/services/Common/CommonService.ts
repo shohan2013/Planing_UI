@@ -29,6 +29,7 @@ import {
 } from '../../model/Common/BusinessFlow/pre-planned-route-model';
 import { IRecipe } from '../../model/Common/Recipe/Recipe';
 import { IActiveRole } from '../../model/Role/Role';
+import { IWorkType } from '../../model/WorkType/WorkType';
 
 @Injectable({
   providedIn: 'root',
@@ -226,6 +227,17 @@ export class CommonService {
   getActiveRoles(): Observable<IActiveRole[]> {
     return this.http.get<IActiveRole[]>(
       `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.activeRoles}`,
+    );
+  }
+  getActiveRoles(): Observable<IActiveRole[]> {
+    return this.http.get<IActiveRole[]>(
+      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.activeRoles}`,
+    );
+  }
+
+  getWorkTypes(): Observable<IWorkType[]> {
+    return this.http.get<IWorkType[]>(
+      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.WorkType}`,
     );
   }
 }

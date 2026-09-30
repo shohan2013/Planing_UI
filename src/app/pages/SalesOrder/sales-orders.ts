@@ -43,6 +43,8 @@ export class DeliveryOrders
   private destroy$ = new Subject<void>();
   units: IUnit[];
   businesses: IBusiness[];
+  workTypes: { Id: number; Code: string; Name: string }[] = [];
+  selectedWorkTypeId = 1;
   selectedUnitId: Number = 0;
   selectedBusinessId: Number = 0;
   selectedDeliveryOrders = signal<IDeliveryOrder[]>([]);
@@ -62,13 +64,31 @@ export class DeliveryOrders
     //super.ngOnInit();
     this.GetBusinessList();
     this.GetUnitList();
+    this.GetWorkTypes();
   }
 
   protected override fetchData(
     request: ServerQueryRequest,
   ): Observable<ServerQueryResponse<IDeliveryOrder>> {
+
+
+
+
+    const workTypeCode =
+      this.workTypes.find((type) => type.Id === this.selectedWorkTypeId)?.Code ??
+      'DO';
+
     return this.deliveryOrderService
-      .GetDeliverOrders(request, this.selectedUnitId, this.selectedBusinessId)
+      .GetDeliverOrders(
+        request,
+        this.selectedUnitId,
+        this.selectedBusinessId,
+        workTypeCode,
+      )
+
+
+
+
       .pipe(
         tap((response) => console.log(`Delivery Orders Response`, response)),
       );
@@ -85,6 +105,25 @@ export class DeliveryOrders
   onBusinessFilterChange(): void {
     this.currentPage.set(1);
     this.retry();
+  }
+
+  onWorkTypeFilterChange(): void {
+    this.selectedDeliveryOrders.set([]);
+    this.cartOpen.set(false);
+    this.OrderForView.set(null);
+    this.viewOpen.set(false);
+    this.currentPage.set(1);
+    this.retry();
+  }
+
+  GetWorkTypes(): void {
+    this.commonService
+      .getWorkTypes()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data) => {
+        console.log('Work Types:', data);
+        this.workTypes = data;
+      });
   }
 
   GetBusinessList(): void {
@@ -199,6 +238,10 @@ export class DeliveryOrders
     this.cartOpen.set(false);
   }
 
+  get selectedWorkTypeCode(): string {
+    return this.workTypes.find((type) => type.Id === this.selectedWorkTypeId)?.Code ?? 'DO';
+  }
+
   openView(order: IDeliveryOrder): void {
     this.OrderForView.set(order);
     this.viewOpen.set(true);
@@ -218,6 +261,7 @@ export class DeliveryOrders
       DeliveryOrderIds: this.selectedDeliveryOrders().map(
         (order) => order.SOID,
       ),
+      WorkTypeCode: this.selectedWorkTypeCode,
       Remarks: null,
       DocumentCreatedBy: Number(localStorage.getItem('Enroll')),
       IsCombineDO: this.selectedDeliveryOrders().length > 1 ? true : false,

@@ -62,7 +62,7 @@ export const GlobalConstant = {
     PrePlannedRoute: 'Common/GetPrePlannedRoute',
     PrePlannedRouteSteps: 'Common/GetPrePlannedRouteSteps',
     MachineUtilization: 'MachineDashboard/GetMachineUtilization',
-
+    WorkType: 'Common/WorkType',
 
 
   /*===========================ROLE===================================== */
