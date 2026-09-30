@@ -229,11 +229,6 @@ export class CommonService {
       `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.activeRoles}`,
     );
   }
-  getActiveRoles(): Observable<IActiveRole[]> {
-    return this.http.get<IActiveRole[]>(
-      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.activeRoles}`,
-    );
-  }
 
   getWorkTypes(): Observable<IWorkType[]> {
     return this.http.get<IWorkType[]>(
