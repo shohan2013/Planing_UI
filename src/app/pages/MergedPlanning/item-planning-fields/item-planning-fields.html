@@ -73,24 +73,23 @@
         }
       </div>
 
-      <div>
+      <div class="field-recipe">
         <label class="form-label" [for]="'recipeVersion-' + line.Id"
           >Recipe Version</label
         >
         <div class="field-tooltip">
-          <select
-            class="form-select form-select-sm"
-            [id]="'recipeVersion-' + line.Id"
-            [name]="'recipeVersion-' + line.Id"
+          <ng-select
+            class="recipe-version-select"
+            [labelForId]="'recipeVersion-' + line.Id"
+            [items]="recipeVersions"
+            bindLabel="Name"
+            bindValue="Id"
             formControlName="recipeVersionId"
-          >
-            <option [ngValue]="null">Select version</option>
-            @if (recipeVersions.length === 0) {
-            <option disabled>No versions available</option>
-            } @for (version of recipeVersions; track version.Id) {
-            <option [ngValue]="version.Id">{{ version.Name }}</option>
-            }
-          </select>
+            placeholder="Search version..."
+            notFoundText="No versions available"
+            [searchable]="true"
+            [clearable]="true"
+          ></ng-select>
           @if (!hasValidTakenQty) {
           <span class="tooltip-text"
             >Enter a valid Taken Qty to select Recipe Version and
@@ -100,7 +99,7 @@
         </div>
       </div>
 
-      <div>
+      <div class="field-priority">
         <label class="form-label" [for]="'priority-' + line.Id">Priority</label>
         <div class="field-tooltip">
           <select

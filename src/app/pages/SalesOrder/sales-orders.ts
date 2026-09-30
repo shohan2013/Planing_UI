@@ -235,8 +235,10 @@ export class DeliveryOrders
       .subscribe({
         next: () => {
           this.cartOpen.set(false);
+          this.selectedDeliveryOrders.set([]);
           //this.submitted = false;
           this.toaster.success('DO merged successfully.');
+          this.retry();
         },
       });
   }

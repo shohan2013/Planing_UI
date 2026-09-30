@@ -136,9 +136,10 @@
                 [steps]="productionSteps()"
                 [isLoading]="stepsLoading()"
                 [loadError]="stepsLoadError()"
-                [machineOptions]="Machines()"
+                [machinesByStep]="machinesByStep()"
                 (GetSteps)="loadProductionSteps()"
                 (dragStateChange)="isDragging.set($event)"
+                (stepSelected)="loadMachine($event)"
               ></app-production-steps>
             </div>
           </div>
@@ -269,7 +270,7 @@
                       >
                         <option [ngValue]="0">Select machine</option>
 
-                        @for (machine of Machines(); track machine.Id) {
+                        @for (machine of machinesForStep(step.stepId); track machine.Id) {
                         <option [ngValue]="machine.Id">
                           {{ machine.Name }}
                         </option>

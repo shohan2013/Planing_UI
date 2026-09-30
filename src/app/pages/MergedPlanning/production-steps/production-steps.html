@@ -95,7 +95,7 @@
     <app-process-step-from
       [lineId]="line!.Id"
       [step]="selectedStep!"
-      [machineOptions]="machineOptions"
+      [machineOptions]="machinesForStep(selectedStep!.Id)"
       (formValueChange)="onFormChange($event)"
     >
     </app-process-step-from>
@@ -116,7 +116,7 @@
       [class.fa-check-circle]="isStepValid(step)"
       [class.fa-triangle-exclamation]="!isStepValid(step)"
     ></i>
-    {{ step.stepName }} · {{ getMachineName(step.machineId) }} ·
+    {{ step.stepName }} · {{ getMachineName(step.stepId, step.machineId) }} ·
     {{ getAllocatedTimeLabel(step) }}
   </span>
   }

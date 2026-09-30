@@ -195,9 +195,13 @@ export class CommonService {
     );
   }
 
-  GetMachine(unitId: number, BusinessesId: number): Observable<IMachine[]> {
+  GetMachine(
+    unitId: number,
+    BusinessesId: number,
+    bussinessFlowConfigureId: number,
+  ): Observable<IMachine[]> {
     return this.http.get<IMachine[]>(
-      `${environment.API_URL}${GlobalConstant.API_END_POINTS.Machine}?UnitId=${unitId}&BusinessId=${BusinessesId}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.Machine}?UnitId=${unitId}&BusinessId=${BusinessesId}&BussinessFlowConfigureId=${bussinessFlowConfigureId}`,
     );
   }
 

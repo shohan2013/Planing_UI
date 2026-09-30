@@ -41,7 +41,7 @@
       <app-process-step-from
         [lineId]="lineId"
         [step]="step"
-        [machineOptions]="machineOptions"
+        [machineOptions]="machinesForStep(step.Id)"
         [initialValue]="initialValueFor(step.Id)"
         (formValueChange)="onFormChange($event, step.Id)"
       ></app-process-step-from>

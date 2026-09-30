@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
+import { NgSelectModule } from '@ng-select/ng-select';
 import { IPriority } from 'src/app/core/model/Common/Priority/Priority';
 import { IRecipe } from 'src/app/core/model/Common/Recipe/Recipe';
 import { IMergedPlanningLine } from 'src/app/core/model/MergedPlanning/merged-planning-model';
@@ -17,7 +18,7 @@ import { ProcessStepStateService } from 'src/app/core/services/MergedPlanning/pr
 @Component({
   selector: 'app-item-planning-fields',
   standalone: true,
-  imports: [ReactiveFormsModule, DecimalPipe],
+  imports: [ReactiveFormsModule, DecimalPipe, NgSelectModule],
   templateUrl: './item-planning-fields.html',
   styleUrl: './item-planning-fields.scss',
 })

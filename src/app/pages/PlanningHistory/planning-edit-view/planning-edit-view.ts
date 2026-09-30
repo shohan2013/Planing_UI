@@ -63,7 +63,8 @@ export class PlanningEditView implements OnInit, OnChanges, OnDestroy {
   lines = signal<IPlanningHistoryLine[]>([]);
   priorities = signal<IPriority[]>([]);
   recipeVersions = signal<IRecipe[]>([]);
-  machines = signal<IMachine[]>([]);
+  /** Machines per production step, keyed by step (BusinessFlowConfigure) Id. */
+  machinesByStep = signal<Record<number, IMachine[]>>({});
   productionSteps = signal<IBusinessFlowForPlanning[]>([]);
 
   isLoading = signal(false);
@@ -125,7 +126,7 @@ export class PlanningEditView implements OnInit, OnChanges, OnDestroy {
           this.header.set(data.Header);
           this.lines.set(data.Lines);
           this.loadProductionSteps();
-          this.loadMachines();
+          this.loadMachinesForSavedSteps();
           this.loadRecipes();
           this.isLoading.set(false);
         },
@@ -158,16 +159,39 @@ export class PlanningEditView implements OnInit, OnChanges, OnDestroy {
       });
   }
 
-  loadMachines(): void {
+  /** Step Ids whose machines are loaded or currently loading. */
+  private requestedMachineStepIds = new Set<number>();
+
+  /** Loads machines only for the process steps already saved on this plan. */
+  private loadMachinesForSavedSteps(): void {
+    this.requestedMachineStepIds.clear();
+    this.machinesByStep.set({});
+
+    const savedStepIds = new Set(
+      this.lines().flatMap((line) => (line.Steps ?? []).map((s) => s.StepId)),
+    );
+    savedStepIds.forEach((stepId) => this.loadMachine(stepId));
+  }
+
+  /**
+   * Loads one production step's machines (saved steps on open, or a step the
+   * user adds later). Each step is fetched only once.
+   */
+  loadMachine(stepId: number): void {
     const header = this.header();
     if (!header?.UnitId || !header?.BusinessId) return;
+    if (this.requestedMachineStepIds.has(stepId)) return;
+
+    this.requestedMachineStepIds.add(stepId);
 
     this.commonService
-      .GetMachine(header.UnitId, header.BusinessId)
+      .GetMachine(header.UnitId, header.BusinessId, stepId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (data) => this.machines.set(data),
-        error: () => this.machines.set([]),
+        next: (data) =>
+          this.machinesByStep.update((map) => ({ ...map, [stepId]: data })),
+        // Allow a retry the next time this step is added.
+        error: () => this.requestedMachineStepIds.delete(stepId),
       });
   }
 

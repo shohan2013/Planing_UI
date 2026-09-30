@@ -66,7 +66,8 @@ export class MergedPlanningView implements OnInit, OnDestroy {
   priorities = signal<IPriority[]>([]);
   recipeVersions = signal<IRecipe[]>([]);
   itemPlanningValues = signal<Record<number, IItemPlanningInput>>({});
-  Machines = signal<IMachine[]>([]);
+  /** Machines per production step, keyed by step (BusinessFlowConfigure) Id. */
+  machinesByStep = signal<Record<number, IMachine[]>>({});
 
   isLoading = signal(false);
   loadError = signal(false);
@@ -117,7 +118,6 @@ export class MergedPlanningView implements OnInit, OnDestroy {
           this.header.set(data.Header);
           this.lines.set(data.Lines);
           this.loadProductionSteps();
-          this.loadMachine();
           this.loadRecipe();
           this.isLoading.set(false);
         },
@@ -151,13 +151,32 @@ export class MergedPlanningView implements OnInit, OnDestroy {
       });
   }
 
-  loadMachine() {
+  /** Step Ids whose machines are loaded or currently loading. */
+  private requestedMachineStepIds = new Set<number>();
+
+  /**
+   * Loads a production step's machines when the user selects that step.
+   * Each step is fetched only once; later selections reuse the result.
+   */
+  loadMachine(stepId: number) {
+    const header = this.header();
+    if (!header || this.requestedMachineStepIds.has(stepId)) return;
+
+    this.requestedMachineStepIds.add(stepId);
+
     this.commonService
-      .GetMachine(this.header().UnitId, this.header().BusinessId)
+      .GetMachine(header.UnitId, header.BusinessId, stepId)
       .pipe(takeUntil(this.destroy$))
-      .subscribe((data) => {
-        this.Machines.set(data);
+      .subscribe({
+        next: (data) =>
+          this.machinesByStep.update((map) => ({ ...map, [stepId]: data })),
+        // Allow a retry the next time this step is selected.
+        error: () => this.requestedMachineStepIds.delete(stepId),
       });
+  }
+
+  machinesForStep(stepId: number): IMachine[] {
+    return this.machinesByStep()[stepId] ?? [];
   }
 
   loadRecipe() {
@@ -369,9 +388,10 @@ export class MergedPlanningView implements OnInit, OnDestroy {
     );
   }
 
-  getMachineName(machineId: number): string {
+  getMachineName(stepId: number, machineId: number): string {
     return (
-      this.Machines().find((m) => m.Id === machineId)?.Name ?? `#${machineId}`
+      this.machinesForStep(stepId).find((m) => m.Id === machineId)?.Name ??
+      `#${machineId}`
     );
   }
 

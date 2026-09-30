@@ -33,7 +33,8 @@ import { ItemPlanningStateService } from 'src/app/core/services/MergedPlanning/i
 })
 export class ProductionSteps implements OnInit {
   @Input() line: IMergedPlanningLine | null = null;
-  @Input() machineOptions: IMachine[] = [];
+  /** Machines per production step, keyed by step (BusinessFlowConfigure) Id. */
+  @Input() machinesByStep: Record<number, IMachine[]> = {};
 
   steps = input<IBusinessFlowForPlanning[]>([]);
   isLoading = input<boolean>(true);
@@ -41,6 +42,8 @@ export class ProductionSteps implements OnInit {
 
   @Output() GetSteps = new EventEmitter<void>();
   @Output() dragStateChange = new EventEmitter<boolean>();
+  /** Emits a process step's Id when it is picked, so its machines can be loaded. */
+  @Output() stepSelected = new EventEmitter<number>();
 
   selectedStepId = signal<number | null>(null);
   pendingFormValue: IProcessStepInput | null = null;
@@ -231,6 +234,7 @@ export class ProductionSteps implements OnInit {
             machineId: 0,
             orderNo: step.Slno,
           });
+          this.stepSelected.emit(step.Id);
         }
 
         this.selectedStepId.set(null);
@@ -244,6 +248,11 @@ export class ProductionSteps implements OnInit {
   onStepSelected(): void {
     this.pendingFormValue = null;
     this.dropSucceeded.set(false);
+
+    const stepId = this.selectedStepId();
+    if (stepId != null) {
+      this.stepSelected.emit(stepId);
+    }
   }
 
   onFormChange(value: IProcessStepInput | null): void {
@@ -283,9 +292,13 @@ export class ProductionSteps implements OnInit {
     return step.endDate >= step.startDate;
   }
 
-  getMachineName(machineId: number): string {
+  machinesForStep(stepId: number): IMachine[] {
+    return this.machinesByStep[stepId] ?? [];
+  }
+
+  getMachineName(stepId: number, machineId: number): string {
     return (
-      this.machineOptions.find((m) => m.Id === machineId)?.Name ??
+      this.machinesForStep(stepId).find((m) => m.Id === machineId)?.Name ??
       `#${machineId}`
     );
   }
