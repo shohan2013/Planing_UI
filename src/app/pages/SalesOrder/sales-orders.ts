@@ -261,6 +261,7 @@ export class DeliveryOrders
       DeliveryOrderIds: this.selectedDeliveryOrders().map(
         (order) => order.SOID,
       ),
+      WorkTypeCode: this.selectedWorkTypeCode,
       Remarks: null,
       DocumentCreatedBy: Number(localStorage.getItem('Enroll')),
       IsCombineDO: this.selectedDeliveryOrders().length > 1 ? true : false,

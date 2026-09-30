@@ -20,6 +20,7 @@ export interface IDeliveryOrderLine {
 
 export interface IMergeDeliveryOrderRequest {
   DeliveryOrderIds: number[] | null;
+  WorkTypeCode: string;
   Remarks: string | null;
   DocumentCreatedBy: number;
   IsCombineDO: boolean;
