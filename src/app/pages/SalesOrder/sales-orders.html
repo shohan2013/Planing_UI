@@ -133,8 +133,9 @@
                 aria-hidden="true"
               >
               </span>
-
-              Loading Delivery Orders...
+              {{ selectedWorkTypeCode === 'REQ'
+                              ? 'Loading Requisitions...'
+                              : 'Loading Delivery Orders...' }}
             </td>
           </tr>
 
