@@ -105,9 +105,13 @@
                 (change)="toggleAll($event)"
               />
             </th>
-              <th>{{ selectedWorkTypeCode === 'REQ' ? 'REQUISITION CODE' : 'DO CODE' }}</th>
+              <th style="width: 19%">
+                {{ selectedWorkTypeCode === 'REQ' ? 'REQUISITION CODE' : 'DO CODE' }}
+              </th>
               <th>CREATED DATE</th>
-              <th>{{ selectedWorkTypeCode === 'REQ' ? 'REQUEST REQUISITION DATE' : 'REQUEST DELIVERY DATE' }}</th>
+              <th style="width: 22%">
+                {{ selectedWorkTypeCode === 'REQ' ? 'REQUEST REQUISITION DATE' : 'REQUEST DELIVERY DATE' }}
+              </th>              
               <th>UNIT</th>
               <th>BUSINESS</th>
               @if (selectedWorkTypeCode !== 'REQ') {
