@@ -97,13 +97,13 @@
               <span
                 class="g-status g-status-lg"
                 [ngClass]="{
-                  'status-pending': header.DocStatusId === 1,
-                  'status-approve': header.DocStatusId === 2,
-                  'status-reject': header.DocStatusId === 3,
-                  'status-complete': header.DocStatusId === 4
+                  'pending': header.DocStatusId === 1,
+                  'approve': header.DocStatusId === 2,
+                  'reject': header.DocStatusId === 3,
+                  'complete': header.DocStatusId === 4
                 }"
               >
-                <span class="g-dot"></span>
+                <!-- <span class="g-dot"></span> -->
                 {{ getDocStatusName(header.DocStatusId) }}
               </span>
             </div>

@@ -119,8 +119,10 @@
                 class="g-status"
                 [class.pending]="item.DocumentStatus === 'Pending'"
                 [class.approve]="item.DocumentStatus === 'Approved'"
+                [class.reject]="item.DocumentStatus === 'Rejected'"
+                [class.complete]="item.DocumentStatus === 'Complete'"
               >
-                <span class="g-dot"></span>
+                <!-- <span class="g-dot"></span> -->
                 {{ item.DocumentStatus }}
               </span>
             </td>
