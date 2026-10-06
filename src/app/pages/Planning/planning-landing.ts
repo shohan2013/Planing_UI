@@ -33,11 +33,10 @@ export class Planning implements OnDestroy {
   }
 
   activeTab = signal<string>('mergeOrSplit');
-   renderedTab = signal<string>('mergeOrSplit');
+  renderedTab = signal<string>('mergeOrSplit');
 
   onTabChange(tab: string) {
     this.activeTab.set(tab);
-    this.tabChange$.next(tab);
     this.tabChange$.next(tab);
   }
 
