@@ -21,6 +21,25 @@
   }
 }
 
+
+
+
+.table-responsive {
+  min-height: 360px;
+}
+
+.custom-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.custom-table th,
+.custom-table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* =========================================================
    Floating Selection Cart Button
    ========================================================= */

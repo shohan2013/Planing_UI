@@ -334,28 +334,66 @@ label {
 }
 
 /*===============================================BADGE=============================================================*/
+// .g-status {
+//   display: inline-flex;
+//   align-items: center;
+//   gap: 8px;
+//   padding: 6px 14px;
+//   border-radius: 30px;
+//   font-size: 12px;
+//   font-weight: 600;
+//   letter-spacing: 0.3px;
+//   transition: all 0.25s ease-in-out;
+//   cursor: default;
+//   user-select: none;
+//   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+// }
+
+
+
 .g-status {
-  display: inline-flex;
+  display: inline-flex;          /* Flexbox ensures perfect centering */
   align-items: center;
-  gap: 8px;
-  padding: 6px 14px;
-  border-radius: 30px;
-  font-size: 12px;
-  font-weight: 600;
+  justify-content: center;
+  width: 70px;                   /* Fixed width to fit "Completed" uniformly across all pills */
+  height: 25px;                  /* Increased height for a fuller pill */
+  font-size: 13px;               /* Increased font size for better legibility */
+  font-weight: 549;              /* Semi-bold weight */
+
   letter-spacing: 0.3px;
+
+  gap: 8px;            //place 8px between Dot and Text
+  padding: 6px 14px;
+
+  border-radius: 13px;           /* Half of height for perfectly rounded ends */
+  text-align: center;
+  box-sizing: border-box;        /* Ensures fixed width/height include padding */
+  /* Adds space OUTSIDE the capsule */
+  margin: 4px 8px; /* 4px top/bottom, 8px left/right */
+
   transition: all 0.25s ease-in-out;
   cursor: default;
   user-select: none;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
+/* Automatically expand width ONLY when a .g-dot exists inside */
+.g-status:has(.g-dot) {
+  width: 80px; /* Or min-width / fit-content */
+}
 /* DOT */
 .g-dot {
+  display: inline-block;
   width: 8px;
   height: 8px;
   border-radius: 50%;
+  flex-shrink: 0;
   position: relative;
+  
 }
+
+
+
 
 /* ACTIVE */
 .g-status.active {
@@ -383,17 +421,33 @@ label {
   animation: pulseRed 1.5s infinite;
 }
 
+
+
 /* HOVER EFFECT */
 .g-status:hover {
   transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 }
 
+/* Complete */
+.g-status.complete {
+  color: #000000;
+  background-color: #89e1db;
+}
+.g-status.complete .g-dot {
+  background: #3d1f9f;
+  box-shadow: 0 0 8px #3d1f9f;
+  animation: pulsePurple 1.5s infinite;
+}
+
 /* PENDING */
 .g-status.pending {
-  background: linear-gradient(135deg, #fff7e6, #fffbeb);
-  color: #b7791f;
-  border: 1px solid rgba(183, 121, 31, 0.25);
+  // background: linear-gradient(135deg, #fff7e6, #fffbeb);
+  // color: #b7791f;
+  // border: 1px solid rgba(183, 121, 31, 0.25);
+
+  color: #000000;
+  background-color: #fde388;
 }
 
 .g-status.pending .g-dot {
@@ -404,9 +458,11 @@ label {
 
 /* APPROVE */
 .g-status.approve {
-  background: linear-gradient(135deg, #eaf7ef, #f0fdf4);
-  color: #2f855a;
-  border: 1px solid rgba(47, 133, 90, 0.25);
+  // background: linear-gradient(135deg, #eaf7ef, #f0fdf4);
+  // color: #2f855a;
+  // border: 1px solid rgba(47, 133, 90, 0.25);
+  color: #000000;
+  background-color: #eaf7ef;
 }
 
 .g-status.approve .g-dot {
@@ -417,9 +473,11 @@ label {
 
 /* REJECT */
 .g-status.reject {
-  background: linear-gradient(135deg, #fdecec, #fff1f2);
-  color: #c53030;
-  border: 1px solid rgba(197, 48, 48, 0.25);
+  // background: linear-gradient(135deg, #fdecec, #fff1f2);
+  // color: #c53030;
+  // border: 1px solid rgba(197, 48, 48, 0.25);
+  color: #000000;
+  background-color: #f8d6c8;
 }
 
 .g-status.reject .g-dot {
@@ -427,6 +485,10 @@ label {
   box-shadow: 0 0 8px #ef4444;
   animation: pulseRed 1.5s infinite;
 }
+
+
+
+
 
 /* ANIMATIONS */
 @keyframes pulseYellow {

@@ -200,47 +200,6 @@ styles: [
       font-weight: 600;
     }
 
-    .g-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      border-radius: 15px;
-      font-weight: 600;
-      white-space: nowrap;
-    }
-
-    .g-status-lg {
-      padding: 4px 8px;
-      font-size: 12px;
-    }
-
-    .g-dot {
-      flex: 0 0 7px;
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background-color: currentColor;
-    }
-
-    .status-pending {
-      color: #b7791f;
-      background-color: #fff7e6;
-    }
-
-    .status-approve {
-      color: #2f855a;
-      background-color: #eaf7ef;
-    }
-
-    .status-reject {
-      color: #c53030;
-      background-color: #fdecec;
-    }
-
-    .status-complete {
-        color: #2f855a;
-        background-color: #eaf7ef;
-    }
 
     @media (max-width: 767.98px) {
       .requisition-modal-body {

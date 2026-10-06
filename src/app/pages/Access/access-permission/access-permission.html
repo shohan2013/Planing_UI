@@ -94,7 +94,7 @@
                   class="form-check-input"
                   type="checkbox"
                   [(ngModel)]="item.CanInsert"
-                  (ngModelChange)="onToggle(item.Id,item.SubMenuId, 2,item.CanView)"
+                  (ngModelChange)="onToggle(item.Id,item.SubMenuId, 2,$event)"
                 />
               </div>
             </td>
@@ -106,7 +106,7 @@
                   class="form-check-input"
                   type="checkbox"
                   [(ngModel)]="item.CanUpdate"
-                  (ngModelChange)="onToggle(item.Id,item.SubMenuId, 3,item.CanView)"
+                  (ngModelChange)="onToggle(item.Id,item.SubMenuId, 3,$event)" 
                 />
               </div>
             </td>
@@ -118,7 +118,7 @@
                   class="form-check-input"
                   type="checkbox"
                   [(ngModel)]="item.CanDelete"
-                  (ngModelChange)="onToggle(item.Id,item.SubMenuId, 4,item.CanView)"
+                  (ngModelChange)="onToggle(item.Id,item.SubMenuId, 4,$event)" 
                 />
                 <!-- <label>
       {{ item.CanDelete ? 'ON' : 'OFF' }}
@@ -133,7 +133,7 @@
                   class="form-check-input"
                   type="checkbox"
                   [(ngModel)]="item.CanPrint"
-                  (ngModelChange)="onToggle(item.Id,item.SubMenuId, 5,item.CanView)"
+                  (ngModelChange)="onToggle(item.Id,item.SubMenuId, 5,$event)" 
                 />
                 <!-- <label>
       {{ item.CanPrint ? 'ON' : 'OFF' }}

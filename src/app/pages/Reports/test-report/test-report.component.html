@@ -1,0 +1,84 @@
+<section class="report-page">
+  <div class="report-card">
+    <header class="report-header">
+      <span class="report-icon" aria-hidden="true">
+        <i class="bx bx-file"></i>
+      </span>
+
+      <div>
+        <h1>Test Report</h1>
+        <p>Select a date range to get started.</p>
+      </div>
+    </header>
+
+    <form [formGroup]="dateForm" (ngSubmit)="submit()" class="report-form">
+      <div class="filter-row">
+        <div class="date-field">
+          <label for="startDate">Start Date</label>
+          <input
+            id="startDate"
+            type="date"
+            formControlName="startDate"
+            aria-required="true"
+          />
+        </div>
+
+        <div class="date-field">
+          <label for="endDate">End Date</label>
+          <input
+            id="endDate"
+            type="date"
+            formControlName="endDate"
+            aria-required="true"
+          />
+        </div>
+
+        <button type="submit" class="submit-button">
+          <i class="bx bx-play-circle" aria-hidden="true"></i>
+          Submit
+        </button>
+      </div>
+
+      <p class="error-message" *ngIf="error" role="alert">
+        {{ error }}
+      </p>
+    </form>
+  </div>
+
+  <div class="result-card" *ngIf="submittedRange" role="status">
+    <span class="success-icon" aria-hidden="true">
+      <i class="bx bx-check"></i>
+    </span>
+
+    <div>
+      <h2>Date range submitted</h2>
+      <p>
+        {{ submittedRange.startDate | date: 'dd MMM yyyy' }}
+        <span class="range-separator">to</span>
+        {{ submittedRange.endDate | date: 'dd MMM yyyy' }}
+      </p>
+    </div>
+  </div>
+
+  
+
+
+    <div class="preview-card" *ngIf="reportUrl">
+    <div class="preview-header">
+      <div>
+        <h2>Bonus Summary</h2>
+        <p>Inline report preview · Unit XXX</p>
+      </div>
+
+      <span class="preview-badge">In-page view</span>
+    </div>
+
+    <iframe
+      class="report-frame"
+      style="display: block; width: 100%; height: 78vh; min-height: 550px; border: 0;"
+
+      [src]="reportUrl"
+      title="Bonus Summary report"
+    ></iframe>
+  </div>
+</section>

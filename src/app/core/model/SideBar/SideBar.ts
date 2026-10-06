@@ -2,6 +2,8 @@ export interface ISideBarMenu {
   MenuId: number;
   MenuName: string;
   Icon: string;
+  IsDirectRoute: boolean;
+  RouterLink: string | null;
   SubMenus: ISideBarSubMenu[];
 }
 

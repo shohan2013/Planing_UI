@@ -41,6 +41,7 @@ export class DeliveryOrders
   implements OnInit, OnDestroy
 {
   private destroy$ = new Subject<void>();
+  private workTypeChange$ = new Subject<void>();
   units: IUnit[];
   businesses: IBusiness[];
   workTypes: { Id: number; Code: string; Name: string }[] = [];
@@ -90,6 +91,7 @@ export class DeliveryOrders
 
 
       .pipe(
+        takeUntil(this.workTypeChange$), // Cancel any ongoing requests if work type changes
         tap((response) => console.log(`Delivery Orders Response`, response)),
       );
   }
@@ -108,10 +110,15 @@ export class DeliveryOrders
   }
 
   onWorkTypeFilterChange(): void {
+    this.workTypeChange$.next();
+    this.isLoading.set(true);
+    this.error.set(null);
+
     this.selectedDeliveryOrders.set([]);
     this.cartOpen.set(false);
     this.OrderForView.set(null);
     this.viewOpen.set(false);
+
     this.currentPage.set(1);
     this.retry();
   }
@@ -319,6 +326,10 @@ export class DeliveryOrders
   }
 
   ngOnDestroy(): void {
+    this.workTypeChange$.next();
+    this.workTypeChange$.complete();
+
+
     this.destroy$.next();
     this.destroy$.complete();
   }

@@ -22,7 +22,9 @@
       </div>
 
       <div>
-        <h5 id="do-view-title">Delivery Order Details</h5>
+        <h5 id="do-view-title">
+          {{ workTypeCode === 'REQ' ? 'Requisition Details' : 'Delivery Order Details' }}
+        </h5>
 
         <div class="do-code">{{ order.Code }}</div>
       </div>
@@ -54,14 +56,23 @@
 
         <div>
           <h6>Order Information</h6>
-          <span>Basic delivery order information</span>
+
+          <span>
+            {{ workTypeCode === 'REQ'
+              ? 'Basic requisition information'
+              : 'Basic delivery order information' }}
+          </span>
+
         </div>
       </div>
 
       <div class="info-grid">
         <!-- DO Code -->
         <div class="info-item">
-          <span class="info-label"> Delivery Order </span>
+      
+          <span class="info-label">
+            {{ workTypeCode === 'REQ' ? 'Requisition No.' : 'Delivery Order' }}
+          </span>
 
           <strong class="info-value highlight"> {{ order.Code }} </strong>
         </div>
@@ -94,7 +105,7 @@
           <span class="info-label"> Customer </span>
 
           <strong class="info-value">
-            {{ order.CustomerName || 'Not specified' }}
+            {{ workTypeCode === 'REQ' ? 'N/A' : (order.CustomerName || 'Not specified') }}
           </strong>
         </div>
 
@@ -132,6 +143,8 @@
         </div>
       </div>
 
+
+      @if (workTypeCode == 'DO') {
       <div class="summary-divider"></div>
 
       <div class="summary-item">
@@ -142,9 +155,13 @@
         <div>
           <span>Total Amount</span>
 
-          <strong> {{ order.TotalAmount.toString()| number:'1.2-2' }} </strong>
+          <strong> {{ order.TotalAmount.toString() | number:'1.2-2' }} </strong>
         </div>
       </div>
+      }
+
+
+
     </section>
 
     <!-- ===================================================
@@ -178,8 +195,10 @@
                 <th>PRODUCT</th>
                 <th class="presentStock-column">PRESENT STOCK</th>
                 <th class="quantity-column">QUANTITY</th>
-                <th class="price-column">UNIT PRICE</th>
-                <th class="amount-column">AMOUNT</th>
+                @if (workTypeCode !== 'REQ') {
+                  <th class="price-column">UNIT PRICE</th>
+                  <th class="amount-column">AMOUNT</th>
+                }
               </tr>
             </thead>
 
@@ -201,6 +220,7 @@
                 <td class="presentStock-column">{{line.PresentStock}}</td>
                 <td class="quantity-column">{{ line.Quantity }}</td>
 
+                @if (workTypeCode !== 'REQ') {
                 <td class="price-column">
                   {{ line.LastPrice.toString()| number:'1.2-2' }}
                 </td>
@@ -211,6 +231,9 @@
                     number:'1.2-2' }}
                   </strong>
                 </td>
+                }
+
+
               </tr>
 
               }
@@ -242,7 +265,11 @@
     <div class="footer-info">
       <i class="fa-solid fa-circle-info"></i>
 
-      <span> Delivery Order: {{ order.Code }} </span>
+      <span>
+        {{ workTypeCode === 'REQ' ? 'Requisition No.' : 'Delivery Order' }}:
+        {{ order.Code }}
+      </span>
+
     </div>
 
     <button

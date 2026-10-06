@@ -195,7 +195,7 @@ export class Menu extends ServerSideFilteredPaginatedComponent<IMenu> {
     ModuleID: new FormControl('', Validators.required),
     Code: new FormControl('', Validators.required),
     Sequence: new FormControl('', Validators.required),
-    IsActive: new FormControl(''),
+    IsActive: new FormControl(true, { nonNullable: true }),
   });
 
   eformGroup: FormGroup = new FormGroup({
@@ -203,7 +203,7 @@ export class Menu extends ServerSideFilteredPaginatedComponent<IMenu> {
     eModuleID: new FormControl('', Validators.required),
     eCode: new FormControl('', Validators.required),
     eSequence: new FormControl('', Validators.required),
-    eIsActive: new FormControl(''),
+    eIsActive: new FormControl(true, { nonNullable: true }),
   });
 
   get f(): { [key: string]: AbstractControl } {

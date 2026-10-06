@@ -157,19 +157,15 @@
 
             <td>
               <span
-                class="g-status g-status-lg"
+                class="g-status"
                 [ngClass]="{
-                      'status-pending':
-                        item.DocStatusId === 1,
-                      'status-approve':
-                        item.DocStatusId === 2,
-                      'status-reject':
-                        item.DocStatusId === 3,
-                      'status-complete':
-                        item.DocStatusId === 4
+                      'pending': item.DocStatusId === 1,
+                      'approve': item.DocStatusId === 2,
+                      'reject': item.DocStatusId === 3,
+                      'complete': item.DocStatusId === 4
                     }"
               >
-                <span class="g-dot"></span>
+                 
 
                 {{ getDocStatusName( item.DocStatusId ) }}
               </span>
