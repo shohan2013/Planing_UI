@@ -1,0 +1,38 @@
+<div class="pvp-page">
+  <header class="pvp-header">
+    <div>
+      <h1 class="pvp-header__title">Customer Order Production Overview</h1>
+      <p class="pvp-header__subtitle">
+        View order quantity, planned quantity, production completion and remaining to plan by customer, delivery order
+        and item.
+      </p>
+    </div>
+
+    <div class="pvp-header__actions">
+      @if (lastUpdated(); as updated) {
+        <span class="pvp-updated">
+          <span class="pvp-updated__dot" [class.busy]="loading()"></span>
+          Last Updated: <strong>{{ updated | date: 'dd MMM yyyy hh:mm a' }}</strong>
+        </span>
+      }
+      <button type="button" class="btn pvp-refresh" (click)="load()" [disabled]="loading()">
+        <i class="fas fa-sync-alt" [class.fa-spin]="loading()"></i>
+        Refresh
+      </button>
+    </div>
+  </header>
+
+  <app-pvp-filter-bar
+    [filter]="filter()"
+    [customers]="customers()"
+    [deliveryOrders]="deliveryOrders()"
+    [loading]="loading()"
+    (customerChange)="loadDeliveryOrders($event)"
+    (apply)="onApply($event)"
+    (reset)="onReset()"
+  />
+
+  <app-pvp-kpi-cards [totals]="totals()" [loading]="loading()" />
+
+  <app-pvp-overview-table [rows]="rows()" [loading]="loading()" />
+</div>

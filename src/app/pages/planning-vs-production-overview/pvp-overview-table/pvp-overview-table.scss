@@ -1,0 +1,571 @@
+:host {
+  display: block;
+}
+
+$pvp-border: #e8edf5;
+$pvp-line: #eef2f7;
+
+.pvp-card {
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid $pvp-border;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 14px rgba(15, 23, 42, 0.04);
+  overflow: hidden;
+}
+
+/* ---------- Toolbar ---------- */
+.pvp-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1.1rem;
+  border-bottom: 1px solid $pvp-border;
+
+  &__summary {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #0f172a;
+
+    strong {
+      font-weight: 800;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}
+
+.pvp-chip {
+  margin-left: 0.35rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  background: #eef4ff;
+  color: #2563eb;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.pvp-search {
+  position: relative;
+  width: 230px;
+
+  > i {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.8rem;
+    color: #94a3b8;
+  }
+
+  .form-control {
+    height: 36px;
+    padding-left: 2.1rem;
+    padding-right: 2rem;
+    border-radius: 9px;
+    border-color: #dfe5ee;
+    font-size: 0.84rem;
+
+    &:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+    }
+  }
+
+  &__clear {
+    position: absolute;
+    right: 0.4rem;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 0;
+    background: transparent;
+    color: #94a3b8;
+    padding: 0.2rem 0.4rem;
+
+    &:hover {
+      color: #475569;
+    }
+  }
+
+  @media (max-width: 575.98px) {
+    width: 100%;
+  }
+}
+
+.pvp-tool-btn {
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0 0.85rem;
+  border-radius: 9px;
+  border: 1px solid #dfe5ee;
+  background: #f8fafc;
+  color: #1e293b;
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: background 0.15s ease, border-color 0.15s ease;
+
+  i {
+    color: #2563eb;
+  }
+
+  &:hover:not(:disabled) {
+    background: #eef4ff;
+    border-color: #c7d7f5;
+  }
+
+  .fa-file-excel {
+    color: #16a34a;
+  }
+}
+
+.pvp-columns-menu {
+  min-width: 220px;
+  padding: 0.5rem;
+  border-radius: 12px;
+  border: 1px solid $pvp-border;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.14);
+
+  &__title {
+    padding: 0.25rem 0.5rem 0.4rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #94a3b8;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.4rem 0.5rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    margin: 0;
+
+    &:hover {
+      background: #f1f5fb;
+    }
+
+    .form-check-input {
+      margin: 0;
+    }
+  }
+}
+
+/* ---------- Table ---------- */
+$pvp-frozen-edge: #9db4d8;
+$pvp-accent: #2563eb;
+
+.pvp-table-shell {
+  position: relative;
+
+  // Fade on the right edge: "there are more columns this way"
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 22px; // stop above the custom scrollbar
+    width: 42px;
+    pointer-events: none;
+    background: linear-gradient(to left, rgba(15, 23, 42, 0.1), rgba(15, 23, 42, 0));
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 4;
+  }
+
+  &.can-scroll-right::after {
+    opacity: 1;
+  }
+}
+
+.pvp-table-wrap {
+  overflow: auto;
+  max-height: calc(100vh - 380px);
+  min-height: 260px;
+
+  // The native horizontal bar is replaced by .pvp-hscroll (which starts after the frozen column).
+  &::-webkit-scrollbar {
+    height: 0;
+    width: 10px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 999px;
+    border: 2px solid #fff;
+  }
+}
+
+/* "Scroll →" pill, shown until the user scrolls for the first time */
+.pvp-scroll-hint {
+  position: absolute;
+  right: 18px;
+  top: 6px;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.65rem;
+  border: 0;
+  border-radius: 999px;
+  background: $pvp-accent;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+  animation: pvp-nudge 1.6s ease-in-out infinite;
+
+  &:hover {
+    background: #1d4ed8;
+  }
+}
+
+/* Custom horizontal scrollbar that begins at the frozen column's right edge */
+.pvp-hscroll {
+  display: flex;
+  align-items: stretch;
+  border-top: 1px solid $pvp-border;
+  background: #f8fafc;
+
+  &__label {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0 0.85rem;
+    border-right: 2px solid $pvp-frozen-edge;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #64748b;
+    white-space: nowrap;
+    overflow: hidden;
+
+    .fa-thumbtack {
+      color: $pvp-accent;
+      transform: rotate(35deg);
+    }
+  }
+
+  &__arrow {
+    color: $pvp-accent;
+  }
+
+  &__bar {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    height: 18px;
+    scrollbar-width: thin;
+    scrollbar-color: #94a3b8 #e8eef6;
+
+    &::-webkit-scrollbar {
+      height: 10px;
+    }
+    &::-webkit-scrollbar-track {
+      background: #e8eef6;
+      border-radius: 999px;
+      margin: 0 4px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: linear-gradient(90deg, #93b4ec, $pvp-accent);
+      border-radius: 999px;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background: #1d4ed8;
+    }
+  }
+
+  &__spacer {
+    height: 1px;
+  }
+}
+
+@keyframes pvp-nudge {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+}
+
+.pvp-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.85rem;
+  color: #1e293b;
+
+  th,
+  td {
+    padding: 0.55rem 0.85rem;
+    border-bottom: 1px solid $pvp-line;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  th + th,
+  td + td {
+    border-left: 1px solid $pvp-line;
+  }
+
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #f1f5fa;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #0f172a;
+    border-bottom: 1px solid #e2e8f0;
+    user-select: none;
+
+    &.pvp-sortable,
+    &.pvp-col-name {
+      cursor: pointer;
+
+      &:hover {
+        background: #e8eef7;
+      }
+    }
+  }
+
+  // Frozen first column: a solid divider marks where horizontal scrolling begins,
+  // and a shadow appears once columns are scrolled underneath it.
+  .pvp-col-name {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    min-width: 340px;
+    background: inherit;
+    border-right: 2px solid $pvp-frozen-edge;
+    transition: box-shadow 0.2s ease;
+  }
+
+  .pvp-col-name + th,
+  .pvp-col-name + td {
+    border-left: 0;
+  }
+
+  thead .pvp-col-name {
+    z-index: 3;
+  }
+}
+
+.is-scrolled .pvp-table .pvp-col-name {
+  box-shadow: 8px 0 12px -6px rgba(15, 23, 42, 0.22);
+}
+
+.pvp-pin {
+  font-size: 0.72rem;
+  color: $pvp-accent;
+  transform: rotate(35deg);
+}
+
+.pvp-th {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+th.pvp-num .pvp-th {
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.pvp-sort {
+  font-size: 0.72rem;
+  color: #a3b1c6;
+
+  &.active {
+    color: #2563eb;
+  }
+}
+
+.pvp-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.pvp-zero {
+  color: #94a3b8;
+}
+
+.pvp-date {
+  color: #334155;
+}
+
+/* Row levels */
+.pvp-row {
+  cursor: default;
+  background: #fff;
+  transition: background 0.12s ease;
+  animation: pvp-row-in 0.25s ease both;
+
+  > td {
+    background: inherit;
+  }
+
+  &--customer {
+    background: #f8fafc;
+    cursor: pointer;
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: #0f172a;
+
+    td {
+      border-top: 1px solid #e2e8f0;
+    }
+  }
+
+  &--order {
+    background: #f3f7fd;
+    cursor: pointer;
+    font-weight: 700;
+  }
+
+  &--item {
+    font-weight: 400;
+  }
+
+  &:hover {
+    background: #eaf2ff;
+  }
+}
+
+.pvp-name {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &__label {
+    min-width: 110px;
+  }
+
+  &__sub {
+    color: #3b5b8f;
+    font-size: 0.82rem;
+  }
+}
+
+.pvp-count {
+  padding: 0 0.45rem;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #475569;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.pvp-caret {
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 6px;
+  color: #334155;
+  font-size: 0.68rem;
+  transition: transform 0.2s ease, background 0.15s ease;
+
+  &.open {
+    transform: rotate(90deg);
+  }
+
+  .pvp-row:hover &:not(.pvp-caret--leaf) {
+    background: #dbe6f7;
+  }
+}
+
+/* Status badges */
+.pvp-badge {
+  display: inline-block;
+  padding: 0.25rem 0.65rem;
+  border-radius: 7px;
+  font-size: 0.74rem;
+  font-weight: 600;
+
+  &--not-planned {
+    background: #fde8e8;
+    color: #b91c1c;
+  }
+  &--partially-planned {
+    background: #fdecc8;
+    color: #a15c07;
+  }
+  &--fully-planned {
+    background: #d9f5ee;
+    color: #0f766e;
+  }
+  &--in-production {
+    background: #dde9fd;
+    color: #1d4ed8;
+  }
+  &--completed {
+    background: #dcfce7;
+    color: #15803d;
+  }
+}
+
+/* Loading + empty */
+.pvp-skel {
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #eef2f7 25%, #e2e8f0 50%, #eef2f7 75%);
+  background-size: 200% 100%;
+  animation: pvp-shimmer 1.2s linear infinite;
+}
+
+.pvp-empty {
+  padding: 3rem 1rem;
+  text-align: center;
+  color: #64748b;
+
+  i {
+    font-size: 2.4rem;
+    color: #cbd5e1;
+    margin-bottom: 0.75rem;
+  }
+
+  &__title {
+    font-weight: 700;
+    color: #334155;
+  }
+
+  &__text {
+    font-size: 0.85rem;
+  }
+}
+
+@keyframes pvp-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes pvp-row-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

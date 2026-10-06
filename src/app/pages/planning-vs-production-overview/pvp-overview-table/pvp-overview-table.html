@@ -1,0 +1,208 @@
+<div class="pvp-card">
+  <!-- Toolbar -->
+  <div class="pvp-toolbar">
+    <div class="pvp-toolbar__summary">
+      Showing
+      <strong>{{ counts().orders | number }}</strong> Delivery Orders /
+      <strong>{{ counts().items | number }}</strong> Items
+      <span class="pvp-chip">{{ counts().customers | number }} Customers</span>
+    </div>
+
+    <div class="pvp-toolbar__actions">
+      <div class="pvp-search">
+        <i class="fas fa-search"></i>
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Search in results..."
+          aria-label="Search in results"
+          [ngModel]="search()"
+          (ngModelChange)="onSearch($event)"
+        />
+        @if (search()) {
+          <button type="button" class="pvp-search__clear" (click)="onSearch('')" aria-label="Clear search">
+            <i class="fas fa-times"></i>
+          </button>
+        }
+      </div>
+
+      <button type="button" class="btn pvp-tool-btn" (click)="toggleAll()" [disabled]="!tree().length">
+        <i class="fas" [class.fa-compress-alt]="allExpanded()" [class.fa-expand-alt]="!allExpanded()"></i>
+        {{ allExpanded() ? 'Collapse All' : 'Expand All' }}
+      </button>
+
+      <button type="button" class="btn pvp-tool-btn" (click)="exportExcel()" [disabled]="!filteredRows().length">
+        <i class="fas fa-file-excel"></i>
+        Export Excel
+      </button>
+
+      <div class="dropdown">
+        <button
+          type="button"
+          class="btn pvp-tool-btn"
+          data-bs-toggle="dropdown"
+          data-bs-auto-close="outside"
+          aria-expanded="false"
+        >
+          <i class="fas fa-cog"></i>
+          Columns
+        </button>
+        <div class="dropdown-menu dropdown-menu-end pvp-columns-menu">
+          <div class="pvp-columns-menu__title">Visible columns</div>
+          @for (col of columns(); track col.Key) {
+            <label class="pvp-columns-menu__item">
+              <input type="checkbox" class="form-check-input" [checked]="col.Visible" (change)="toggleColumn(col.Key)" />
+              {{ col.Title }}
+            </label>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div
+    class="pvp-table-shell"
+    [class.is-scrolled]="scrolledLeft()"
+    [class.can-scroll-right]="canScrollRight()"
+  >
+    @if (canScrollRight() && !scrolledLeft()) {
+      <button type="button" class="pvp-scroll-hint" (click)="scrollRight()" aria-label="Scroll table right">
+        Scroll <i class="fas fa-arrow-right"></i>
+      </button>
+    }
+  <div class="pvp-table-wrap" #scrollWrap (scroll)="updateScrollState()">
+    <table class="pvp-table" #scrollTable>
+      <thead>
+        <tr>
+          <th #frozenHeader class="pvp-col-name" (click)="sortBy('Label')" title="Frozen column - other columns scroll horizontally">
+            <span class="pvp-th">
+              <i class="fas fa-thumbtack pvp-pin"></i>
+              Customer / Delivery Order / Item
+              <i class="fas pvp-sort" [class]="'fas pvp-sort ' + sortIcon('Label')" [class.active]="sortKey() === 'Label'"></i>
+            </span>
+          </th>
+          @for (col of visibleColumns(); track col.Key) {
+            <th
+              [class.pvp-num]="col.Sortable && col.Key !== 'OrderDate'"
+              [class.pvp-sortable]="!!col.Sortable"
+              (click)="sortBy(col.Sortable)"
+            >
+              <span class="pvp-th">
+                {{ col.Title }}
+                @if (col.Sortable) {
+                  <i [class]="'fas pvp-sort ' + sortIcon(col.Sortable)" [class.active]="sortKey() === col.Sortable"></i>
+                }
+              </span>
+            </th>
+          }
+        </tr>
+      </thead>
+
+      <tbody>
+        @if (loading()) {
+          @for (_ of skeletonRows; track $index) {
+            <tr class="pvp-skeleton-row">
+              <td><div class="pvp-skel" style="width: 70%"></div></td>
+              @for (col of visibleColumns(); track col.Key) {
+                <td><div class="pvp-skel"></div></td>
+              }
+            </tr>
+          }
+        } @else {
+          @for (row of flatRows(); track row.node.Key) {
+            <tr [class]="'pvp-row pvp-row--' + row.node.Level" (click)="toggle(row)">
+              <td class="pvp-col-name">
+                <div class="pvp-name" [style.padding-left.px]="row.depth * 18">
+                  @if (row.expandable) {
+                    <span class="pvp-caret" [class.open]="row.expanded">
+                      <i class="fas fa-chevron-right"></i>
+                    </span>
+                  } @else {
+                    <span class="pvp-caret pvp-caret--leaf"></span>
+                  }
+                  <span class="pvp-name__label">{{ row.node.Label }}</span>
+                  @if (row.node.SubLabel) {
+                    <span class="pvp-name__sub">{{ row.node.SubLabel }}</span>
+                  }
+                  @if (row.node.Level !== 'item') {
+                    <span class="pvp-count">{{ row.node.Children.length }}</span>
+                  }
+                </div>
+              </td>
+
+              @for (col of visibleColumns(); track col.Key) {
+                @switch (col.Key) {
+                  @case ('OrderDate') {
+                    <td class="pvp-date">{{ row.node.OrderDate ? (row.node.OrderDate | date: 'dd MMM yyyy') : '' }}</td>
+                  }
+                  @case ('OrderQty') {
+                    <td class="pvp-num">{{ row.node.OrderQty | number }}</td>
+                  }
+                  @case ('PlannedQty') {
+                    <td class="pvp-num">{{ row.node.PlannedQty | number }}</td>
+                  }
+                  @case ('ProducedQty') {
+                    <td class="pvp-num">{{ row.node.ProducedQty | number }}</td>
+                  }
+                  @case ('PendingProduction') {
+                    <td class="pvp-num">{{ row.node.PendingProduction | number }}</td>
+                  }
+                  @case ('RemainToPlan') {
+                    <td class="pvp-num" [class.pvp-zero]="row.node.RemainToPlan === 0">{{ row.node.RemainToPlan | number }}</td>
+                  }
+                  @case ('PlanningProgress') {
+                    <td><app-pvp-progress-bar [value]="row.node.PlanningPercent" variant="planning" /></td>
+                  }
+                  @case ('ProductionProgress') {
+                    <td><app-pvp-progress-bar [value]="row.node.ProductionPercent" variant="production" /></td>
+                  }
+                  @case ('Status') {
+                    <td>
+                      @if (row.node.Status) {
+                        <span class="pvp-badge" [class]="'pvp-badge ' + statusClass(row.node.Status)">{{ row.node.Status }}</span>
+                      }
+                    </td>
+                  }
+                }
+              }
+            </tr>
+          } @empty {
+            <tr>
+              <td [attr.colspan]="visibleColumns().length + 1">
+                <div class="pvp-empty">
+                  <i class="fas fa-folder-open"></i>
+                  <div class="pvp-empty__title">No orders found</div>
+                  <div class="pvp-empty__text">Try changing the filters or the search text.</div>
+                </div>
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+    <!-- Horizontal scrollbar that begins where the frozen column ends -->
+    <div class="pvp-hscroll" [class.d-none]="!hasHScroll()" [style.padding-right.px]="vScrollbarWidth()">
+      <div class="pvp-hscroll__label" [style.width.px]="frozenWidth()">
+        <i class="fas fa-thumbtack"></i> Frozen
+        <span class="pvp-hscroll__arrow"><i class="fas fa-arrows-alt-h"></i> Scroll columns</span>
+      </div>
+      <div class="pvp-hscroll__bar" #hScroll (scroll)="onHScroll()">
+        <div [style.width.px]="scrollableWidth()" class="pvp-hscroll__spacer"></div>
+      </div>
+    </div>
+  </div>
+
+  @if (!loading() && tree().length) {
+    <app-pagination
+      [totalItems]="tree().length"
+      [pageSizes]="[5, 10, 25, 50]"
+      [currentPage]="page()"
+      (currentPageChange)="page.set($event)"
+      [pageSize]="pageSize()"
+      (pageSizeChanged)="onPageSizeChange($event)"
+    />
+  }
+</div>

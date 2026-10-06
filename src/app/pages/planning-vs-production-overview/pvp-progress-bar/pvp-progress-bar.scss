@@ -1,0 +1,53 @@
+:host {
+  display: block;
+  min-width: 150px;
+}
+
+.pvp-progress {
+  --pvp-fill-from: #22c55e;
+  --pvp-fill-to: #15803d;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+
+  &--blue {
+    --pvp-fill-from: #60a5fa;
+    --pvp-fill-to: #2563eb;
+  }
+
+  &__track {
+    flex: 1 1 auto;
+    height: 9px;
+    border-radius: 999px;
+    background: #e5eaf2;
+    overflow: hidden;
+  }
+
+  &__fill {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--pvp-fill-from), var(--pvp-fill-to));
+    transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    animation: pvp-grow 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  &__label {
+    flex: 0 0 38px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #475569;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@keyframes pvp-grow {
+  from {
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  to {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
