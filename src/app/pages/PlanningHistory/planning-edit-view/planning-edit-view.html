@@ -153,9 +153,10 @@
                 [steps]="productionSteps()"
                 [isLoading]="stepsLoading()"
                 [loadError]="stepsLoadError()"
-                [machineOptions]="machines()"
+                [machinesByStep]="machinesByStep()"
                 [savedSteps]="line.Steps ?? []"
                 (GetSteps)="loadProductionSteps()"
+                (stepAdded)="loadMachine($event)"
               ></app-planning-process-steps>
             </td>
           </tr>

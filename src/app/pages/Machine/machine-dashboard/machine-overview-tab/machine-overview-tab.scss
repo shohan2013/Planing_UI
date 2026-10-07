@@ -4,6 +4,27 @@
   padding: 0 0.5rem;
 }
 
+.kpi-selected-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #4f46e5;
+  background: #f2f4ff;
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+  margin-bottom: 0.25rem;
+
+  b {
+    font-weight: 700;
+  }
+
+  .btn-clear-selection {
+    margin-left: auto;
+  }
+}
+
 .kpi-card {
   display: flex;
   align-items: center;
@@ -13,7 +34,9 @@
   border: 1px solid rgba(0, 0, 0, 0.04);
   border-radius: 12px;
   box-shadow: 0 1px 4px rgba(20, 30, 60, 0.04);
-  transition: box-shadow 0.15s ease, transform 0.15s ease;
+  transition:
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
 
   &:hover {
     box-shadow: 0 4px 12px rgba(20, 30, 60, 0.08);
@@ -117,4 +140,184 @@
     background: #e6e8eb;
     color: #6b7280;
   }
+}
+
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.kpi-row {
+  flex: 0 0 auto;
+}
+
+// ---------------------------------------------------------------------------
+// Charts row: shared layout only (40 / 60 split). Edit card looks below.
+// ---------------------------------------------------------------------------
+.charts-row {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  grid-template-rows: minmax(0, 1fr);
+  gap: 0.75rem;
+  // padding: 0 0.1rem 0.5rem;
+  margin: 0.5rem;
+  box-sizing: border-box;
+
+  @media (max-width: 991.98px) {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Overall Time Distribution card
+// ---------------------------------------------------------------------------
+.time-distribution-col {
+  min-height: 0;
+  height: 100%;
+}
+
+.time-distribution-card {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.time-distribution-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 1rem 1.25rem;
+}
+
+.time-distribution-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.btn-clear-selection {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #4f46e5;
+  background: #f2f4ff;
+  border: none;
+  border-radius: 20px;
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+
+  &:hover {
+    background: #e4e8ff;
+  }
+}
+
+// Doughnut container: centers a perfectly square box inside whatever space
+// the card gives it. The square's side (donutSize, in machine-overview-tab.ts)
+// is recomputed on every resize as min(available width, available height),
+// so the circle always keeps a 1:1 ratio and fills as much of the card as
+// it can — growing on a bigger screen/card, shrinking on a smaller one.
+.time-distribution-chart {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0;
+}
+
+.time-distribution-chart-inner {
+  position: relative;
+  flex-shrink: 0;
+
+  canvas {
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Utilization % by Machine card
+// ---------------------------------------------------------------------------
+.utilization-col {
+  min-height: 0;
+  height: 100%;
+}
+
+.utilization-card {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.utilization-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+// Card stays fixed; the bar chart scrolls inside it.
+.utilization-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+// Compact KPI cards to leave more height for the charts.
+.kpi-row {
+  margin-bottom: 0.5rem !important;
+  padding: 0;
+}
+
+.kpi-card {
+  gap: 0.6rem;
+  padding: 0.65rem 0.75rem;
+
+  &:hover {
+    transform: none;
+  }
+}
+
+.kpi-icon {
+  width: 30px;
+  height: 30px;
+  font-size: 0.85rem;
+  border-radius: 8px;
+}
+
+.kpi-label {
+  font-size: 0.66rem;
+  margin-bottom: 0;
+}
+
+.kpi-value {
+  font-size: 1.1rem;
+}
+
+.charts-row {
+  padding-bottom: 0.25rem;
+}
+
+.time-distribution-body,
+.utilization-body {
+  padding: 0.5rem 1rem 0.75rem;
 }

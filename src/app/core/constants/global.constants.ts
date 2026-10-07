@@ -59,7 +59,10 @@ export const GlobalConstant = {
     ProductionStepsForPlanning: 'Common/GetBusinessConfigure',
     Machine: 'Common/GetMachine',
     Recipe: 'Common/GetRecipe',
+    PrePlannedRoute: 'Common/GetPrePlannedRoute',
+    PrePlannedRouteSteps: 'Common/GetPrePlannedRouteSteps',
     MachineUtilization: 'MachineDashboard/GetMachineUtilization',
+    PlanningVsProductionOverview: 'PlanningVsProduction/GetOverview',
     WorkType: 'Common/WorkType',
 
 

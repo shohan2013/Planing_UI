@@ -5,42 +5,42 @@ import { PagesLayoutComponent } from './Layout/pages-layout/pages-layout.compone
 
 // Import all components from barrel file
 import {
-// Dashboard components
-AnalyticsComponent,
+  // Dashboard components
+  AnalyticsComponent,
 
-// Elements components
-StandardComponent,
-DropdownsComponent,
-CardsComponent,
-ListGroupsComponent,
-TimelineComponent,
-IconsComponent,
+  // Elements components
+  StandardComponent,
+  DropdownsComponent,
+  CardsComponent,
+  ListGroupsComponent,
+  TimelineComponent,
+  IconsComponent,
 
-// Components
-AccordionsComponent,
-TabsComponent,
-CarouselComponent,
-ModalsComponent,
-ProgressBarComponent,
-TooltipsPopoversComponent,
+  // Components
+  AccordionsComponent,
+  TabsComponent,
+  CarouselComponent,
+  ModalsComponent,
+  ProgressBarComponent,
+  TooltipsPopoversComponent,
 
-// Form components
-ControlsComponent,
-LayoutComponent,
+  // Form components
+  ControlsComponent,
+  LayoutComponent,
 
-// Table components
-RegularComponent,
-TablesMainComponent,
+  // Table components
+  RegularComponent,
+  TablesMainComponent,
 
-// Widget components
-ChartBoxes3Component,
+  // Widget components
+  ChartBoxes3Component,
 
-// User pages components
-ForgotPasswordBoxedComponent,
-LoginBoxedComponent,
-RegisterBoxedComponent,
-// Chart components
-ChartjsComponent,
+  // User pages components
+  ForgotPasswordBoxedComponent,
+  LoginBoxedComponent,
+  RegisterBoxedComponent,
+  // Chart components
+  ChartjsComponent,
 } from './components.barrel';
 
 import { permissionGuard } from 'src/app/core/guards/auth/permission.guard';
@@ -56,19 +56,18 @@ export const routes: Routes = [
       // Dashboards
       //{path: 'pages/login-boxed', component: LoginBoxedComponent, data: {extraParameter: ''}},
       { path: '', redirectTo: '/pages/login-boxed', pathMatch: 'full' },
-      {
-        path: 'dashboards/analytics',
-
-        redirectTo: 'requisition',
-        pathMatch: 'full',
-        // component: Requisition,
-        // data: { extraParameter: 'dashboardsMenu' },
-      },
-      {
-        path: '',
-        component: AnalyticsComponent,
-        data: { extraParameter: 'dashboardsMenu' },
-      },
+      // {
+      //   path: 'dashboards/analytics',
+      //   redirectTo: 'requisition',
+      //   pathMatch: 'full',
+      //   // component: Requisition,
+      //   // data: { extraParameter: 'dashboardsMenu' },
+      // },
+      // {
+      //   path: '',
+      //   component: AnalyticsComponent,
+      //   data: { extraParameter: 'dashboardsMenu' },
+      // },
 
       {
         path: 'permission-required',
@@ -78,10 +77,10 @@ export const routes: Routes = [
           ),
       },
 
-
       {
         path: 'roles',
-        loadComponent: () =>import('./pages/Role/roles/roles').then((m) => m.Roles),
+        loadComponent: () =>
+          import('./pages/Role/roles/roles').then((m) => m.Roles),
       },
 
       {
@@ -123,6 +122,14 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/Machine/machine-dashboard/machine-dashboard').then(
             (m) => m.MachineDashboard,
+          ),
+      },
+      {
+        path: 'PlanningVsProductionOverview',
+        pathMatch: 'full',
+        loadComponent: () =>
+          import('./pages/planning-vs-production-overview/planning-vs-production-overview').then(
+            (m) => m.PlanningVsProductionOverview,
           ),
       },
 
@@ -264,4 +271,3 @@ export const routes: Routes = [
   },
   { path: '**', redirectTo: '' },
 ];
-

@@ -1,0 +1,23 @@
+<div class="pvp-kpis">
+  @for (card of cards(); track card.key; let i = $index) {
+    <div class="pvp-kpi" [class]="'pvp-kpi pvp-kpi--' + card.tone" [style.animation-delay.ms]="i * 60">
+      <div class="pvp-kpi__icon">
+        <i class="fas" [class]="'fas ' + card.icon"></i>
+      </div>
+      <div class="pvp-kpi__body">
+        <div class="pvp-kpi__title">{{ card.title }}</div>
+        @if (loading()) {
+          <div class="pvp-kpi__skeleton"></div>
+        } @else {
+          <div class="pvp-kpi__value" [class.text-danger-strong]="card.danger">
+            {{ display()[card.key] | number }}
+          </div>
+        }
+        <div class="pvp-kpi__meta">
+          {{ card.percent | number: '1.0-1' }}%{{ card.key === 'OrderQty' ? '' : ' of Order' }}
+        </div>
+      </div>
+      <div class="pvp-kpi__ring" [style.--pct]="card.percent"></div>
+    </div>
+  }
+</div>

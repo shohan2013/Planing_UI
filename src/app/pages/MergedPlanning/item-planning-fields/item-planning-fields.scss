@@ -5,10 +5,24 @@
   background: #f8f9fa;
 }
 
+// 6-column track: qty fields take half each; Recipe Version gets the
+// larger share of the second row and Priority the smaller one.
 .item-planning-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 8px 10px;
+
+  > div {
+    grid-column: span 3;
+  }
+
+  > .field-recipe {
+    grid-column: span 4;
+  }
+
+  > .field-priority {
+    grid-column: span 2;
+  }
 }
 
 .qty-summary {
@@ -84,6 +98,36 @@
   text-overflow: ellipsis;
 }
 
+// Shared height so the Recipe Version (ng-select) and Priority (select)
+// dropdowns line up exactly.
+$dropdown-height: 31px;
+
+.form-select {
+  height: $dropdown-height;
+}
+
+:host ::ng-deep .recipe-version-select.ng-select {
+  font-size: 12px;
+
+  .ng-select-container {
+    min-height: $dropdown-height;
+    height: $dropdown-height;
+    border-color: var(--bs-border-color);
+  }
+
+  .ng-value-container {
+    padding-left: 0.5rem;
+  }
+
+  .ng-value-container .ng-input {
+    top: 6px;
+  }
+
+  &.ng-select-disabled .ng-select-container {
+    background-color: #e9ecef;
+  }
+}
+
 .field-error {
   margin-top: 3px;
   color: #dc3545;
@@ -126,5 +170,11 @@
 @media (max-width: 575.98px) {
   .item-planning-grid {
     grid-template-columns: 1fr;
+
+    > div,
+    > .field-recipe,
+    > .field-priority {
+      grid-column: auto;
+    }
   }
 }

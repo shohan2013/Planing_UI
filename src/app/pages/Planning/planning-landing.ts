@@ -8,6 +8,7 @@ Subject
 import { DeliveryOrders } from '../SalesOrder/sales-orders';
 import { MergedPlanning } from '../MergedPlanning/merged-planning';
 import { PlanningHistoryList } from '../PlanningHistory/planning-history-list/planning-history-list';
+
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 @Component({
   selector: 'app-planning',
@@ -17,19 +18,22 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 })
 export class Planning implements OnDestroy {
   private destroy$ = new Subject<void>();
-
   private tabChange$ = new Subject<string>();
-
-  activeTab = signal<string>('mergeOrSplit');
-  renderedTab = signal<string>('mergeOrSplit');
-
+  
   constructor(private modalService: NgbModal) {
-    this.tabChange$
-      .pipe(debounceTime(1000), distinctUntilChanged(), takeUntilDestroyed())
+     this.tabChange$
+      .pipe(
+        debounceTime(1000),
+        distinctUntilChanged(),
+        takeUntilDestroyed()
+      )
       .subscribe((tab) => {
         this.renderedTab.set(tab);
       });
   }
+
+  activeTab = signal<string>('mergeOrSplit');
+  renderedTab = signal<string>('mergeOrSplit');
 
   onTabChange(tab: string) {
     this.activeTab.set(tab);

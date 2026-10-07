@@ -1,0 +1,150 @@
+:host {
+  display: block;
+}
+
+$pvp-control-h: 40px;
+$pvp-border: #dfe5ee;
+$pvp-focus: #2563eb;
+
+.pvp-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.85rem 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid #e8edf5;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 14px rgba(15, 23, 42, 0.04);
+}
+
+.pvp-field {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1 1 150px;
+
+  &--sm {
+    flex: 1 1 150px;
+    max-width: 190px;
+  }
+  &--md {
+    flex: 1 1 200px;
+    max-width: 260px;
+  }
+  &--lg {
+    flex: 2 1 240px;
+  }
+
+  @media (max-width: 767.98px) {
+    &--sm,
+    &--md {
+      max-width: none;
+    }
+  }
+}
+
+.pvp-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 0.35rem;
+}
+
+.form-control {
+  height: $pvp-control-h;
+  border-radius: 9px;
+  border-color: $pvp-border;
+  font-size: 0.875rem;
+  color: #0f172a;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &:focus {
+    border-color: $pvp-focus;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+  }
+}
+
+.pvp-input-icon {
+  position: relative;
+
+  i {
+    position: absolute;
+    left: 0.8rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.8rem;
+    color: #94a3b8;
+    pointer-events: none;
+  }
+
+  .form-control {
+    padding-left: 2.2rem;
+  }
+}
+
+:host ::ng-deep .pvp-select {
+  &.ng-select .ng-select-container {
+    min-height: $pvp-control-h;
+    height: $pvp-control-h;
+    border-radius: 9px;
+    border-color: $pvp-border;
+    font-size: 0.875rem;
+  }
+
+  &.ng-select .ng-select-container .ng-value-container .ng-placeholder {
+    color: #0f172a;
+  }
+
+  &.ng-select-focused:not(.ng-select-opened) > .ng-select-container {
+    border-color: $pvp-focus;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+  }
+
+  .ng-dropdown-panel {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+    font-size: 0.875rem;
+  }
+}
+
+.pvp-actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-left: auto;
+}
+
+.pvp-btn {
+  height: $pvp-control-h;
+  min-width: 112px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &.btn-primary {
+    background: linear-gradient(135deg, #2f7bff, #1d5fe0);
+    border: none;
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.28);
+
+    &:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(37, 99, 235, 0.34);
+    }
+  }
+
+  &--ghost {
+    background: #f4f7fb;
+    border: 1px solid $pvp-border;
+    color: #334155;
+
+    &:hover:not(:disabled) {
+      background: #eaf0f8;
+    }
+  }
+}

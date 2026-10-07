@@ -136,9 +136,10 @@
                 [steps]="productionSteps()"
                 [isLoading]="stepsLoading()"
                 [loadError]="stepsLoadError()"
-                [machineOptions]="Machines()"
+                [machinesByStep]="machinesByStep()"
                 (GetSteps)="loadProductionSteps()"
                 (dragStateChange)="isDragging.set($event)"
+                (stepSelected)="loadMachine($event)"
               ></app-production-steps>
             </div>
           </div>
@@ -204,7 +205,11 @@
                   cdkDragPreviewContainer="global"
                   [cdkDragBoundary]="'.desk-body'"
                 >
-                  <div class="desk-card-header" cdkDragHandle>
+                  <div
+                    class="desk-card-header"
+                    [class.desk-card-header-incomplete]="!isDeskStepValid(step)"
+                    cdkDragHandle
+                  >
                     <i class="fa-solid fa-grip-vertical drag-handle"></i>
                     <span class="desk-card-title" [title]="step.stepName">
                       {{ step.stepName }}
@@ -263,7 +268,9 @@
                         "
                         name="deskMachine-{{ step.stepId }}"
                       >
-                        @for (machine of Machines(); track machine.Id) {
+                        <option [ngValue]="0">Select machine</option>
+
+                        @for (machine of machinesForStep(step.stepId); track machine.Id) {
                         <option [ngValue]="machine.Id">
                           {{ machine.Name }}
                         </option>

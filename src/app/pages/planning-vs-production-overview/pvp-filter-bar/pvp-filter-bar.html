@@ -1,0 +1,103 @@
+<form class="pvp-filters" (ngSubmit)="onApply()">
+  <div class="pvp-field pvp-field--md">
+    <label class="pvp-label" for="pvpCustomer">Customer</label>
+    <ng-select
+      labelForId="pvpCustomer"
+      name="customer"
+      class="pvp-select"
+      [items]="customers()"
+      bindLabel="Name"
+      bindValue="Id"
+      placeholder="All Customers"
+      [ngModel]="draft().CustomerId"
+      (ngModelChange)="onCustomerChange($event)"
+    ></ng-select>
+  </div>
+
+  <div class="pvp-field pvp-field--md">
+    <label class="pvp-label" for="pvpDo">Delivery Order</label>
+    <ng-select
+      labelForId="pvpDo"
+      name="deliveryOrder"
+      class="pvp-select"
+      [items]="deliveryOrders()"
+      bindLabel="Name"
+      bindValue="Id"
+      placeholder="All Delivery Orders"
+      [ngModel]="draft().DeliveryOrderId"
+      (ngModelChange)="patch({ DeliveryOrderId: $event ?? null })"
+    ></ng-select>
+  </div>
+
+  <div class="pvp-field pvp-field--lg">
+    <label class="pvp-label" for="pvpItem">Item</label>
+    <div class="pvp-input-icon">
+      <i class="fas fa-search"></i>
+      <input
+        id="pvpItem"
+        name="item"
+        type="text"
+        class="form-control"
+        placeholder="Search item code or name..."
+        autocomplete="off"
+        [ngModel]="draft().ItemSearch"
+        (ngModelChange)="patch({ ItemSearch: $event })"
+      />
+    </div>
+  </div>
+
+  <div class="pvp-field pvp-field--sm">
+    <label class="pvp-label" for="pvpFrom">Order Date From</label>
+    <input
+      id="pvpFrom"
+      name="fromDate"
+      type="date"
+      class="form-control"
+      [max]="draft().ToDate"
+      [ngModel]="draft().FromDate"
+      (ngModelChange)="patch({ FromDate: $event })"
+    />
+  </div>
+
+  <div class="pvp-field pvp-field--sm">
+    <label class="pvp-label" for="pvpTo">Order Date To</label>
+    <input
+      id="pvpTo"
+      name="toDate"
+      type="date"
+      class="form-control"
+      [min]="draft().FromDate"
+      [ngModel]="draft().ToDate"
+      (ngModelChange)="patch({ ToDate: $event })"
+    />
+  </div>
+
+  <div class="pvp-field pvp-field--sm">
+    <label class="pvp-label" for="pvpStatus">Status</label>
+    <ng-select
+      labelForId="pvpStatus"
+      name="status"
+      class="pvp-select"
+      [items]="statuses"
+      placeholder="All Status"
+      [searchable]="false"
+      [ngModel]="draft().Status"
+      (ngModelChange)="patch({ Status: $event ?? null })"
+    ></ng-select>
+  </div>
+
+  <div class="pvp-actions">
+    <button type="submit" class="btn btn-primary pvp-btn" [disabled]="loading()">
+      @if (loading()) {
+        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+      } @else {
+        <i class="fas fa-search"></i>
+      }
+      Apply
+    </button>
+    <button type="button" class="btn btn-light pvp-btn pvp-btn--ghost" (click)="reset.emit()" [disabled]="loading()">
+      <i class="fas fa-redo-alt"></i>
+      Reset
+    </button>
+  </div>
+</form>

@@ -23,6 +23,10 @@ import { IApproveMatrixGroupList } from '../../model/Common/ApproveMatrixGroupLi
 import { environment } from 'src/environments/environment';
 import { IBusinessFlowForPlanning } from '../../model/Common/BusinessFlow/production-steps-model';
 import { IMachine } from '../../model/Common/Machine/machine';
+import {
+  IPrePlannedRoute,
+  IPrePlannedRouteStep,
+} from '../../model/Common/BusinessFlow/pre-planned-route-model';
 import { IRecipe } from '../../model/Common/Recipe/Recipe';
 import { IActiveRole } from '../../model/Role/Role';
 import { IWorkType } from '../../model/WorkType/WorkType';
@@ -192,9 +196,25 @@ export class CommonService {
     );
   }
 
-  GetMachine(unitId: number, BusinessesId: number): Observable<IMachine[]> {
+  GetMachine(
+    unitId: number,
+    BusinessesId: number,
+    bussinessFlowConfigureId: number,
+  ): Observable<IMachine[]> {
     return this.http.get<IMachine[]>(
-      `${environment.API_URL}${GlobalConstant.API_END_POINTS.Machine}?UnitId=${unitId}&BusinessId=${BusinessesId}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.Machine}?UnitId=${unitId}&BusinessId=${BusinessesId}&BussinessFlowConfigureId=${bussinessFlowConfigureId}`,
+    );
+  }
+
+  GetPrePlannedRoutes(productId: number): Observable<IPrePlannedRoute[]> {
+    return this.http.get<IPrePlannedRoute[]>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.PrePlannedRoute}?ProductId=${productId}`,
+    );
+  }
+
+  GetPrePlannedRouteSteps(routeId: number): Observable<IPrePlannedRouteStep[]> {
+    return this.http.get<IPrePlannedRouteStep[]>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.PrePlannedRouteSteps}?RouteId=${routeId}`,
     );
   }
 
@@ -204,23 +224,15 @@ export class CommonService {
     );
   }
 
+  getActiveRoles(): Observable<IActiveRole[]> {
+    return this.http.get<IActiveRole[]>(
+      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.activeRoles}`,
+    );
+  }
 
-
-    getActiveRoles(): Observable<IActiveRole[]> {
-      return this.http.get<IActiveRole[]>(
-        `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.activeRoles}`,
-      );
-    }
-
-
-    getWorkTypes(): Observable<IWorkType[]> {
-      return this.http.get<IWorkType[]>(
-        `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.WorkType}`,
-      );
-    }
-
-
-
-
-
+  getWorkTypes(): Observable<IWorkType[]> {
+    return this.http.get<IWorkType[]>(
+      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.WorkType}`,
+    );
+  }
 }

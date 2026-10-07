@@ -1,15 +1,16 @@
 import {
-Component,
-EventEmitter,
-Input,OnDestroy,
-OnInit,
-Output,
-signal
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  signal,
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subject,takeUntil } from 'rxjs';
-import { CdkDragDrop,DragDropModule } from '@angular/cdk/drag-drop';
+import { Subject, takeUntil } from 'rxjs';
+import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { DateTimePipe } from 'src/app/shared/pipes/date-time-pipe';
 import { MergedPlanningServices } from 'src/app/core/services/MergedPlanning/merged-planning-services';
 import { ProductionSteps } from '../production-steps/production-steps';
@@ -17,9 +18,9 @@ import { ItemPlanningFields } from '../item-planning-fields/item-planning-fields
 import { CommonService } from 'src/app/core/services/Common/CommonService';
 import { IPriority } from 'src/app/core/model/Common/Priority/Priority';
 import {
-IMergedPlanning,
-IMergedPlanningDetails,
-IMergedPlanningLine,
+  IMergedPlanning,
+  IMergedPlanningDetails,
+  IMergedPlanningLine,
 } from 'src/app/core/model/MergedPlanning/merged-planning-model';
 import { IBusinessFlowForPlanning } from 'src/app/core/model/Common/BusinessFlow/production-steps-model';
 import { IMachine } from 'src/app/core/model/Common/Machine/machine';
@@ -27,10 +28,10 @@ import { IRecipe } from 'src/app/core/model/Common/Recipe/Recipe';
 import { ItemPlanningStateService } from 'src/app/core/services/MergedPlanning/item-planning-state-service';
 import { ProcessStepStateService } from 'src/app/core/services/MergedPlanning/process-step-state-service';
 import {
-IItemPlanningInput,
-IProcessStepInput,
-IProductionPlanHeader,
-IProductionPlanLine,
+  IItemPlanningInput,
+  IProcessStepInput,
+  IProductionPlanHeader,
+  IProductionPlanLine,
 } from 'src/app/core/model/MergedPlanning/planning-processes-model';
 import { ToastrService } from 'ngx-toastr';
 import { IApiResponse } from 'src/app/core/model/Response/ApiResponse';
@@ -65,7 +66,8 @@ export class MergedPlanningView implements OnInit, OnDestroy {
   priorities = signal<IPriority[]>([]);
   recipeVersions = signal<IRecipe[]>([]);
   itemPlanningValues = signal<Record<number, IItemPlanningInput>>({});
-  Machines = signal<IMachine[]>([]);
+  /** Machines per production step, keyed by step (BusinessFlowConfigure) Id. */
+  machinesByStep = signal<Record<number, IMachine[]>>({});
 
   isLoading = signal(false);
   loadError = signal(false);
@@ -116,7 +118,6 @@ export class MergedPlanningView implements OnInit, OnDestroy {
           this.header.set(data.Header);
           this.lines.set(data.Lines);
           this.loadProductionSteps();
-          this.loadMachine();
           this.loadRecipe();
           this.isLoading.set(false);
         },
@@ -139,7 +140,7 @@ export class MergedPlanningView implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
-          console.log(data);
+          //console.log(data);
           this.productionSteps.set(data);
           this.stepsLoading.set(false);
         },
@@ -150,13 +151,32 @@ export class MergedPlanningView implements OnInit, OnDestroy {
       });
   }
 
-  loadMachine() {
+  /** Step Ids whose machines are loaded or currently loading. */
+  private requestedMachineStepIds = new Set<number>();
+
+  /**
+   * Loads a production step's machines when the user selects that step.
+   * Each step is fetched only once; later selections reuse the result.
+   */
+  loadMachine(stepId: number) {
+    const header = this.header();
+    if (!header || this.requestedMachineStepIds.has(stepId)) return;
+
+    this.requestedMachineStepIds.add(stepId);
+
     this.commonService
-      .GetMachine(this.header().UnitId, this.header().BusinessId)
+      .GetMachine(header.UnitId, header.BusinessId, stepId)
       .pipe(takeUntil(this.destroy$))
-      .subscribe((data) => {
-        this.Machines.set(data);
+      .subscribe({
+        next: (data) =>
+          this.machinesByStep.update((map) => ({ ...map, [stepId]: data })),
+        // Allow a retry the next time this step is selected.
+        error: () => this.requestedMachineStepIds.delete(stepId),
       });
+  }
+
+  machinesForStep(stepId: number): IMachine[] {
+    return this.machinesByStep()[stepId] ?? [];
   }
 
   loadRecipe() {
@@ -197,7 +217,7 @@ export class MergedPlanningView implements OnInit, OnDestroy {
         }
 
         const steps = processSteps
-          .filter((x) => x.lineId === line.Id)
+          .filter((x) => x.lineId === line.Id && this.isDeskStepValid(x))
           .sort((a, b) => a.orderNo - b.orderNo);
 
         return {
@@ -238,6 +258,13 @@ export class MergedPlanningView implements OnInit, OnDestroy {
     };
   }
 
+  /** Count of desk steps still missing Start/End Date, a valid range, or a Machine. */
+  private countIncompleteSteps(): number {
+    return this.processStepState
+      .processSteps()
+      .filter((step) => !this.isDeskStepValid(step)).length;
+  }
+
   onSaveAll(): void {
     const header = this.buildProductionPlanHeaderToSave();
     const lines = this.buildProductionPlanLinesToSave();
@@ -247,6 +274,24 @@ export class MergedPlanningView implements OnInit, OnDestroy {
         'Enter a valid Taken Qty for at least one item before saving.',
       );
       return;
+    }
+
+    const hasAnyValidStep = lines.some(
+      (line) => (line.ProductionPlanConfigures?.length ?? 0) > 0,
+    );
+
+    if (!hasAnyValidStep) {
+      this.toastr.error('Plan at least one valid process step before saving.');
+      return;
+    }
+
+    const incompleteCount = this.countIncompleteSteps();
+    if (incompleteCount > 0) {
+      const proceed = confirm(
+        `${incompleteCount} planning step(s) are missing Start Date, End Date, or Machine and will NOT be saved.\n\nDo you want to continue and save only the valid steps?`,
+      );
+
+      if (!proceed) return;
     }
 
     this.isSaving.set(true);
@@ -327,9 +372,26 @@ export class MergedPlanningView implements OnInit, OnDestroy {
     return step.endDate < step.startDate;
   }
 
-  getMachineName(machineId: number): string {
+  /**
+   * A step is Ready/Valid only once all 4 of its inputs are filled in on the
+   * desk card: Start Date, End Date, a valid (non-reversed) range, and a
+   * chosen Machine. Pre-planned-route steps land here empty (see
+   * production-steps.ts onRouteSelected) and stay "incomplete" until the user
+   * fills them in.
+   */
+  isDeskStepValid(step: IProcessStepInput): boolean {
     return (
-      this.Machines().find((m) => m.Id === machineId)?.Name ?? `#${machineId}`
+      !!step.startDate &&
+      !!step.endDate &&
+      !this.isDeskStepDateRangeInvalid(step) &&
+      !!step.machineId
+    );
+  }
+
+  getMachineName(stepId: number, machineId: number): string {
+    return (
+      this.machinesForStep(stepId).find((m) => m.Id === machineId)?.Name ??
+      `#${machineId}`
     );
   }
 

@@ -38,12 +38,15 @@ import { ProcessStepFrom } from '../../MergedPlanning/process-step-from/process-
 export class PlanningProcessSteps implements OnChanges {
   @Input({ required: true }) lineId!: number;
   @Input() steps: IBusinessFlowForPlanning[] = [];
-  @Input() machineOptions: IMachine[] = [];
+  /** Machines per production step, keyed by step (BusinessFlowConfigure) Id. */
+  @Input() machinesByStep: Record<number, IMachine[]> = {};
   @Input() isLoading = false;
   @Input() loadError = false;
   @Input() savedSteps: IPlanningHistoryStep[] = [];
 
   @Output() GetSteps = new EventEmitter<void>();
+  /** Emits a newly added step's Id so its machines can be loaded. */
+  @Output() stepAdded = new EventEmitter<number>();
 
   @ViewChild('cardsContainer') cardsContainer?: ElementRef<HTMLDivElement>;
 
@@ -105,6 +108,10 @@ export class PlanningProcessSteps implements OnChanges {
     return this.steps.filter((s) => !ids.has(s.Id));
   }
 
+  machinesForStep(stepId: number): IMachine[] {
+    return this.machinesByStep[stepId] ?? [];
+  }
+
   initialValueFor(stepId: number): IProcessStepInput | null {
     return (
       this.processStepStateService
@@ -123,6 +130,7 @@ export class PlanningProcessSteps implements OnChanges {
   addStep(): void {
     if (this.newStepId === null) return;
 
+    this.stepAdded.emit(this.newStepId);
     this.activeStepIds.update((ids) =>
       ids.includes(this.newStepId!) ? ids : [...ids, this.newStepId!],
     );

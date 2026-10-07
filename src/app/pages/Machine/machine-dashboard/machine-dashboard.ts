@@ -15,6 +15,11 @@ import {
   IMachineDashboardSummary,
   IMachineUtilization,
 } from 'src/app/core/model/MachineDashboard/machine-dashboard.model';
+import {
+  FLAT_KPI_TRENDS,
+  IMachineDashboardKpiTrends,
+  computeTrend,
+} from 'src/app/core/model/MachineDashboard/machine-dashboard-trend.util';
 
 type MachineDashboardTab = 'overview' | 'timeline';
 
@@ -42,6 +47,7 @@ export class MachineDashboard implements OnInit, OnDestroy {
   readonly businesses = signal<IBusiness[]>([]);
   readonly businessesLoading = signal(false);
   readonly loading = signal(false);
+  readonly hasLoaded = signal(false);
 
   readonly activeTab = signal<MachineDashboardTab>('overview');
 
@@ -61,6 +67,14 @@ export class MachineDashboard implements OnInit, OnDestroy {
 
   readonly machines = signal<IMachineUtilization[]>([]);
 
+  /** Trends compare the current summary against the previously loaded one.
+   * Owned here (not by the overview tab) because that component is
+   * destroyed/recreated on every load (see the @else if gating in the
+   * template) and on every tab switch, which would otherwise wipe out the
+   * "previous" value each time and leave every trend stuck at 0%. */
+  readonly trends = signal<IMachineDashboardKpiTrends>(FLAT_KPI_TRENDS);
+  private previousSummary: IMachineDashboardSummary | null = null;
+
   private readonly destroy$ = new Subject<void>();
 
   constructor(
@@ -70,7 +84,6 @@ export class MachineDashboard implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadUnits();
-    this.loadDashboard();
   }
 
   ngOnDestroy(): void {
@@ -86,12 +99,11 @@ export class MachineDashboard implements OnInit, OnDestroy {
     this.selectedUnitId = Number(unitId);
     this.selectedBusinessId = 0;
     this.businesses.set([]);
+    this.resetDashboard();
 
     if (this.selectedUnitId > 0) {
       this.loadBusinesses(this.selectedUnitId);
     }
-
-    this.loadDashboard();
   }
 
   onBusinessChange(businessId: number): void {
@@ -135,8 +147,46 @@ export class MachineDashboard implements OnInit, OnDestroy {
       });
   }
 
+  private resetDashboard(): void {
+    this.summary.set(EMPTY_SUMMARY);
+    this.machines.set([]);
+    this.hasLoaded.set(false);
+    this.trends.set(FLAT_KPI_TRENDS);
+    this.previousSummary = null;
+  }
+
+  private applySummary(value: IMachineDashboardSummary): void {
+    if (this.previousSummary) {
+      const prev = this.previousSummary;
+
+      this.trends.set({
+        machines: computeTrend(value.TotalMachines, prev.TotalMachines, 'up'),
+        utilization: computeTrend(
+          value.AvgUtilizationPercent,
+          prev.AvgUtilizationPercent,
+          'up',
+        ),
+        free: computeTrend(value.TotalFreeHours, prev.TotalFreeHours, 'up'),
+        downtime: computeTrend(
+          value.TotalDowntimeHours,
+          prev.TotalDowntimeHours,
+          'down',
+        ),
+      });
+    }
+
+    this.previousSummary = value;
+    this.summary.set(value);
+  }
+
   private loadDashboard(): void {
+    if (this.selectedUnitId <= 0 || this.selectedBusinessId <= 0) {
+      this.resetDashboard();
+      return;
+    }
+
     this.loading.set(true);
+    this.hasLoaded.set(false);
 
     this.machineDashboardService
       .GetMachineUtilization(
@@ -148,13 +198,17 @@ export class MachineDashboard implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
-          this.summary.set(data?.Summary ?? EMPTY_SUMMARY);
+          this.applySummary(data?.Summary ?? EMPTY_SUMMARY);
           this.machines.set(data?.Machines ?? []);
+          this.hasLoaded.set(true);
           this.loading.set(false);
         },
         error: () => {
           this.summary.set(EMPTY_SUMMARY);
           this.machines.set([]);
+          this.trends.set(FLAT_KPI_TRENDS);
+          this.previousSummary = null;
+          this.hasLoaded.set(true);
           this.loading.set(false);
         },
       });
