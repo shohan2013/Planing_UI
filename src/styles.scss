@@ -355,7 +355,13 @@ label {
   display: inline-flex;          /* Flexbox ensures perfect centering */
   align-items: center;
   justify-content: center;
-  width: 70px;                   /* Fixed width to fit "Completed" uniformly across all pills */
+
+  // width: 70px;                   /* Fixed width to fit "Completed" uniformly across all pills */
+  min-width: 75px;               /* Allow pill to grow for longer text while maintaining a base size */
+  width: fit-content;            /* Expand capsule dynamically based on content */
+  white-space: nowrap;           /* Prevent text wrapping (e.g. "Compl\nete") in grid cells/modal tiles */
+  
+  
   height: 25px;                  /* Increased height for a fuller pill */
   font-size: 13px;               /* Increased font size for better legibility */
   font-weight: 549;              /* Semi-bold weight */
@@ -363,7 +369,7 @@ label {
   letter-spacing: 0.3px;
 
   gap: 8px;            //place 8px between Dot and Text
-  padding: 6px 14px;
+  padding: 4px 12px;
 
   border-radius: 13px;           /* Half of height for perfectly rounded ends */
   text-align: center;
@@ -379,7 +385,9 @@ label {
 
 /* Automatically expand width ONLY when a .g-dot exists inside */
 .g-status:has(.g-dot) {
-  width: 80px; /* Or min-width / fit-content */
+  // width: 80px; /* Or min-width / fit-content */
+  min-width: 85px;              /* Expand minimum width to accommodate dot + gap + text */
+ 
 }
 /* DOT */
 .g-dot {
