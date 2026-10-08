@@ -133,7 +133,7 @@
 <ng-template #insert let-c="close" let-d="dismiss">
   <form [formGroup]="formGroup" (ngSubmit)="CreateSubMenu()">
     <div class="modal-header">
-      <h5 class="modal-title">CREATE NEW</h5>
+      <h5 class="modal-title d-flex align-items-center gap-2"><img src="assets/icons/create.svg" width="18" height="18" alt="" /> CREATE NEW</h5>
       <button
         type="button"
         class="btn-close"
@@ -277,7 +277,7 @@
 <ng-template #update let-c="close" let-d="dismiss">
   <form [formGroup]="eformGroup" (ngSubmit)="Update()">
     <div class="modal-header">
-      <h5 class="modal-title">EDIT</h5>
+      <h5 class="modal-title d-flex align-items-center gap-2"><img src="assets/icons/edit.svg" width="16" height="16" alt="" /> EDIT</h5>
       <button
         type="button"
         class="btn-close"
