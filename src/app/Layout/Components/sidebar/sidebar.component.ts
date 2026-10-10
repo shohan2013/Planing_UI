@@ -180,12 +180,17 @@ getSideBarData(): void {
     }
   }
 
+  // onNavigate() {
+  //   if (window.innerWidth < 1200) {
+  //     this.globals.toggleSidebarMobile.set(true);
+  //     this.globals.sidebarHover.set(false);
+  //   }
+  // }
   onNavigate() {
-    if (window.innerWidth < 1200) {
-      this.globals.toggleSidebarMobile.set(true);
-      this.globals.sidebarHover.set(false);
-    }
+    this.globals.toggleSidebarMobile.set(false);
+    this.globals.sidebarHover.set(false);
   }
+
 
   @HostListener('window:resize', ['$event'])
   onResize(event: Event) {
