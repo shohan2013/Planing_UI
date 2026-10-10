@@ -1,22 +1,15 @@
+
 <div class="modal-header">
   <img src="assets/icons/view.svg" width="18" height="18" class="me-2" alt="" />
   <h5 class="modal-title">Requisition Details</h5>
-
-  <button
-    type="button"
-    class="btn-close"
-    aria-label="Close"
-    (click)="dismiss()"
-  ></button>
+  <button type="button" class="btn-close" aria-label="Close" (click)="dismiss()"></button>
 </div>
 
 <div class="modal-body requisition-modal-body">
   @if (state === 'loading') {
     <div class="d-flex justify-content-center align-items-center py-5">
       <div class="spinner-border text-success" role="status">
-        <span class="visually-hidden">
-          Loading requisition lines...
-        </span>
+        <span class="visually-hidden">Loading requisition lines...</span>
       </div>
     </div>
   } @else if (state === 'failed') {
@@ -24,117 +17,64 @@
       Unable to display the requisition.
     </div>
   } @else {
-    <section class="requisition-card">
-      <div class="section-heading">
-        <span class="section-icon" aria-hidden="true">
-          <i class="fa-solid fa-circle-info"></i>
-        </span>
 
-        <div>
-          <h6>Requisition Information</h6>
-          <p>General details and schedule</p>
+    <!-- Compact Requisition Summary -->
+    <section class="requisition-card requisition-summary">
+      <div class="summary-grid">
+        <div class="summary-field">
+          <span class="summary-label">Requisition Number</span>
+          <span class="summary-value detail-highlight">{{ header.RequisitionNumber || '-' }}</span>
+        </div>
+
+        <div class="summary-field">
+          <span class="summary-label">Unit</span>
+          <span class="summary-value">{{ header.UnitName || '-' }}</span>
+        </div>
+
+        <div class="summary-field">
+          <span class="summary-label">Business</span>
+          <span class="summary-value">{{ header.BusinessName || '-' }}</span>
+        </div>
+
+        <div class="summary-field">
+          <span class="summary-label">Requisition Date</span>
+          <span class="summary-value">{{ header.ReqDate | date: 'dd-MMM-yyyy' }}</span>
+        </div>
+
+        <div class="summary-field">
+          <span class="summary-label">Start Date</span>
+          <span class="summary-value">{{ header.StartDate | date: 'dd-MMM-yyyy' }}</span>
+        </div>
+
+        <div class="summary-field">
+          <span class="summary-label">End Date</span>
+          <span class="summary-value">{{ header.EndDate | date: 'dd-MMM-yyyy' }}</span>
+        </div>
+
+        <div class="summary-field">
+          <span class="summary-label">Status</span>
+          <span class="g-status g-status-lg" [ngClass]="{
+            'pending': header.DocStatusId === 1,
+            'approve': header.DocStatusId === 2,
+            'reject': header.DocStatusId === 3,
+            'complete': header.DocStatusId === 4
+          }">{{ getDocStatusName(header.DocStatusId) }}</span>
         </div>
       </div>
 
-      <div class="row g-3">
-        <div class="col-12 col-md-4">
-          <div class="detail-tile">
-            <div class="detail-label">Requisition Number</div>
-            <div class="detail-value detail-highlight">
-              {{ header.RequisitionNumber || '-' }}
-            </div>
-          </div>
-        </div>
-
-        <div class="col-12 col-md-4">
-          <div class="detail-tile">
-            <div class="detail-label">Unit</div>
-            <div class="detail-value">
-              {{ header.UnitName || '-' }}
-            </div>
-          </div>
-        </div>
-
-        <div class="col-12 col-md-4">
-          <div class="detail-tile">
-            <div class="detail-label">Business</div>
-            <div class="detail-value">
-              {{ header.BusinessName || '-' }}
-            </div>
-          </div>
-        </div>
-
-        <div class="col-12 col-md-4">
-          <div class="detail-tile">
-            <div class="detail-label">Requisition Date</div>
-            <div class="detail-value">
-              {{ header.ReqDate | date: 'dd-MMM-yyyy' }}
-            </div>
-          </div>
-        </div>
-
-        <div class="col-12 col-md-4">
-          <div class="detail-tile">
-            <div class="detail-label">Start Date</div>
-            <div class="detail-value">
-              {{ header.StartDate | date: 'dd-MMM-yyyy' }}
-            </div>
-          </div>
-        </div>
-
-        <div class="col-12 col-md-4">
-          <div class="detail-tile">
-            <div class="detail-label">End Date</div>
-            <div class="detail-value">
-              {{ header.EndDate | date: 'dd-MMM-yyyy' }}
-            </div>
-          </div>
-        </div>
-
-        <div class="col-12 col-md-4">
-          <div class="detail-tile">
-            <div class="detail-label">Status</div>
-            <div class="detail-value">
-              <span
-                class="g-status g-status-lg"
-                [ngClass]="{
-                  'pending': header.DocStatusId === 1,
-                  'approve': header.DocStatusId === 2,
-                  'reject': header.DocStatusId === 3,
-                  'complete': header.DocStatusId === 4
-                }"
-              >
-                <!-- <span class="g-dot"></span> -->
-                {{ getDocStatusName(header.DocStatusId) }}
-              </span>
-            </div>
-          </div>
-        </div>
+      <!-- Header Remarks -->
+      <div class="summary-remarks">
+        <span class="summary-label">Remarks</span>
+        <div class="g-scrollable-text full" [title]="header.Remarks || ''">{{ header.Remarks || '-' }}</div>
       </div>
     </section>
 
-    <section class="requisition-card">
-      <div class="section-heading">
-        <span class="section-icon" aria-hidden="true">
-          <i class="fa-regular fa-message"></i>
-        </span>
-
-        <div>
-          <h6>Remarks</h6>
-        </div>
-      </div>
-
-      <div class="remarks-content">
-        {{ header.Remarks || '-' }}
-      </div>
-    </section>
-
-    <section class="requisition-card">
+    <!-- Product Requisition -->
+    <section class="requisition-card product-section">
       <div class="section-heading">
         <span class="section-icon" aria-hidden="true">
           <i class="fa-solid fa-list"></i>
         </span>
-
         <div>
           <h6>Product Requisition</h6>
           <p>Items included in this requisition</p>
@@ -143,6 +83,17 @@
 
       <div class="table-responsive product-table-wrapper">
         <table class="custom-table product-table">
+          <colgroup>
+            <col style="width: 11%" />
+            <col style="width: 21%" />
+            <col style="width: 12%" />
+            <col style="width: 8%" />
+            <col style="width: 12%" />
+            <col style="width: 10%" />
+            <col style="width: 10%" />
+            <col style="width: 16%" />
+          </colgroup>
+
           <thead>
             <tr>
               <th>Product Type</th>
@@ -167,21 +118,12 @@
               @for (line of lines; track line.ID) {
                 <tr>
                   <td>{{ line.ProductTypeName || '-' }}</td>
-                  <td class="item-name">
-                    {{ line.ItemName || '-' }}
-                  </td>
+                  <td class="item-name">{{ line.ItemName || '-' }}</td>
                   <td>{{ line.UOMName || '-' }}</td>
-                  <td class="number-column">
-                    {{ line.Quantity }}
-                  </td>
+                  <td class="number-column">{{ line.Quantity }}</td>
 
                   <td class="number-column">
-                    <span
-                      [class.negative-quantity]="
-                        line.RemainingQuantity !== null &&
-                        line.RemainingQuantity < 0
-                      "
-                    >
+                    <span [class.negative-quantity]="line.RemainingQuantity !== null && line.RemainingQuantity < 0">
                       {{
                         line.RemainingQuantity === null
                           ? '-'
@@ -192,13 +134,9 @@
                     </span>
                   </td>
 
-                  <td class="number-column">
-                    {{ line.StockQuantity ?? 0 }}
-                  </td>
-                  <td class="number-column">
-                    {{ line.SalesQuantity ?? 0 }}
-                  </td>
-                  <td>{{ line.Remarks || '-' }}</td>
+                  <td class="number-column">{{ line.StockQuantity ?? 0 }}</td>
+                  <td class="number-column">{{ line.SalesQuantity ?? 0 }}</td>
+                  <td><div class="g-scrollable-text sm" [title]="line.Remarks || ''">{{ line.Remarks || '-' }}</div></td>
                 </tr>
               }
             }
@@ -210,12 +148,7 @@
 </div>
 
 <div class="modal-footer">
-  <button
-    type="button"
-    class="btn btn-secondary"
-    (click)="close()"
-  >
-    <i class="fa-solid fa-fw fa-xmark"></i>
-    Close
+  <button type="button" class="btn btn-secondary" (click)="close()">
+    <i class="fa-solid fa-fw fa-xmark"></i> Close
   </button>
 </div>

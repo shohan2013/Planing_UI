@@ -236,12 +236,103 @@ h6 {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
-/*==================================================================BUTTON=====================================================================*/
-.action-buttons {
-  display: flex;
-  gap: 8px;
-  align-items: center;
+/*==================================================================Big Text=====================================================================*/
+
+/* Global Scrollable Text */
+.g-scrollable-text {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-height: 36px;
+  overflow: auto;
+  scrollbar-width: none;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  user-select: text;
+  cursor: text;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
+
+/* Automatically Control Parent Table Column Width */
+/* Custom Example usage <td style="--g-text-width: 25%"><div class="g-scrollable-text" tabindex="0" [title]="item.Remarks || ''">{{ item.Remarks || '-' }}</div></td> */
+/*Auto Example usage<td><div class="g-scrollable-text">{{ item.Remarks || '-' }}</div></td>*/
+td:has(> .g-scrollable-text) {
+  width: var(--g-text-width, auto);
+  max-width: var(--g-text-max-width, none);
+}
+
+/* Small: Product-Line Remarks */
+td:has(> .g-scrollable-text.sm) {
+  --g-text-width: 12%;
+}
+
+/* Medium: Landing Table Remarks */
+td:has(> .g-scrollable-text.md) {
+  --g-text-width: 20%;
+}
+
+/* Full: Standalone Remarks */
+.g-scrollable-text.full {
+  width: 100%;
+}  
+
+
+
+
+/*==================================================================BUTTON=====================================================================*/
+/* Global Dynamic Action Column */
+.g-action-column {
+  width: auto;
+  min-width: 20px;
+  padding: 5px 5px !important;
+  text-align: center !important;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+
+// .action-buttons {
+//   display: flex;
+//   gap: 8px;
+//   align-items: center;
+// }
+.action-buttons {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+/*Usage Example
+  <td class="g-action-column">
+    <div class="action-buttons">
+      <button
+        *menuPermission="PermissionAction.View"
+        type="button"
+        class="action-btn btn-view"
+        title="View"
+        [disabled]="deletingReqId() !== null"
+        (click)="openViewModal(item)"
+      >
+        <i class="fa-solid fa-magnifying-glass-plus"></i>
+      </button>
+
+      <button
+        *menuPermission="PermissionAction.Update"
+        type="button"
+        class="action-btn btn-edit"
+        title="Edit"
+        [disabled]="deletingReqId() !== null
+        (click)="openEditModal(item)"
+      >
+        <i class="fa-regular fa-pen-to-square"></i>
+      </button>
+*/
 
 .action-btn {
   width: 36px;

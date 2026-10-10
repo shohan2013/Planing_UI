@@ -76,7 +76,7 @@
             <input
               type="text"
               class="form-control"
-              placeholder="Search by Requisition Number or Remarks..."
+              placeholder="Search Requisition Number..."
               [ngModel]="globalSearch()"
               (ngModelChange)="
                 updateSearch($event)
@@ -111,7 +111,7 @@
             <th>CREATED BY</th>
             <th>CREATED DATE</th>
             <th>STATUS</th>
-            <th>ACTION</th>
+            <th class="g-action-column">ACTION</th>
           </tr>
         </thead>
 
@@ -147,8 +147,8 @@
 
             <td>{{ item.ReqDate | dateTime }}</td>
 
-            <td>{{ item.Remarks || '-' }}</td>
-
+            <td><div class="g-scrollable-text md" [title]="item.Remarks || ''">{{ item.Remarks || '-' }}</div></td>
+            
             <td>{{ item.CREATEDBY ?? '-' }}</td>
 
             <td>
@@ -171,7 +171,7 @@
               </span>
             </td>
 
-            <td>
+            <td class="g-action-column">
               <div class="action-buttons">
                 <button
                   *menuPermission="PermissionAction.View"
