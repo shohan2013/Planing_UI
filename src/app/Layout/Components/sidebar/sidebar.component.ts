@@ -42,20 +42,27 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
       transform: rotate(360deg) !important;  /* Point down */
     }
 
-    .submenu-link {
+    .submenu-link { 
       display: flex !important;
       align-items: center !important;
     }
+
+    .vsm-icon { /*menu Icons*/
+      font-size: 18px !important;
+      width: 20px !important;
+      min-width: 20px !important;
+    }
+
 
     .submenu-icon {
       position: static !important;
       display: inline-flex !important;
       align-items: center;
       justify-content: center;
-      width: 28px;
-      min-width: 28px;
-      margin-right: 10px;
-      font-size: 24px;
+      width: 20px;
+      min-width: 20px;
+      margin-right: 8px;
+      font-size: 18px;
     }
 
 

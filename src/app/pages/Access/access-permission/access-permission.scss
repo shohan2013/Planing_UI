@@ -1,0 +1,23 @@
+.employee-search-group {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+
+  .input-group-text {
+    border-radius: 6px 0 0 6px;
+    flex-shrink: 0;
+  }
+
+  ng-select {
+    display: block;
+    flex: 1 1 0%;
+    width: 0;
+    min-width: 0;
+  }
+
+  ::ng-deep ng-select .ng-select-container {
+    border-radius: 0 6px 6px 0 !important;
+    height: 100%;
+    min-height: 38px;
+  }
+}
