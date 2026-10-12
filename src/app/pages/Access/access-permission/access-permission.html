@@ -18,7 +18,7 @@
       </div>
 
       <div class="flex-fill">
-        <div class="input-group">
+        <div class="input-group employee-search-group">
           <div class="input-group-text">
             <span class=""
               ><i
@@ -29,7 +29,7 @@
             ></span>
           </div>
           <ng-select
-            class="form-control"
+            class="flex-grow-1"
             [items]="EmpList"
             bindLabel="Name"
             bindValue="Id"
@@ -37,10 +37,21 @@
             placeholder="Search Employee..."
             [searchable]="true"
             [clearable]="true"
+            dropdownPosition="bottom"
             style="margin-right: 5px"
             (search)="onSearch($event)"
             (ngModelChange)="onSelect($event)"
           >
+            <ng-template ng-option-tmp let-item="item">
+              <div class="employee-option-text">
+                <strong>{{ item.Name }}</strong>
+                <span class="ms-2 text-muted">({{ item.Id }})</span>
+              </div>
+            </ng-template>
+
+            <ng-template ng-label-tmp let-item="item">
+              {{ item.Name }} ({{ item.Id }})
+            </ng-template>
           </ng-select>
         </div>
       </div>

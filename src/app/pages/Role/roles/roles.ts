@@ -19,7 +19,7 @@ type RoleTab = 'role-assign' | 'role-permission';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Roles {
-  readonly activeTab = signal<RoleTab>('role-assign');
+  readonly activeTab = signal<RoleTab>('role-permission');
 
   onTabChange(tab: RoleTab): void {
     this.activeTab.set(tab);

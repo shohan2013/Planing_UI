@@ -131,7 +131,7 @@ export class RequisitionFormModalComponent implements OnInit {
       Validators.required,
     ),
 
-    Remarks: new FormControl(''),
+    Remarks: new FormControl('', [Validators.maxLength(500)]),
 
     Lines: new FormArray([]),
   });
@@ -166,7 +166,7 @@ export class RequisitionFormModalComponent implements OnInit {
 
     StockQuantity: new FormControl(0),
     SalesQuantity: new FormControl(0),
-    Remarks: new FormControl(''),
+    Remarks: new FormControl('', [Validators.maxLength(500)]),
   });
 
   private readonly destroyRef =
