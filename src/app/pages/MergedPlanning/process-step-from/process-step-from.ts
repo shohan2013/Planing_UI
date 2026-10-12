@@ -101,6 +101,7 @@ export class ProcessStepFrom implements OnInit, OnChanges {
             ? of(null)
             : this.machineSchedule
                 .GetMachineJobs({
+                  BusinessFlowConfigureId: this.step.Id, // the selected step
                   MachineId: slot.machineId,
                   StartDate: slot.startDate,
                   EndDate: slot.endDate,

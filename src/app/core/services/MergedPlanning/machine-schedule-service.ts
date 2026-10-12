@@ -17,12 +17,13 @@ export class MachineScheduleService {
   constructor(private readonly http: HttpClient) {}
 
   /**
-   * GET MergedPlanning/GetMachineJobs?machineId=&startDate=&endDate=
-   * Jobs on the machine that overlap [startDate, endDate]. An empty list means the
-   * machine is free in that slot.
+   * GET MergedPlanning/GetMachineJobs?businessFlowConfigureId=&machineId=&startDate=&endDate=
+   * Jobs on the machine (for that planning step) that overlap [startDate, endDate].
+   * An empty list means the machine is free in that slot.
    */
   GetMachineJobs(request: IMachineJobsRequest): Observable<IMachineJob[]> {
     const params = new HttpParams()
+      .set('businessFlowConfigureId', request.BusinessFlowConfigureId)
       .set('machineId', request.MachineId)
       .set('startDate', request.StartDate)
       .set('endDate', request.EndDate);

@@ -4,6 +4,8 @@
  * them (yyyy-MM-ddTHH:mm).
  */
 export interface IMachineJobsRequest {
+  /** The planning step (IBusinessFlowForPlanning.Id), same id Common/GetMachine takes. */
+  BusinessFlowConfigureId: number;
   MachineId: number;
   StartDate: string;
   EndDate: string;
