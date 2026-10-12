@@ -199,10 +199,10 @@ export class CommonService {
   GetMachine(
     unitId: number,
     BusinessesId: number,
-    bussinessFlowConfigureId: number,
+    businessFlowConfigureId: number,
   ): Observable<IMachine[]> {
     return this.http.get<IMachine[]>(
-      `${environment.API_URL}${GlobalConstant.API_END_POINTS.Machine}?UnitId=${unitId}&BusinessId=${BusinessesId}&BussinessFlowConfigureId=${bussinessFlowConfigureId}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.Machine}?UnitId=${unitId}&BusinessId=${BusinessesId}&BusinessFlowConfigureId=${businessFlowConfigureId}`,
     );
   }
 

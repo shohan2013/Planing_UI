@@ -167,38 +167,14 @@ $pvp-line: #eef2f7;
 }
 
 /* ---------- Table ---------- */
-$pvp-frozen-edge: #9db4d8;
 $pvp-accent: #2563eb;
-
-.pvp-table-shell {
-  position: relative;
-
-  // Fade on the right edge: "there are more columns this way"
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 22px; // stop above the custom scrollbar
-    width: 42px;
-    pointer-events: none;
-    background: linear-gradient(to left, rgba(15, 23, 42, 0.1), rgba(15, 23, 42, 0));
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    z-index: 4;
-  }
-
-  &.can-scroll-right::after {
-    opacity: 1;
-  }
-}
 
 .pvp-table-wrap {
   overflow: auto;
   max-height: calc(100vh - 380px);
   min-height: 260px;
 
-  // The native horizontal bar is replaced by .pvp-hscroll (which starts after the frozen column).
+  // The native horizontal bar is replaced by .pvp-hscroll, which starts after the frozen column.
   &::-webkit-scrollbar {
     height: 0;
     width: 10px;
@@ -210,59 +186,11 @@ $pvp-accent: #2563eb;
   }
 }
 
-/* "Scroll →" pill, shown until the user scrolls for the first time */
-.pvp-scroll-hint {
-  position: absolute;
-  right: 18px;
-  top: 6px;
-  z-index: 5;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.2rem 0.65rem;
-  border: 0;
-  border-radius: 999px;
-  background: $pvp-accent;
-  color: #fff;
-  font-size: 0.72rem;
-  font-weight: 600;
-  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
-  animation: pvp-nudge 1.6s ease-in-out infinite;
-
-  &:hover {
-    background: #1d4ed8;
-  }
-}
-
-/* Custom horizontal scrollbar that begins at the frozen column's right edge */
 .pvp-hscroll {
   display: flex;
-  align-items: stretch;
-  border-top: 1px solid $pvp-border;
-  background: #f8fafc;
 
-  &__label {
+  &__gap {
     flex: 0 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-    padding: 0 0.85rem;
-    border-right: 2px solid $pvp-frozen-edge;
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: #64748b;
-    white-space: nowrap;
-    overflow: hidden;
-
-    .fa-thumbtack {
-      color: $pvp-accent;
-      transform: rotate(35deg);
-    }
-  }
-
-  &__arrow {
-    color: $pvp-accent;
   }
 
   &__bar {
@@ -270,39 +198,19 @@ $pvp-accent: #2563eb;
     min-width: 0;
     overflow-x: auto;
     overflow-y: hidden;
-    height: 18px;
-    scrollbar-width: thin;
-    scrollbar-color: #94a3b8 #e8eef6;
 
     &::-webkit-scrollbar {
       height: 10px;
     }
-    &::-webkit-scrollbar-track {
-      background: #e8eef6;
-      border-radius: 999px;
-      margin: 0 4px;
-    }
     &::-webkit-scrollbar-thumb {
-      background: linear-gradient(90deg, #93b4ec, $pvp-accent);
+      background: #cbd5e1;
       border-radius: 999px;
-    }
-    &::-webkit-scrollbar-thumb:hover {
-      background: #1d4ed8;
+      border: 2px solid #fff;
     }
   }
 
   &__spacer {
     height: 1px;
-  }
-}
-
-@keyframes pvp-nudge {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  50% {
-    transform: translateX(4px);
   }
 }
 
@@ -347,30 +255,18 @@ $pvp-accent: #2563eb;
     }
   }
 
-  // Frozen first column: a solid divider marks where horizontal scrolling begins,
-  // and a shadow appears once columns are scrolled underneath it.
+  // Frozen first column
   .pvp-col-name {
     position: sticky;
     left: 0;
     z-index: 1;
     min-width: 340px;
     background: inherit;
-    border-right: 2px solid $pvp-frozen-edge;
-    transition: box-shadow 0.2s ease;
-  }
-
-  .pvp-col-name + th,
-  .pvp-col-name + td {
-    border-left: 0;
   }
 
   thead .pvp-col-name {
     z-index: 3;
   }
-}
-
-.is-scrolled .pvp-table .pvp-col-name {
-  box-shadow: 8px 0 12px -6px rgba(15, 23, 42, 0.22);
 }
 
 .pvp-pin {

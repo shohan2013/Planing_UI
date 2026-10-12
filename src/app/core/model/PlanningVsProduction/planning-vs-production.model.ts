@@ -19,6 +19,8 @@ export const PVP_STATUSES: PvpStatus[] = [
  * The page builds the Customer -> Delivery Order -> Item tree from these rows.
  */
 export interface IPvpItemRow {
+  UnitId?: number;
+  BusinessId?: number;
   CustomerId: number;
   CustomerName: string;
   DeliveryOrderId: number;
@@ -35,12 +37,32 @@ export interface IPvpItemRow {
 
 /** Filter payload sent to the API. */
 export interface IPvpFilter {
+  UnitId: number | null;
+  BusinessId: number | null;
   CustomerId: number | null;
   DeliveryOrderId: number | null;
-  ItemSearch: string;
+  ItemId: number | null;
   FromDate: string;
   ToDate: string;
   Status: PvpStatus | null;
+}
+
+/** Unit selection plus typed text that scope the customer dropdown. */
+export interface IPvpCustomerScope {
+  UnitId: number | null;
+  Prefix?: string;
+}
+
+/** Selections plus typed text that scope the delivery order dropdown (null = all). */
+export interface IPvpDeliveryOrderScope
+  extends Pick<IPvpFilter, 'UnitId' | 'BusinessId' | 'CustomerId'> {
+  Prefix?: string;
+}
+
+/** Unit selection plus typed text that scope the item search (Common/ItemList). */
+export interface IPvpItemScope {
+  UnitId: number | null;
+  Prefix?: string;
 }
 
 export interface IPvpOverviewResponse {

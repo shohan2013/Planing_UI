@@ -1,4 +1,3 @@
-
 export const GlobalConstant = {
   API_END_POINTS: {
     LOGIN: 'Login/Login',
@@ -33,7 +32,7 @@ export const GlobalConstant = {
     getRequisitionLines: 'Requisition/GetLinesByReqId',
     updateRequisition: 'Requisition/update',
     deleteRequisition: 'Requisition/Delete',
-    completeRequisition: "Requisition/complete",
+    completeRequisition: 'Requisition/complete',
 
     /*===========================COMMON===================================== */
     Common: 'Common',
@@ -61,18 +60,18 @@ export const GlobalConstant = {
     Recipe: 'Common/GetRecipe',
     PrePlannedRoute: 'Common/GetPrePlannedRoute',
     PrePlannedRouteSteps: 'Common/GetPrePlannedRouteSteps',
+    Customers: 'Common/GetCustomerUnitWise',
     MachineUtilization: 'MachineDashboard/GetMachineUtilization',
+    PlanningVsProductionDeliveryOrders: 'Common/GetDeliveryOrders',
     PlanningVsProductionOverview: 'PlanningVsProduction/GetOverview',
     WorkType: 'Common/WorkType',
 
-
-  /*===========================ROLE===================================== */
+    /*===========================ROLE===================================== */
 
     activeRoles: 'Common/ActiveRoles',
     assignRole: 'Role/Assign',
     terminateRoleView: 'Role/TerminateView',
     terminateRole: 'Role/Terminate',
-
 
     getRolePermissions: 'RolePermission',
     rolePermissionMatrix: 'RolePermission/Matrix',
@@ -80,7 +79,6 @@ export const GlobalConstant = {
     addRolePermission: 'RolePermission',
     updateRolePermission: 'RolePermission',
     deleteRolePermission: 'RolePermission/Delete',
-
 
     /*==============================PLANNING====================================*/
     DeliveryOrders: 'SalesOrderLanding/GetDOData',
@@ -92,6 +90,7 @@ export const GlobalConstant = {
     PlanningHistory: 'PlanningHistory/GetAllData',
     PlanningHistoryDetails: 'PlanningHistory/GetDataById',
     UpdatePlan: 'PlanningHistory/UpdateProductionPlan',
+    MachineJobs: 'MergedPlanning/GetMachineJobs',
   },
 
   URL: { API_URL: 'https://localhost:7111/api/' },

@@ -24,21 +24,28 @@ $pvp-focus: #2563eb;
   min-width: 0;
   flex: 1 1 150px;
 
+  // Unit / Business: short names, compact.
+  &--xs {
+    flex: 1 1 120px;
+    max-width: 150px;
+  }
   &--sm {
     flex: 1 1 150px;
     max-width: 190px;
   }
-  &--md {
-    flex: 1 1 200px;
-    max-width: 260px;
+  // Customer / Delivery Order prefix search: room for long names.
+  &--search {
+    flex: 1.5 1 240px;
+    max-width: 320px;
   }
   &--lg {
     flex: 2 1 240px;
   }
 
   @media (max-width: 767.98px) {
+    &--xs,
     &--sm,
-    &--md {
+    &--search {
       max-width: none;
     }
   }
@@ -65,23 +72,6 @@ $pvp-focus: #2563eb;
   }
 }
 
-.pvp-input-icon {
-  position: relative;
-
-  i {
-    position: absolute;
-    left: 0.8rem;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 0.8rem;
-    color: #94a3b8;
-    pointer-events: none;
-  }
-
-  .form-control {
-    padding-left: 2.2rem;
-  }
-}
 
 :host ::ng-deep .pvp-select {
   &.ng-select .ng-select-container {
@@ -96,9 +86,26 @@ $pvp-focus: #2563eb;
     color: #0f172a;
   }
 
-  &.ng-select-focused:not(.ng-select-opened) > .ng-select-container {
+  // Active (clicked / open): same blue border and ring as the Item box's focus,
+  // kept while the panel is open (ng-select would otherwise grey it out and
+  // square the bottom corners).
+  &.ng-select-focused:not(.ng-select-disabled) > .ng-select-container,
+  &.ng-select-opened:not(.ng-select-disabled) > .ng-select-container {
     border-color: $pvp-focus;
+    border-radius: 9px;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  // Detach the panel slightly so it doesn't cover the ring.
+  &.ng-select-bottom .ng-dropdown-panel {
+    margin-top: 6px;
+    border-color: #dbe4f0;
+  }
+
+  &.ng-select-top .ng-dropdown-panel {
+    margin-bottom: 6px;
+    border-color: #dbe4f0;
   }
 
   .ng-dropdown-panel {
@@ -106,6 +113,142 @@ $pvp-focus: #2563eb;
     overflow: hidden;
     box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
     font-size: 0.875rem;
+  }
+
+  // Locked until the fields it depends on are chosen.
+  &.ng-select-disabled .ng-select-container {
+    background: #f8fafc;
+    cursor: not-allowed;
+  }
+
+  // Faded placeholder while locked, same color as the other fields' placeholders
+  // (Bootstrap's .form-control::placeholder); specific enough to beat the dark
+  // placeholder rule above.
+  &.ng-select.ng-select-disabled .ng-select-container .ng-value-container .ng-placeholder {
+    color: var(--bs-secondary-color);
+  }
+
+  // Prefix search boxes (Customer / Delivery Order): no arrow, text cursor.
+  // Idle: search icon + placeholder (or the selected value).
+  // Typing (focused): icon stays and turns blue, placeholder hides.
+  &--search {
+    .ng-arrow-wrapper {
+      display: none;
+    }
+
+    .ng-select-container {
+      cursor: text;
+    }
+
+    // `.ng-select-single` matches the theme's specificity so these rules win.
+    &.ng-select-single .ng-select-container .ng-value-container {
+      position: relative;
+      align-self: stretch; // full box height, so the typing input isn't clipped to 0px
+      min-width: 0;
+      padding-left: 2.2rem;
+      padding-right: 0.25rem;
+
+      &::before {
+        content: '\f002'; // fa-search
+        font-family: 'Font Awesome 7 Free', 'Font Awesome 5 Free';
+        font-weight: 900;
+        position: absolute;
+        left: 0.8rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.8rem;
+        color: #94a3b8;
+        pointer-events: none;
+      }
+
+      // Faded like the Item search box (Bootstrap's .form-control::placeholder color).
+      .ng-placeholder {
+        color: var(--bs-secondary-color);
+      }
+
+      // Placeholder and selected value stay on one line and end in "..." when too long.
+      .ng-placeholder,
+      .ng-value {
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      // ng-select lays the typing input over the whole box (left:0, padding 10px / 50px);
+      // line it up with the text and only leave room for the clear button.
+      .ng-input {
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        align-items: center;
+        padding-left: 2.2rem;
+        padding-right: 0.25rem;
+
+        > input {
+          width: 100%;
+          color: #0f172a;
+        }
+      }
+    }
+
+    // Typing: icon stays (highlighted), placeholder hides; text starts after the icon.
+    &.ng-select-single.ng-select-focused:not(.ng-select-disabled) .ng-select-container .ng-value-container {
+      &::before {
+        color: $pvp-focus;
+      }
+
+      .ng-placeholder {
+        display: none;
+      }
+    }
+
+    .ng-clear-wrapper {
+      width: 28px;
+      flex: 0 0 28px;
+    }  }
+
+  .ng-spinner-loader {
+    border-color: rgba(37, 99, 235, 0.15);
+    border-left-color: $pvp-focus;
+  }
+
+  .ng-dropdown-panel .ng-dropdown-panel-items .ng-option {
+    padding: 0.5rem 0.85rem;
+
+    &.ng-option-marked {
+      background: #eff6ff;
+      color: #0f172a;
+    }
+
+    &.ng-option-selected,
+    &.ng-option-selected.ng-option-marked {
+      background: #dbeafe;
+      color: #1e3a8a;
+      font-weight: 600;
+    }
+
+    // "Searching..." / "No ... match" / "Type a ..." rows.
+    &.ng-option-disabled {
+      color: #94a3b8;
+      font-style: italic;
+    }
+  }
+
+  .pvp-option {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .pvp-option__match {
+    padding: 0;
+    background: transparent;
+    color: $pvp-focus;
+    font-weight: 700;
   }
 }
 
@@ -122,29 +265,6 @@ $pvp-focus: #2563eb;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border-radius: 9px;
   font-weight: 600;
   font-size: 0.875rem;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-
-  &.btn-primary {
-    background: linear-gradient(135deg, #2f7bff, #1d5fe0);
-    border: none;
-    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.28);
-
-    &:hover:not(:disabled) {
-      transform: translateY(-1px);
-      box-shadow: 0 10px 22px rgba(37, 99, 235, 0.34);
-    }
-  }
-
-  &--ghost {
-    background: #f4f7fb;
-    border: 1px solid $pvp-border;
-    color: #334155;
-
-    &:hover:not(:disabled) {
-      background: #eaf0f8;
-    }
-  }
 }

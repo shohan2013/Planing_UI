@@ -1,0 +1,63 @@
+@if (info(); as i) {
+<div class="modal-header mbd-header">
+  <div class="mbd-icon" aria-hidden="true">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+  </div>
+  <div class="mbd-title-wrap">
+    <h5 class="modal-title mbd-title" id="machineBusyTitle">Machine is busy</h5>
+    <p class="mbd-subtitle">
+      <strong>{{ i.machineName }}</strong> already has
+      {{ i.jobs.length }} {{ i.jobs.length === 1 ? 'job' : 'jobs' }} in this time slot.
+    </p>
+  </div>
+  <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+</div>
+
+<div class="modal-body mbd-body">
+  <div class="mbd-slot">
+    <span class="mbd-slot-label">Requested slot</span>
+    <span class="mbd-slot-value">
+      {{ i.startDate | date: 'dd MMM yyyy, hh:mm a' }}
+      <i class="fa-solid fa-arrow-right-long"></i>
+      {{ i.endDate | date: 'dd MMM yyyy, hh:mm a' }}
+    </span>
+  </div>
+
+  <p class="mbd-section-title">Allocated jobs in this slot</p>
+  <ul class="mbd-jobs">
+    @for (job of i.jobs; track job.JobId) {
+    <li class="mbd-job">
+      <div class="mbd-job-main">
+        <span class="mbd-job-no">{{ job.JobNo }}</span>
+        <span class="mbd-job-item" [title]="job.ItemName">{{ job.ItemName }}</span>
+      </div>
+      <div class="mbd-job-meta">
+        <span><i class="fa-regular fa-file-lines"></i> {{ job.DeliveryOrderNo }}</span>
+        <span>
+          <i class="fa-regular fa-clock"></i>
+          {{ job.StartDate | date: 'dd MMM, hh:mm a' }} – {{ job.EndDate | date: 'dd MMM, hh:mm a' }}
+        </span>
+      </div>
+    </li>
+    }
+  </ul>
+
+  <div class="mbd-hint">
+    <i class="fa-regular fa-lightbulb"></i>
+    <span>
+      <strong>Hint:</strong> please change the time slot or try another machine.
+    </span>
+  </div>
+</div>
+
+<div class="modal-footer mbd-footer">
+  <button type="button" class="btn btn-sm mbd-btn mbd-btn-outline" (click)="close('change-machine')">
+    <i class="fa-solid fa-gears"></i>
+    Try another machine
+  </button>
+  <button type="button" class="btn btn-sm mbd-btn mbd-btn-primary" ngbAutofocus (click)="close('change-time')">
+    <i class="fa-regular fa-calendar"></i>
+    Change time slot
+  </button>
+</div>
+}
