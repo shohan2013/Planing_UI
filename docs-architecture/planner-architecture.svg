@@ -1,0 +1,479 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2620" height="1510" viewBox="0 0 2620 1510"><defs><marker id="ah-d97706" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#d97706"/></marker><marker id="ah-2563eb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#2563eb"/></marker><marker id="ah-64748b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#64748b"/></marker><marker id="ah-0d9488" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#0d9488"/></marker></defs><rect width="2620" height="1510" fill="#ffffff"/>
+<text x="40" y="56" font-family="'Segoe UI', Arial, sans-serif" font-size="34" font-weight="700" fill="#0f172a" text-anchor="start">Planner – Event-Driven Production Integration &amp; Real-Time Dashboard Architecture</text>
+<text x="40" y="90" font-family="'Segoe UI', Arial, sans-serif" font-size="19" font-weight="400" fill="#475569" text-anchor="start">ASP.NET Core + Angular 21 + RabbitMQ + Read Models + SignalR</text>
+<rect x="60" y="116" width="280" height="34" rx="17" fill="#0f172a" stroke="none" stroke-width="1"/>
+<text x="200" y="138" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing="1.5">SOURCE SYSTEMS</text>
+<text x="395" y="140" font-family="'Segoe UI', Arial, sans-serif" font-size="18" font-weight="400" fill="#94a3b8" text-anchor="middle">➜</text>
+<rect x="450" y="116" width="310" height="34" rx="17" fill="#0f172a" stroke="none" stroke-width="1"/>
+<text x="605" y="138" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing="1.5">INTEGRATION</text>
+<text x="815" y="140" font-family="'Segoe UI', Arial, sans-serif" font-size="18" font-weight="400" fill="#94a3b8" text-anchor="middle">➜</text>
+<rect x="870" y="116" width="300" height="34" rx="17" fill="#0f172a" stroke="none" stroke-width="1"/>
+<text x="1020" y="138" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing="1.5">MESSAGE BUS</text>
+<text x="1225" y="140" font-family="'Segoe UI', Arial, sans-serif" font-size="18" font-weight="400" fill="#94a3b8" text-anchor="middle">➜</text>
+<rect x="1280" y="116" width="420" height="34" rx="17" fill="#0f172a" stroke="none" stroke-width="1"/>
+<text x="1490" y="138" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing="1.5">CONSUMERS / READ MODEL</text>
+<text x="1755" y="140" font-family="'Segoe UI', Arial, sans-serif" font-size="18" font-weight="400" fill="#94a3b8" text-anchor="middle">➜</text>
+<rect x="1810" y="116" width="320" height="34" rx="17" fill="#0f172a" stroke="none" stroke-width="1"/>
+<text x="1970" y="138" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing="1.5">APPLICATION API / REAL-TIME</text>
+<text x="2185" y="140" font-family="'Segoe UI', Arial, sans-serif" font-size="18" font-weight="400" fill="#94a3b8" text-anchor="middle">➜</text>
+<rect x="2240" y="116" width="330" height="34" rx="17" fill="#0f172a" stroke="none" stroke-width="1"/>
+<text x="2405" y="138" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing="1.5">FRONTEND</text>
+<rect x="30" y="170" width="340" height="615" rx="16" fill="#f8fafc" stroke="#475569" stroke-width="1.6" stroke-dasharray="7 5"/>
+<text x="46" y="192" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#475569" text-anchor="start" letter-spacing="1.2">EXTERNAL PRODUCTION SYSTEM</text>
+<rect x="420" y="170" width="780" height="615" rx="16" fill="#faf5ff" stroke="#7c3aed" stroke-width="1.6" stroke-dasharray="7 5"/>
+<text x="436" y="192" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#7c3aed" text-anchor="start" letter-spacing="1.2">INTEGRATION INFRASTRUCTURE</text>
+<rect x="1250" y="170" width="910" height="960" rx="16" fill="#f0f6ff" stroke="#2563eb" stroke-width="1.6" stroke-dasharray="7 5"/>
+<text x="1266" y="192" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#2563eb" text-anchor="start" letter-spacing="1.2">PLANNER APPLICATION</text>
+<rect x="2210" y="170" width="380" height="960" rx="16" fill="#fff5f7" stroke="#dd0031" stroke-width="1.6" stroke-dasharray="7 5"/>
+<text x="2226" y="192" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#dd0031" text-anchor="start" letter-spacing="1.2">FRONTEND</text>
+<rect x="420" y="820" width="780" height="310" rx="16" fill="#f0fdfa" stroke="#0d9488" stroke-width="1.6" stroke-dasharray="7 5"/>
+<text x="436" y="842" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#0d9488" text-anchor="start" letter-spacing="1.2">FUTURE / OTHER CONSUMERS (independent)</text>
+<path d="M72 228 V718 A140 20 0 0 0 352 718 V228" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/><ellipse cx="212" cy="228" rx="140" ry="20" fill="#cbd5e1" stroke="#94a3b8" stroke-width="1.5"/>
+<path d="M60 240 V730 A140 20 0 0 0 340 730 V240" fill="#ffffff" stroke="#475569" stroke-width="2"/><ellipse cx="200" cy="240" rx="140" ry="20" fill="#e2e8f0" stroke="#475569" stroke-width="2"/>
+<text x="200" y="292" font-family="'Segoe UI', Arial, sans-serif" font-size="18" font-weight="700" fill="#1e293b" text-anchor="middle">Production Database(s)</text>
+<text x="200" y="312" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="400" fill="#64748b" text-anchor="middle">External · one or more SQL Server DBs</text>
+<rect x="80" y="324" width="240" height="26" rx="13" fill="#0f172a" stroke="none" stroke-width="1"/>
+<text x="200" y="341.5" font-family="'Segoe UI', Arial, sans-serif" font-size="11.5" font-weight="700" fill="#fff" text-anchor="middle">SOURCE OF TRUTH · production data</text>
+<text x="80" y="378" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="700" fill="#64748b" text-anchor="start" letter-spacing="1">DATA DOMAINS</text>
+<rect x="80" y="390" width="240" height="32" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1"/>
+<text x="92" y="410.5" font-family="'Segoe UI', Arial, sans-serif" font-size="14" font-weight="400" fill="#1e293b" text-anchor="start">Customer Orders</text>
+<rect x="80" y="430" width="240" height="32" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1"/>
+<text x="92" y="450.5" font-family="'Segoe UI', Arial, sans-serif" font-size="14" font-weight="400" fill="#1e293b" text-anchor="start">Production Orders</text>
+<rect x="80" y="470" width="240" height="32" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1"/>
+<text x="92" y="490.5" font-family="'Segoe UI', Arial, sans-serif" font-size="14" font-weight="400" fill="#1e293b" text-anchor="start">Production Plans</text>
+<rect x="80" y="510" width="240" height="32" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1"/>
+<text x="92" y="530.5" font-family="'Segoe UI', Arial, sans-serif" font-size="14" font-weight="400" fill="#1e293b" text-anchor="start">Production Entries</text>
+<rect x="80" y="550" width="240" height="32" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1"/>
+<text x="92" y="570.5" font-family="'Segoe UI', Arial, sans-serif" font-size="14" font-weight="400" fill="#1e293b" text-anchor="start">Machines</text>
+<rect x="80" y="590" width="240" height="32" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1"/>
+<text x="92" y="610.5" font-family="'Segoe UI', Arial, sans-serif" font-size="14" font-weight="400" fill="#1e293b" text-anchor="start">Products</text>
+<rect x="80" y="630" width="240" height="32" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1"/>
+<text x="92" y="650.5" font-family="'Segoe UI', Arial, sans-serif" font-size="14" font-weight="400" fill="#1e293b" text-anchor="start">Units</text>
+<rect x="80" y="670" width="240" height="32" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1"/>
+<text x="92" y="690.5" font-family="'Segoe UI', Arial, sans-serif" font-size="14" font-weight="400" fill="#1e293b" text-anchor="start">Business Processes</text>
+<path d="M342 360 L446 360" fill="none" stroke="#d97706" stroke-width="2.5" marker-end="url(#ah-d97706)"/>
+<circle cx="395" cy="300" r="11" fill="#d97706"/>
+<text x="395" y="304.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">1</text>
+<text x="395" y="344" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#1e293b" text-anchor="middle" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">DB Changes</text>
+<text x="395" y="380" font-family="'Segoe UI', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569" text-anchor="middle" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">CDC / SQL Server</text>
+<text x="395" y="395" font-family="'Segoe UI', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569" text-anchor="middle" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">Change Tracking</text>
+<path d="M448 450 L344 450" fill="none" stroke="#64748b" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#ah-64748b)"/>
+<text x="395" y="440" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="400" fill="#64748b" text-anchor="middle" font-style="italic" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">fetch changed</text>
+<text x="395" y="468" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="400" fill="#64748b" text-anchor="middle" font-style="italic" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">rows</text>
+<rect x="450" y="230" width="310" height="500" rx="12" fill="#fff" stroke="#7c3aed" stroke-width="2"/>
+<path d="M450 286 V242 Q450 230 462 230 H748 Q760 230 760 242 V286 Z" fill="#7c3aed"/>
+<text x="605" y="256" font-family="'Segoe UI', Arial, sans-serif" font-size="17" font-weight="700" fill="#fff" text-anchor="middle">Production Integration Worker</text>
+<text x="605" y="275" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="400" fill="#ffffffdd" text-anchor="middle">.NET Worker Service · deployed separately</text>
+<text x="470" y="314" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="700" fill="#7c3aed" text-anchor="start" letter-spacing="1">RESPONSIBILITIES</text>
+<rect x="466" y="326" width="278" height="36" rx="6" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1"/>
+<circle cx="484" cy="344" r="10" fill="#7c3aed"/>
+<text x="484" y="348" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">1</text>
+<text x="500" y="349" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="400" fill="#1e293b" text-anchor="start">Detect database changes</text>
+<rect x="466" y="372" width="278" height="36" rx="6" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1"/>
+<circle cx="484" cy="390" r="10" fill="#7c3aed"/>
+<text x="484" y="394" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">2</text>
+<text x="500" y="395" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="400" fill="#1e293b" text-anchor="start">Fetch changed production data</text>
+<rect x="466" y="418" width="278" height="36" rx="6" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1"/>
+<circle cx="484" cy="436" r="10" fill="#7c3aed"/>
+<text x="484" y="440" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">3</text>
+<text x="500" y="441" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="400" fill="#1e293b" text-anchor="start">Transform / normalize data</text>
+<rect x="466" y="464" width="278" height="36" rx="6" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1"/>
+<circle cx="484" cy="482" r="10" fill="#7c3aed"/>
+<text x="484" y="486" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">4</text>
+<text x="500" y="487" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="400" fill="#1e293b" text-anchor="start">Validate data</text>
+<rect x="466" y="510" width="278" height="36" rx="6" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1"/>
+<circle cx="484" cy="528" r="10" fill="#7c3aed"/>
+<text x="484" y="532" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">5</text>
+<text x="500" y="533" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="400" fill="#1e293b" text-anchor="start">Maintain synchronization checkpoint</text>
+<rect x="466" y="556" width="278" height="36" rx="6" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1"/>
+<circle cx="484" cy="574" r="10" fill="#7c3aed"/>
+<text x="484" y="578" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">6</text>
+<text x="500" y="579" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="400" fill="#1e293b" text-anchor="start">Outbox / reliable event publishing</text>
+<rect x="466" y="610" width="278" height="28" rx="14" fill="#ede9fe" stroke="#7c3aed" stroke-width="1"/>
+<text x="605" y="628.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12.5" font-weight="700" fill="#7c3aed" text-anchor="middle">⊘  Independent of the Planner API</text>
+<rect x="466" y="650" width="278" height="64" rx="8" fill="#fff" stroke="#a78bfa" stroke-width="1" stroke-dasharray="5 4"/>
+<text x="605" y="674" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#7c3aed" text-anchor="middle">Worker state store</text>
+<text x="605" y="694" font-family="'Segoe UI', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569" text-anchor="middle">sync checkpoint (CT version) + outbox</text>
+<path d="M762 360 L866 360" fill="none" stroke="#d97706" stroke-width="2.5" marker-end="url(#ah-d97706)"/>
+<circle cx="815" cy="300" r="11" fill="#d97706"/>
+<text x="815" y="304.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">2</text>
+<text x="815" y="328" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#1e293b" text-anchor="middle" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">Integration</text>
+<text x="815" y="344" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#1e293b" text-anchor="middle" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">Events</text>
+<text x="815" y="380" font-family="'Segoe UI', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569" text-anchor="middle" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">publish via</text>
+<text x="815" y="395" font-family="'Segoe UI', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569" text-anchor="middle" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">Outbox (AMQP)</text>
+<rect x="870" y="230" width="300" height="500" rx="12" fill="#fff" stroke="#ea580c" stroke-width="2"/>
+<path d="M870 286 V242 Q870 230 882 230 H1158 Q1170 230 1170 242 V286 Z" fill="#ea580c"/>
+<text x="1020" y="256" font-family="'Segoe UI', Arial, sans-serif" font-size="17" font-weight="700" fill="#fff" text-anchor="middle">RabbitMQ</text>
+<text x="1020" y="275" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="400" fill="#ffffffdd" text-anchor="middle">Integration Event Bus</text>
+<text x="890" y="312" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="700" fill="#ea580c" text-anchor="start" letter-spacing="1">EXCHANGE</text>
+<rect x="886" y="320" width="268" height="32" rx="6" fill="#fff7ed" stroke="#fdba74" stroke-width="1"/>
+<text x="1020" y="340.5" font-family="Consolas, 'Cascadia Mono', monospace" font-size="12.5" font-weight="400" fill="#1e293b" text-anchor="middle">production.integration (topic)</text>
+<text x="890" y="378" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="700" fill="#ea580c" text-anchor="start" letter-spacing="1">INTEGRATION EVENTS</text>
+<rect x="886" y="388" width="268" height="30" rx="6" fill="#fff" stroke="#fed7aa" stroke-width="1"/>
+<text x="898" y="407.5" font-family="Consolas, 'Cascadia Mono', monospace" font-size="12.5" font-weight="400" fill="#1e293b" text-anchor="start">ProductionOrderCreated</text>
+<rect x="886" y="424" width="268" height="30" rx="6" fill="#fff" stroke="#fed7aa" stroke-width="1"/>
+<text x="898" y="443.5" font-family="Consolas, 'Cascadia Mono', monospace" font-size="12.5" font-weight="400" fill="#1e293b" text-anchor="start">ProductionOrderUpdated</text>
+<rect x="886" y="460" width="268" height="30" rx="6" fill="#fff" stroke="#fed7aa" stroke-width="1"/>
+<text x="898" y="479.5" font-family="Consolas, 'Cascadia Mono', monospace" font-size="12.5" font-weight="400" fill="#1e293b" text-anchor="start">ProductionOrderCancelled</text>
+<rect x="886" y="496" width="268" height="30" rx="6" fill="#fff" stroke="#fed7aa" stroke-width="1"/>
+<text x="898" y="515.5" font-family="Consolas, 'Cascadia Mono', monospace" font-size="12.5" font-weight="400" fill="#1e293b" text-anchor="start">ProductionEntryChanged</text>
+<rect x="886" y="532" width="268" height="30" rx="6" fill="#fff" stroke="#fed7aa" stroke-width="1"/>
+<text x="898" y="551.5" font-family="Consolas, 'Cascadia Mono', monospace" font-size="12.5" font-weight="400" fill="#1e293b" text-anchor="start">MachineStatusChanged</text>
+<text x="1020" y="584" font-family="'Segoe UI', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569" text-anchor="middle" font-style="italic">Application-independent events —</text>
+<text x="1020" y="599" font-family="'Segoe UI', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569" text-anchor="middle" font-style="italic">never named after Planner UI actions</text>
+<text x="890" y="628" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="700" fill="#ea580c" text-anchor="start" letter-spacing="1">QUEUES (one per subscriber)</text>
+<rect x="886" y="638" width="268" height="30" rx="6" fill="#eff6ff" stroke="#93c5fd" stroke-width="1"/>
+<text x="898" y="657.5" font-family="Consolas, 'Cascadia Mono', monospace" font-size="11.5" font-weight="400" fill="#1e293b" text-anchor="start">q.planner-integration-consumer</text>
+<rect x="886" y="674" width="268" height="30" rx="6" fill="#f0fdfa" stroke="#5eead4" stroke-width="1"/>
+<text x="898" y="693.5" font-family="Consolas, 'Cascadia Mono', monospace" font-size="11.5" font-weight="400" fill="#1e293b" text-anchor="start">q.reporting · q.analytics · q.ai-ml …</text>
+<path d="M1172 360 L1276 360" fill="none" stroke="#d97706" stroke-width="2.5" marker-end="url(#ah-d97706)"/>
+<circle cx="1225" cy="300" r="11" fill="#d97706"/>
+<text x="1225" y="304.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">3</text>
+<text x="1225" y="328" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#1e293b" text-anchor="middle" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">Consume</text>
+<text x="1225" y="344" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#1e293b" text-anchor="middle" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">Event</text>
+<text x="1225" y="380" font-family="'Segoe UI', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569" text-anchor="middle" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">subscribe on</text>
+<text x="1225" y="395" font-family="'Segoe UI', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569" text-anchor="middle" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">own queue</text>
+<path d="M1020 732 L1020 868" fill="none" stroke="#0d9488" stroke-width="2.5"/>
+<path d="M525 868 L1089 868" fill="none" stroke="#0d9488" stroke-width="2.5"/>
+<text x="1032" y="800" font-family="'Segoe UI', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#0d9488" text-anchor="start" font-style="italic" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">same integration events,</text>
+<text x="1032" y="815" font-family="'Segoe UI', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#0d9488" text-anchor="start" font-style="italic" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">independent queues</text>
+<path d="M525 868 L525 896" fill="none" stroke="#0d9488" stroke-width="2.5" marker-end="url(#ah-0d9488)"/>
+<rect x="440" y="898" width="170" height="104" rx="10" fill="#fff" stroke="#0d9488" stroke-width="1.8"/>
+<text x="525" y="932" font-family="'Segoe UI', Arial, sans-serif" font-size="14" font-weight="700" fill="#1e293b" text-anchor="middle">Reporting / BI</text>
+<text x="525" y="950" font-family="'Segoe UI', Arial, sans-serif" font-size="14" font-weight="700" fill="#1e293b" text-anchor="middle">Application</text>
+<text x="525" y="980" font-family="'Segoe UI', Arial, sans-serif" font-size="10.5" font-weight="400" fill="#0d9488" text-anchor="middle">consumes independently</text>
+<path d="M713 868 L713 896" fill="none" stroke="#0d9488" stroke-width="2.5" marker-end="url(#ah-0d9488)"/>
+<rect x="628" y="898" width="170" height="104" rx="10" fill="#fff" stroke="#0d9488" stroke-width="1.8"/>
+<text x="713" y="932" font-family="'Segoe UI', Arial, sans-serif" font-size="14" font-weight="700" fill="#1e293b" text-anchor="middle">Analytics</text>
+<text x="713" y="950" font-family="'Segoe UI', Arial, sans-serif" font-size="14" font-weight="700" fill="#1e293b" text-anchor="middle">Application</text>
+<text x="713" y="980" font-family="'Segoe UI', Arial, sans-serif" font-size="10.5" font-weight="400" fill="#0d9488" text-anchor="middle">consumes independently</text>
+<path d="M901 868 L901 896" fill="none" stroke="#0d9488" stroke-width="2.5" marker-end="url(#ah-0d9488)"/>
+<rect x="816" y="898" width="170" height="104" rx="10" fill="#fff" stroke="#0d9488" stroke-width="1.8"/>
+<text x="901" y="932" font-family="'Segoe UI', Arial, sans-serif" font-size="14" font-weight="700" fill="#1e293b" text-anchor="middle">Future AI / ML</text>
+<text x="901" y="950" font-family="'Segoe UI', Arial, sans-serif" font-size="14" font-weight="700" fill="#1e293b" text-anchor="middle">Application</text>
+<text x="901" y="980" font-family="'Segoe UI', Arial, sans-serif" font-size="10.5" font-weight="400" fill="#0d9488" text-anchor="middle">consumes independently</text>
+<path d="M1089 868 L1089 896" fill="none" stroke="#0d9488" stroke-width="2.5" marker-end="url(#ah-0d9488)"/>
+<rect x="1004" y="898" width="170" height="104" rx="10" fill="#fff" stroke="#0d9488" stroke-width="1.8"/>
+<text x="1089" y="932" font-family="'Segoe UI', Arial, sans-serif" font-size="14" font-weight="700" fill="#1e293b" text-anchor="middle">Other Enterprise</text>
+<text x="1089" y="950" font-family="'Segoe UI', Arial, sans-serif" font-size="14" font-weight="700" fill="#1e293b" text-anchor="middle">Applications</text>
+<text x="1089" y="980" font-family="'Segoe UI', Arial, sans-serif" font-size="10.5" font-weight="400" fill="#0d9488" text-anchor="middle">consumes independently</text>
+<text x="810" y="1040" font-family="'Segoe UI', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#475569" text-anchor="middle" font-style="italic">Planner never calls these applications — each one subscribes to the same integration events directly.</text>
+<text x="810" y="1064" font-family="'Segoe UI', Arial, sans-serif" font-size="12.5" font-weight="700" fill="#0d9488" text-anchor="middle">Adding a consumer = adding a queue binding. No change to the Worker or to Planner.</text>
+<rect x="1280" y="230" width="420" height="250" rx="12" fill="#fff" stroke="#2563eb" stroke-width="2"/>
+<path d="M1280 286 V242 Q1280 230 1292 230 H1688 Q1700 230 1700 242 V286 Z" fill="#2563eb"/>
+<text x="1490" y="256" font-family="'Segoe UI', Arial, sans-serif" font-size="17" font-weight="700" fill="#fff" text-anchor="middle">Planner Integration Consumer</text>
+<text x="1490" y="275" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="400" fill="#ffffffdd" text-anchor="middle">Hosted background service · Planner application</text>
+<rect x="1296" y="298" width="388" height="29" rx="6" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+<text x="1310" y="317.5" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#2563eb" text-anchor="start">✓</text>
+<text x="1330" y="317.5" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="400" fill="#1e293b" text-anchor="start">Consume integration events</text>
+<rect x="1296" y="333" width="388" height="29" rx="6" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+<text x="1310" y="352.5" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#2563eb" text-anchor="start">✓</text>
+<text x="1330" y="352.5" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="400" fill="#1e293b" text-anchor="start">Validate events</text>
+<rect x="1296" y="368" width="388" height="29" rx="6" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+<text x="1310" y="387.5" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#2563eb" text-anchor="start">✓</text>
+<text x="1330" y="387.5" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="400" fill="#1e293b" text-anchor="start">Idempotent processing (inbox / event-id dedupe)</text>
+<rect x="1296" y="403" width="388" height="29" rx="6" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+<text x="1310" y="422.5" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#2563eb" text-anchor="start">✓</text>
+<text x="1330" y="422.5" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="400" fill="#1e293b" text-anchor="start">Upsert Planner read models</text>
+<rect x="1296" y="438" width="388" height="29" rx="6" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+<text x="1310" y="457.5" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#2563eb" text-anchor="start">✓</text>
+<text x="1330" y="457.5" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="400" fill="#1e293b" text-anchor="start">Handle retries / failures (retry + DLQ)</text>
+<path d="M1490 482 L1490 536" fill="none" stroke="#d97706" stroke-width="2.5" marker-end="url(#ah-d97706)"/>
+<circle cx="1466" cy="509" r="11" fill="#d97706"/>
+<text x="1466" y="513.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">4</text>
+<text x="1504" y="506" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#1e293b" text-anchor="start">Upsert Read Model</text>
+<text x="1504" y="522" font-family="'Segoe UI', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569" text-anchor="start">in one DB transaction (commit)</text>
+<path d="M1280 555 V1085 A210 16 0 0 0 1700 1085 V555" fill="#ffffff" stroke="#2563eb" stroke-width="2"/><ellipse cx="1490" cy="555" rx="210" ry="16" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+<text x="1490" y="598" font-family="'Segoe UI', Arial, sans-serif" font-size="17" font-weight="700" fill="#1e293b" text-anchor="middle">Planner Database</text>
+<text x="1490" y="616" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="400" fill="#64748b" text-anchor="middle">SQL Server · owned by Planner</text>
+<rect x="1298" y="628" width="384" height="112" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1"/>
+<text x="1312" y="648" font-family="'Segoe UI', Arial, sans-serif" font-size="11.5" font-weight="700" fill="#2563eb" text-anchor="start">A · PLANNER-OWNED DATA  (Planner is authoritative)</text>
+<rect x="1312" y="660" width="172" height="28" rx="5" fill="#fff" stroke="#93c5fd" stroke-width="1"/>
+<text x="1324" y="678.5" font-family="Consolas, 'Cascadia Mono', monospace" font-size="12" font-weight="400" fill="#1e293b" text-anchor="start">ProductionPlan</text>
+<rect x="1498" y="660" width="172" height="28" rx="5" fill="#fff" stroke="#93c5fd" stroke-width="1"/>
+<text x="1510" y="678.5" font-family="Consolas, 'Cascadia Mono', monospace" font-size="12" font-weight="400" fill="#1e293b" text-anchor="start">ProductionPlanLine</text>
+<rect x="1312" y="696" width="172" height="28" rx="5" fill="#fff" stroke="#93c5fd" stroke-width="1"/>
+<text x="1324" y="714.5" font-family="Consolas, 'Cascadia Mono', monospace" font-size="12" font-weight="400" fill="#1e293b" text-anchor="start">PlanningConfiguration</text>
+<rect x="1498" y="696" width="172" height="28" rx="5" fill="#fff" stroke="#93c5fd" stroke-width="1"/>
+<text x="1510" y="714.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="400" fill="#1e293b" text-anchor="start">Other Planner domain tables</text>
+<rect x="1298" y="752" width="384" height="302" rx="8" fill="#fffbeb" stroke="#d97706" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="1312" y="772" font-family="'Segoe UI', Arial, sans-serif" font-size="11.5" font-weight="700" fill="#b45309" text-anchor="start">B · EXTERNAL PRODUCTION READ MODELS</text>
+<text x="1312" y="790" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="400" fill="#475569" text-anchor="start" font-style="italic">NOT a full copy of the Production DB — only the data and</text>
+<text x="1312" y="805" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="400" fill="#475569" text-anchor="start" font-style="italic">shape that Planner queries &amp; dashboards need.</text>
+<rect x="1312" y="815" width="356" height="190" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="2.5"/>
+<text x="1324" y="835" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#78350f" text-anchor="start">★ CustomerOrderProductionOverviewReadModel</text>
+<text x="1324" y="851" font-family="'Segoe UI', Arial, sans-serif" font-size="10.5" font-weight="700" fill="#b45309" text-anchor="start">PRIMARY dashboard read model · persisted table, not a DTO</text>
+<text x="1330" y="873" font-family="Consolas, 'Cascadia Mono', monospace" font-size="11.5" font-weight="400" fill="#422006" text-anchor="start">• CustomerOrderId</text>
+<text x="1330" y="889.5" font-family="Consolas, 'Cascadia Mono', monospace" font-size="11.5" font-weight="400" fill="#422006" text-anchor="start">• ProductionOrderId</text>
+<text x="1330" y="906" font-family="Consolas, 'Cascadia Mono', monospace" font-size="11.5" font-weight="400" fill="#422006" text-anchor="start">• ProductionPlanId</text>
+<text x="1330" y="922.5" font-family="Consolas, 'Cascadia Mono', monospace" font-size="11.5" font-weight="400" fill="#422006" text-anchor="start">• UnitId</text>
+<text x="1330" y="939" font-family="Consolas, 'Cascadia Mono', monospace" font-size="11.5" font-weight="400" fill="#422006" text-anchor="start">• BusinessId</text>
+<text x="1330" y="955.5" font-family="Consolas, 'Cascadia Mono', monospace" font-size="11.5" font-weight="400" fill="#422006" text-anchor="start">• ProductId</text>
+<text x="1330" y="972" font-family="Consolas, 'Cascadia Mono', monospace" font-size="11.5" font-weight="400" fill="#422006" text-anchor="start">• ProductName</text>
+<text x="1330" y="988.5" font-family="Consolas, 'Cascadia Mono', monospace" font-size="11.5" font-weight="400" fill="#422006" text-anchor="start">• OrderedQuantity</text>
+<text x="1500" y="873" font-family="Consolas, 'Cascadia Mono', monospace" font-size="11.5" font-weight="400" fill="#422006" text-anchor="start">• PlannedQuantity</text>
+<text x="1500" y="889.5" font-family="Consolas, 'Cascadia Mono', monospace" font-size="11.5" font-weight="400" fill="#422006" text-anchor="start">• ProducedQuantity</text>
+<text x="1500" y="906" font-family="Consolas, 'Cascadia Mono', monospace" font-size="11.5" font-weight="400" fill="#422006" text-anchor="start">• RemainingQuantity</text>
+<text x="1500" y="922.5" font-family="Consolas, 'Cascadia Mono', monospace" font-size="11.5" font-weight="400" fill="#422006" text-anchor="start">• ProductionStatus</text>
+<text x="1500" y="939" font-family="Consolas, 'Cascadia Mono', monospace" font-size="11.5" font-weight="400" fill="#422006" text-anchor="start">• StartDate</text>
+<text x="1500" y="955.5" font-family="Consolas, 'Cascadia Mono', monospace" font-size="11.5" font-weight="400" fill="#422006" text-anchor="start">• EndDate</text>
+<text x="1500" y="972" font-family="Consolas, 'Cascadia Mono', monospace" font-size="11.5" font-weight="400" fill="#422006" text-anchor="start">• LastUpdatedAt</text>
+<rect x="1312" y="1014" width="184" height="28" rx="5" fill="#fff" stroke="#fcd34d" stroke-width="1"/>
+<text x="1324" y="1032.5" font-family="Consolas, 'Cascadia Mono', monospace" font-size="11" font-weight="400" fill="#1e293b" text-anchor="start">ProductionOrderReadModel</text>
+<rect x="1502" y="1014" width="166" height="28" rx="5" fill="#fff" stroke="#fcd34d" stroke-width="1"/>
+<text x="1514" y="1032.5" font-family="Consolas, 'Cascadia Mono', monospace" font-size="11" font-weight="400" fill="#1e293b" text-anchor="start">MachineStatusReadModel</text>
+<path d="M1702 380 L1826 380" fill="none" stroke="#d97706" stroke-width="2.5" marker-end="url(#ah-d97706)"/>
+<circle cx="1764" cy="300" r="11" fill="#d97706"/>
+<text x="1764" y="304.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">5</text>
+<text x="1764" y="328" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#1e293b" text-anchor="middle" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">Notify change</text>
+<text x="1764" y="344" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#b45309" text-anchor="middle" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">AFTER commit</text>
+<text x="1764" y="400" font-family="'Segoe UI', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569" text-anchor="middle" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">via IHubContext</text>
+<path d="M1670 930 L1826 930" fill="none" stroke="#2563eb" stroke-width="2.5" marker-end="url(#ah-2563eb)"/>
+<circle cx="1764" cy="868" r="11" fill="#2563eb"/>
+<text x="1764" y="872.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">B</text>
+<text x="1764" y="896" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#1e293b" text-anchor="middle" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">Query</text>
+<text x="1764" y="912" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#1e293b" text-anchor="middle" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">read model</text>
+<text x="1764" y="950" font-family="'Segoe UI', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569" text-anchor="middle" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">map → DTO</text>
+<rect x="1810" y="210" width="320" height="900" rx="12" fill="#fff" stroke="#1e40af" stroke-width="2"/>
+<text x="1970" y="238" font-family="'Segoe UI', Arial, sans-serif" font-size="18" font-weight="700" fill="#1e3a8a" text-anchor="middle">Planner API</text>
+<text x="1970" y="257" font-family="'Segoe UI', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#64748b" text-anchor="middle">ASP.NET Core Web API · Clean Architecture</text>
+<rect x="1828" y="274" width="284" height="310" rx="10" fill="#fff7ed" stroke="#d97706" stroke-width="2"/>
+<text x="1970" y="300" font-family="'Segoe UI', Arial, sans-serif" font-size="16" font-weight="700" fill="#9a3412" text-anchor="middle">SignalR Hub</text>
+<text x="1970" y="318" font-family="Consolas, 'Cascadia Mono', monospace" font-size="11.5" font-weight="400" fill="#475569" text-anchor="middle">/hubs/production-overview</text>
+<rect x="1848" y="330" width="244" height="26" rx="13" fill="#d97706" stroke="none" stroke-width="1"/>
+<text x="1970" y="347.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">Real-time delivery ONLY</text>
+<text x="1846" y="382" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="700" fill="#b45309" text-anchor="start" letter-spacing="1">EVENTS → CONNECTED CLIENTS</text>
+<rect x="1846" y="392" width="248" height="30" rx="6" fill="#fff" stroke="#fdba74" stroke-width="1"/>
+<text x="1858" y="411.5" font-family="Consolas, 'Cascadia Mono', monospace" font-size="12.5" font-weight="400" fill="#1e293b" text-anchor="start">ProductionOverviewAdded</text>
+<rect x="1846" y="428" width="248" height="30" rx="6" fill="#fff" stroke="#fdba74" stroke-width="1"/>
+<text x="1858" y="447.5" font-family="Consolas, 'Cascadia Mono', monospace" font-size="12.5" font-weight="400" fill="#1e293b" text-anchor="start">ProductionOverviewUpdated</text>
+<rect x="1846" y="464" width="248" height="30" rx="6" fill="#fff" stroke="#fdba74" stroke-width="1"/>
+<text x="1858" y="483.5" font-family="Consolas, 'Cascadia Mono', monospace" font-size="12.5" font-weight="400" fill="#1e293b" text-anchor="start">ProductionOverviewRemoved</text>
+<text x="1970" y="526" font-family="'Segoe UI', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569" text-anchor="middle" font-style="italic">Sent only after the read model</text>
+<text x="1970" y="541" font-family="'Segoe UI', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569" text-anchor="middle" font-style="italic">is committed. Payload = changed row.</text>
+<text x="1970" y="562" font-family="'Segoe UI', Arial, sans-serif" font-size="11.5" font-weight="700" fill="#b91c1c" text-anchor="middle">Not the source of truth.</text>
+<rect x="1828" y="604" width="284" height="488" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+<text x="1970" y="630" font-family="'Segoe UI', Arial, sans-serif" font-size="16" font-weight="700" fill="#1e3a8a" text-anchor="middle">REST Controllers</text>
+<text x="1970" y="648" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="400" fill="#64748b" text-anchor="middle">Web → Application (queries) → Infrastructure</text>
+<text x="1846" y="678" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="700" fill="#2563eb" text-anchor="start" letter-spacing="1">RESPONSIBILITIES</text>
+<rect x="1846" y="688" width="248" height="28" rx="6" fill="#fff" stroke="#bfdbfe" stroke-width="1"/>
+<text x="1860" y="707" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#2563eb" text-anchor="start">✓</text>
+<text x="1880" y="707" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="400" fill="#1e293b" text-anchor="start">Initial dashboard load</text>
+<rect x="1846" y="722" width="248" height="28" rx="6" fill="#fff" stroke="#bfdbfe" stroke-width="1"/>
+<text x="1860" y="741" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#2563eb" text-anchor="start">✓</text>
+<text x="1880" y="741" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="400" fill="#1e293b" text-anchor="start">Normal queries</text>
+<rect x="1846" y="756" width="248" height="28" rx="6" fill="#fff" stroke="#bfdbfe" stroke-width="1"/>
+<text x="1860" y="775" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#2563eb" text-anchor="start">✓</text>
+<text x="1880" y="775" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="400" fill="#1e293b" text-anchor="start">Planner CRUD operations</text>
+<rect x="1846" y="790" width="248" height="28" rx="6" fill="#fff" stroke="#bfdbfe" stroke-width="1"/>
+<text x="1860" y="809" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#2563eb" text-anchor="start">✓</text>
+<text x="1880" y="809" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="400" fill="#1e293b" text-anchor="start">Return DTOs to Angular</text>
+<rect x="1846" y="832" width="248" height="50" rx="6" fill="#1e3a8a" stroke="none" stroke-width="1"/>
+<text x="1858" y="853" font-family="Consolas, 'Cascadia Mono', monospace" font-size="12" font-weight="400" fill="#fff" text-anchor="start">GET /api/customer-order-</text>
+<text x="1858" y="871" font-family="Consolas, 'Cascadia Mono', monospace" font-size="12" font-weight="400" fill="#fff" text-anchor="start">    production-overview</text>
+<text x="1970" y="1010" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#b91c1c" text-anchor="middle">✕  Never queries the external</text>
+<text x="1970" y="1027" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#b91c1c" text-anchor="middle">Production DB for dashboard refreshes</text>
+<text x="1970" y="1056" font-family="'Segoe UI', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569" text-anchor="middle" font-style="italic">reads Planner read models only</text>
+<path d="M2112 380 L2254 380" fill="none" stroke="#d97706" stroke-width="2.5" marker-end="url(#ah-d97706)"/>
+<circle cx="2176" cy="300" r="11" fill="#d97706"/>
+<text x="2176" y="304.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">6</text>
+<text x="2176" y="328" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#1e293b" text-anchor="middle" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">Real-time</text>
+<text x="2176" y="344" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#1e293b" text-anchor="middle" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">SignalR Event</text>
+<text x="2176" y="400" font-family="'Segoe UI', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569" text-anchor="middle" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">WebSocket push</text>
+<path d="M2254 950 L2114 950" fill="none" stroke="#2563eb" stroke-width="2.5" marker-end="url(#ah-2563eb)"/>
+<circle cx="2176" cy="888" r="11" fill="#2563eb"/>
+<text x="2176" y="892.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">A</text>
+<text x="2176" y="916" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#1e293b" text-anchor="middle" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">Initial REST</text>
+<text x="2176" y="932" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#1e293b" text-anchor="middle" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">Query (GET)</text>
+<path d="M2114 1000 L2254 1000" fill="none" stroke="#2563eb" stroke-width="2.5" marker-end="url(#ah-2563eb)"/>
+<circle cx="2176" cy="1056" r="11" fill="#2563eb"/>
+<text x="2176" y="1060.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">C</text>
+<text x="2176" y="1020" font-family="'Segoe UI', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569" text-anchor="middle" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">DTO · full</text>
+<text x="2176" y="1035" font-family="'Segoe UI', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569" text-anchor="middle" paint-order="stroke" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">dataset</text>
+<rect x="2240" y="210" width="330" height="900" rx="12" fill="#fff" stroke="#dd0031" stroke-width="2"/>
+<path d="M2240 266 V222 Q2240 210 2252 210 H2558 Q2570 210 2570 222 V266 Z" fill="#dd0031"/>
+<text x="2405" y="236" font-family="'Segoe UI', Arial, sans-serif" font-size="17" font-weight="700" fill="#fff" text-anchor="middle">Angular 21 Dashboard</text>
+<text x="2405" y="255" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="400" fill="#ffffffdd" text-anchor="middle">Standalone · Zoneless · Signals</text>
+<rect x="2256" y="300" width="298" height="150" rx="8" fill="#fff1f2" stroke="#fda4af" stroke-width="1"/>
+<text x="2270" y="322" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#9f1239" text-anchor="start">Live changes · SignalR connection</text>
+<rect x="2270" y="334" width="270" height="28" rx="5" fill="#fff" stroke="#fecdd3" stroke-width="1"/>
+<text x="2280" y="352.5" font-family="Consolas, 'Cascadia Mono', monospace" font-size="10.5" font-weight="400" fill="#1e293b" text-anchor="start">ProductionOverviewAdded</text>
+<text x="2530" y="352.5" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="700" fill="#dd0031" text-anchor="end">→ add row</text>
+<rect x="2270" y="370" width="270" height="28" rx="5" fill="#fff" stroke="#fecdd3" stroke-width="1"/>
+<text x="2280" y="388.5" font-family="Consolas, 'Cascadia Mono', monospace" font-size="10.5" font-weight="400" fill="#1e293b" text-anchor="start">ProductionOverviewUpdated</text>
+<text x="2530" y="388.5" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="700" fill="#dd0031" text-anchor="end">→ update row</text>
+<rect x="2270" y="406" width="270" height="28" rx="5" fill="#fff" stroke="#fecdd3" stroke-width="1"/>
+<text x="2280" y="424.5" font-family="Consolas, 'Cascadia Mono', monospace" font-size="10.5" font-weight="400" fill="#1e293b" text-anchor="start">ProductionOverviewRemoved</text>
+<text x="2530" y="424.5" font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="700" fill="#dd0031" text-anchor="end">→ remove row</text>
+<path d="M2405 452 L2405 486" fill="none" stroke="#d97706" stroke-width="2.5" marker-end="url(#ah-d97706)"/>
+<circle cx="2382" cy="469" r="11" fill="#d97706"/>
+<text x="2382" y="473.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">7</text>
+<text x="2420" y="474" font-family="'Segoe UI', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569" text-anchor="start">patch state</text>
+<rect x="2256" y="490" width="298" height="300" rx="8" fill="#fff" stroke="#dd0031" stroke-width="2"/>
+<text x="2270" y="514" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#9f1239" text-anchor="start">Angular Signals · client dashboard state</text>
+<rect x="2270" y="524" width="270" height="124" rx="6" fill="#1e1b2e" stroke="none" stroke-width="1"/>
+<text x="2282" y="546" font-family="Consolas, 'Cascadia Mono', monospace" font-size="11.5" font-weight="400" fill="#f9a8d4" text-anchor="start">rows = signal&lt;OverviewRow[]&gt;([])</text>
+<text x="2282" y="568" font-family="Consolas, 'Cascadia Mono', monospace" font-size="11.5" font-weight="400" fill="#e2e8f0" text-anchor="start">add    → rows.update(push)</text>
+<text x="2282" y="590" font-family="Consolas, 'Cascadia Mono', monospace" font-size="11.5" font-weight="400" fill="#e2e8f0" text-anchor="start">update → rows.update(map)</text>
+<text x="2282" y="612" font-family="Consolas, 'Cascadia Mono', monospace" font-size="11.5" font-weight="400" fill="#e2e8f0" text-anchor="start">remove → rows.update(filter)</text>
+<text x="2282" y="634" font-family="Consolas, 'Cascadia Mono', monospace" font-size="11.5" font-weight="400" fill="#a5f3fc" text-anchor="start">kpis   = computed(() =&gt; …)</text>
+<text x="2270" y="670" font-family="'Segoe UI', Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569" text-anchor="start" font-style="italic">Only the affected row re-renders</text>
+<rect x="2270" y="682" width="270" height="20" rx="3" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="2278" y="689" width="70" height="6" rx="3" fill="#cbd5e1" stroke="none" stroke-width="1"/>
+<rect x="2360" y="689" width="50" height="6" rx="3" fill="#cbd5e1" stroke="none" stroke-width="1"/>
+<rect x="2422" y="689" width="90" height="6" rx="3" fill="#94a3b8" stroke="none" stroke-width="1"/>
+<rect x="2270" y="706" width="270" height="20" rx="3" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="2278" y="713" width="70" height="6" rx="3" fill="#cbd5e1" stroke="none" stroke-width="1"/>
+<rect x="2360" y="713" width="50" height="6" rx="3" fill="#cbd5e1" stroke="none" stroke-width="1"/>
+<rect x="2422" y="713" width="78" height="6" rx="3" fill="#94a3b8" stroke="none" stroke-width="1"/>
+<rect x="2270" y="730" width="270" height="20" rx="3" fill="#fde68a" stroke="#d97706" stroke-width="1.5"/>
+<rect x="2278" y="737" width="70" height="6" rx="3" fill="#b45309" stroke="none" stroke-width="1"/>
+<rect x="2360" y="737" width="50" height="6" rx="3" fill="#b45309" stroke="none" stroke-width="1"/>
+<rect x="2422" y="737" width="66" height="6" rx="3" fill="#d97706" stroke="none" stroke-width="1"/>
+<text x="2534" y="744.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#b45309" text-anchor="end">⟳</text>
+<rect x="2270" y="754" width="270" height="20" rx="3" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="1"/>
+<rect x="2278" y="761" width="70" height="6" rx="3" fill="#cbd5e1" stroke="none" stroke-width="1"/>
+<rect x="2360" y="761" width="50" height="6" rx="3" fill="#cbd5e1" stroke="none" stroke-width="1"/>
+<rect x="2422" y="761" width="54" height="6" rx="3" fill="#94a3b8" stroke="none" stroke-width="1"/>
+<path d="M2405 878 L2405 794" fill="none" stroke="#2563eb" stroke-width="2.5" marker-end="url(#ah-2563eb)"/>
+<circle cx="2382" cy="836" r="11" fill="#2563eb"/>
+<text x="2382" y="840.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">D</text>
+<text x="2420" y="840" font-family="Consolas, 'Cascadia Mono', monospace" font-size="11.5" font-weight="400" fill="#475569" text-anchor="start">rows.set(dto[])</text>
+<rect x="2256" y="880" width="298" height="140" rx="8" fill="#eff6ff" stroke="#93c5fd" stroke-width="1"/>
+<text x="2270" y="904" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#1e3a8a" text-anchor="start">Initial state · HttpClient (REST)</text>
+<text x="2270" y="928" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="400" fill="#475569" text-anchor="start">One GET on page load returns the full</text>
+<text x="2270" y="945" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="400" fill="#475569" text-anchor="start">CustomerOrderProductionOverview dataset.</text>
+<text x="2270" y="972" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="400" fill="#475569" text-anchor="start">After that, every change arrives</text>
+<text x="2270" y="989" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="400" fill="#475569" text-anchor="start">through SignalR — no re-fetch.</text>
+<rect x="2256" y="1034" width="146" height="26" rx="13" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+<text x="2329" y="1051.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#b91c1c" text-anchor="middle">✕ No polling</text>
+<rect x="2408" y="1034" width="146" height="26" rx="13" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+<text x="2481" y="1051.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#b91c1c" text-anchor="middle">✕ No page reload</text>
+<rect x="2256" y="1068" width="298" height="26" rx="13" fill="#fee2e2" stroke="#fca5a5" stroke-width="1"/>
+<text x="2405" y="1085.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#b91c1c" text-anchor="middle">✕ No REST request per live change</text>
+<rect x="30" y="820" width="340" height="310" rx="16" fill="#fff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="48" y="846" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#0f172a" text-anchor="start" letter-spacing="1.2">LEGEND</text>
+<path d="M50 874 L110 874" fill="none" stroke="#d97706" stroke-width="2.5" marker-end="url(#ah-d97706)"/>
+<text x="124" y="878.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#1e293b" text-anchor="start">Live event flow (steps 1 – 7)</text>
+<path d="M50 902 L110 902" fill="none" stroke="#2563eb" stroke-width="2.5" marker-end="url(#ah-2563eb)"/>
+<text x="124" y="906.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#1e293b" text-anchor="start">Initial load / query flow (A – D)</text>
+<path d="M50 930 L110 930" fill="none" stroke="#64748b" stroke-width="2.5" stroke-dasharray="6 4" marker-end="url(#ah-64748b)"/>
+<text x="124" y="934.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#1e293b" text-anchor="start">Fetch / read-back</text>
+<path d="M50 958 L110 958" fill="none" stroke="#0d9488" stroke-width="2.5" marker-end="url(#ah-0d9488)"/>
+<text x="124" y="962.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#1e293b" text-anchor="start">Fan-out to other consumers</text>
+<rect x="52" y="979" width="16" height="14" rx="3" fill="#475569" stroke="none" stroke-width="1"/>
+<text x="80" y="990" font-family="'Segoe UI', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#1e293b" text-anchor="start">External Production System</text>
+<rect x="52" y="1001" width="16" height="14" rx="3" fill="#7c3aed" stroke="none" stroke-width="1"/>
+<text x="80" y="1012" font-family="'Segoe UI', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#1e293b" text-anchor="start">Integration Infrastructure</text>
+<rect x="52" y="1023" width="16" height="14" rx="3" fill="#ea580c" stroke="none" stroke-width="1"/>
+<text x="80" y="1034" font-family="'Segoe UI', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#1e293b" text-anchor="start">Message Bus (RabbitMQ)</text>
+<rect x="52" y="1045" width="16" height="14" rx="3" fill="#2563eb" stroke="none" stroke-width="1"/>
+<text x="80" y="1056" font-family="'Segoe UI', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#1e293b" text-anchor="start">Planner Application</text>
+<rect x="52" y="1067" width="16" height="14" rx="3" fill="#dd0031" stroke="none" stroke-width="1"/>
+<text x="80" y="1078" font-family="'Segoe UI', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#1e293b" text-anchor="start">Frontend (Angular 21)</text>
+<rect x="52" y="1089" width="16" height="14" rx="3" fill="#0d9488" stroke="none" stroke-width="1"/>
+<text x="80" y="1100" font-family="'Segoe UI', Arial, sans-serif" font-size="12.5" font-weight="400" fill="#1e293b" text-anchor="start">Future Consumers</text>
+<rect x="30" y="1160" width="1170" height="330" rx="16" fill="#fff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="50" y="1190" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#0f172a" text-anchor="start" letter-spacing="1.2">KEY FLOWS</text>
+<text x="50" y="1220" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#2563eb" text-anchor="start">Initial load</text>
+<text x="140" y="1220" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="400" fill="#475569" text-anchor="start">— Angular gets the full dataset once</text>
+<rect x="50" y="1230" width="76" height="32" rx="16" fill="#eff6ff" stroke="#2563eb" stroke-width="1"/>
+<text x="88" y="1250.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1e293b" text-anchor="middle">Angular</text>
+<path d="M130 1246 L150 1246" fill="none" stroke="#2563eb" stroke-width="2" marker-end="url(#ah-2563eb)"/>
+<rect x="156" y="1230" width="111" height="32" rx="16" fill="#eff6ff" stroke="#2563eb" stroke-width="1"/>
+<text x="211.5" y="1250.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1e293b" text-anchor="middle">GET REST API</text>
+<path d="M271 1246 L291 1246" fill="none" stroke="#2563eb" stroke-width="2" marker-end="url(#ah-2563eb)"/>
+<rect x="297" y="1230" width="104" height="32" rx="16" fill="#eff6ff" stroke="#2563eb" stroke-width="1"/>
+<text x="349" y="1250.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1e293b" text-anchor="middle">Planner API</text>
+<path d="M405 1246 L425 1246" fill="none" stroke="#2563eb" stroke-width="2" marker-end="url(#ah-2563eb)"/>
+<rect x="431" y="1230" width="310" height="32" rx="16" fill="#eff6ff" stroke="#2563eb" stroke-width="1"/>
+<text x="586" y="1250.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1e293b" text-anchor="middle">CustomerOrderProductionOverviewReadModel</text>
+<path d="M745 1246 L765 1246" fill="none" stroke="#2563eb" stroke-width="2" marker-end="url(#ah-2563eb)"/>
+<rect x="771" y="1230" width="47" height="32" rx="16" fill="#eff6ff" stroke="#2563eb" stroke-width="1"/>
+<text x="794.5" y="1250.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1e293b" text-anchor="middle">DTO</text>
+<path d="M822 1246 L842 1246" fill="none" stroke="#2563eb" stroke-width="2" marker-end="url(#ah-2563eb)"/>
+<rect x="848" y="1230" width="168" height="32" rx="16" fill="#eff6ff" stroke="#2563eb" stroke-width="1"/>
+<text x="932" y="1250.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1e293b" text-anchor="middle">Angular · rows.set()</text>
+<text x="50" y="1294" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#d97706" text-anchor="start">Live add / update / remove</text>
+<text x="232" y="1294" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="400" fill="#475569" text-anchor="start">— no polling, no reload, no extra REST call</text>
+<rect x="50" y="1304" width="168" height="32" rx="16" fill="#fffbeb" stroke="#d97706" stroke-width="1"/>
+<text x="134" y="1324.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1e293b" text-anchor="middle">Production DB change</text>
+<path d="M222 1320 L242 1320" fill="none" stroke="#d97706" stroke-width="2" marker-end="url(#ah-d97706)"/>
+<rect x="248" y="1304" width="154" height="32" rx="16" fill="#fffbeb" stroke="#d97706" stroke-width="1"/>
+<text x="325" y="1324.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1e293b" text-anchor="middle">Integration Worker</text>
+<path d="M406 1320 L426 1320" fill="none" stroke="#d97706" stroke-width="2" marker-end="url(#ah-d97706)"/>
+<rect x="432" y="1304" width="83" height="32" rx="16" fill="#fffbeb" stroke="#d97706" stroke-width="1"/>
+<text x="473.5" y="1324.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1e293b" text-anchor="middle">RabbitMQ</text>
+<path d="M519 1320 L539 1320" fill="none" stroke="#d97706" stroke-width="2" marker-end="url(#ah-d97706)"/>
+<rect x="545" y="1304" width="140" height="32" rx="16" fill="#fffbeb" stroke="#d97706" stroke-width="1"/>
+<text x="615" y="1324.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1e293b" text-anchor="middle">Planner Consumer</text>
+<path d="M689 1320 L709 1320" fill="none" stroke="#d97706" stroke-width="2" marker-end="url(#ah-d97706)"/>
+<rect x="715" y="1304" width="211" height="32" rx="16" fill="#fffbeb" stroke="#d97706" stroke-width="1"/>
+<text x="820.5" y="1324.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1e293b" text-anchor="middle">Upsert Read Model (commit)</text>
+<path d="M930 1320 L950 1320" fill="none" stroke="#d97706" stroke-width="2" marker-end="url(#ah-d97706)"/>
+<rect x="50" y="1348" width="104" height="32" rx="16" fill="#fffbeb" stroke="#d97706" stroke-width="1"/>
+<text x="102" y="1368.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1e293b" text-anchor="middle">SignalR Hub</text>
+<path d="M158 1364 L178 1364" fill="none" stroke="#d97706" stroke-width="2" marker-end="url(#ah-d97706)"/>
+<rect x="184" y="1348" width="125" height="32" rx="16" fill="#fffbeb" stroke="#d97706" stroke-width="1"/>
+<text x="246.5" y="1368.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1e293b" text-anchor="middle">Angular Signal</text>
+<path d="M313 1364 L333 1364" fill="none" stroke="#d97706" stroke-width="2" marker-end="url(#ah-d97706)"/>
+<rect x="339" y="1348" width="303" height="32" rx="16" fill="#fffbeb" stroke="#d97706" stroke-width="1"/>
+<text x="490.5" y="1368.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1e293b" text-anchor="middle">Dashboard row added / updated / removed</text>
+<path d="M956 1320 h10" stroke="none"/>
+<rect x="50" y="1404" width="1130" height="66" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="1"/>
+<text x="66" y="1430" font-family="'Segoe UI', Arial, sans-serif" font-size="13.5" font-weight="700" fill="#78350f" text-anchor="start">Ordering guarantee: the read model is committed BEFORE the SignalR notification is sent.</text>
+<text x="66" y="1452" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="400" fill="#78350f" text-anchor="start">A client can always re-load from REST and get the same state it was pushed — the Planner read model, not SignalR, is the source of truth.</text>
+<rect x="1250" y="1160" width="1340" height="330" rx="16" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="1270" y="1190" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#0f172a" text-anchor="start" letter-spacing="1.2">ARCHITECTURAL PRINCIPLES</text>
+<rect x="1272" y="1206" width="636" height="32" rx="8" fill="#fff" stroke="#e2e8f0" stroke-width="1"/>
+<circle cx="1290" cy="1222" r="10" fill="#16a34a"/>
+<text x="1290" y="1226.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">✓</text>
+<text x="1310" y="1227" font-family="'Segoe UI', Arial, sans-serif" font-size="13.5" font-weight="400" fill="#1e293b" text-anchor="start">Production DB remains authoritative for production data</text>
+<rect x="1272" y="1245" width="636" height="32" rx="8" fill="#fff" stroke="#e2e8f0" stroke-width="1"/>
+<circle cx="1290" cy="1261" r="10" fill="#16a34a"/>
+<text x="1290" y="1265.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">✓</text>
+<text x="1310" y="1266" font-family="'Segoe UI', Arial, sans-serif" font-size="13.5" font-weight="400" fill="#1e293b" text-anchor="start">Planner DB is authoritative only for Planner-owned data</text>
+<rect x="1272" y="1284" width="636" height="32" rx="8" fill="#fff" stroke="#e2e8f0" stroke-width="1"/>
+<circle cx="1290" cy="1300" r="10" fill="#16a34a"/>
+<text x="1290" y="1304.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">✓</text>
+<text x="1310" y="1305" font-family="'Segoe UI', Arial, sans-serif" font-size="13.5" font-weight="400" fill="#1e293b" text-anchor="start">Planner read models are optimized for Planner queries</text>
+<rect x="1272" y="1323" width="636" height="32" rx="8" fill="#fff" stroke="#e2e8f0" stroke-width="1"/>
+<circle cx="1290" cy="1339" r="10" fill="#16a34a"/>
+<text x="1290" y="1343.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">✓</text>
+<text x="1310" y="1344" font-family="'Segoe UI', Arial, sans-serif" font-size="13.5" font-weight="400" fill="#1e293b" text-anchor="start">No full production database replication</text>
+<rect x="1272" y="1362" width="636" height="32" rx="8" fill="#fff" stroke="#e2e8f0" stroke-width="1"/>
+<circle cx="1290" cy="1378" r="10" fill="#16a34a"/>
+<text x="1290" y="1382.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">✓</text>
+<text x="1310" y="1383" font-family="'Segoe UI', Arial, sans-serif" font-size="13.5" font-weight="400" fill="#1e293b" text-anchor="start">Integration Worker is independent of Planner</text>
+<rect x="1272" y="1401" width="636" height="32" rx="8" fill="#fff" stroke="#e2e8f0" stroke-width="1"/>
+<circle cx="1290" cy="1417" r="10" fill="#16a34a"/>
+<text x="1290" y="1421.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">✓</text>
+<text x="1310" y="1422" font-family="'Segoe UI', Arial, sans-serif" font-size="13.5" font-weight="400" fill="#1e293b" text-anchor="start">RabbitMQ provides asynchronous decoupling</text>
+<rect x="1272" y="1440" width="636" height="32" rx="8" fill="#fff" stroke="#e2e8f0" stroke-width="1"/>
+<circle cx="1290" cy="1456" r="10" fill="#16a34a"/>
+<text x="1290" y="1460.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">✓</text>
+<text x="1310" y="1461" font-family="'Segoe UI', Arial, sans-serif" font-size="13.5" font-weight="400" fill="#1e293b" text-anchor="start">Consumers are idempotent</text>
+<rect x="1932" y="1206" width="636" height="32" rx="8" fill="#fff" stroke="#e2e8f0" stroke-width="1"/>
+<circle cx="1950" cy="1222" r="10" fill="#16a34a"/>
+<text x="1950" y="1226.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">✓</text>
+<text x="1970" y="1227" font-family="'Segoe UI', Arial, sans-serif" font-size="13.5" font-weight="400" fill="#1e293b" text-anchor="start">SignalR provides real-time delivery</text>
+<rect x="1932" y="1245" width="636" height="32" rx="8" fill="#fff" stroke="#e2e8f0" stroke-width="1"/>
+<circle cx="1950" cy="1261" r="10" fill="#16a34a"/>
+<text x="1950" y="1265.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">✓</text>
+<text x="1970" y="1266" font-family="'Segoe UI', Arial, sans-serif" font-size="13.5" font-weight="400" fill="#1e293b" text-anchor="start">REST API provides the initial state</text>
+<rect x="1932" y="1284" width="636" height="32" rx="8" fill="#fff" stroke="#e2e8f0" stroke-width="1"/>
+<circle cx="1950" cy="1300" r="10" fill="#16a34a"/>
+<text x="1950" y="1304.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">✓</text>
+<text x="1970" y="1305" font-family="'Segoe UI', Arial, sans-serif" font-size="13.5" font-weight="400" fill="#1e293b" text-anchor="start">Angular does not poll</text>
+<rect x="1932" y="1323" width="636" height="32" rx="8" fill="#fff" stroke="#e2e8f0" stroke-width="1"/>
+<circle cx="1950" cy="1339" r="10" fill="#16a34a"/>
+<text x="1950" y="1343.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">✓</text>
+<text x="1970" y="1344" font-family="'Segoe UI', Arial, sans-serif" font-size="13.5" font-weight="400" fill="#1e293b" text-anchor="start">SignalR is not the source of truth — the Planner Read Model is</text>
+<rect x="1932" y="1362" width="636" height="32" rx="8" fill="#fff" stroke="#e2e8f0" stroke-width="1"/>
+<circle cx="1950" cy="1378" r="10" fill="#16a34a"/>
+<text x="1950" y="1382.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">✓</text>
+<text x="1970" y="1383" font-family="'Segoe UI', Arial, sans-serif" font-size="13.5" font-weight="400" fill="#1e293b" text-anchor="start">Read model is updated before the SignalR notification</text>
+<rect x="1932" y="1401" width="636" height="32" rx="8" fill="#fff" stroke="#e2e8f0" stroke-width="1"/>
+<circle cx="1950" cy="1417" r="10" fill="#16a34a"/>
+<text x="1950" y="1421.5" font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">✓</text>
+<text x="1970" y="1422" font-family="'Segoe UI', Arial, sans-serif" font-size="13.5" font-weight="400" fill="#1e293b" text-anchor="start">Future applications can consume the same integration events</text></svg>

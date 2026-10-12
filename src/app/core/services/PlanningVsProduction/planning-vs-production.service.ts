@@ -1,66 +1,97 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, delay, of } from 'rxjs';
+import { Observable, map, of } from 'rxjs';
+import { environment } from 'src/environments/environment';
 
+import { GlobalConstant } from '../../constants/global.constants';
 import {
+  IPvpCustomerScope,
+  IPvpDeliveryOrderScope,
   IPvpFilter,
-  IPvpItemRow,
   IPvpOption,
   IPvpOverviewResponse,
 } from '../../model/PlanningVsProduction/planning-vs-production.model';
-import { deriveStatus } from '../../model/PlanningVsProduction/planning-vs-production.util';
-import { PVP_MOCK_ROWS } from './planning-vs-production.mock';
 
-/**
- * Planning vs Production overview data.
- *
- * Currently backed by dummy data. To switch to the API, replace the body of each
- * method with the commented `http` call (endpoint already registered in
- * GlobalConstant.API_END_POINTS.PlanningVsProductionOverview) and delete the mock file.
- */
+/** Planning vs Production overview data. */
 @Injectable({
   providedIn: 'root',
 })
 export class PlanningVsProductionService {
   constructor(private readonly http: HttpClient) {}
 
+  /** GET PlanningVsProduction/GetOverview?UnitId=&BusinessId=&CustomerId=&DeliveryOrderId=&ItemId=&FromDate=&ToDate=&Status= */
   GetOverview(filter: IPvpFilter): Observable<IPvpOverviewResponse> {
-    // const params = new HttpParams()
-    //   .set('CustomerId', filter.CustomerId ?? 0)
-    //   .set('DeliveryOrderId', filter.DeliveryOrderId ?? 0)
-    //   .set('ItemSearch', filter.ItemSearch ?? '')
-    //   .set('FromDate', filter.FromDate)
-    //   .set('ToDate', filter.ToDate)
-    //   .set('Status', filter.Status ?? '');
-    // return this.http.get<IPvpOverviewResponse>(
-    //   `${environment.API_URL}${GlobalConstant.API_END_POINTS.PlanningVsProductionOverview}`,
-    //   { params },
-    // );
-
-    const search = (filter.ItemSearch ?? '').trim().toLowerCase();
-    const rows = PVP_MOCK_ROWS.filter(
-      (r) =>
-        (!filter.CustomerId || r.CustomerId === filter.CustomerId) &&
-        (!filter.DeliveryOrderId || r.DeliveryOrderId === filter.DeliveryOrderId) &&
-        (!search || r.ItemCode.toLowerCase().includes(search) || r.ItemName.toLowerCase().includes(search)) &&
-        (!filter.FromDate || r.OrderDate >= filter.FromDate) &&
-        (!filter.ToDate || r.OrderDate <= filter.ToDate) &&
-        (!filter.Status || deriveStatus(r) === filter.Status),
+    const values: Record<string, string | number | null | undefined> = {
+      UnitId: filter.UnitId,
+      BusinessId: filter.BusinessId,
+      CustomerId: filter.CustomerId,
+      DeliveryOrderId: filter.DeliveryOrderId,
+      ItemId: filter.ItemId,
+      FromDate: filter.FromDate,
+      ToDate: filter.ToDate,
+      Status: filter.Status,
+    };
+    // Empty values are left out so the API treats them as "all".
+    let params = new HttpParams();
+    for (const [key, value] of Object.entries(values)) {
+      if (value !== null && value !== undefined && value !== '')
+        params = params.set(key, value);
+    }
+    return this.http.get<IPvpOverviewResponse>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.PlanningVsProductionOverview}`,
+      { params },
     );
-    return of({ Rows: rows, LastUpdated: new Date().toISOString() }).pipe(delay(400));
   }
 
-  GetCustomers(): Observable<IPvpOption[]> {
-    const map = new Map<number, string>();
-    PVP_MOCK_ROWS.forEach((r) => map.set(r.CustomerId, r.CustomerName));
-    return of([...map].map(([Id, Name]) => ({ Id, Name })));
+  /**
+   * GET Common/GetCustomerUnitWise?unitId=&prefix=
+   * Prefix search only: without a unit or a typed prefix no request is sent.
+   */
+  GetCustomers(scope: IPvpCustomerScope): Observable<IPvpOption[]> {
+    const prefix = scope.Prefix?.trim();
+    if (!scope.UnitId || !prefix) return of([]);
+    const params = new HttpParams()
+      .set('unitId', scope.UnitId)
+      .set('prefix', prefix);
+    return this.http
+      .get<ILookupDto[]>(
+        `${environment.API_URL}${GlobalConstant.API_END_POINTS.Customers}`,
+        {
+          params,
+        },
+      )
+      .pipe(map(toOptions));
   }
 
-  GetDeliveryOrders(customerId: number | null): Observable<IPvpOption[]> {
-    const map = new Map<number, IPvpOption>();
-    PVP_MOCK_ROWS.filter((r: IPvpItemRow) => !customerId || r.CustomerId === customerId).forEach((r) =>
-      map.set(r.DeliveryOrderId, { Id: r.DeliveryOrderId, Name: r.DeliveryOrderNo, ParentId: r.CustomerId }),
-    );
-    return of([...map.values()]);
+  /**
+   * GET PlanningVsProduction/GetDeliveryOrders?unitId=&businessId=&customerId=&prefix=
+   * Prefix search only: without a unit, a business or a typed prefix no request is sent.
+   * Customer is optional (0 = all customers).
+   */
+  GetDeliveryOrders(scope: IPvpDeliveryOrderScope): Observable<IPvpOption[]> {
+    const prefix = scope.Prefix?.trim();
+    if (!scope.UnitId || !scope.BusinessId || !prefix) return of([]);
+    const params = new HttpParams()
+      .set('unitId', scope.UnitId)
+      .set('businessId', scope.BusinessId)
+      .set('customerId', scope.CustomerId ?? 0)
+      .set('prefix', prefix);
+    return this.http
+      .get<
+        ILookupDto[]
+      >(`${environment.API_URL}${GlobalConstant.API_END_POINTS.PlanningVsProductionDeliveryOrders}`, { params })
+      .pipe(map(toOptions));
   }
+}
+
+/** Lookup row as the customer / delivery order APIs return it (delivery orders use `ID`). */
+interface ILookupDto {
+  ID?: number;
+  Id?: number;
+  Name: string;
+}
+
+/** API lookup rows -> IPvpOption { Id, Name } used by the search boxes. */
+function toOptions(rows: ILookupDto[] | null): IPvpOption[] {
+  return (rows ?? []).map((r) => ({ Id: r.ID ?? r.Id, Name: r.Name }));
 }

@@ -54,7 +54,6 @@ const DEFAULT_COLUMNS: IPvpColumn[] = [
   styleUrl: './pvp-overview-table.scss',
 })
 export class PvpOverviewTable {
-  private readonly destroyRef = inject(DestroyRef);
 
   readonly rows = input<IPvpItemRow[]>([]);
   readonly loading = input(false);
@@ -119,14 +118,12 @@ export class PvpOverviewTable {
 
   readonly skeletonRows = Array.from({ length: 8 });
 
-  /** Horizontal scroll state, used to show where the frozen column ends and that more columns exist. */
-  readonly scrolledLeft = signal(false);
-  readonly canScrollRight = signal(false);
-  readonly hasHScroll = computed(() => this.scrolledLeft() || this.canScrollRight());
-  /** The custom scrollbar starts at the frozen column's right edge. */
+  /** The horizontal scrollbar is drawn separately so it starts after the frozen column. */
   readonly frozenWidth = signal(0);
   readonly scrollableWidth = signal(0);
   readonly vScrollbarWidth = signal(0);
+  readonly hasHScroll = signal(false);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly scrollWrap = viewChild<ElementRef<HTMLElement>>('scrollWrap');
   private readonly scrollTable = viewChild<ElementRef<HTMLElement>>('scrollTable');
   private readonly frozenHeader = viewChild<ElementRef<HTMLElement>>('frozenHeader');
@@ -137,7 +134,7 @@ export class PvpOverviewTable {
       const wrap = this.scrollWrap()?.nativeElement;
       const table = this.scrollTable()?.nativeElement;
       if (!wrap || !table || typeof ResizeObserver === 'undefined') return;
-      // Table width changes on column toggle / expand / data load; the wrapper on window resize.
+      // Table width changes on expand / column toggle / data load; the wrapper on window resize.
       const observer = new ResizeObserver(() => this.updateScrollState());
       observer.observe(wrap);
       observer.observe(table);
@@ -159,10 +156,8 @@ export class PvpOverviewTable {
   updateScrollState(): void {
     const el = this.scrollWrap()?.nativeElement;
     if (!el) return;
-    this.scrolledLeft.set(el.scrollLeft > 2);
-    this.canScrollRight.set(el.scrollLeft + el.clientWidth < el.scrollWidth - 2);
-
     const frozen = this.frozenHeader()?.nativeElement.offsetWidth ?? 0;
+    this.hasHScroll.set(el.scrollWidth > el.clientWidth + 2);
     this.frozenWidth.set(frozen);
     this.scrollableWidth.set(Math.max(el.scrollWidth - frozen, 0));
     this.vScrollbarWidth.set(el.offsetWidth - el.clientWidth);
@@ -176,11 +171,6 @@ export class PvpOverviewTable {
     const bar = this.hScroll()?.nativeElement;
     const el = this.scrollWrap()?.nativeElement;
     if (bar && el && Math.abs(el.scrollLeft - bar.scrollLeft) > 1) el.scrollLeft = bar.scrollLeft;
-  }
-
-  scrollRight(): void {
-    const el = this.scrollWrap()?.nativeElement;
-    el?.scrollBy({ left: Math.max(el.clientWidth * 0.6, 240), behavior: 'smooth' });
   }
 
   onSearch(value: string): void {

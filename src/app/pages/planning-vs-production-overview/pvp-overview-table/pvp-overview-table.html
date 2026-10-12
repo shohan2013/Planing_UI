@@ -61,21 +61,12 @@
   </div>
 
   <!-- Table -->
-  <div
-    class="pvp-table-shell"
-    [class.is-scrolled]="scrolledLeft()"
-    [class.can-scroll-right]="canScrollRight()"
-  >
-    @if (canScrollRight() && !scrolledLeft()) {
-      <button type="button" class="pvp-scroll-hint" (click)="scrollRight()" aria-label="Scroll table right">
-        Scroll <i class="fas fa-arrow-right"></i>
-      </button>
-    }
+  <div class="pvp-table-shell">
   <div class="pvp-table-wrap" #scrollWrap (scroll)="updateScrollState()">
     <table class="pvp-table" #scrollTable>
       <thead>
         <tr>
-          <th #frozenHeader class="pvp-col-name" (click)="sortBy('Label')" title="Frozen column - other columns scroll horizontally">
+          <th #frozenHeader class="pvp-col-name" (click)="sortBy('Label')">
             <span class="pvp-th">
               <i class="fas fa-thumbtack pvp-pin"></i>
               Customer / Delivery Order / Item
@@ -183,14 +174,11 @@
     </table>
   </div>
 
-    <!-- Horizontal scrollbar that begins where the frozen column ends -->
+    <!-- Horizontal scrollbar that starts after the frozen column -->
     <div class="pvp-hscroll" [class.d-none]="!hasHScroll()" [style.padding-right.px]="vScrollbarWidth()">
-      <div class="pvp-hscroll__label" [style.width.px]="frozenWidth()">
-        <i class="fas fa-thumbtack"></i> Frozen
-        <span class="pvp-hscroll__arrow"><i class="fas fa-arrows-alt-h"></i> Scroll columns</span>
-      </div>
+      <div class="pvp-hscroll__gap" [style.width.px]="frozenWidth()"></div>
       <div class="pvp-hscroll__bar" #hScroll (scroll)="onHScroll()">
-        <div [style.width.px]="scrollableWidth()" class="pvp-hscroll__spacer"></div>
+        <div class="pvp-hscroll__spacer" [style.width.px]="scrollableWidth()"></div>
       </div>
     </div>
   </div>

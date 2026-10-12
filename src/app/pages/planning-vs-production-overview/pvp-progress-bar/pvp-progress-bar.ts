@@ -7,7 +7,7 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
   imports: [DecimalPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="pvp-progress" [class.pvp-progress--blue]="variant() === 'production'">
+    <div class="pvp-progress" [class.pvp-progress--blue]="variant() === 'planning'">
       <div class="pvp-progress__track">
         <div class="pvp-progress__fill" [style.width.%]="width()"></div>
       </div>

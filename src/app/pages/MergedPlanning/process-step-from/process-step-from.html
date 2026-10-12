@@ -3,6 +3,7 @@
     <div
       class="card-header step-card-header"
       [class.ready]="isReadyToDrop"
+      [class.busy]="isMachineBusy"
       cdkDragHandle
     >
       <span class="step-name" [title]="step.Name">{{ step.Name }}</span>
@@ -12,6 +13,11 @@
         <i class="fa-solid fa-circle-check"></i>
         Ready
       </span>
+      } @else if (isMachineBusy) {
+      <span class="ready-hint busy-hint">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        Busy
+      </span>
       }
     </div>
 
@@ -20,14 +26,15 @@
         <label class="form-label">Start Date &amp; Time</label>
 
         <input
+          #startDateInput
           type="datetime-local"
           class="form-control form-control-sm"
-          [class.is-invalid]="submitted && !startDate"
+          [class.is-invalid]="(submitted || !!machineNumber) && !startDate"
           formControlName="startDate"
           name="startDate-{{ step.Name }}"
         />
 
-        @if (submitted && !startDate) {
+        @if ((submitted || !!machineNumber) && !startDate) {
         <div class="invalid-feedback">Required.</div>
         }
       </div>
@@ -38,12 +45,12 @@
         <input
           type="datetime-local"
           class="form-control form-control-sm"
-          [class.is-invalid]="submitted && (!endDate || isDateRangeInvalid)"
+          [class.is-invalid]="((submitted || !!machineNumber) && !endDate) || (submitted && isDateRangeInvalid)"
           formControlName="endDate"
           name="endDate-{{ step.Name }}"
         />
 
-        @if (submitted && !endDate) {
+        @if ((submitted || !!machineNumber) && !endDate) {
         <div class="invalid-feedback">Required.</div>
         } @else if (submitted && isDateRangeInvalid) {
         <div class="invalid-feedback">
@@ -56,8 +63,9 @@
         <label class="form-label">Machine No</label>
 
         <select
+          #machineSelect
           class="form-select form-select-sm"
-          [class.is-invalid]="submitted && !machineNumber"
+          [class.is-invalid]="(submitted && !machineNumber) || isMachineBusy"
           formControlName="machineId"
           name="machineNumber-{{ step.Name }}"
         >
@@ -72,6 +80,41 @@
 
         @if (submitted && !machineNumber) {
         <div class="invalid-feedback">Required.</div>
+        } @else if (needsDatesForMachine) {
+        <div class="availability-status muted">
+          <i class="fa-regular fa-calendar"></i>
+          Set start &amp; end date/time to check availability.
+        </div>
+        } @else {
+          @switch (availability()) {
+            @case ('checking') {
+            <div class="availability-status checking">
+              <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+              Checking availability...
+            </div>
+            }
+            @case ('free') {
+            <div class="availability-status free">
+              <i class="fa-solid fa-circle-check"></i>
+              Available in this slot
+            </div>
+            }
+            @case ('busy') {
+            <div class="availability-status busy">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              Busy: {{ busyJobs().length }} {{ busyJobs().length === 1 ? 'job' : 'jobs' }} in this slot
+              <button type="button" class="btn btn-link p-0 availability-link" (click)="openBusyDialog()">
+                View
+              </button>
+            </div>
+            }
+            @case ('error') {
+            <div class="availability-status muted">
+              <i class="fa-solid fa-circle-exclamation"></i>
+              Couldn't check availability.
+            </div>
+            }
+          }
         }
       </div>
 

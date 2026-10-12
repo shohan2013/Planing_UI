@@ -1,49 +1,132 @@
 <form class="pvp-filters" (ngSubmit)="onApply()">
-  <div class="pvp-field pvp-field--md">
+  <div class="pvp-field pvp-field--xs">
+    <label class="pvp-label" for="pvpUnit">Unit</label>
+    <ng-select
+      labelForId="pvpUnit"
+      name="unit"
+      class="pvp-select"
+      [items]="units()"
+      bindLabel="Name"
+      bindValue="Id"
+      placeholder="All Units"
+      [ngModel]="draft().UnitId"
+      (ngModelChange)="onUnitChange($event)"
+    ></ng-select>
+  </div>
+
+  <div class="pvp-field pvp-field--xs">
+    <label class="pvp-label" for="pvpBusiness">Business</label>
+    <ng-select
+      labelForId="pvpBusiness"
+      name="business"
+      class="pvp-select"
+      [items]="businesses()"
+      bindLabel="Name"
+      bindValue="Id"
+      placeholder="All Businesses"
+      [readonly]="!canPickBusiness()"
+      [searchable]="false"
+      [loading]="businessesLoading()"
+      loadingText="Loading businesses..."
+      notFoundText="No businesses for this unit"
+      [ngModel]="draft().BusinessId"
+      (ngModelChange)="onBusinessChange($event)"
+    ></ng-select>
+  </div>
+
+  <!-- Customer and Delivery Order search on the server by typed prefix (ng-select typeahead). -->
+  <div class="pvp-field pvp-field--search">
     <label class="pvp-label" for="pvpCustomer">Customer</label>
     <ng-select
+      #customerSelect
       labelForId="pvpCustomer"
       name="customer"
-      class="pvp-select"
+      class="pvp-select pvp-select--search"
       [items]="customers()"
       bindLabel="Name"
-      bindValue="Id"
-      placeholder="All Customers"
-      [ngModel]="draft().CustomerId"
-      (ngModelChange)="onCustomerChange($event)"
-    ></ng-select>
+      [placeholder]="canPickCustomer() ? 'Type to search customer' : 'Select unit first'"
+      [minTermLength]="1"
+      [readonly]="!canPickCustomer()"
+      [typeahead]="customerTypeahead"
+      [loading]="customersLoading()"
+      loadingText="Searching customers..."
+      typeToSearchText="Type a customer name prefix"
+      notFoundText="No customers match"
+      [ngModel]="selectedCustomer()"
+      [compareWith]="compareById"
+      (change)="onCustomerChange($event)"
+      (close)="onCustomerClose()"
+      (blur)="onSearchBoxBlur(customerSelect)"
+    >
+      <ng-template ng-option-tmp let-item="item" let-search="searchTerm">
+        @let name = item.Name ?? '';
+        @let matched = prefixLength(name, search);
+        <span class="pvp-option" [title]="name">@if (matched) {<mark class="pvp-option__match">{{ name.slice(0, matched) }}</mark>}{{ name.slice(matched) }}</span>
+      </ng-template>
+    </ng-select>
   </div>
 
-  <div class="pvp-field pvp-field--md">
+  <div class="pvp-field pvp-field--search">
     <label class="pvp-label" for="pvpDo">Delivery Order</label>
     <ng-select
+      #deliveryOrderSelect
       labelForId="pvpDo"
       name="deliveryOrder"
-      class="pvp-select"
+      class="pvp-select pvp-select--search"
       [items]="deliveryOrders()"
       bindLabel="Name"
-      bindValue="Id"
-      placeholder="All Delivery Orders"
-      [ngModel]="draft().DeliveryOrderId"
-      (ngModelChange)="patch({ DeliveryOrderId: $event ?? null })"
-    ></ng-select>
+      [placeholder]="canPickDeliveryOrder() ? 'Type to search delivery order' : 'Select unit & business first'"
+      [minTermLength]="1"
+      [readonly]="!canPickDeliveryOrder()"
+      [typeahead]="deliveryOrderTypeahead"
+      [loading]="deliveryOrdersLoading()"
+      loadingText="Searching delivery orders..."
+      typeToSearchText="Type a delivery order no. prefix"
+      notFoundText="No delivery orders match"
+      [ngModel]="selectedDeliveryOrder()"
+      [compareWith]="compareById"
+      (change)="onDeliveryOrderChange($event)"
+      (close)="onDeliveryOrderClose()"
+      (blur)="onSearchBoxBlur(deliveryOrderSelect)"
+    >
+      <ng-template ng-option-tmp let-item="item" let-search="searchTerm">
+        @let name = item.Name ?? '';
+        @let matched = prefixLength(name, search);
+        <span class="pvp-option" [title]="name">@if (matched) {<mark class="pvp-option__match">{{ name.slice(0, matched) }}</mark>}{{ name.slice(matched) }}</span>
+      </ng-template>
+    </ng-select>
   </div>
 
+  <!-- Item: searched by typed prefix within the selected unit (Common/ItemList). -->
   <div class="pvp-field pvp-field--lg">
     <label class="pvp-label" for="pvpItem">Item</label>
-    <div class="pvp-input-icon">
-      <i class="fas fa-search"></i>
-      <input
-        id="pvpItem"
-        name="item"
-        type="text"
-        class="form-control"
-        placeholder="Search item code or name..."
-        autocomplete="off"
-        [ngModel]="draft().ItemSearch"
-        (ngModelChange)="patch({ ItemSearch: $event })"
-      />
-    </div>
+    <ng-select
+      #itemSelect
+      labelForId="pvpItem"
+      name="item"
+      class="pvp-select pvp-select--search"
+      [items]="items()"
+      bindLabel="Name"
+      [placeholder]="canPickItem() ? 'Type to search item code or name' : 'Select unit first'"
+      [minTermLength]="1"
+      [readonly]="!canPickItem()"
+      [typeahead]="itemTypeahead"
+      [loading]="itemsLoading()"
+      loadingText="Searching items..."
+      typeToSearchText="Type an item code or name prefix"
+      notFoundText="No items match"
+      [ngModel]="selectedItem()"
+      [compareWith]="compareById"
+      (change)="onItemChange($event)"
+      (close)="onItemClose()"
+      (blur)="onSearchBoxBlur(itemSelect)"
+    >
+      <ng-template ng-option-tmp let-item="item" let-search="searchTerm">
+        @let name = item.Name ?? '';
+        @let matched = prefixLength(name, search);
+        <span class="pvp-option" [title]="name">@if (matched) {<mark class="pvp-option__match">{{ name.slice(0, matched) }}</mark>}{{ name.slice(matched) }}</span>
+      </ng-template>
+    </ng-select>
   </div>
 
   <div class="pvp-field pvp-field--sm">
@@ -87,7 +170,7 @@
   </div>
 
   <div class="pvp-actions">
-    <button type="submit" class="btn btn-primary pvp-btn" [disabled]="loading()">
+    <button type="submit" class="btn btn-success btn-shadow pvp-btn" [disabled]="loading()">
       @if (loading()) {
         <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
       } @else {
@@ -95,7 +178,7 @@
       }
       Apply
     </button>
-    <button type="button" class="btn btn-light pvp-btn pvp-btn--ghost" (click)="reset.emit()" [disabled]="loading()">
+    <button type="button" class="btn btn-secondary pvp-btn" (click)="reset.emit()" [disabled]="loading()">
       <i class="fas fa-redo-alt"></i>
       Reset
     </button>
