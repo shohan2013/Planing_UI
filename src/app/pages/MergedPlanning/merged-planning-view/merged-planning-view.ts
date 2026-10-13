@@ -223,6 +223,7 @@ export class MergedPlanningView implements OnInit, OnDestroy {
         return {
           ProductId: line.ProductId,
           Quantity: line.Quantity,
+          UOM: line.UOMId,
           TakenQuantity: item.TakenQty,
           AdvanceProductionQuantity: item.AdvanceProductionQty ?? 0,
           Rate: line.Rate,

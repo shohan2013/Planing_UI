@@ -29,6 +29,7 @@ export interface IProductionPlanHeader {
 export interface IProductionPlanLine {
   ProductId: number;
   Quantity: number;
+  UOM: number;
   TakenQuantity: number;
   AdvanceProductionQuantity: number | null;
   Rate: number;

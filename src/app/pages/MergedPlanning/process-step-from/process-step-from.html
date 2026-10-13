@@ -60,7 +60,19 @@
       </div>
 
       <div>
-        <label class="form-label">Machine No</label>
+        <div class="label-row">
+          <label class="form-label">Machine No</label>
+          <button
+            type="button"
+            class="btn btn-link p-0 schedule-link"
+            [disabled]="!machineNumber"
+            [title]="machineNumber ? 'View ' + selectedMachineName + ' schedule' : 'Select a machine first'"
+            (click)="openScheduleDialog()"
+          >
+            <i class="fa-regular fa-calendar-days"></i>
+            View schedule
+          </button>
+        </div>
 
         <select
           #machineSelect

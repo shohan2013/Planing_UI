@@ -1,0 +1,270 @@
+@let ctx = context();
+@let s = summary();
+
+<!-- Header -->
+<div class="msd-header">
+  <div class="msd-header-icon" aria-hidden="true">
+    <i class="fa-regular fa-calendar-days"></i>
+  </div>
+  <div class="msd-header-text">
+    <h5 class="msd-title" id="machineScheduleTitle">
+      {{ ctx?.machineName }} <span class="msd-title-sep">·</span> Schedule
+    </h5>
+    <p class="msd-subtitle">
+      Now <strong>{{ s.now | date: 'dd MMM yyyy, hh:mm a' }}</strong>
+      @if (s.jobs.length) {
+      <i class="fa-solid fa-arrow-right-long"></i>
+      last planned job ends <strong>{{ s.lastEnd | date: 'dd MMM yyyy, hh:mm a' }}</strong>
+      } @else if (!loading() && !error()) {
+      <span class="msd-muted">· nothing planned yet</span>
+      }
+    </p>
+  </div>
+  <button type="button" class="msd-close" aria-label="Close" (click)="modal.dismiss()">
+    <i class="fa-solid fa-xmark"></i>
+  </button>
+</div>
+
+@if (loading()) {
+<div class="msd-state">
+  <span class="spinner-border text-primary" aria-hidden="true"></span>
+  <span>Loading schedule...</span>
+</div>
+} @else if (error()) {
+<div class="msd-state msd-state-error">
+  <i class="fa-solid fa-circle-exclamation"></i>
+  <span>Couldn't load this machine's schedule.</span>
+  <button type="button" class="msd-btn msd-btn-outline" (click)="load()">
+    <i class="fa-solid fa-rotate-right"></i> Retry
+  </button>
+</div>
+} @else {
+
+<!-- Stat tiles -->
+<div class="msd-stats">
+  <div class="msd-stat">
+    <span class="msd-stat-label">Scheduled jobs</span>
+    <span class="msd-stat-value">{{ s.jobs.length }}</span>
+  </div>
+  <div class="msd-stat">
+    <span class="msd-stat-label">Booked time</span>
+    <span class="msd-stat-value msd-navy">{{ formatDuration(s.bookedMs) }}</span>
+  </div>
+  <div class="msd-stat">
+    <span class="msd-stat-label">Free time</span>
+    <span class="msd-stat-value msd-green">{{ formatDuration(s.freeMs) }}</span>
+  </div>
+  <div class="msd-stat">
+    <span class="msd-stat-label">Machine load</span>
+    <div class="msd-load">
+      <span class="msd-stat-value">{{ s.loadPct }}%</span>
+      <div class="msd-load-bar" role="progressbar" [attr.aria-valuenow]="s.loadPct" aria-valuemin="0" aria-valuemax="100">
+        <div class="msd-load-fill" [style.width.%]="s.loadPct"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="msd-body">
+  <!-- Your slot vs the schedule -->
+  @if (s.slot) {
+    @if (s.conflicts.length) {
+    <div class="msd-banner msd-banner-danger">
+      <i class="fa-solid fa-circle-exclamation msd-banner-icon"></i>
+      <div class="msd-banner-text">
+        <div>
+          <strong>
+            Your slot {{ s.slot.start | date: 'dd MMM, hh:mm a' }} – {{ s.slot.end | date: 'dd MMM, hh:mm a' }}
+            overlaps {{ s.conflicts.length }} {{ s.conflicts.length === 1 ? 'job' : 'jobs' }}
+          </strong>
+          (@for (c of s.conflicts; track c.job.JobId; let last = $last) {{{ formatDuration(c.conflictMs) }}@if (!last) { + }}).
+        </div>
+        @if (s.suggestion; as sug) {
+        <div>
+          Earliest free slot that fits {{ formatDuration(sug.end - sug.start) }}:
+          <strong>{{ sug.start | date: 'dd MMM, hh:mm a' }} – {{ sug.end | date: 'dd MMM, hh:mm a' }}</strong>
+        </div>
+        }
+      </div>
+      @if (s.suggestion; as sug) {
+      <button type="button" class="msd-btn msd-btn-success" (click)="use(sug)">Use this slot</button>
+      }
+    </div>
+    } @else {
+    <div class="msd-banner msd-banner-ok">
+      <i class="fa-solid fa-circle-check msd-banner-icon"></i>
+      <div class="msd-banner-text">
+        <strong>
+          Your slot {{ s.slot.start | date: 'dd MMM, hh:mm a' }} – {{ s.slot.end | date: 'dd MMM, hh:mm a' }}
+          is free on this machine.
+        </strong>
+      </div>
+    </div>
+    }
+  }
+
+  <!-- Timeline -->
+  <div class="msd-timeline-head">
+    <span class="msd-section-title">Timeline</span>
+    <div class="msd-legend">
+      <span><i class="lg lg-booked"></i>Booked</span>
+      <span><i class="lg lg-free"></i>Free</span>
+      @if (s.slot) {
+      <span><i class="lg lg-slot"></i>Your slot</span>
+      <span><i class="lg lg-conflict"></i>Conflict</span>
+      }
+      @if (s.suggestion) {
+      <span><i class="lg lg-suggested"></i>Suggested</span>
+      }
+      <span><i class="lg lg-past"></i>Past</span>
+    </div>
+  </div>
+
+  <div class="msd-timeline">
+    <div class="msd-axis">
+      <div></div>
+      <div class="msd-axis-ticks">
+        @for (t of hourTicks; track t) {
+        <span>{{ t }}</span>
+        }
+      </div>
+    </div>
+
+    @for (row of timeline().rows; track row.dayStart) {
+    <div class="msd-row">
+      <div class="msd-day">
+        <span class="msd-day-name">{{ row.dayStart | date: 'EEE dd MMM' }}</span>
+        <span class="msd-day-caption" [class.today]="row.isToday">{{ row.caption }}</span>
+      </div>
+      <div class="msd-track">
+        @for (seg of row.segments; track $index) {
+        <div
+          [class]="'msd-seg msd-seg-' + seg.kind"
+          [style.left.%]="seg.left"
+          [style.width.%]="seg.width"
+          [attr.title]="seg.title ?? null"
+        >
+          @if (seg.label) {
+          <span class="msd-seg-label">{{ seg.label }}</span>
+          }
+        </div>
+        }
+        @if (row.nowPct !== null) {
+        <div class="msd-now" [style.left.%]="row.nowPct" title="Now"></div>
+        }
+      </div>
+    </div>
+    }
+    @if (timeline().truncated) {
+    <p class="msd-muted msd-truncated">Timeline shows the first 45 days; the tables list everything.</p>
+    }
+  </div>
+
+  <!-- Tabs -->
+  <div class="msd-tabs" role="tablist">
+    <button type="button" role="tab" class="msd-tab" [class.active]="tab() === 'jobs'" [attr.aria-selected]="tab() === 'jobs'" (click)="tab.set('jobs')">
+      Scheduled jobs ({{ s.jobs.length }})
+    </button>
+    <button type="button" role="tab" class="msd-tab" [class.active]="tab() === 'free'" [attr.aria-selected]="tab() === 'free'" (click)="tab.set('free')">
+      Free slots ({{ s.freeSlots.length + 1 }})
+    </button>
+  </div>
+
+  @if (tab() === 'jobs') {
+    @if (s.jobs.length) {
+    <div class="msd-table-wrap">
+      <table class="msd-table">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Production plan</th>
+            <th>Item</th>
+            <th>Duration</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (j of s.jobs; track j.job.JobId) {
+          <tr>
+            <td>
+              @if (j.multiDay) {
+              <div class="msd-cell-strong">{{ j.start | date: 'dd MMM, hh:mm a' }}</div>
+              <div class="msd-cell-sub">to {{ j.end | date: 'dd MMM, hh:mm a' }}</div>
+              } @else {
+              <div class="msd-cell-strong">{{ j.start | date: 'dd MMM' }}</div>
+              <div class="msd-cell-sub">{{ j.start | date: 'hh:mm a' }} – {{ j.end | date: 'hh:mm a' }}</div>
+              }
+            </td>
+            <td>
+              <div class="msd-req">{{ j.job.JobNo }}</div>
+            </td>
+            <td>
+              <div>{{ j.job.ItemName }}</div>
+              <div class="msd-cell-sub">Planned qty <strong>{{ j.job.PlannedQty | number }} {{ j.job.UOM }}</strong></div>
+            </td>
+            <td class="msd-cell-strong">{{ formatDuration(j.durationMs) }}</td>
+            <td>
+              @if (j.conflictMs > 0) {
+              <span class="msd-chip msd-chip-danger">Overlaps {{ formatDuration(j.conflictMs) }}</span>
+              } @else if (j.inProgress) {
+              <span class="msd-chip msd-chip-info">In progress</span>
+              } @else {
+              <span class="msd-chip">Planned</span>
+              }
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    } @else {
+    <div class="msd-empty">
+      <i class="fa-regular fa-calendar-check"></i>
+      No jobs planned on this machine from now on — it's free.
+    </div>
+    }
+  } @else {
+  <div class="msd-table-wrap">
+    <table class="msd-table">
+      <thead>
+        <tr>
+          <th>From</th>
+          <th>To</th>
+          <th>Length</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (g of s.freeSlots; track g.start) {
+        @let fit = fitInGap(g);
+        <tr>
+          <td class="msd-cell-strong">{{ g.start | date: 'dd MMM, hh:mm a' }}</td>
+          <td>{{ g.end | date: 'dd MMM, hh:mm a' }}</td>
+          <td class="msd-green msd-cell-strong">{{ formatDuration(g.end - g.start) }}</td>
+          <td class="text-end">
+            @if (fit) {
+            <button type="button" class="msd-btn msd-btn-outline msd-btn-sm" (click)="use(fit)">Use this slot</button>
+            } @else if (slotDurationMs()) {
+            <span class="msd-cell-sub">Too short for your slot</span>
+            }
+          </td>
+        </tr>
+        }
+        <tr>
+          <td class="msd-cell-strong">{{ s.openFrom | date: 'dd MMM, hh:mm a' }}</td>
+          <td class="msd-cell-sub">—</td>
+          <td class="msd-green msd-cell-strong">Unlimited</td>
+          <td class="text-end">
+            @if (slotDurationMs(); as d) {
+            <button type="button" class="msd-btn msd-btn-outline msd-btn-sm" (click)="use({ start: s.openFrom, end: s.openFrom + d })">
+              Use this slot
+            </button>
+            }
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  }
+</div>
+}

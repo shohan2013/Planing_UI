@@ -17,6 +17,9 @@ export interface IMergedPlanningLine {
   Id: number;
   ProductId: number;
   ProductName: string | null;
+  /** UOM id, sent back as IProductionPlanLine.UOM when the plan is saved. */
+  UOMId: number;
+  /** UOM display name (e.g. "Pcs"). */
   UOM: string | null;
   Quantity: number;
   PlannedQuantity: number;

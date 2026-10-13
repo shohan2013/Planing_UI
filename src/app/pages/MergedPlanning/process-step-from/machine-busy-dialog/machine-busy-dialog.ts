@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
@@ -15,7 +15,7 @@ import {
 @Component({
   selector: 'app-machine-busy-dialog',
   standalone: true,
-  imports: [DatePipe],
+  imports: [DatePipe, DecimalPipe],
   templateUrl: './machine-busy-dialog.html',
   styleUrl: './machine-busy-dialog.scss',
 })

@@ -91,6 +91,7 @@ export const GlobalConstant = {
     PlanningHistoryDetails: 'PlanningHistory/GetDataById',
     UpdatePlan: 'PlanningHistory/UpdateProductionPlan',
     MachineJobs: 'MergedPlanning/GetMachineJobs',
+    MachineSchedule: 'MergedPlanning/GetMachineSchedule',
   },
 
   URL: { API_URL: 'https://localhost:7111/api/' },

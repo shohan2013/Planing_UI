@@ -112,6 +112,11 @@ export class PlanningProcessSteps implements OnChanges {
     return this.machinesByStep[stepId] ?? [];
   }
 
+  /** The saved job (ProductionPlanConfigure Id) of a step, so its own booking isn't a clash. */
+  savedJobIdFor(stepId: number): number | null {
+    return this.savedSteps.find((s) => s.StepId === stepId)?.Id ?? null;
+  }
+
   initialValueFor(stepId: number): IProcessStepInput | null {
     return (
       this.processStepStateService
