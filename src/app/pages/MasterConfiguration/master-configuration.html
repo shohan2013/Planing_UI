@@ -1,0 +1,106 @@
+<div class="user-card">
+  <div class="page-header">
+    <h5><i class="fa-solid fa-database me-2" style="color: rgb(79, 171, 89); font-size: 17px;"></i><b>MASTER CONFIGURATION</b></h5>
+  </div>
+
+  <hr />
+  <div class="card-body">
+    <div class="d-flex align-items-center gap-3 mb-3 w-100">
+      <div class="master-select">
+        <div class="input-group">
+          <div class="input-group-text"><i class="fa-solid fa-filter"></i></div>
+          <select class="form-select" [ngModel]="selectedUnitId" (ngModelChange)="onUnitChange($event)" [disabled]="unitsLoading()">
+            <option [ngValue]="0">{{ unitsLoading() ? 'Loading Units...' : 'Select Unit' }}</option>
+            @for (unit of units(); track unit.Id) {
+              <option [ngValue]="unit.Id">{{ unit.Name }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="master-select">
+        <select class="form-select" [ngModel]="selectedBusinessId" (ngModelChange)="onBusinessChange($event)" [disabled]="selectedUnitId === 0 || businessesLoading()">
+          <option [ngValue]="0">{{ businessesLoading() ? 'Loading Businesses...' : 'Select Business' }}</option>
+          @for (business of businesses(); track business.Id) {
+            <option [ngValue]="business.Id">{{ business.Name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="ms-auto">
+        <div class="input-group">
+          <div class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></div>
+          <input type="text" class="form-control" placeholder="Search..." maxlength="200" [ngModel]="globalSearch()" (ngModelChange)="updateSearch($event)" [disabled]="selectedUnitId === 0 || selectedBusinessId === 0" />
+        </div>
+      </div>
+    </div>
+
+    @if (error()) {
+      <div class="alert alert-danger d-flex justify-content-between align-items-center">
+        <span>{{ error() }}</span>
+        <button type="button" class="btn btn-danger btn-sm" (click)="retry()">Retry</button>
+      </div>
+    }
+
+    <div class="table-responsive">
+      <table class="custom-table master-fg-table">
+
+        <thead>
+          <tr>
+            <th>SL.</th>
+            <th>ITEM ID</th>
+            <th>FINISH GOOD NAME</th>
+            <th>STATUS</th>
+            <th class="g-action-column">ACTION</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @if (selectedUnitId === 0 || selectedBusinessId === 0) {
+            <tr><td colspan="5" class="text-center py-4">Select Unit and Business to view finish goods.</td></tr>
+          } @else if (isLoading()) {
+            <tr>
+              <td colspan="5" class="text-center py-4">
+                <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Loading finish goods...
+              </td>
+            </tr>
+          } @else if (paginatedItems().length === 0) {
+            <tr>
+              <td colspan="5" class="text-center py-4">
+                <i class="fas fa-folder-open fa-4x text-secondary mb-3"></i><br />
+                <h6>No Records Found.</h6>
+              </td>
+            </tr>
+          } @else {
+            @for (item of paginatedItems(); track item.ItemId; let index = $index) {
+                <tr [class.master-row-expanded]="expandedItemId() === item.ItemId">
+                    <td class="master-click-cell" (click)="toggleDetails(item.ItemId)"><span class="master-sl-content"><i class="fa-solid fa-chevron-right master-expand-chevron" [class.is-expanded]="expandedItemId() === item.ItemId" aria-hidden="true"></i><span>{{ (currentPage() - 1) * pageSize() + index + 1 }}</span></span></td>
+
+                    <!--
+                    <td class="master-click-cell" (click)="toggleDetails(item.ItemId)">{{ item.ItemId }}</td>
+                    <td class="master-click-cell"  (click)="toggleDetails(item.ItemId)">{{ item.ItemName }}</td>
+                    -->
+                    <td>{{ item.ItemId }}</td>
+                    <td>{{ item.ItemName }}</td>
+                    <td> <!--STATUS    --> </td> 
+                    <td class="g-action-column"></td>
+                </tr>
+
+                @if (expandedItemId() === item.ItemId) {
+                    <tr>
+                    <td colspan="5" class="master-expanded-cell"><app-fg-expanded [itemId]="item.ItemId" [itemName]="item.ItemName" [unitId]="selectedUnitId" [businessId]="selectedBusinessId" /></td>
+                    </tr>
+              }
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  @if (selectedUnitId > 0 && selectedBusinessId > 0) {
+    <div class="card-footer">
+      <app-pagination [(currentPage)]="currentPage" [(pageSize)]="pageSize" [totalItems]="totalItems()" (pageChanged)="changePage($event)" (pageSizeChanged)="changePageSize($event)" />
+    </div>
+  }
+</div>

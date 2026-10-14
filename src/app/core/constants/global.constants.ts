@@ -80,6 +80,9 @@ export const GlobalConstant = {
     updateRolePermission: 'RolePermission',
     deleteRolePermission: 'RolePermission/Delete',
 
+  /*==============================MasterConfiguration====================================*/
+    MasterConfigurationFGs: 'MasterConfiguration/FGs',
+
     /*==============================PLANNING====================================*/
     DeliveryOrders: 'SalesOrderLanding/GetDOData',
     DeliveryOrderLine: 'SalesOrderLanding/GetDOLineData',

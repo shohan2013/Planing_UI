@@ -103,7 +103,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/Requisition/requisition').then((m) => m.Requisition),
       },
-
+      {
+        path: 'masterconfiguration',
+        loadComponent: () =>
+          import('./pages/MasterConfiguration/master-configuration').then((m) => m.MasterConfiguration),
+      },
       {
         path: 'testreport',
         loadComponent: () =>
