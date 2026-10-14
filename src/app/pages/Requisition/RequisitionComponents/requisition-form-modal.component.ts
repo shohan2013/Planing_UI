@@ -42,7 +42,7 @@ import { IDropdownBind } from 'src/app/core/model/Common/dropdown-bind';
 import { IItem } from 'src/app/core/model/Common/Items/Item';
 import { IProductType } from 'src/app/core/model/Common/ProductType/ProductType';
 import { IUnit } from 'src/app/core/model/Common/Unit/Unit';
-import { IUOM } from 'src/app/core/model/Common/UOM/UOM';
+// import { IUOM } from 'src/app/core/model/Common/UOM/UOM';
 import { IRequisition } from 'src/app/core/model/Requisition/Requisition';
 import {
   IViewRequisitionHeader,
@@ -88,7 +88,7 @@ export class RequisitionFormModalComponent implements OnInit {
   readonly units = signal<IUnit[]>([]);
   readonly businesses = signal<IBusiness[]>([]);
   readonly productTypes = signal<IProductType[]>([]);
-  readonly uoms = signal<IUOM[]>([]);
+  // readonly uoms = signal<IUOM[]>([]);
   readonly documentStatuses = signal<IDropdownBind[]>([]);
 
   readonly unitDataLoading = signal(false);
@@ -154,10 +154,10 @@ export class RequisitionFormModalComponent implements OnInit {
 
     ItemName: new FormControl(''),
 
-    UOMId: new FormControl(
-      '',
-      Validators.required,
-    ),
+    // UOMId: new FormControl(
+    //   '',
+    //   Validators.required,
+    // ),
 
     Quantity: new FormControl('', [
       Validators.required,
@@ -326,7 +326,7 @@ complete(): void {
       ?.reset('');
 
     this.businesses.set([]);
-    this.uoms.set([]);
+    // this.uoms.set([]);
 
     this.lines.clear();
     this.resetLineInput();
@@ -380,12 +380,12 @@ if (
 }
 
 
-    const selectedUOM =
-      this.uoms().find(
-        (uom) =>
-          Number(uom.Id) ===
-          Number(lineValue.UOMId),
-      );
+    // const selectedUOM =
+    //   this.uoms().find(
+    //     (uom) =>
+    //       Number(uom.Id) ===
+    //       Number(lineValue.UOMId),
+    //   );
 
     const line = new FormGroup({
       ID: new FormControl(0),
@@ -417,13 +417,8 @@ if (
             ),
       ),
 
-      UOMId: new FormControl(
-        Number(lineValue.UOMId),
-      ),
-
-      UOMName: new FormControl(
-        selectedUOM?.Name ?? '',
-      ),
+      UOMId: new FormControl(0),
+      UOMName: new FormControl('N/A'),
 
       Quantity: new FormControl(
         Number(lineValue.Quantity),
@@ -823,172 +818,57 @@ if (
       });
   }
 
-  private initializeEditMode(
-    header: IViewRequisitionHeader,
-  ): void {
+  private initializeEditMode(header: IViewRequisitionHeader): void {
     this.formGroup.patchValue({
-      UnitId:
-        String(header.UnitId),
-
-      BusinessId:
-        String(header.BusinessId),
-
-      ReqDate:
-        this.toDateInputValue(
-          header.ReqDate,
-        ),
-
-      StartDate:
-        this.toDateInputValue(
-          header.StartDate,
-        ),
-
-      EndDate:
-        this.toDateInputValue(
-          header.EndDate,
-        ),
-
-      Remarks:
-        header.Remarks ?? '',
+      UnitId: String(header.UnitId),
+      BusinessId: String(header.BusinessId),
+      ReqDate: this.toDateInputValue(header.ReqDate),
+      StartDate: this.toDateInputValue(header.StartDate),
+      EndDate: this.toDateInputValue(header.EndDate),
+      Remarks: header.Remarks ?? '',
     });
 
-    this.formGroup
-      .get('UnitId')
-      ?.disable();
-
-    this.formGroup
-      .get('BusinessId')
-      ?.disable();
+    this.formGroup.get('UnitId')?.disable();
+    this.formGroup.get('BusinessId')?.disable();
 
     forkJoin({
-      businesses:
-        this.commonService
-          .GetBusinessList(
-            header.UnitId,
-          ),
-
-      uoms:
-        this.commonService
-          .GetUOMList(
-            header.UnitId,
-          ),
-
-      lines:
-        this.requisitionService
-          .GetLinesByReqId(
-            header.ReqID,
-          ),
+      businesses: this.commonService.GetBusinessList(header.UnitId),
+      lines: this.requisitionService.GetLinesByReqId(header.ReqID),
     })
-      .pipe(
-        takeUntilDestroyed(
-          this.destroyRef,
-        ),
-      )
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: ({
-          businesses,
-          uoms,
-          lines,
-        }) => {
-          this.businesses.set(
-            businesses,
-          );
-
-          this.uoms.set(uoms);
-
-          this.populateExistingLines(
-            lines.filter(
-              (line) =>
-                line.IsActive,
-            ),
-          );
-
+        next: ({ businesses, lines }) => {
+          this.businesses.set(businesses);
+          this.populateExistingLines(lines.filter((line) => line.IsActive));
           this.state.set('ready');
         },
-
-        error: (
-          error: HttpErrorResponse,
-        ) => {
+        error: (error: HttpErrorResponse) => {
           this.failInitialization(
-            this.getErrorMessage(
-              error,
-              'Unable to load the requisition for editing.',
-            ),
+            this.getErrorMessage(error, 'Unable to load the requisition for editing.'),
           );
         },
       });
   }
 
-  private loadUnitDependentData(
-    unitId: number,
-  ): void {
-    this.unitDataLoading.set(
-      true,
-    );
+  private loadUnitDependentData(unitId: number): void {
+    this.unitDataLoading.set(true);
 
-    forkJoin({
-      businesses:
-        this.commonService
-          .GetBusinessList(unitId),
-
-      uoms:
-        this.commonService
-          .GetUOMList(unitId),
-    })
-      .pipe(
-        takeUntilDestroyed(
-          this.destroyRef,
-        ),
-      )
+    this.commonService.GetBusinessList(unitId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: ({
-          businesses,
-          uoms,
-        }) => {
-          if (
-            this.selectedUnitId !==
-            unitId
-          ) {
-            return;
-          }
+        next: (businesses) => {
+          if (this.selectedUnitId !== unitId) return;
 
-          this.businesses.set(
-            businesses,
-          );
-
-          this.uoms.set(uoms);
-
-          console.log(
-            `Loaded ${businesses.length} businesses and ${uoms.length} UOMs for Unit ID ${unitId}.`,
-          );
-
-          this.unitDataLoading.set(
-            false,
-          );
+          this.businesses.set(businesses);
+          this.unitDataLoading.set(false);
         },
-
-        error: (
-          error: HttpErrorResponse,
-        ) => {
-          if (
-            this.selectedUnitId !==
-            unitId
-          ) {
-            return;
-          }
+        error: (error: HttpErrorResponse) => {
+          if (this.selectedUnitId !== unitId) return;
 
           this.businesses.set([]);
-          this.uoms.set([]);
-
-          this.unitDataLoading.set(
-            false,
-          );
-
+          this.unitDataLoading.set(false);
           this.toastr.error(
-            this.getErrorMessage(
-              error,
-              'Unable to load Unit-related information.',
-            ),
+            this.getErrorMessage(error, 'Unable to load Unit-related information.'),
           );
         },
       });
@@ -1416,10 +1296,7 @@ if (
               Number(line.UOMId),
             ),
 
-            UOMName:
-              new FormControl(
-                line.UOMName ?? '',
-              ),
+            UOMName: new FormControl(Number(line.UOMId) === 0 ? 'N/A' : (line.UOMName ?? '')),
 
             Quantity:
               new FormControl(
@@ -1478,7 +1355,6 @@ if (
       ItemSearch: '',
       ItemId: '',
       ItemName: '',
-      UOMId: '',
       Quantity: '',
       StockQuantity: 0,
       SalesQuantity: 0,
@@ -1593,8 +1469,7 @@ if (
                   )
                 : null,
 
-            UOMId:
-              Number(line.UOMId),
+            UOMId: 0,
 
             Quantity:
               Number(
@@ -1784,8 +1659,7 @@ if (
                   )
                 : null,
 
-            UOMId:
-              Number(line.UOMId),
+            UOMId: 0,
 
             Quantity:
               Number(
