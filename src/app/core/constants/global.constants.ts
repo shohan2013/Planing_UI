@@ -64,6 +64,7 @@ export const GlobalConstant = {
     MachineUtilization: 'MachineDashboard/GetMachineUtilization',
     PlanningVsProductionDeliveryOrders: 'Common/GetDeliveryOrders',
     PlanningVsProductionOverview: 'PlanningVsProduction/GetOverview',
+    PlanningVsProductionOverviewTotals: 'PlanningVsProduction/GetOverviewTotals',
     WorkType: 'Common/WorkType',
 
     /*===========================ROLE===================================== */

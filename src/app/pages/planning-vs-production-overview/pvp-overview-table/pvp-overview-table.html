@@ -5,7 +5,7 @@
       Showing
       <strong>{{ counts().orders | number }}</strong> Delivery Orders /
       <strong>{{ counts().items | number }}</strong> Items
-      <span class="pvp-chip">{{ counts().customers | number }} Customers</span>
+      <span class="pvp-chip">{{ totalCustomers() | number }} Customers</span>
     </div>
 
     <div class="pvp-toolbar__actions">
@@ -16,10 +16,10 @@
           class="form-control"
           placeholder="Search in results..."
           aria-label="Search in results"
-          [ngModel]="search()"
+          [ngModel]="searchText()"
           (ngModelChange)="onSearch($event)"
         />
-        @if (search()) {
+        @if (searchText()) {
           <button type="button" class="pvp-search__clear" (click)="onSearch('')" aria-label="Clear search">
             <i class="fas fa-times"></i>
           </button>
@@ -31,8 +31,12 @@
         {{ allExpanded() ? 'Collapse All' : 'Expand All' }}
       </button>
 
-      <button type="button" class="btn pvp-tool-btn" (click)="exportExcel()" [disabled]="!filteredRows().length">
-        <i class="fas fa-file-excel"></i>
+      <button type="button" class="btn pvp-tool-btn" (click)="exportExcel()" [disabled]="!rows().length || exporting()">
+        @if (exporting()) {
+          <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+        } @else {
+          <i class="fas fa-file-excel"></i>
+        }
         Export Excel
       </button>
 
@@ -151,7 +155,7 @@
                   @case ('Status') {
                     <td>
                       @if (row.node.Status) {
-                        <span class="pvp-badge" [class]="'pvp-badge ' + statusClass(row.node.Status)">{{ row.node.Status }}</span>
+                        <span class="pvp-badge" [class]="'pvp-badge ' + statusClass(row.node.Status)">{{ statusLabel(row.node.Status) }}</span>
                       }
                     </td>
                   }
@@ -183,13 +187,14 @@
     </div>
   </div>
 
-  @if (!loading() && tree().length) {
+  <!-- Paged by customer on the server: totalItems = customers matching filter + search. -->
+  @if (!loading() && totalCustomers()) {
     <app-pagination
-      [totalItems]="tree().length"
+      [totalItems]="totalCustomers()"
       [pageSizes]="[5, 10, 25, 50]"
-      [currentPage]="page()"
-      (currentPageChange)="page.set($event)"
-      [pageSize]="pageSize()"
+      [currentPage]="pageQuery().page"
+      (currentPageChange)="onPageChange($event)"
+      [pageSize]="pageQuery().pageSize"
       (pageSizeChanged)="onPageSizeChange($event)"
     />
   }

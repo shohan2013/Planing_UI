@@ -162,6 +162,8 @@
       name="status"
       class="pvp-select"
       [items]="statuses"
+      bindLabel="name"
+      bindValue="id"
       placeholder="All Status"
       [searchable]="false"
       [ngModel]="draft().Status"

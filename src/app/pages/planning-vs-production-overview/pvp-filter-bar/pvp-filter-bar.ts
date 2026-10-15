@@ -23,7 +23,6 @@ import {
   IPvpItemScope,
   IPvpOption,
   PVP_STATUSES,
-  PvpStatus,
 } from 'src/app/core/model/PlanningVsProduction/planning-vs-production.model';
 
 /** Wait this long after the last keystroke before asking the API. */
@@ -62,7 +61,8 @@ export class PvpFilterBar {
   /** Unit plus typed prefix for the item search. */
   readonly itemScopeChange = output<IPvpItemScope>();
 
-  readonly statuses: PvpStatus[] = PVP_STATUSES;
+  /** { id, name } options; the numeric id goes to the API as Status. */
+  readonly statuses = PVP_STATUSES;
   readonly draft = signal<IPvpFilter>({} as IPvpFilter);
   /** Businesses are loaded from the API for the chosen unit only. */
   readonly canPickBusiness = computed(() => !!this.draft().UnitId);

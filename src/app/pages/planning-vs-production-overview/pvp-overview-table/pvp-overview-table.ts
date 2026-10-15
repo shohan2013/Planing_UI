@@ -9,11 +9,14 @@ import {
   effect,
   inject,
   input,
+  output,
   signal,
   untracked,
   viewChild,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { Observable, Subject, debounceTime, distinctUntilChanged, finalize } from 'rxjs';
 
 import {
   IPvpColumn,
@@ -21,8 +24,10 @@ import {
   IPvpTreeNode,
   PvpSortKey,
   PvpStatus,
+  pvpStatusLabel,
 } from 'src/app/core/model/PlanningVsProduction/planning-vs-production.model';
-import { buildPvpTree, deriveStatus, sortPvpTree } from 'src/app/core/model/PlanningVsProduction/planning-vs-production.util';
+import { buildPvpTree, deriveStatus } from 'src/app/core/model/PlanningVsProduction/planning-vs-production.util';
+import { ServerQueryRequest } from 'src/app/core/model/Common/Pagination/ServerQueryRequest';
 import { PaginationComponent } from 'src/app/shared/pagination/pagination.component';
 import { PvpProgressBar } from '../pvp-progress-bar/pvp-progress-bar';
 
@@ -32,6 +37,9 @@ interface IFlatRow {
   expandable: boolean;
   expanded: boolean;
 }
+
+/** Wait this long after the last keystroke before searching on the server. */
+const SEARCH_DEBOUNCE_MS = 300;
 
 const DEFAULT_COLUMNS: IPvpColumn[] = [
   { Key: 'OrderDate', Title: 'Order Date', Visible: true, Sortable: 'OrderDate' },
@@ -55,52 +63,45 @@ const DEFAULT_COLUMNS: IPvpColumn[] = [
 })
 export class PvpOverviewTable {
 
+  /** Item rows of the customers on the current page (already searched / sorted / paged by the API). */
   readonly rows = input<IPvpItemRow[]>([]);
   readonly loading = input(false);
+  /** Customers matching the filter + search: the paging total. */
+  readonly totalCustomers = input(0);
+  readonly pageQuery = input.required<ServerQueryRequest>();
+  /** Loads every row for the current filter / search / sort (all pages), for the export. */
+  readonly fetchAllRows = input<(() => Observable<IPvpItemRow[]>) | null>(null);
 
-  readonly search = signal('');
-  readonly sortKey = signal<PvpSortKey | null>(null);
-  readonly sortDir = signal<1 | -1>(1);
-  readonly page = signal(1);
-  readonly pageSize = signal(10);
+  /** Page, page size, search or sort changed: the parent re-queries the API. */
+  readonly pageQueryChange = output<Partial<ServerQueryRequest>>();
+
+  /** Text typed in "Search in results"; sent to the API after a pause. */
+  readonly searchText = signal('');
+  private readonly searchInput = new Subject<string>();
+  readonly exporting = signal(false);
   readonly expanded = signal<Set<string>>(new Set());
   readonly columns = signal<IPvpColumn[]>(DEFAULT_COLUMNS.map((c) => ({ ...c })));
 
   readonly visibleColumns = computed(() => this.columns().filter((c) => c.Visible));
   readonly visibleKeys = computed(() => new Set(this.visibleColumns().map((c) => c.Key)));
 
-  /** Quick "search in results" is applied on item rows, then the tree is rebuilt so totals stay correct. */
-  readonly filteredRows = computed(() => {
-    const q = this.search().trim().toLowerCase();
-    if (!q) return this.rows();
-    return this.rows().filter((r) =>
-      [r.CustomerName, r.DeliveryOrderNo, r.ItemCode, r.ItemName, deriveStatus(r)].some((v) =>
-        v?.toLowerCase().includes(q),
-      ),
-    );
-  });
+  /** Rows arrive in the API order (search / sort / paging done there); the tree keeps that order. */
+  readonly tree = computed(() => buildPvpTree(this.rows()));
 
-  readonly tree = computed(() => sortPvpTree(buildPvpTree(this.filteredRows()), this.sortKey(), this.sortDir()));
-
+  /** Counts for the current page. */
   readonly counts = computed(() => {
-    const rows = this.filteredRows();
+    const rows = this.rows();
     return {
-      customers: this.tree().length,
       orders: new Set(rows.map((r) => r.DeliveryOrderId)).size,
       items: rows.length,
     };
   });
 
-  /** Paging is done on customer groups so a customer's orders never split across pages. */
-  readonly pagedTree = computed(() => {
-    const size = Number(this.pageSize()) || 10;
-    const start = (this.page() - 1) * size;
-    return this.tree().slice(start, start + size);
-  });
+  readonly sortKey = computed(() => this.pageQuery().sortBy ?? null);
 
   readonly flatRows = computed<IFlatRow[]>(() => {
     const open = this.expanded();
-    const forceOpen = !!this.search().trim();
+    const forceOpen = !!this.pageQuery().globalSearch?.trim();
     const out: IFlatRow[] = [];
     const walk = (nodes: IPvpTreeNode[], depth: number) => {
       for (const node of nodes) {
@@ -110,7 +111,7 @@ export class PvpOverviewTable {
         if (expanded) walk(node.Children, depth + 1);
       }
     };
-    walk(this.pagedTree(), 0);
+    walk(this.tree(), 0);
     return out;
   });
 
@@ -142,11 +143,24 @@ export class PvpOverviewTable {
       this.destroyRef.onDestroy(() => observer.disconnect());
     });
 
-    // New data from the API: back to page 1 and open the first customer like the design.
+    // Keep the search box in sync when the parent resets the query (Reset button).
+    effect(() => {
+      const term = this.pageQuery().globalSearch ?? '';
+      untracked(() => {
+        if (term !== this.searchText().trim()) this.searchText.set(term);
+      });
+    });
+
+    this.searchInput
+      .pipe(debounceTime(SEARCH_DEBOUNCE_MS), distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe((term) => {
+        if (term !== (this.pageQuery().globalSearch ?? '')) this.pageQueryChange.emit({ globalSearch: term });
+      });
+
+    // New page from the API: open the first customer like the design.
     effect(() => {
       const rows = this.rows();
       untracked(() => {
-        this.page.set(1);
         const first = buildPvpTree(rows)[0];
         this.expanded.set(new Set(first ? [first.Key, ...first.Children.map((c) => c.Key)] : []));
       });
@@ -173,9 +187,10 @@ export class PvpOverviewTable {
     if (bar && el && Math.abs(el.scrollLeft - bar.scrollLeft) > 1) el.scrollLeft = bar.scrollLeft;
   }
 
+  /** Typing searches on the server after a pause. */
   onSearch(value: string): void {
-    this.search.set(value);
-    this.page.set(1);
+    this.searchText.set(value);
+    this.searchInput.next(value.trim());
   }
 
   toggle(row: IFlatRow): void {
@@ -204,38 +219,67 @@ export class PvpOverviewTable {
     this.expanded.set(keys);
   }
 
+  /** Sorting is done by the API: asc -> desc -> off. */
   sortBy(key: PvpSortKey | undefined): void {
     if (!key) return;
-    if (this.sortKey() !== key) {
-      this.sortKey.set(key);
-      this.sortDir.set(1);
-    } else if (this.sortDir() === 1) {
-      this.sortDir.set(-1);
+    const { sortBy: current, sortOrder } = this.pageQuery();
+    if (current !== key) {
+      this.pageQueryChange.emit({ sortBy: key, sortOrder: 'asc' });
+    } else if (sortOrder === 'asc') {
+      this.pageQueryChange.emit({ sortBy: key, sortOrder: 'desc' });
     } else {
-      this.sortKey.set(null); // third click clears sorting
+      this.pageQueryChange.emit({ sortBy: null, sortOrder: null }); // third click clears sorting
     }
   }
 
   sortIcon(key: PvpSortKey | undefined): string {
-    if (!key || this.sortKey() !== key) return 'fa-sort';
-    return this.sortDir() === 1 ? 'fa-sort-up' : 'fa-sort-down';
+    const { sortBy: current, sortOrder } = this.pageQuery();
+    if (!key || current !== key) return 'fa-sort';
+    return sortOrder === 'desc' ? 'fa-sort-down' : 'fa-sort-up';
   }
 
   toggleColumn(key: string): void {
     this.columns.update((cols) => cols.map((c) => (c.Key === key ? { ...c, Visible: !c.Visible } : c)));
   }
 
+  onPageChange(page: number): void {
+    if (page !== this.pageQuery().page) this.pageQueryChange.emit({ page });
+  }
+
   onPageSizeChange(size: number | string): void {
-    this.pageSize.set(Number(size) || 10);
-    this.page.set(1);
+    this.pageQueryChange.emit({ pageSize: Number(size) || 10, page: 1 });
   }
 
+  /** Status name for display ("In Production"); the API sends the numeric code. */
+  statusLabel(status: PvpStatus | undefined): string {
+    return pvpStatusLabel(status);
+  }
+
+  /** Badge modifier from the name, e.g. 'pvp-badge--in-production'. */
   statusClass(status: PvpStatus | undefined): string {
-    return 'pvp-badge--' + (status ?? '').toLowerCase().replace(/\s+/g, '-');
+    return 'pvp-badge--' + pvpStatusLabel(status).toLowerCase().replace(/\s+/g, '-');
   }
 
-  /** Exports item-level rows (respecting search + visible columns) as an Excel-friendly CSV. */
+  /**
+   * Exports every row for the current filter / search / sort (all pages, fetched from the
+   * API) with the visible columns, as an Excel-friendly CSV.
+   */
   exportExcel(): void {
+    const fetchAll = this.fetchAllRows();
+    if (!fetchAll) {
+      this.downloadCsv(this.rows());
+      return;
+    }
+    this.exporting.set(true);
+    fetchAll()
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => this.exporting.set(false)),
+      )
+      .subscribe({ next: (rows) => this.downloadCsv(rows) });
+  }
+
+  private downloadCsv(rows: IPvpItemRow[]): void {
     const cols = this.visibleKeys();
     const header = ['Customer', 'Delivery Order', 'Item Code', 'Item Name'];
     const pick: [string, string, (r: IPvpItemRow) => string | number][] = [
@@ -247,14 +291,14 @@ export class PvpOverviewTable {
       ['RemainToPlan', 'Remain To Plan', (r) => Math.max(r.OrderQty - r.PlannedQty, 0)],
       ['PlanningProgress', 'Planning %', (r) => (r.OrderQty ? ((r.PlannedQty / r.OrderQty) * 100).toFixed(1) : 0)],
       ['ProductionProgress', 'Production %', (r) => (r.OrderQty ? ((r.ProducedQty / r.OrderQty) * 100).toFixed(1) : 0)],
-      ['Status', 'Status', (r) => deriveStatus(r)],
+      ['Status', 'Status', (r) => pvpStatusLabel(deriveStatus(r))],
     ];
     const active = pick.filter(([key]) => cols.has(key));
     const esc = (v: string | number) => `"${String(v ?? '').replace(/"/g, '""')}"`;
 
     const lines = [
       [...header, ...active.map(([, title]) => title)].map(esc).join(','),
-      ...this.filteredRows().map((r) =>
+      ...rows.map((r) =>
         [r.CustomerName, r.DeliveryOrderNo, r.ItemCode, r.ItemName, ...active.map(([, , fn]) => fn(r))]
           .map(esc)
           .join(','),
