@@ -9,6 +9,8 @@ import { IRequisition } from 'src/app/core/model/Requisition/Requisition';
 import { ServerQueryRequest, ServerQueryResponse } from 'src/app/core/model/Common/Pagination/ServerQueryRequest';
 
 import { IViewRequisitionHeader, IViewRequisitionLine } from 'src/app/core/model/Requisition/ViewRequisition';
+import { IBulkRequisitionItem, IBulkRequisitionItemsRequest } from '../../model/Requisition/BulkRequisitionItems';
+import { IACRLBulkFilters } from '../../model/Requisition/ACRLBulkFilters';
 
 @Injectable({
   providedIn: 'root'
@@ -74,6 +76,22 @@ return this.http.get<IViewRequisitionLine[]>(
       },
     );
   }
+
+
+
+  GetACRLBulkFilters(unitId: number, businessId: number): Observable<IACRLBulkFilters> {
+    return this.http.post<IACRLBulkFilters>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.ACRLBulkFilters}`,
+      { unitId, businessId },
+    );
+  }
+
+  GetBulkItems(request: IBulkRequisitionItemsRequest): Observable<IBulkRequisitionItem[]> {
+  return this.http.post<IBulkRequisitionItem[]>(
+    `${environment.API_URL}${GlobalConstant.API_END_POINTS.bulkRequisitionItems}`,
+    request,
+  );
+}
 
 
 

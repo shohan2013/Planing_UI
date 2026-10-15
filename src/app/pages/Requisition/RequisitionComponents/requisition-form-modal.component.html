@@ -1,575 +1,248 @@
-<form
-  [formGroup]="formGroup"
-  (ngSubmit)="submit()"
->
+<form [formGroup]="formGroup" (ngSubmit)="submit()">
   <div class="modal-header">
     <div class="d-flex flex-column align-items-start">
       <h5 class="modal-title d-flex align-items-center gap-2">
-        @if (isEditMode) {<img src="assets/icons/edit.svg" width="16" height="16" alt=""/> EDIT REQUISITION }
-        @else { <img src="assets/icons/create.svg" width="17.5" height="17.5" alt="" /> CREATE NEW}
+        @if (isEditMode) {
+          <img src="assets/icons/edit.svg" width="16" height="16" alt="" /> EDIT REQUISITION
+        } @else {
+          <img src="assets/icons/create.svg" width="17.5" height="17.5" alt="" /> CREATE NEW
+        }
       </h5>
 
-      @if (!isEditMode) {
-        <span
-          class="mt-1 fw-semibold small text-success"
-          [style.display]="selectedUnitId > 0 ? 'none' : 'block'"
-        >
-          [Note: Please select a Unit before adding a product.]
+      @if (!isEditMode && !canShowAddProduct) {
+        <span class="mt-1 fw-semibold small text-success">
+          [Select Unit, Business, Start Date and End Date before adding products.]
         </span>
       }
     </div>
 
-    <button
-      type="button"
-      class="btn-close"
-      aria-label="Close"
-      [disabled]="isSubmitting"
-      (click)="dismiss()"
-    ></button>
+    <button type="button" class="btn-close" aria-label="Close"
+      [disabled]="isSubmitting" (click)="dismiss()"></button>
   </div>
 
   <div class="modal-body">
     @if (state() === 'initializing') {
-      <div
-        class="d-flex justify-content-center align-items-center py-5"
-      >
-        <div
-          class="spinner-border text-success"
-          role="status"
-        >
-          <span class="visually-hidden">
-            Initializing requisition form...
-          </span>
+      <div class="d-flex justify-content-center align-items-center py-5">
+        <div class="spinner-border text-success" role="status">
+          <span class="visually-hidden">Initializing requisition form...</span>
         </div>
       </div>
     } @else {
       <div class="border rounded-3 p-3 mb-3 mt-2">
+        <div class="d-flex justify-content-end align-items-center mb-2 text-nowrap">
+          <span class="fw-semibold me-2">Requisition Date :</span>
+          <span>{{ formGroup.get('ReqDate')?.value | date: 'dd-MMM-yyyy' }}</span>
+        </div>
+
         <div class="row g-3">
-          <div class="col-md-4">
-            <label class="form-label">
-              Unit :
-            </label>
-
-            <select
-              class="form-select"
-              formControlName="UnitId"
-              [ngClass]="{
-                'is-invalid':
-                  submitted &&
-                  f['UnitId'].errors
-              }"
-              (change)="onUnitChange()"
-            >
-              <option value="" disabled>
-                Select Unit
-              </option>
-
-              @for (
-                unit of units();
-                track unit.Id
-              ) {
-                <option [value]="unit.Id">
-                  {{ unit.Name }}
-                </option>
+          <div class="col-lg-3 col-md-6">
+            <label class="form-label" for="reqUnit">Unit :</label>
+            <select id="reqUnit" class="form-select" formControlName="UnitId"
+              (change)="onUnitChange()" [class.is-invalid]="submitted && f['UnitId'].invalid">
+              <option value="" disabled>Select Unit</option>
+              @for (unit of units(); track unit.Id) {
+                <option [value]="unit.Id">{{ unit.Name }}</option>
               }
             </select>
-
-            @if (
-              submitted &&
-              f['UnitId'].errors
-            ) {
-              <div class="invalid-feedback">
-                Please select Unit.
-              </div>
+            @if (submitted && f['UnitId'].invalid) {
+              <div class="invalid-feedback">Please select Unit.</div>
             }
           </div>
 
-          <div class="col-md-4">
-            <label class="form-label">
-              Business :
-            </label>
-
-            <select
-              class="form-select"
-              formControlName="BusinessId"
-              [ngClass]="{
-                'is-invalid':
-                  submitted &&
-                  f['BusinessId'].errors
-              }"
+          <div class="col-lg-3 col-md-6">
+            <label class="form-label" for="reqBusiness">Business :</label>
+            <select id="reqBusiness" class="form-select" formControlName="BusinessId"
               (change)="onBusinessChange()"
-            >
+              [class.is-invalid]="submitted && f['BusinessId'].invalid">
               <option value="" disabled>
-                {{
-                  unitDataLoading()
-                    ? 'Loading Businesses...'
-                    : 'Select Business'
-                }}
+                {{ unitDataLoading() ? 'Loading Businesses...' : 'Select Business' }}
               </option>
-
-              @for (
-                business of businesses();
-                track business.Id
-              ) {
-                <option [value]="business.Id">
-                  {{ business.Name }}
-                </option>
+              @for (business of businesses(); track business.Id) {
+                <option [value]="business.Id">{{ business.Name }}</option>
               }
             </select>
+            @if (submitted && f['BusinessId'].invalid) {
+              <div class="invalid-feedback">Please select Business.</div>
+            }
+          </div>
 
-            @if (
-              submitted &&
-              f['BusinessId'].errors
-            ) {
-              <div class="invalid-feedback">
-                Please select Business.
+          <div class="col-lg-3 col-md-6">
+            <label class="form-label" for="reqStart">Start Date :</label>
+            <input id="reqStart" type="date" class="form-control"
+              formControlName="StartDate"
+              [class.is-invalid]="(f['StartDate'].touched || submitted) && (f['StartDate'].invalid || dateRangeInvalid)" />
+            @if ((f['StartDate'].touched || submitted) && f['StartDate'].invalid) {
+              <div class="invalid-feedback">Start Date is required.</div>
+            } @else if (dateRangeInvalid) {
+              <div class="invalid-feedback d-block">
+                Start Date must not be after End Date.
               </div>
             }
           </div>
 
-          <div class="col-md-4">
-            <label class="form-label">
-              Requisition Date :
-            </label>
-
-            <input
-              type="date"
-              class="form-control"
-              formControlName="ReqDate"
-              readonly
-              [ngClass]="{
-                'is-invalid':
-                  submitted &&
-                  f['ReqDate'].errors
-              }"
-            />
-
-            @if (
-              submitted &&
-              f['ReqDate'].errors
-            ) {
-              <div class="invalid-feedback">
-                Requisition Date is required.
+          <div class="col-lg-3 col-md-6">
+            <label class="form-label" for="reqEnd">End Date :</label>
+            <input id="reqEnd" type="date" class="form-control"
+              formControlName="EndDate"
+              [class.is-invalid]="(f['EndDate'].touched || submitted) && (f['EndDate'].invalid || dateRangeInvalid)" />
+            @if ((f['EndDate'].touched || submitted) && f['EndDate'].invalid) {
+              <div class="invalid-feedback">End Date is required.</div>
+            } @else if (dateRangeInvalid) {
+              <div class="invalid-feedback d-block">
+                End Date must not be before Start Date.
               </div>
             }
           </div>
 
           <div class="col-12">
-            <label class="form-label">
-              Remarks :
-            </label>
-            <textarea class="form-control" formControlName="Remarks" rows="2" maxlength="500" placeholder="Enter remarks..."></textarea>
+            <textarea class="form-control" formControlName="Remarks"
+              rows="2" maxlength="500" placeholder="Enter remarks..."></textarea>
           </div>
         </div>
       </div>
 
-      <hr class="my-4" />
+      @if (!canShowAddProduct && state() === 'ready') {
+        <p class="small text-muted mb-3">
+          Select Unit, Business, and a valid Start and End Date to add products.
+        </p>
+      }
 
-      <fieldset class="border rounded-3 p-3 mt-4">
-        <legend
-          class="float-none w-auto px-2 mb-0"
-        >
-          Add Product
-        </legend>
+      @if (canShowAddProduct) {
+        <fieldset class="border rounded-3 p-3 mt-3">
+          <legend class="float-none w-auto px-2 mb-0">Add Product</legend>
 
-        <div class="row align-items-center mb-3">
-          <div class="col-md-3"></div>
+          @if (isACRL) {
+            <div class="d-flex justify-content-end mb-3">
+              <button type="button" class="btn btn-success"
+                [disabled]="isSubmitting" (click)="openBulkModal()">
+                <i class="fa-solid fa-layer-group me-1"></i> Bulk Add
+              </button>
+            </div>
+          }
 
-          <div class="col-md-6 mt-2 mt-md-0">
-            @if (!isEditMode) {
-              <div
-                class="d-flex align-items-start justify-content-center gap-3"
-              >
-                <div>
-                  <div
-                    class="d-flex align-items-center gap-2"
-                  >
-                    <label
-                      class="form-label mb-0 text-nowrap"
-                    >
-                      Start Date :
-                    </label>
+          <div [formGroup]="lineFormGroup">
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>PRODUCT TYPE</th>
+                    <th>ITEM</th>
+                    <th>QUANTITY</th>
+                    <th>STOCK QUANTITY</th>
+                    <th>SALES QUANTITY</th>
+                    <th>REMARKS</th>
+                    <th>ADD</th>
+                  </tr>
+                </thead>
 
-                    <input
-                      type="date"
-                      class="form-control form-control-sm date-input"
-                      formControlName="StartDate"
-                      [ngClass]="{
-                        'is-invalid':
-                          submitted &&
-                          f['StartDate'].errors
-                      }"
-                    />
-                  </div>
+                <tbody>
+                  <tr>
+                    <td>
+                      <select class="form-select" formControlName="ProductTypeId"
+                        [class.is-invalid]="lineSubmitted && lf['ProductTypeId'].errors">
+                        <option value="" disabled>Select Product Type</option>
+                        @for (productType of productTypes(); track productType.Id) {
+                          <option [value]="productType.Id">{{ productType.Name }}</option>
+                        }
+                      </select>
+                      <div class="invalid-feedback">Please select Product Type.</div>
+                    </td>
 
-                  @if (
-                    submitted &&
-                    f['StartDate'].errors
-                  ) {
-                    <div
-                      class="invalid-feedback d-block text-end"
-                    >
-                      Start Date is required.
-                    </div>
-                  }
-                </div>
+                    <td>
+                      @if (selectedLineProductTypeId === 1) {
+                        <input type="text" class="form-control"
+                          formControlName="ItemName" maxlength="200"
+                          placeholder="Enter Sample Product name"
+                          [class.is-invalid]="lineSubmitted && lf['ItemName'].errors" />
+                        <div class="invalid-feedback">
+                          Please enter a Sample Product name.
+                        </div>
+                      } @else if (selectedLineProductTypeId === 2) {
+                        <input type="text" class="form-control"
+                          formControlName="ItemSearch"
+                          placeholder="Type at least 2 characters"
+                          autocomplete="off"
+                          [ngbTypeahead]="searchItems"
+                          placement="bottom-start"
+                          container="body"
+                          popupClass="requisition-item-dropdown"
+                          [resultFormatter]="itemFormatter"
+                          [inputFormatter]="itemFormatter"
+                          (selectItem)="onItemSelect($event)"
+                          (keydown.arrowdown)="scrollActiveItem()"
+                          (keydown.arrowup)="scrollActiveItem()"
+                          [class.is-invalid]="lineSubmitted && (lf['ItemSearch'].errors || lf['ItemId'].errors)" />
+                        <div class="invalid-feedback">
+                          Please search and select a valid Item.
+                        </div>
 
-                <div
-                  class="border-start align-self-stretch"
-                ></div>
-
-                <div>
-                  <div
-                    class="d-flex align-items-center gap-2"
-                  >
-                    <label
-                      class="form-label mb-0 text-nowrap"
-                    >
-                      End Date :
-                    </label>
-
-                    <input
-                      type="date"
-                      class="form-control form-control-sm date-input"
-                      formControlName="EndDate"
-                      [ngClass]="{
-                        'is-invalid':
-                          submitted &&
-                          f['EndDate'].errors
-                      }"
-                    />
-                  </div>
-
-                  @if (
-                    submitted &&
-                    f['EndDate'].errors
-                  ) {
-                    <div
-                      class="invalid-feedback d-block text-end"
-                    >
-                      End Date is required.
-                    </div>
-                  }
-                </div>
-              </div>
-            } @else {
-              <div class="text-center">
-                <span class="fw-semibold">
-                  Start Date:
-                </span>
-
-                {{
-                  formGroup
-                    .get('StartDate')
-                    ?.value
-                    | date: 'dd-MMM-yyyy'
-                }}
-
-                <span class="mx-3 text-muted">
-                  |
-                </span>
-
-                <span class="fw-semibold">
-                  End Date:
-                </span>
-
-                {{
-                  formGroup
-                    .get('EndDate')
-                    ?.value
-                    | date: 'dd-MMM-yyyy'
-                }}
-              </div>
-            }
-          </div>
-
-          <div class="col-md-3"></div>
-        </div>
-
-        <div [formGroup]="lineFormGroup">
-          <div class="table-responsive">
-            <table class="custom-table">
-
-<!--
-              <colgroup>
-                <col style="width: 13%" />
-                <col style="width: 22%" />
-                <col style="width: 10%" />
-                <col style="width: 10%" />
-                <col style="width: 11%" />
-                <col style="width: 11%" />
-                <col style="width: 16%" />
-                <col style="width: 7%" />
-              </colgroup>
--->
-
-
-              <thead>
-                <tr>
-                  <th>PRODUCT TYPE</th>
-                  <th>ITEM</th>
-                  <!-- <th>UOM</th> -->
-                  <th>QUANTITY</th>
-                  <th>STOCK QUANTITY</th>
-                  <th>SALES QUANTITY</th>
-                  <th>REMARKS</th>
-                  <th>ADD</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                <tr>
-                  <td>
-                    <select
-                      class="form-select"
-                      formControlName="ProductTypeId"
-                      [ngClass]="{
-                        'is-invalid':
-                          lineSubmitted &&
-                          lf['ProductTypeId'].errors
-                      }"
-                    >
-                      <option value="" disabled>
-                        Select Product Type
-                      </option>
-
-                      @for (
-                        productType of productTypes();
-                        track productType.Id
-                      ) {
-                        <option
-                          [value]="productType.Id"
-                        >
-                          {{ productType.Name }}
-                        </option>
+                        @if (isItemSearching()) {
+                          <div class="small text-primary mt-1">
+                            <span class="spinner-border spinner-border-sm me-1"
+                              aria-hidden="true"></span>
+                            Searching...
+                          </div>
+                        }
+                        @if (itemSearchCompleted() && !itemSearchHasResults() && !itemSearchFailed()) {
+                          <div class="small text-muted mt-1">
+                            No matching Items found.
+                          </div>
+                        }
+                        @if (itemSearchFailed()) {
+                          <div class="small text-danger mt-1">
+                            Item search failed. Please try again.
+                          </div>
+                        }
+                      } @else {
+                        <input type="text" class="form-control"
+                          placeholder="Select Product Type first" disabled />
                       }
-                    </select>
+                    </td>
 
-                    <div class="invalid-feedback">
-                      Please select Product Type.
-                    </div>
-                  </td>
-
-                  <td>
-                    @if (
-                      selectedLineProductTypeId === 1
-                    ) {
-                      <input
-                        type="text"
-                        class="form-control"
-                        formControlName="ItemName"
-                        maxlength="200"
-                        placeholder="Enter Sample Product name"
-                        [ngClass]="{
-                          'is-invalid':
-                            lineSubmitted &&
-                            lf['ItemName'].errors
-                        }"
-                      />
-
+                    <td>
+                      <input type="number" class="form-control"
+                        formControlName="Quantity" placeholder="Quantity" min="1"
+                        [class.is-invalid]="lineSubmitted && lf['Quantity'].errors" />
                       <div class="invalid-feedback">
-                        Please enter a Sample Product name.
+                        Please enter a valid Quantity.
                       </div>
-                    } @else if (
-                      selectedLineProductTypeId === 2
-                    ) {
-                      <input
-                        type="text"
-                        class="form-control"
-                        formControlName="ItemSearch"
-                        [placeholder]="
-                          !selectedUnitId
-                            ? 'Select Unit first'
-                            : !formGroup.get('BusinessId')?.value
-                              ? 'Select Business first'
-                              : !formGroup.get('StartDate')?.value ||
-                                  !formGroup.get('EndDate')?.value
-                                ? 'Select Start and End Date first'
-                                : 'Type at least 2 characters'
-                        "
-                        autocomplete="off"
-                        [ngbTypeahead]="searchItems"
-                        placement="bottom-start"
-                        container="body"
-                        [popupClass]="
-                          'requisition-item-dropdown'
-                        "
-                        [resultFormatter]="itemFormatter"
-                        [inputFormatter]="itemFormatter"
-                        (selectItem)="
-                          onItemSelect($event)
-                        "
-                        (keydown.arrowdown)="
-                          scrollActiveItem()
-                        "
-                        (keydown.arrowup)="
-                          scrollActiveItem()
-                        "
-                        [ngClass]="{
-                          'is-invalid':
-                            lineSubmitted &&
-                            (
-                              lf['ItemSearch'].errors ||
-                              lf['ItemId'].errors
-                            )
-                        }"
-                      />
+                    </td>
 
-                      <div class="invalid-feedback">
-                        Please search and select a valid Item.
-                      </div>
+                    <td>
+                      <input type="number" class="form-control"
+                        formControlName="StockQuantity" readonly />
+                    </td>
 
-                      @if (isItemSearching()) {
-                        <div
-                          class="small text-primary mt-1"
-                        >
-                          <span
-                            class="spinner-border spinner-border-sm me-1"
-                            aria-hidden="true"
-                          ></span>
+                    <td>
+                      <input type="number" class="form-control"
+                        formControlName="SalesQuantity" readonly />
+                    </td>
 
-                          Searching...
-                        </div>
-                      }
+                    <td>
+                      <input type="text" class="form-control"
+                        formControlName="Remarks" maxlength="500"
+                        placeholder="Remarks" />
+                    </td>
 
-                      @if (
-                        itemSearchCompleted() &&
-                        !itemSearchHasResults() &&
-                        !itemSearchFailed()
-                      ) {
-                        <div
-                          class="small text-muted mt-1"
-                        >
-                          No matching Items found.
-                        </div>
-                      }
-
-                      @if (itemSearchFailed()) {
-                        <div
-                          class="small text-danger mt-1"
-                        >
-                          Item search failed. Please try again.
-                        </div>
-                      }
-                    } @else {
-                      <input
-                        type="text"
-                        class="form-control"
-                        placeholder="Select Product Type first"
-                        disabled
-                      />
-                    }
-                  </td>
-
-                  <!-- <td>
-                    <select
-                      class="form-select"
-                      formControlName="UOMId"
-                      [ngClass]="{
-                        'is-invalid':
-                          lineSubmitted &&
-                          lf['UOMId'].errors
-                      }"
-                    >
-                      <option value="" disabled>
-                        {{
-                          unitDataLoading()
-                            ? 'Loading UOMs...'
-                            : 'Select UOM'
-                        }}
-                      </option>
-
-                      @for (
-                        uom of uoms();
-                        track uom.Id
-                      ) {
-                        <option [value]="uom.Id">
-                          {{ uom.Name }}
-                        </option>
-                      }
-                    </select>
-
-                    <div class="invalid-feedback">
-                      Please select UOM.
-                    </div>
-                  </td> -->
-
-                  <td>
-                    <input
-                      type="number"
-                      class="form-control"
-                      formControlName="Quantity"
-                      placeholder="Quantity"
-                      min="1"
-                      [ngClass]="{
-                        'is-invalid':
-                          lineSubmitted &&
-                          lf['Quantity'].errors
-                      }"
-                    />
-
-                    <div class="invalid-feedback">
-                      Please enter a valid Quantity.
-                    </div>
-                  </td>
-
-                  <td>
-                    <input
-                      type="number"
-                      class="form-control"
-                      formControlName="StockQuantity"
-                      readonly
-                    />
-                  </td>
-
-                  <td>
-                    <input
-                      type="number"
-                      class="form-control"
-                      formControlName="SalesQuantity"
-                      readonly
-                    />
-                  </td>
-
-                  <td>
-                    <input type="text" class="form-control" formControlName="Remarks" maxlength="500" placeholder="Remarks" />
-
-                  </td>
-
-                  <td>
-
-
-<button
-  type="button"
-  class="btn btn-success text-nowrap"
-  title="Add Line"
-  [disabled]="
-    !canAddLine ||
-    isSubmitting
-  "
-  (click)="addLine()"
->
-  <i class="fa-solid fa-plus me-1"></i> Add
-</button>
-
-
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                    <td>
+                      <button type="button" class="btn btn-success text-nowrap"
+                        title="Add Line" [disabled]="!canAddLine || isSubmitting"
+                        (click)="addLine()">
+                        <i class="fa-solid fa-plus me-1"></i> Add
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-      </fieldset>
+        </fieldset>
+      }
 
       <hr class="my-4" />
 
-      @if (
-        submitted &&
-        lines.length === 0
-      ) {
-        <div
-          class="alert alert-danger py-2 mt-3"
-        >
+      @if (submitted && lines.length === 0) {
+        <div class="alert alert-danger py-2 mt-3">
           At least one Requisition Line is required.
         </div>
       }
@@ -577,27 +250,6 @@
       @if (lines.length > 0) {
         <div class="table-responsive mt-3">
           <table class="custom-table">
-
-            <!--
-            <colgroup>
-              <col style="width: 4%" />
-              <col style="width: 12%" />
-              <col style="width: 24%" />
-              <col style="width: 10%" />
-              <col style="width: 8%" />
-              <col style="width: 10%" />
-              <col style="width: 10%" />
-              <col style="width: 10%" />
-
-              @if (isEditMode) {
-                <col style="width: 8%" />
-              }
-
-              <col style="width: 4%" />
-            </colgroup>
--->
-
-
             <thead>
               <tr>
                 <th>#</th>
@@ -605,73 +257,31 @@
                 <th>ITEM</th>
                 <th>UOM</th>
                 <th>QUANTITY</th>
-
                 @if (isEditMode) {
                   <th>REMAINING QUANTITY</th>
                 }
-
                 <th>STOCK QUANTITY</th>
                 <th>SALES QUANTITY</th>
                 <th>REMARKS</th>
-
-
-
-                <!-- @if (isEditMode) {
-                  <th>STATUS</th>
-                } -->
-
                 <th>ACTION</th>
               </tr>
             </thead>
 
             <tbody>
-              @for (
-                line of lines.controls;
-                track line;
-                let index = $index
-              ) {
+              @for (line of lines.controls; track line; let index = $index) {
                 <tr>
-                  <td class="text-center">
-                    {{ index + 1 }}
-                  </td>
-
+                  <td class="text-center">{{ index + 1 }}</td>
                   <td>
-                    {{
-                      getProductTypeName(
-                        +line.get('ProductTypeId')?.value
-                      )
-                    }}
+                    {{ getProductTypeName(+line.get('ProductTypeId')?.value) }}
                   </td>
-
+                  <td>{{ line.get('ItemName')?.value || '-' }}</td>
                   <td>
-                    {{
-                      line.get('ItemName')?.value ||
-                        '-'
-                    }}
+                    {{ +line.get('UOMId')?.value === 0 ? 'N/A' : (line.get('UOMName')?.value || '-') }}
                   </td>
-
-                  <td>{{ +line.get('UOMId')?.value === 0 ? 'N/A' : (line.get('UOMName')?.value || '-') }}</td>
-                  <!-- <td>
-                    {{
-                      line.get('UOMName')?.value ||
-                        '-'
-                    }}
-                  </td> -->
-
-                  <td>
-                    {{
-                      line.get('Quantity')?.value
-                    }}
-                  </td>
-
-
+                  <td>{{ line.get('Quantity')?.value }}</td>
 
                   @if (isEditMode) {
-                    <td
-                      [style.background-color]="
-                        line.get('RemainingQuantity')?.value < 0 ? '#fff1f2' : null
-                      "
-                    >
+                    <td [style.background-color]="line.get('RemainingQuantity')?.value < 0 ? '#fff1f2' : null">
                       {{
                         line.get('RemainingQuantity')?.value == null
                           ? '-'
@@ -680,67 +290,21 @@
                             : line.get('RemainingQuantity')?.value
                       }}
                     </td>
-                  }     
-
-
-
-                  <td>
-                    {{
-                      line.get('StockQuantity')?.value
-                    }}
-                  </td>
-
-                  <td>
-                    {{
-                      line.get('SalesQuantity')?.value
-                    }}
-                  </td>
-
-                  <td><div class="g-scrollable-text sm" [title]="line.get('Remarks')?.value || ''">{{ line.get('Remarks')?.value || '-' }}</div></td>
-
-                  <!--
-                  @if (isEditMode) {
-                    <td>
-                      <span
-                        class="g-status g-status-sm"
-                        [ngClass]="{
-                          'status-pending':
-                            +line.get('DocStatusId')?.value === 1,
-                          'status-approve':
-                            +line.get('DocStatusId')?.value === 2,
-                          'status-reject':
-                            +line.get('DocStatusId')?.value === 3
-                        }"
-                      >
-                    
-
-
-
-
-                        <span class="g-dot"></span>
-
-                        {{
-                          getDocStatusName(
-                            +line.get('DocStatusId')?.value
-                          )
-                        }}
-                      </span>
-                    </td>
                   }
-                   -->
 
-  
+                  <td>{{ line.get('StockQuantity')?.value }}</td>
+                  <td>{{ line.get('SalesQuantity')?.value }}</td>
+                  <td>
+                    <div class="g-scrollable-text sm"
+                      [title]="line.get('Remarks')?.value || ''">
+                      {{ line.get('Remarks')?.value || '-' }}
+                    </div>
+                  </td>
                   <td class="text-end">
-                    <button
-                      type="button"
-                      class="action-btn btn-delete"
-                      title="Delete Line"
-                      [disabled]="isSubmitting"
-                      (click)="removeLine(index)"
-                    >
-                      <i
-                        class="fa-solid fa-trash-can"
-                      ></i>
+                    <button type="button" class="action-btn btn-delete"
+                      title="Delete Line" [disabled]="isSubmitting"
+                      (click)="removeLine(index)">
+                      <i class="fa-solid fa-trash-can"></i>
                     </button>
                   </td>
                 </tr>
@@ -751,86 +315,189 @@
       }
 
       @if (lines.length < 2) {
-        <div
-          class="empty-requisition-lines"
-          [style.min-height]="
-            lines.length === 0
-              ? '80px'
-              : '40px'
-          "
-        ></div>
+        <div class="empty-requisition-lines"
+          [style.min-height]="lines.length === 0 ? '80px' : '40px'"></div>
       }
     }
   </div>
 
   <div class="modal-footer">
-    <button
-      type="button"
-      class="btn btn-secondary"
-      [disabled]="isSubmitting"
-      (click)="close()"
-    >
-      <i class="fa-solid fa-fw fa-xmark"></i>
-      Close
+    <button type="button" class="btn btn-secondary"
+      [disabled]="isSubmitting" (click)="close()">
+      <i class="fa-solid fa-fw fa-xmark"></i> Close
     </button>
 
     @if (state() !== 'initializing') {
       <button
-
-      *menuPermission="
-        isEditMode
-          ? PermissionAction.Update
-          : PermissionAction.Insert
-      "
-
-
+        *menuPermission="isEditMode ? PermissionAction.Update : PermissionAction.Insert"
         type="submit"
         class="btn btn-success"
-        [disabled]="
-          isSubmitting ||
-          unitDataLoading() ||
-          (isEditMode && header?.DocStatusId === 4)
-        "
-      >
+        [disabled]="isSubmitting || unitDataLoading() || (isEditMode && header?.DocStatusId === 4)">
         @if (isSubmitting) {
-          <span
-            class="spinner-border spinner-border-sm me-2"
-            aria-hidden="true"
-          ></span>
+          <span class="spinner-border spinner-border-sm me-2"
+            aria-hidden="true"></span>
         } @else {
-          <i
-            class="fa-solid fa-fw fa-check"
-          ></i>
+          <i class="fa-solid fa-fw fa-check"></i>
         }
-
         {{
           isSubmitting
-            ? (
-                isEditMode
-                  ? 'Updating...'
-                  : 'Saving...'
-              )
-            : (
-                isEditMode
-                  ? 'Update'
-                  : 'Save'
-              )
+            ? (isEditMode ? 'Updating...' : 'Saving...')
+            : (isEditMode ? 'Update' : 'Save')
         }}
       </button>
     }
 
     @if (isEditMode && state() !== 'initializing') {
-      <button
+      <button type="button" class="btn btn-complete me-3"
         [disabled]="isSubmitting || header?.DocStatusId === 4"
-        type="button"
-        class="btn btn-complete me-3"
-        (click)="complete()"
-      >
+        (click)="complete()">
         Complete
       </button>
     }
-
-
-
   </div>
 </form>
+
+<ng-template #bulkModal>
+  <div class="modal-header">
+    <h5 class="modal-title">Bulk Add Products</h5>
+    <button type="button" class="btn-close" aria-label="Close"
+      (click)="closeBulkModal()"></button>
+  </div>
+
+  <div class="modal-body bulk-body">
+    <div class="row g-3 align-items-end" [formGroup]="bulkFilters">
+      <div class="col-md-4">
+        <label class="form-label" for="bulkSize">Size</label>
+        <select id="bulkSize" class="form-select" formControlName="SizeId">
+          <option [ngValue]="0">All sizes</option>
+          @for (option of bulkSizes(); track option.ID) {
+            <option [ngValue]="option.ID">{{ option.Name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label" for="bulkSubCategory">Subcategory</label>
+        <select id="bulkSubCategory" class="form-select" formControlName="SubCategoryId">
+          <option [ngValue]="0">All subcategories</option>
+          @for (option of bulkSubCategories(); track option.ID) {
+            <option [ngValue]="option.ID">{{ option.Name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <button type="button" class="btn btn-success"
+          [disabled]="!canViewBulk" (click)="viewBulkItems()">
+          View
+        </button>
+      </div>
+    </div>
+
+    @if (bulkFiltersLoading()) {
+      <div class="small text-success mt-2">
+        <span class="spinner-border spinner-border-sm me-1"
+          aria-hidden="true"></span>
+        Loading Size and Subcategory...
+      </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center gap-3 mt-4 mb-2">
+      <div class="fw-semibold">
+        Items @if (bulkViewed()) { ({{ bulkRows().length }}) }
+      </div>
+      <input type="search" class="form-control bulk-search"
+        aria-label="Search loaded items"
+        placeholder="Search loaded items by ID or name"
+        [value]="bulkSearch()"
+        [disabled]="!bulkViewed() || bulkItemsLoading()"
+        (input)="setBulkSearch($any($event.target).value)" />
+    </div>
+
+    <div class="table-responsive bulk-table-wrap">
+      <table class="table table-hover align-middle bulk-table">
+        <thead>
+          <tr>
+            <th>
+              <input type="checkbox" aria-label="Select all loaded items"
+                [checked]="bulkAllSelected"
+                [disabled]="!bulkRows().length || bulkItemsLoading()"
+                (change)="selectAllBulk($any($event.target).checked)" />
+            </th>
+            <th>ITEM ID</th>
+            <th>ITEM NAME</th>
+            <th>UOM</th>
+            <th>QUANTITY</th>
+            <th>SALES QUANTITY</th>
+            <th>STOCK QUANTITY</th>
+            <th>REMARKS</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (row of filteredBulkRows; track row.itemId) {
+            <tr [class.bulk-unselected]="!row.selected">
+              <td>
+                <input type="checkbox" [checked]="row.selected"
+                  (change)="setBulkSelected(row, $any($event.target).checked, $any($event.target))" />
+              </td>
+              <td>{{ row.itemId }}</td>
+              <td>{{ row.itemName }}</td>
+              <td>N/A</td>
+              <td>
+                <input type="number" min="0"
+                  class="form-control form-control-sm bulk-quantity"
+                  [class.is-invalid]="row.quantityError"
+                  [value]="row.quantity ?? ''"
+                  (input)="setBulkQuantity(row, $any($event.target).value)" />
+                @if (row.quantityError) {
+                  <div class="invalid-feedback d-block">
+                    Quantity is required.
+                  </div>
+                }
+              </td>
+              <td>{{ row.salesQuantity }}</td>
+              <td>{{ row.stockQuantity }}</td>
+              <td>
+                <input type="text" maxlength="500"
+                  class="form-control form-control-sm"
+                  [value]="row.remarks"
+                  (input)="setBulkRemarks(row, $any($event.target).value)" />
+              </td>
+            </tr>
+          } @empty {
+            @if (bulkViewed() && !bulkItemsLoading()) {
+              <tr>
+                <td colspan="8" class="text-center text-muted py-4">
+                  No matching items.
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+
+      @if (bulkItemsLoading()) {
+        <div class="bulk-loading" role="status" aria-live="polite">
+          <div class="spinner-border text-success" aria-hidden="true"></div>
+          <span class="ms-2">Loading items and quantities...</span>
+        </div>
+      }
+    </div>
+
+    @if (bulkError()) {
+      <div class="alert alert-danger mt-3">{{ bulkError() }}</div>
+    }
+  </div>
+
+  <div class="modal-footer">
+    <span class="me-auto text-muted">{{ bulkSelectedCount }} selected</span>
+    <button type="button" class="btn btn-secondary"
+      (click)="closeBulkModal()">Close</button>
+    <button type="button" class="btn btn-success"
+      [disabled]="!bulkSelectedCount || bulkItemsLoading()"
+      (click)="addBulkLines()">
+      <i class="fa-solid fa-plus me-1"></i> Add
+    </button>
+  </div>
+</ng-template>

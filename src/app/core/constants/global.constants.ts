@@ -34,6 +34,9 @@ export const GlobalConstant = {
     deleteRequisition: 'Requisition/Delete',
     completeRequisition: 'Requisition/complete',
 
+    ACRLBulkFilters: 'Requisition/ACRLBulkFilters',
+    bulkRequisitionItems: 'Requisition/BulkItems',
+
     /*===========================COMMON===================================== */
     Common: 'Common',
     modules: 'Common/modules',

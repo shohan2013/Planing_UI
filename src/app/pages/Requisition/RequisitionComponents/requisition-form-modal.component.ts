@@ -1,96 +1,74 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
-  Component,
-  DestroyRef,
-  Input,
-  OnInit,
-  inject,
-  signal,
+  Component, DestroyRef, Input, OnInit, TemplateRef, ViewChild, inject, signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
-  AbstractControl,
-  FormArray,
-  FormControl,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-  Validators,
+  AbstractControl, FormArray, FormControl, FormGroup,
+  FormsModule, ReactiveFormsModule, Validators,
 } from '@angular/forms';
 import {
-  NgbActiveModal,
-  NgbTypeaheadModule,
+  NgbActiveModal, NgbModal, NgbModalRef, NgbTypeaheadModule,
   NgbTypeaheadSelectItemEvent,
 } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import {
-  catchError,
-  debounceTime,
-  distinctUntilChanged,
-  finalize,
-  forkJoin,
-  Observable,
-  of,
-  switchMap,
-  tap,
+  catchError, debounceTime, distinctUntilChanged, finalize,
+  forkJoin, Observable, of, switchMap, tap,
 } from 'rxjs';
-import { MenuPermissionDirective } from 'src/app/core/directives/menu-permission.directive';
 
+import { MenuPermissionDirective } from 'src/app/core/directives/menu-permission.directive';
 import { IBusiness } from 'src/app/core/model/Common/BusinessType/BusinessType';
 import { IDropdownBind } from 'src/app/core/model/Common/dropdown-bind';
 import { IItem } from 'src/app/core/model/Common/Items/Item';
 import { IProductType } from 'src/app/core/model/Common/ProductType/ProductType';
 import { IUnit } from 'src/app/core/model/Common/Unit/Unit';
-// import { IUOM } from 'src/app/core/model/Common/UOM/UOM';
 import { IRequisition } from 'src/app/core/model/Requisition/Requisition';
 import {
-  IViewRequisitionHeader,
-  IViewRequisitionLine,
+  IViewRequisitionHeader, IViewRequisitionLine,
 } from 'src/app/core/model/Requisition/ViewRequisition';
 import { PermissionAction } from 'src/app/core/services/Authorization/authorization.service';
 import { CommonService } from 'src/app/core/services/Common/CommonService';
 import { RequisitionService } from 'src/app/core/services/Requisition/requisition.service';
 
 export type RequisitionFormMode = 'create' | 'edit';
+type FormModalState = 'initializing' | 'ready' | 'submitting' | 'failed';
 
-type FormModalState =
-  | 'initializing'
-  | 'ready'
-  | 'submitting'
-  | 'failed';
+type BulkRow = {
+  itemId: number;
+  itemName: string;
+  uomId: number;
+  stockQuantity: number;
+  salesQuantity: number;
+  selected: boolean;
+  quantity: number | null;
+  remarks: string;
+  quantityError: boolean;
+};
 
 @Component({
   selector: 'app-requisition-form-modal',
   standalone: true,
   imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    NgbTypeaheadModule,
-    MenuPermissionDirective,
+    CommonModule, FormsModule, ReactiveFormsModule,
+    NgbTypeaheadModule, MenuPermissionDirective,
   ],
   templateUrl: './requisition-form-modal.component.html',
   styleUrl: './requisition-form-modal.component.scss',
 })
 export class RequisitionFormModalComponent implements OnInit {
-
   readonly PermissionAction = PermissionAction;
 
-  @Input({ required: true })
-  mode: RequisitionFormMode = 'create';
-
-  @Input()
-  header: IViewRequisitionHeader | null = null;
+  @Input({ required: true }) mode: RequisitionFormMode = 'create';
+  @Input() header: IViewRequisitionHeader | null = null;
+  @ViewChild('bulkModal') bulkModal!: TemplateRef<unknown>;
 
   readonly state = signal<FormModalState>('initializing');
-
   readonly units = signal<IUnit[]>([]);
   readonly businesses = signal<IBusiness[]>([]);
   readonly productTypes = signal<IProductType[]>([]);
-  // readonly uoms = signal<IUOM[]>([]);
   readonly documentStatuses = signal<IDropdownBind[]>([]);
-
   readonly unitDataLoading = signal(false);
 
   readonly isItemSearching = signal(false);
@@ -98,103 +76,72 @@ export class RequisitionFormModalComponent implements OnInit {
   readonly itemSearchHasResults = signal(true);
   readonly itemSearchFailed = signal(false);
 
-  submitted = false;
-  lineSubmitted = false;
-  deletedLineIds: number[] = [];
+  readonly bulkSizes = signal<{ ID: number; Name: string }[]>([]);
+  readonly bulkSubCategories = signal<{ ID: number; Name: string }[]>([]);
+  readonly bulkFiltersLoading = signal(false);
+  readonly bulkFiltersReady = signal(false);
+  readonly bulkRows = signal<BulkRow[]>([]);
+  readonly bulkItemsLoading = signal(false);
+  readonly bulkViewed = signal(false);
+  readonly bulkError = signal('');
+  readonly bulkSearch = signal('');
+
+  readonly bulkFilters = new FormGroup({
+    SizeId: new FormControl(0, { nonNullable: true }),
+    SubCategoryId: new FormControl(0, { nonNullable: true }),
+  });
 
   readonly formGroup = new FormGroup({
     UnitId: new FormControl('', Validators.required),
-
-    BusinessId: new FormControl(
-      '',
-      Validators.required,
-    ),
-
+    BusinessId: new FormControl('', Validators.required),
     ReqDate: new FormControl(
-      {
-        value:
-          new Date()
-            .toISOString()
-            .split('T')[0],
-        disabled: true,
-      },
+      { value: new Date().toISOString().split('T')[0], disabled: true },
       Validators.required,
     ),
-
-    StartDate: new FormControl(
-      '',
-      Validators.required,
-    ),
-
-    EndDate: new FormControl(
-      '',
-      Validators.required,
-    ),
-
-    Remarks: new FormControl('', [Validators.maxLength(500)]),
-
+    StartDate: new FormControl('', Validators.required),
+    EndDate: new FormControl('', Validators.required),
+    Remarks: new FormControl('', Validators.maxLength(500)),
     Lines: new FormArray([]),
   });
 
   readonly lineFormGroup = new FormGroup({
-    ProductTypeId: new FormControl(
-      2,
-      Validators.required,
-    ),
-
-    ItemSearch: new FormControl(
-      '',
-      Validators.required,
-    ),
-
-    ItemId: new FormControl(
-      '',
-      Validators.required,
-    ),
-
+    ProductTypeId: new FormControl(2, Validators.required),
+    ItemSearch: new FormControl('', Validators.required),
+    ItemId: new FormControl('', Validators.required),
     ItemName: new FormControl(''),
-
-    // UOMId: new FormControl(
-    //   '',
-    //   Validators.required,
-    // ),
-
-    Quantity: new FormControl('', [
-      Validators.required,
-      Validators.min(1),
-    ]),
-
+    Quantity: new FormControl('', [Validators.required, Validators.min(1)]),
     StockQuantity: new FormControl(0),
     SalesQuantity: new FormControl(0),
-    Remarks: new FormControl('', [Validators.maxLength(500)]),
+    Remarks: new FormControl('', Validators.maxLength(500)),
   });
 
-  private readonly destroyRef =
-    inject(DestroyRef);
+  submitted = false;
+  lineSubmitted = false;
+  deletedLineIds: number[] = [];
+
+  private readonly destroyRef = inject(DestroyRef);
+  private bulkModalRef?: NgbModalRef;
+  private bulkRequestId = 0;
+  private filterRequestId = 0;
+  private bulkResultContext = '';
 
   constructor(
     public readonly activeModal: NgbActiveModal,
+    private readonly modalService: NgbModal,
     private readonly commonService: CommonService,
     private readonly requisitionService: RequisitionService,
     private readonly toastr: ToastrService,
   ) {}
 
   ngOnInit(): void {
-    if (
-      this.mode === 'edit' &&
-      !this.header
-    ) {
-      this.failInitialization(
-        'Requisition header information was not provided.',
-      );
-
+    if (this.mode === 'edit' && !this.header) {
+      this.failInitialization('Requisition header information was not provided.');
       return;
     }
 
     this.watchItemInput();
     this.watchProductType();
     this.watchDateRange();
-
     this.loadInitialData();
   }
 
@@ -206,608 +153,577 @@ export class RequisitionFormModalComponent implements OnInit {
     return this.state() === 'submitting';
   }
 
-  get f(): {
-    [key: string]: AbstractControl;
-  } {
+  get f(): { [key: string]: AbstractControl } {
     return this.formGroup.controls;
   }
 
-  get lf(): {
-    [key: string]: AbstractControl;
-  } {
+  get lf(): { [key: string]: AbstractControl } {
     return this.lineFormGroup.controls;
   }
 
   get lines(): FormArray {
-    return this.formGroup.get(
-      'Lines',
-    ) as FormArray;
+    return this.formGroup.get('Lines') as FormArray;
   }
 
   get selectedUnitId(): number {
-    return Number(
-      this.formGroup.get('UnitId')?.value,
-    );
+    return Number(this.formGroup.get('UnitId')?.value);
   }
 
   get selectedLineProductTypeId(): number {
-    return Number(
-      this.lineFormGroup.get(
-        'ProductTypeId',
-      )?.value,
-    );
+    return Number(this.lineFormGroup.get('ProductTypeId')?.value);
+  }
+
+  get dateRangeInvalid(): boolean {
+    const start = this.formGroup.get('StartDate')?.value;
+    const end = this.formGroup.get('EndDate')?.value;
+    return !!start && !!end && start > end;
+  }
+
+  get canShowAddProduct(): boolean {
+    return this.state() === 'ready' &&
+      !this.unitDataLoading() &&
+      this.selectedUnitId > 0 &&
+      Number(this.formGroup.get('BusinessId')?.value) > 0 &&
+      !!this.formGroup.get('StartDate')?.value &&
+      !!this.formGroup.get('EndDate')?.value &&
+      !this.dateRangeInvalid;
   }
 
   get canAddLine(): boolean {
-    return (
-      this.state() === 'ready' &&
-      !this.unitDataLoading() &&
-      this.selectedUnitId > 0 &&
-      Number(
-        this.formGroup.get(
-          'BusinessId',
-        )?.value,
-      ) > 0
-    );
+    return this.canShowAddProduct;
   }
 
+  get isACRL(): boolean {
+    return this.selectedUnitId === 6;
+  }
 
+  get canViewBulk(): boolean {
+    return this.isACRL &&
+      this.canShowAddProduct &&
+      this.bulkFiltersReady() &&
+      !this.bulkFiltersLoading() &&
+      !this.bulkItemsLoading();
+  }
 
+  get filteredBulkRows(): BulkRow[] {
+    const query = this.bulkSearch().trim().toLowerCase();
 
+    return query
+      ? this.bulkRows().filter(row =>
+          String(row.itemId).includes(query) ||
+          row.itemName.toLowerCase().includes(query))
+      : this.bulkRows();
+  }
 
+  get bulkSelectedCount(): number {
+    return this.bulkRows().filter(row => row.selected).length;
+  }
 
-complete(): void {
-  if (!this.header || this.isSubmitting) return;
+  get bulkAllSelected(): boolean {
+    const available = this.bulkRows().filter(row => !this.isAlreadyAdded(row.itemId));
+    return available.length > 0 && available.every(row => row.selected);
+  }
 
-  this.state.set('submitting');
+  private isAlreadyAdded(itemId: number): boolean {
+    return this.lines.controls.some(line =>
+      Number(line.get('ProductTypeId')?.value) === 2 &&
+      Number(line.get('ItemId')?.value) === itemId);
+  }
 
-  this.requisitionService
-    .completeData(this.header.ReqID)
-    .pipe(takeUntilDestroyed(this.destroyRef))
-    .subscribe({
-      next: (response) => {
-        if (response.Status) {
-          this.toastr.success(response.Message);
-          this.activeModal.close({ changed: true });
-        } else {
+  private currentBulkContext(): string {
+    return [
+      this.selectedUnitId,
+      this.formGroup.get('BusinessId')?.value,
+      this.formGroup.get('StartDate')?.value,
+      this.formGroup.get('EndDate')?.value,
+      this.bulkFilters.controls.SizeId.value,
+      this.bulkFilters.controls.SubCategoryId.value,
+    ].join('|');
+  }
+
+  private syncHeaderLock(): void {
+    const locked = this.isEditMode || this.lines.length > 0;
+
+    for (const key of ['UnitId', 'BusinessId', 'StartDate', 'EndDate']) {
+      const control = this.formGroup.get(key);
+
+      if (locked) control?.disable({ emitEvent: false });
+      else control?.enable({ emitEvent: false });
+    }
+  }
+
+  complete(): void {
+    if (!this.header || this.isSubmitting) return;
+
+    this.state.set('submitting');
+
+    this.requisitionService.completeData(this.header.ReqID)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: response => {
+          if (response.Status) {
+            this.toastr.success(response.Message);
+            this.activeModal.close({ changed: true });
+          } else {
+            this.state.set('ready');
+            this.toastr.error(response.Message || 'Unable to complete requisition.');
+          }
+        },
+        error: (error: HttpErrorResponse) => {
           this.state.set('ready');
-          this.toastr.error(response.Message || 'Unable to complete requisition.');
-        }
-      },
-      error: (error: HttpErrorResponse) => {
-        this.state.set('ready');
-        this.toastr.error(
-          this.getErrorMessage(error, 'Unable to complete requisition.'),
-        );
-      },
-    });
-}
-
-
+          this.toastr.error(
+            this.getErrorMessage(error, 'Unable to complete requisition.'),
+          );
+        },
+      });
+  }
 
   close(): void {
-    if (this.isSubmitting) {
-      return;
-    }
-
-    this.activeModal.close({
-      changed: false,
-    });
+    if (!this.isSubmitting) this.activeModal.close({ changed: false });
   }
 
   dismiss(): void {
-    if (this.isSubmitting) {
-      return;
-    }
-
-    this.activeModal.dismiss(
-      'dismissed',
-    );
+    if (!this.isSubmitting) this.activeModal.dismiss('dismissed');
   }
 
   submit(): void {
-    if (this.isSubmitting) {
-      return;
-    }
+    if (this.isSubmitting) return;
 
-    if (this.isEditMode) {
-      this.update();
-      return;
-    }
-
-    this.create();
+    if (this.isEditMode) this.update();
+    else this.create();
   }
 
   onUnitChange(): void {
     const unitId = this.selectedUnitId;
 
-    this.formGroup
-      .get('BusinessId')
-      ?.reset('');
-
+    this.formGroup.get('BusinessId')?.reset('');
     this.businesses.set([]);
-    // this.uoms.set([]);
-
     this.lines.clear();
+    this.syncHeaderLock();
     this.resetLineInput();
-    this.resetItemSearchState();
 
     if (unitId <= 0) {
       this.unitDataLoading.set(false);
       return;
     }
 
-    this.loadUnitDependentData(
-      unitId,
-    );
+    this.loadUnitDependentData(unitId);
   }
 
   onBusinessChange(): void {
     this.lines.clear();
+    this.syncHeaderLock();
     this.resetLineInput();
-    this.resetItemSearchState();
   }
 
   addLine(): void {
     this.lineSubmitted = true;
     this.lineFormGroup.markAllAsTouched();
 
-    if (
-      !this.canAddLine ||
-      this.lineFormGroup.invalid
-    ) {
+    if (!this.canAddLine || this.lineFormGroup.invalid) return;
+
+    const value = this.lineFormGroup.getRawValue();
+    const productTypeId = Number(value.ProductTypeId);
+    const itemId = productTypeId === 1 ? 0 : Number(value.ItemId);
+
+    if (productTypeId === 2 && this.isAlreadyAdded(itemId)) {
+      this.toastr.warning('Item already exists in this requisition.');
       return;
     }
 
-    const lineValue =
-      this.lineFormGroup.getRawValue();
-
-    const productTypeId = Number(
-      lineValue.ProductTypeId,
-    );
-
-//  Restrict adding the same item multiple times for product type 2 (Item) in same requisition
-if (
-  productTypeId === 2 &&
-  this.lines.controls.some(
-    (line) =>
-      Number(line.get('ProductTypeId')?.value) === productTypeId &&
-      Number(line.get('ItemId')?.value) === Number(lineValue.ItemId),
-  )
-) {
-  this.toastr.warning('Item already exists in this requisition.');
-  return;
-}
-
-
-    // const selectedUOM =
-    //   this.uoms().find(
-    //     (uom) =>
-    //       Number(uom.Id) ===
-    //       Number(lineValue.UOMId),
-    //   );
-
-    const line = new FormGroup({
+    this.lines.push(new FormGroup({
       ID: new FormControl(0),
-
-      ReqID: new FormControl(
-        this.header?.ReqID ?? 0,
-      ),
-
-      ProductTypeId:
-        new FormControl(
-          productTypeId,
-        ),
-
-      ItemId: new FormControl(
-        productTypeId === 1
-          ? 0
-          : Number(lineValue.ItemId),
-      ),
-
+      ReqID: new FormControl(this.header?.ReqID ?? 0),
+      ProductTypeId: new FormControl(productTypeId),
+      ItemId: new FormControl(itemId),
       ItemName: new FormControl(
-        productTypeId === 1
-          ? (
-              lineValue.ItemName?.trim() ??
-              ''
-            )
-          : (
-              lineValue.ItemName ??
-              ''
-            ),
+        productTypeId === 1 ? (value.ItemName?.trim() ?? '') : (value.ItemName ?? ''),
       ),
-
       UOMId: new FormControl(0),
       UOMName: new FormControl('N/A'),
-
-      Quantity: new FormControl(
-        Number(lineValue.Quantity),
-      ),
-
+      Quantity: new FormControl(Number(value.Quantity)),
       RemainingQuantity: new FormControl<number | null>(null),
+      StockQuantity: new FormControl(Number(value.StockQuantity) || 0),
+      SalesQuantity: new FormControl(Number(value.SalesQuantity) || 0),
+      Remarks: new FormControl(value.Remarks ?? ''),
+      DocStatusId: new FormControl(1),
+      IsActive: new FormControl(true),
+    }));
 
-      StockQuantity: new FormControl(
-        Number(
-          lineValue.StockQuantity,
-        ) || 0,
-      ),
-
-      SalesQuantity: new FormControl(
-        Number(
-          lineValue.SalesQuantity,
-        ) || 0,
-      ),
-
-      Remarks: new FormControl(
-        lineValue.Remarks ?? '',
-      ),
-
-      DocStatusId:
-        new FormControl(1),
-
-      IsActive:
-        new FormControl(true),
-    });
-
-    this.lines.push(line);
-
-    this.resetLineInput(
-      productTypeId,
-    );
-
+    this.syncHeaderLock();
+    this.resetLineInput(productTypeId);
     this.lineSubmitted = false;
   }
 
   removeLine(index: number): void {
-    const lineId = Number(
-      this.lines
-        .at(index)
-        .get('ID')?.value,
-    );
+    const lineId = Number(this.lines.at(index).get('ID')?.value);
 
-    if (
-      this.isEditMode &&
-      lineId > 0 &&
-      !this.deletedLineIds.includes(
-        lineId,
-      )
-    ) {
-      this.deletedLineIds.push(
-        lineId,
-      );
+    if (this.isEditMode && lineId > 0 && !this.deletedLineIds.includes(lineId)) {
+      this.deletedLineIds.push(lineId);
     }
 
     this.lines.removeAt(index);
+    this.syncHeaderLock();
   }
 
-  onItemSelect(
-    event: NgbTypeaheadSelectItemEvent,
-  ): void {
-    const startDate =
-      this.formGroup.get(
-        'StartDate',
-      )?.value;
-
-    const endDate =
-      this.formGroup.get(
-        'EndDate',
-      )?.value;
-
-    const businessId = Number(
-      this.formGroup.get(
-        'BusinessId',
-      )?.value,
-    );
-
-    if (!startDate || !endDate) {
+  onItemSelect(event: NgbTypeaheadSelectItemEvent): void {
+    if (!this.canShowAddProduct) {
       event.preventDefault();
-
-      this.toastr.warning(
-        'Please select Start Date and End Date first.',
-      );
-
+      this.toastr.warning('Select Unit, Business, and a valid date range first.');
       return;
     }
 
-    if (
-      !this.selectedUnitId ||
-      !businessId
-    ) {
+    const item = event.item as IItem;
+    const itemId = Number(item.Id);
+
+    if (this.isAlreadyAdded(itemId)) {
       event.preventDefault();
-
-      this.toastr.warning(
-        'Please select Unit and Business first.',
-      );
-
+      this.toastr.warning('Item already exists in this requisition.');
       return;
     }
 
-    if (
-      new Date(startDate) >
-      new Date(endDate)
-    ) {
-      event.preventDefault();
+    this.lineFormGroup.patchValue({
+      ItemId: String(item.Id),
+      ItemName: item.Name,
+      StockQuantity: 0,
+      SalesQuantity: 0,
+    }, { emitEvent: false });
 
-      this.toastr.warning(
-        'Start Date cannot be greater than End Date.',
-      );
-
-      return;
-    }
-
-    const item =
-      event.item as IItem;
-
-
-//  Validation - no same item can be added in the same requisition
-if (
-  this.lines.controls.some(
-    (line) =>
-      Number(line.get('ProductTypeId')?.value) === 2 &&
-      Number(line.get('ItemId')?.value) === Number(item.Id),
-  )
-) {
-  event.preventDefault();
-  this.toastr.warning('Item already exists in this requisition.');
-  return;
-}
-
-
-
-
-    this.lineFormGroup.patchValue(
-      {
-        // ItemId: item.Id,
-        ItemId: String(item.Id),
-        ItemName: item.Name,
-        StockQuantity: 0,
-        SalesQuantity: 0,
-      },
-      {
-        emitEvent: false,
-      },
-    );
-
-    this.loadStockQuantity(
-      Number(item.Id),
-      this.lineFormGroup,
-    );
-
-    this.loadSalesQuantity(
-      Number(item.Id),
-      this.lineFormGroup,
-    );
-
+    this.loadStockQuantity(itemId, this.lineFormGroup);
+    this.loadSalesQuantity(itemId, this.lineFormGroup);
     this.resetItemSearchState();
   }
 
-  searchItems = (
-    text$: Observable<string>,
-  ): Observable<IItem[]> => {
-    return text$.pipe(
+  searchItems = (text$: Observable<string>): Observable<IItem[]> =>
+    text$.pipe(
       debounceTime(800),
       distinctUntilChanged(),
+      switchMap(searchText => {
+        const text = searchText.trim();
 
-      switchMap((searchText) => {
-        const text =
-          searchText.trim();
-
-        this.itemSearchCompleted.set(
-          false,
-        );
-
-        this.itemSearchHasResults.set(
-          true,
-        );
-
-        this.itemSearchFailed.set(
-          false,
-        );
+        this.itemSearchCompleted.set(false);
+        this.itemSearchHasResults.set(true);
+        this.itemSearchFailed.set(false);
 
         if (
-          this.selectedLineProductTypeId !==
-            2 ||
-          !this.selectedUnitId ||
+          this.selectedLineProductTypeId !== 2 ||
+          !this.canShowAddProduct ||
           text.length < 2
         ) {
-          this.isItemSearching.set(
-            false,
-          );
-
+          this.isItemSearching.set(false);
           return of([]);
         }
 
         this.isItemSearching.set(true);
 
-        return this.commonService
-          .GetItemList(
-            this.selectedUnitId,
-            text,
-          )
-          .pipe(
-            tap((items) => {
-              this.itemSearchCompleted.set(
-                true,
-              );
-
-              this.itemSearchHasResults.set(
-                items.length > 0,
-              );
-
-              this.itemSearchFailed.set(
-                false,
-              );
-            }),
-
-            catchError(() => {
-              this.itemSearchCompleted.set(
-                true,
-              );
-
-              this.itemSearchHasResults.set(
-                false,
-              );
-
-              this.itemSearchFailed.set(
-                true,
-              );
-
-              return of([]);
-            }),
-
-            finalize(() => {
-              this.isItemSearching.set(
-                false,
-              );
-            }),
-          );
+        return this.commonService.GetItemList(this.selectedUnitId, text).pipe(
+          tap(items => {
+            this.itemSearchCompleted.set(true);
+            this.itemSearchHasResults.set(items.length > 0);
+            this.itemSearchFailed.set(false);
+          }),
+          catchError(() => {
+            this.itemSearchCompleted.set(true);
+            this.itemSearchHasResults.set(false);
+            this.itemSearchFailed.set(true);
+            return of([]);
+          }),
+          finalize(() => this.isItemSearching.set(false)),
+        );
       }),
     );
-  };
 
-  itemFormatter = (
-    item: IItem | string,
-  ): string => {
-    if (typeof item === 'string') {
-      return item;
-    }
-
-    return item?.Name ?? '';
-  };
+  itemFormatter = (item: IItem | string): string =>
+    typeof item === 'string' ? item : (item?.Name ?? '');
 
   scrollActiveItem(): void {
     setTimeout(() => {
       const dropdown =
-        document.querySelector(
-          '.requisition-item-dropdown',
-        ) as HTMLElement | null;
-
+        document.querySelector('.requisition-item-dropdown') as HTMLElement | null;
       const activeItem =
-        dropdown?.querySelector(
-          '.dropdown-item.active',
-        ) as HTMLElement | null;
+        dropdown?.querySelector('.dropdown-item.active') as HTMLElement | null;
 
-      if (
-        !dropdown ||
-        !activeItem
-      ) {
-        return;
-      }
+      if (!dropdown || !activeItem) return;
 
-      const itemTop =
-        activeItem.offsetTop;
+      const top = activeItem.offsetTop;
+      const bottom = top + activeItem.offsetHeight;
+      const visibleTop = dropdown.scrollTop;
+      const visibleBottom = visibleTop + dropdown.clientHeight;
 
-      const itemBottom =
-        itemTop +
-        activeItem.offsetHeight;
-
-      const visibleTop =
-        dropdown.scrollTop;
-
-      const visibleBottom =
-        visibleTop +
-        dropdown.clientHeight;
-
-      if (
-        itemTop < visibleTop
-      ) {
-        dropdown.scrollTop =
-          itemTop;
-      } else if (
-        itemBottom >
-        visibleBottom
-      ) {
-        dropdown.scrollTop =
-          itemBottom -
-          dropdown.clientHeight;
-      }
+      if (top < visibleTop) dropdown.scrollTop = top;
+      else if (bottom > visibleBottom) dropdown.scrollTop = bottom - dropdown.clientHeight;
     });
   }
 
-  getProductTypeName(
-    productTypeId: number,
-  ): string {
-    return (
-      this.productTypes().find(
-        (productType) =>
-          Number(
-            productType.Id,
-          ) ===
-          Number(
-            productTypeId,
-          ),
-      )?.Name ?? '-'
-    );
+  getProductTypeName(productTypeId: number): string {
+    return this.productTypes().find(type =>
+      Number(type.Id) === Number(productTypeId))?.Name ?? '-';
   }
 
-  getDocStatusName(
-    docStatusId: number,
-  ): string {
-    return (
-      this.documentStatuses().find(
-        (status) =>
-          Number(status.Id) ===
-          Number(docStatusId),
-      )?.Name ?? '-'
-    );
+  getDocStatusName(docStatusId: number): string {
+    return this.documentStatuses().find(status =>
+      Number(status.Id) === Number(docStatusId))?.Name ?? '-';
+  }
+
+  openBulkModal(): void {
+    if (!this.canShowAddProduct || !this.isACRL || !this.bulkModal) return;
+
+    this.bulkModalRef = this.modalService.open(this.bulkModal, {
+      fullscreen: true,
+      scrollable: true,
+      backdrop: 'static',
+      windowClass: 'requisition-bulk-modal',
+    });
+
+    const unitId = this.selectedUnitId;
+    const businessId = Number(this.formGroup.get('BusinessId')?.value);
+    const requestId = ++this.filterRequestId;
+
+    this.bulkFiltersLoading.set(true);
+    this.bulkFiltersReady.set(false);
+
+    this.requisitionService.GetACRLBulkFilters(unitId, businessId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: filters => {
+          if (requestId !== this.filterRequestId) return;
+
+          if (
+            unitId !== this.selectedUnitId ||
+            businessId !== Number(this.formGroup.get('BusinessId')?.value)
+          ) return;
+
+          this.bulkSizes.set(filters.Sizes);
+          this.bulkSubCategories.set(filters.SubCategories);
+          this.bulkFiltersLoading.set(false);
+          this.bulkFiltersReady.set(true);
+        },
+        error: (error: HttpErrorResponse) => {
+          if (requestId !== this.filterRequestId) return;
+
+          this.bulkFiltersLoading.set(false);
+          this.toastr.error(
+            this.getErrorMessage(error, 'Unable to load ACRL bulk filters.'),
+          );
+        },
+      });
+  }
+
+  closeBulkModal(): void {
+    this.bulkModalRef?.close();
+    this.bulkModalRef = undefined;
+  }
+
+  viewBulkItems(): void {
+    if (!this.canViewBulk) return;
+
+    const requestId = ++this.bulkRequestId;
+
+    this.bulkRows.set([]);
+    this.bulkViewed.set(false);
+    this.bulkError.set('');
+    this.bulkSearch.set('');
+    this.bulkItemsLoading.set(true);
+    this.bulkResultContext = this.currentBulkContext();
+
+    this.requisitionService.GetBulkItems({
+      UnitID: this.selectedUnitId,
+      BusinessID: Number(this.formGroup.get('BusinessId')?.value),
+      FromDate: this.formGroup.get('StartDate')!.value!,
+      ToDate: this.formGroup.get('EndDate')!.value!,
+      SizeID: this.bulkFilters.controls.SizeId.value,
+      SubCategoryID: this.bulkFilters.controls.SubCategoryId.value,
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: items => {
+          if (requestId !== this.bulkRequestId) return;
+
+          this.bulkRows.set(items.map(item => ({
+            itemId: Number(item.ItemID),
+            itemName: item.ItemName,
+            uomId: item.UOMID,
+            stockQuantity: Number(item.StockQuantity),
+            salesQuantity: Number(item.SalesQuantity),
+            selected: false,
+            quantity: null,
+            remarks: '',
+            quantityError: false,
+          })));
+
+          this.bulkViewed.set(true);
+          this.bulkItemsLoading.set(false);
+        },
+        error: (error: HttpErrorResponse) => {
+          if (requestId !== this.bulkRequestId) return;
+
+          this.bulkItemsLoading.set(false);
+          this.bulkError.set(
+            this.getErrorMessage(error, 'Unable to load bulk items.'),
+          );
+        },
+      });
+  }
+
+  setBulkSearch(value: string): void {
+    this.bulkSearch.set(value);
+  }
+
+  setBulkSelected(
+    row: BulkRow,
+    selected: boolean,
+    checkbox: HTMLInputElement,
+  ): void {
+    if (selected && this.isAlreadyAdded(row.itemId)) {
+      checkbox.checked = false;
+      this.toastr.warning(`${row.itemName} is already in this requisition.`);
+      return;
+    }
+
+    this.bulkRows.update(rows => rows.map(current =>
+      current.itemId === row.itemId
+        ? { ...current, selected, quantityError: false }
+        : current));
+  }
+
+  selectAllBulk(selected: boolean): void {
+    const duplicates = this.bulkRows().filter(row =>
+      this.isAlreadyAdded(row.itemId));
+
+    if (selected && duplicates.length) {
+      this.toastr.warning(
+        `${duplicates.length} item(s) are already added and cannot be selected.`,
+      );
+    }
+
+    this.bulkRows.update(rows => rows.map(row => ({
+      ...row,
+      selected: selected && !this.isAlreadyAdded(row.itemId),
+      quantityError: false,
+    })));
+  }
+
+  setBulkQuantity(row: BulkRow, raw: string): void {
+    const quantity = raw.trim() === '' ? null : Number(raw);
+    const selected = quantity !== null && quantity > 0 ? true : row.selected;
+
+    if (selected && this.isAlreadyAdded(row.itemId)) {
+      this.toastr.warning(`${row.itemName} is already in this requisition.`);
+      return;
+    }
+
+    this.bulkRows.update(rows => rows.map(current =>
+      current.itemId === row.itemId
+        ? { ...current, quantity, selected, quantityError: false }
+        : current));
+  }
+
+  setBulkRemarks(row: BulkRow, remarks: string): void {
+    this.bulkRows.update(rows => rows.map(current =>
+      current.itemId === row.itemId ? { ...current, remarks } : current));
+  }
+
+  addBulkLines(): void {
+    if (!this.canShowAddProduct || this.bulkItemsLoading()) return;
+
+    if (!this.bulkViewed() || this.bulkResultContext !== this.currentBulkContext()) {
+      this.toastr.warning(
+        'Header or filters changed. View the items again before adding.',
+      );
+      return;
+    }
+
+    const selected = this.bulkRows().filter(row => row.selected);
+
+    if (!selected.length) {
+      this.toastr.warning('Select at least one item.');
+      return;
+    }
+
+    const invalid = selected.filter(row =>
+      row.quantity === null ||
+      !Number.isFinite(row.quantity) ||
+      row.quantity <= 0);
+
+    if (invalid.length) {
+      this.bulkRows.update(rows => rows.map(row => ({
+        ...row,
+        quantityError:
+          row.selected &&
+          (
+            row.quantity === null ||
+            !Number.isFinite(row.quantity) ||
+            row.quantity <= 0
+          ),
+      })));
+
+      this.toastr.warning('Quantity is required for every selected item.');
+      return;
+    }
+
+    if (selected.some(row => this.isAlreadyAdded(row.itemId))) {
+      this.toastr.warning('Some selected items are already in this requisition.');
+      return;
+    }
+
+    if (selected.some(row =>
+      !Number.isSafeInteger(row.itemId) ||
+      row.itemId <= 0 ||
+      row.itemId > 2147483647)) {
+      this.toastr.error('An item ID is outside the supported range.');
+      return;
+    }
+
+    selected.forEach(row => {
+      this.lines.push(new FormGroup({
+        ID: new FormControl(0),
+        ReqID: new FormControl(this.header?.ReqID ?? 0),
+        ProductTypeId: new FormControl(2),
+        ItemId: new FormControl(row.itemId),
+        ItemName: new FormControl(row.itemName),
+        UOMId: new FormControl(0),
+        UOMName: new FormControl('N/A'),
+        Quantity: new FormControl(row.quantity),
+        RemainingQuantity: new FormControl<number | null>(null),
+        StockQuantity: new FormControl(row.stockQuantity),
+        SalesQuantity: new FormControl(row.salesQuantity),
+        Remarks: new FormControl(row.remarks.trim()),
+        DocStatusId: new FormControl(1),
+        IsActive: new FormControl(true),
+      }));
+    });
+
+    this.syncHeaderLock();
+    this.bulkRows.set([]);
+    this.bulkViewed.set(false);
+    this.bulkSearch.set('');
+    this.bulkError.set('');
+    this.closeBulkModal();
   }
 
   private loadInitialData(): void {
-    this.state.set(
-      'initializing',
-    );
+    this.state.set('initializing');
 
     forkJoin({
-      units:
-        this.commonService
-          .GetUnitList(),
-
-      productTypes:
-        this.commonService
-          .GetProductTypeList(),
-
-      documentStatuses:
-        this.commonService
-          .GetDocumentStatusList(),
+      units: this.commonService.GetUnitList(),
+      productTypes: this.commonService.GetProductTypeList(),
+      documentStatuses: this.commonService.GetDocumentStatusList(),
     })
-      .pipe(
-        takeUntilDestroyed(
-          this.destroyRef,
-        ),
-      )
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: ({
-          units,
-          productTypes,
-          documentStatuses,
-        }) => {
+        next: ({ units, productTypes, documentStatuses }) => {
           this.units.set(units);
+          this.productTypes.set(productTypes);
+          this.documentStatuses.set(documentStatuses);
 
-          this.productTypes.set(
-            productTypes,
-          );
-
-          this.documentStatuses.set(
-            documentStatuses,
-          );
-
-          if (
-            this.isEditMode &&
-            this.header
-          ) {
-            this.initializeEditMode(
-              this.header,
-            );
-
+          if (this.isEditMode && this.header) {
+            this.initializeEditMode(this.header);
             return;
           }
 
           this.state.set('ready');
         },
-
-        error: (
-          error: HttpErrorResponse,
-        ) => {
+        error: (error: HttpErrorResponse) => {
           this.failInitialization(
             this.getErrorMessage(
               error,
@@ -828,8 +744,7 @@ if (
       Remarks: header.Remarks ?? '',
     });
 
-    this.formGroup.get('UnitId')?.disable();
-    this.formGroup.get('BusinessId')?.disable();
+    this.syncHeaderLock();
 
     forkJoin({
       businesses: this.commonService.GetBusinessList(header.UnitId),
@@ -839,12 +754,15 @@ if (
       .subscribe({
         next: ({ businesses, lines }) => {
           this.businesses.set(businesses);
-          this.populateExistingLines(lines.filter((line) => line.IsActive));
+          this.populateExistingLines(lines.filter(line => line.IsActive));
           this.state.set('ready');
         },
         error: (error: HttpErrorResponse) => {
           this.failInitialization(
-            this.getErrorMessage(error, 'Unable to load the requisition for editing.'),
+            this.getErrorMessage(
+              error,
+              'Unable to load the requisition for editing.',
+            ),
           );
         },
       });
@@ -856,7 +774,7 @@ if (
     this.commonService.GetBusinessList(unitId)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (businesses) => {
+        next: businesses => {
           if (this.selectedUnitId !== unitId) return;
 
           this.businesses.set(businesses);
@@ -868,490 +786,154 @@ if (
           this.businesses.set([]);
           this.unitDataLoading.set(false);
           this.toastr.error(
-            this.getErrorMessage(error, 'Unable to load Unit-related information.'),
+            this.getErrorMessage(
+              error,
+              'Unable to load Unit-related information.',
+            ),
           );
         },
       });
   }
 
   private watchItemInput(): void {
-    this.lineFormGroup
-      .get('ItemSearch')
-      ?.valueChanges
-      .pipe(
-        takeUntilDestroyed(
-          this.destroyRef,
-        ),
-      )
-      .subscribe((value) => {
-        if (
-          this.selectedLineProductTypeId ===
-            2 &&
-          typeof value === 'string'
-        ) {
-          this.lineFormGroup.patchValue(
-            {
-              ItemId: '',
-              ItemName: '',
-              StockQuantity: 0,
-              SalesQuantity: 0,
-            },
-            {
-              emitEvent: false,
-            },
-          );
+    this.lineFormGroup.get('ItemSearch')?.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(value => {
+        if (this.selectedLineProductTypeId === 2 && typeof value === 'string') {
+          this.lineFormGroup.patchValue({
+            ItemId: '',
+            ItemName: '',
+            StockQuantity: 0,
+            SalesQuantity: 0,
+          }, { emitEvent: false });
         }
       });
   }
 
   private watchProductType(): void {
-    this.lineFormGroup
-      .get('ProductTypeId')
-      ?.valueChanges
-      .pipe(
-        takeUntilDestroyed(
-          this.destroyRef,
-        ),
-      )
-      .subscribe((value) => {
-        const productTypeId =
-          Number(value);
+    this.lineFormGroup.get('ProductTypeId')?.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(value => {
+        const productTypeId = Number(value);
+        const itemSearch = this.lineFormGroup.get('ItemSearch');
+        const itemId = this.lineFormGroup.get('ItemId');
+        const itemName = this.lineFormGroup.get('ItemName');
 
-        const itemSearchControl =
-          this.lineFormGroup.get(
-            'ItemSearch',
-          );
-
-        const itemIdControl =
-          this.lineFormGroup.get(
-            'ItemId',
-          );
-
-        const itemNameControl =
-          this.lineFormGroup.get(
-            'ItemName',
-          );
-
-        this.lineFormGroup.patchValue(
-          {
-            ItemSearch: '',
-            ItemId: '',
-            ItemName: '',
-            StockQuantity: 0,
-            SalesQuantity: 0,
-          },
-          {
-            emitEvent: false,
-          },
-        );
+        this.lineFormGroup.patchValue({
+          ItemSearch: '',
+          ItemId: '',
+          ItemName: '',
+          StockQuantity: 0,
+          SalesQuantity: 0,
+        }, { emitEvent: false });
 
         if (productTypeId === 1) {
-          itemSearchControl
-            ?.clearValidators();
-
-          itemIdControl
-            ?.clearValidators();
-
-          itemNameControl
-            ?.setValidators([
-              Validators.required,
-              Validators.maxLength(
-                200,
-              ),
-            ]);
-        } else if (
-          productTypeId === 2
-        ) {
-          itemSearchControl
-            ?.setValidators(
-              Validators.required,
-            );
-
-          itemIdControl
-            ?.setValidators(
-              Validators.required,
-            );
-
-          itemNameControl
-            ?.clearValidators();
+          itemSearch?.clearValidators();
+          itemId?.clearValidators();
+          itemName?.setValidators([Validators.required, Validators.maxLength(200)]);
+        } else if (productTypeId === 2) {
+          itemSearch?.setValidators(Validators.required);
+          itemId?.setValidators(Validators.required);
+          itemName?.clearValidators();
         } else {
-          itemSearchControl
-            ?.clearValidators();
-
-          itemIdControl
-            ?.clearValidators();
-
-          itemNameControl
-            ?.clearValidators();
+          itemSearch?.clearValidators();
+          itemId?.clearValidators();
+          itemName?.clearValidators();
         }
 
-        itemSearchControl
-          ?.updateValueAndValidity({
-            emitEvent: false,
-          });
-
-        itemIdControl
-          ?.updateValueAndValidity({
-            emitEvent: false,
-          });
-
-        itemNameControl
-          ?.updateValueAndValidity({
-            emitEvent: false,
-          });
-
+        itemSearch?.updateValueAndValidity({ emitEvent: false });
+        itemId?.updateValueAndValidity({ emitEvent: false });
+        itemName?.updateValueAndValidity({ emitEvent: false });
         this.resetItemSearchState();
       });
   }
 
   private watchDateRange(): void {
-    this.formGroup
-      .get('StartDate')
-      ?.valueChanges
-      .pipe(
-        takeUntilDestroyed(
-          this.destroyRef,
-        ),
-      )
-      .subscribe(() => {
-        this.refreshQuantities();
-      });
-
-    this.formGroup
-      .get('EndDate')
-      ?.valueChanges
-      .pipe(
-        takeUntilDestroyed(
-          this.destroyRef,
-        ),
-      )
-      .subscribe(() => {
-        this.refreshQuantities();
-      });
-  }
-
-  private refreshQuantities(): void {
-    const startDate =
-      this.formGroup.get(
-        'StartDate',
-      )?.value;
-
-    const endDate =
-      this.formGroup.get(
-        'EndDate',
-      )?.value;
-
-    const businessId = Number(
-      this.formGroup.get(
-        'BusinessId',
-      )?.value,
-    );
-
-    this.lineFormGroup.patchValue(
-      {
-        StockQuantity: 0,
-        SalesQuantity: 0,
-      },
-      {
-        emitEvent: false,
-      },
-    );
-
-    this.lines.controls.forEach(
-      (line) => {
-        line.patchValue(
-          {
-            StockQuantity: 0,
-            SalesQuantity: 0,
-          },
-          {
-            emitEvent: false,
-          },
-        );
-      },
-    );
-
-    if (
-      !this.selectedUnitId ||
-      !businessId ||
-      !startDate ||
-      !endDate ||
-      new Date(startDate) >
-        new Date(endDate)
-    ) {
-      return;
+    for (const key of ['StartDate', 'EndDate']) {
+      this.formGroup.get(key)?.valueChanges
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(() => {
+          if (this.lines.length > 0 || this.isEditMode) return;
+          this.resetLineInput(this.selectedLineProductTypeId);
+        });
     }
-
-    const selectedItemId =
-      Number(
-        this.lineFormGroup.get(
-          'ItemId',
-        )?.value,
-      );
-
-    if (
-      this.selectedLineProductTypeId ===
-        2 &&
-      selectedItemId > 0
-    ) {
-      this.loadStockQuantity(
-        selectedItemId,
-        this.lineFormGroup,
-      );
-
-      this.loadSalesQuantity(
-        selectedItemId,
-        this.lineFormGroup,
-      );
-    }
-
-    this.lines.controls.forEach(
-      (line) => {
-        const productTypeId =
-          Number(
-            line.get(
-              'ProductTypeId',
-            )?.value,
-          );
-
-        const itemId = Number(
-          line.get('ItemId')?.value,
-        );
-
-        if (
-          productTypeId === 2 &&
-          itemId > 0
-        ) {
-          this.loadStockQuantity(
-            itemId,
-            line,
-          );
-
-          this.loadSalesQuantity(
-            itemId,
-            line,
-          );
-        }
-      },
-    );
   }
 
-  private loadStockQuantity(
-    productId: number,
-    target: AbstractControl,
-  ): void {
-    const startDate =
-      this.formGroup.get(
-        'StartDate',
-      )?.value;
+  private loadStockQuantity(productId: number, target: AbstractControl): void {
+    const startDate = this.formGroup.get('StartDate')?.value;
+    const endDate = this.formGroup.get('EndDate')?.value;
+    const businessId = Number(this.formGroup.get('BusinessId')?.value);
 
-    const endDate =
-      this.formGroup.get(
-        'EndDate',
-      )?.value;
-
-    const businessId = Number(
-      this.formGroup.get(
-        'BusinessId',
-      )?.value,
-    );
-
-    this.commonService
-      .GetStockQty(
-        startDate,
-        endDate,
-        this.selectedUnitId,
-        businessId,
-        null,
-        productId,
-      )
-      .pipe(
-        takeUntilDestroyed(
-          this.destroyRef,
-        ),
-      )
+    this.commonService.GetStockQty(
+      startDate, endDate, this.selectedUnitId, businessId, null, productId,
+    )
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (quantity) => {
+        next: quantity => {
           target.patchValue(
-            {
-              StockQuantity:
-                Number(quantity),
-            },
-            {
-              emitEvent: false,
-            },
+            { StockQuantity: Number(quantity) },
+            { emitEvent: false },
           );
         },
-
         error: () => {
-          target.patchValue(
-            {
-              StockQuantity: 0,
-            },
-            {
-              emitEvent: false,
-            },
-          );
-
-          this.toastr.error(
-            'Unable to load Stock Quantity.',
-          );
+          target.patchValue({ StockQuantity: 0 }, { emitEvent: false });
+          this.toastr.error('Unable to load Stock Quantity.');
         },
       });
   }
 
-  private loadSalesQuantity(
-    productId: number,
-    target: AbstractControl,
-  ): void {
-    const startDate =
-      this.formGroup.get(
-        'StartDate',
-      )?.value;
+  private loadSalesQuantity(productId: number, target: AbstractControl): void {
+    const startDate = this.formGroup.get('StartDate')?.value;
+    const endDate = this.formGroup.get('EndDate')?.value;
 
-    const endDate =
-      this.formGroup.get(
-        'EndDate',
-      )?.value;
-
-    this.commonService
-      .GetSalesQty(
-        startDate,
-        endDate,
-        this.selectedUnitId,
-        productId,
-        null,
-        null,
-      )
-      .pipe(
-        takeUntilDestroyed(
-          this.destroyRef,
-        ),
-      )
+    this.commonService.GetSalesQty(
+      startDate, endDate, this.selectedUnitId, productId, null, null,
+    )
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (quantity) => {
+        next: quantity => {
           target.patchValue(
-            {
-              SalesQuantity:
-                Number(quantity),
-            },
-            {
-              emitEvent: false,
-            },
+            { SalesQuantity: Number(quantity) },
+            { emitEvent: false },
           );
         },
-
         error: () => {
-          target.patchValue(
-            {
-              SalesQuantity: 0,
-            },
-            {
-              emitEvent: false,
-            },
-          );
-
-          this.toastr.error(
-            'Unable to load Sales Quantity.',
-          );
+          target.patchValue({ SalesQuantity: 0 }, { emitEvent: false });
+          this.toastr.error('Unable to load Sales Quantity.');
         },
       });
   }
 
-  private populateExistingLines(
-    existingLines:
-      IViewRequisitionLine[],
-  ): void {
+  private populateExistingLines(existingLines: IViewRequisitionLine[]): void {
     this.lines.clear();
 
-    existingLines.forEach(
-      (line) => {
-        this.lines.push(
-          new FormGroup({
-            ID: new FormControl(
-              Number(line.ID),
-            ),
+    existingLines.forEach(line => {
+      this.lines.push(new FormGroup({
+        ID: new FormControl(Number(line.ID)),
+        ReqID: new FormControl(Number(line.ReqID)),
+        ProductTypeId: new FormControl(Number(line.ProductTypeId)),
+        ItemId: new FormControl(Number(line.ItemId)),
+        ItemName: new FormControl(line.ItemName ?? ''),
+        UOMId: new FormControl(Number(line.UOMId)),
+        UOMName: new FormControl(
+          Number(line.UOMId) === 0 ? 'N/A' : (line.UOMName ?? ''),
+        ),
+        Quantity: new FormControl(Number(line.Quantity)),
+        RemainingQuantity: new FormControl<number | null>(line.RemainingQuantity),
+        StockQuantity: new FormControl(Number(line.StockQuantity) || 0),
+        SalesQuantity: new FormControl(Number(line.SalesQuantity) || 0),
+        Remarks: new FormControl(line.Remarks ?? ''),
+        DocStatusId: new FormControl(Number(line.DocStatusId)),
+        IsActive: new FormControl(true),
+      }));
+    });
 
-            ReqID: new FormControl(
-              Number(line.ReqID),
-            ),
-
-            ProductTypeId:
-              new FormControl(
-                Number(
-                  line.ProductTypeId,
-                ),
-              ),
-
-            ItemId: new FormControl(
-              Number(line.ItemId),
-            ),
-
-            ItemName:
-              new FormControl(
-                line.ItemName ?? '',
-              ),
-
-            UOMId: new FormControl(
-              Number(line.UOMId),
-            ),
-
-            UOMName: new FormControl(Number(line.UOMId) === 0 ? 'N/A' : (line.UOMName ?? '')),
-
-            Quantity:
-              new FormControl(
-                Number(
-                  line.Quantity,
-                ),
-              ),
-
-            RemainingQuantity: new FormControl<number | null>(
-              line.RemainingQuantity,
-            ),
-
-
-
-            StockQuantity:
-              new FormControl(
-                Number(
-                  line.StockQuantity,
-                ) || 0,
-              ),
-
-            SalesQuantity:
-              new FormControl(
-                Number(
-                  line.SalesQuantity,
-                ) || 0,
-              ),
-
-            Remarks:
-              new FormControl(
-                line.Remarks ?? '',
-              ),
-
-            DocStatusId:
-              new FormControl(
-                Number(
-                  line.DocStatusId,
-                ),
-              ),
-
-            IsActive:
-              new FormControl(true),
-          }),
-        );
-      },
-    );
+    this.syncHeaderLock();
   }
 
-  private resetLineInput(
-    productTypeId: number = 2,
-  ): void {
+  private resetLineInput(productTypeId = 2): void {
     this.lineFormGroup.reset({
-      ProductTypeId:
-        productTypeId,
-
+      ProductTypeId: productTypeId,
       ItemSearch: '',
       ItemId: '',
       ItemName: '',
@@ -1378,155 +960,66 @@ if (
 
     if (
       this.formGroup.invalid ||
+      !this.canShowAddProduct ||
       this.lines.length === 0
-    ) {
-      return;
-    }
+    ) return;
 
     this.state.set('submitting');
 
-    const formValue =
-      this.formGroup.getRawValue();
+    const value = this.formGroup.getRawValue();
+    const enroll = Number(localStorage.getItem('Enroll'));
+    const now = new Date();
 
-    const enroll = Number(
-      localStorage.getItem('Enroll'),
-    );
-
-    const currentDate =
-      new Date();
-
-    const requisitionData:
-      IRequisition = {
+    const requisitionData: IRequisition = {
       Header: {
         ReqID: 0,
         RequisitionNumber: '',
-
-        UnitId: Number(
-          formValue.UnitId,
-        ),
-
-        BusinessId: Number(
-          formValue.BusinessId,
-        ),
-
-        ReqDate: new Date(
-          formValue.ReqDate!,
-        ),
-
-        StartDate: new Date(
-          formValue.StartDate!,
-        ),
-
-        EndDate: new Date(
-          formValue.EndDate!,
-        ),
-
-        Remarks:
-          formValue.Remarks
-            ?.trim() ?? '',
-
+        UnitId: Number(value.UnitId),
+        BusinessId: Number(value.BusinessId),
+        ReqDate: new Date(value.ReqDate!),
+        StartDate: new Date(value.StartDate!),
+        EndDate: new Date(value.EndDate!),
+        Remarks: value.Remarks?.trim() ?? '',
         DocStatusId: 1,
         IsActive: true,
-
         CREATEDBY: enroll,
         UPDATEDBY: enroll,
-
-        CREATEDDATE:
-          currentDate,
-
-        UPDATEDDATE:
-          currentDate,
+        CREATEDDATE: now,
+        UPDATEDDATE: now,
       },
-
-      Lines:
-        this.lines
-          .getRawValue()
-          .map((line: any) => ({
-            ID: 0,
-            ReqID: 0,
-
-            ProductTypeId:
-              Number(
-                line.ProductTypeId,
-              ),
-
-            ItemId:
-              Number(
-                line.ProductTypeId,
-              ) === 1
-                ? 0
-                : Number(
-                    line.ItemId,
-                  ),
-
-            ItemName:
-              Number(
-                line.ProductTypeId,
-              ) === 1
-                ? (
-                    line.ItemName
-                      ?.trim() ?? ''
-                  )
-                : null,
-
-            UOMId: 0,
-
-            Quantity:
-              Number(
-                line.Quantity,
-              ),
-
-            StockQuantity:
-              Number(
-                line.StockQuantity,
-              ) || 0,
-
-            SalesQuantity:
-              Number(
-                line.SalesQuantity,
-              ) || 0,
-
-            Remarks:
-              line.Remarks
-                ?.trim() ?? '',
-
-            DocStatusId: 1,
-            IsActive: true,
-          })),
-
+      Lines: this.lines.getRawValue().map((line: any) => ({
+        ID: 0,
+        ReqID: 0,
+        ProductTypeId: Number(line.ProductTypeId),
+        ItemId: Number(line.ProductTypeId) === 1 ? 0 : Number(line.ItemId),
+        ItemName: Number(line.ProductTypeId) === 1
+          ? (line.ItemName?.trim() ?? '')
+          : null,
+        UOMId: 0,
+        Quantity: Number(line.Quantity),
+        StockQuantity: Number(line.StockQuantity) || 0,
+        SalesQuantity: Number(line.SalesQuantity) || 0,
+        Remarks: line.Remarks?.trim() ?? '',
+        DocStatusId: 1,
+        IsActive: true,
+      })),
       DeletedLineIds: [],
     };
 
-    this.requisitionService
-      .addData(requisitionData)
-      .pipe(
-        takeUntilDestroyed(
-          this.destroyRef,
-        ),
-      )
+    this.requisitionService.addData(requisitionData)
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (response) => {
+        next: response => {
           if (response.Status) {
-            this.toastr.success(
-              response.Message,
+            this.toastr.success(response.Message);
+            this.activeModal.close({ changed: true });
+          } else {
+            this.finishSubmissionFailure(
+              response.Message || 'Unable to save the requisition.',
             );
-
-            this.activeModal.close({
-              changed: true,
-            });
-
-            return;
           }
-
-          this.finishSubmissionFailure(
-            response.Message ||
-              'Unable to save the requisition.',
-          );
         },
-
-        error: (
-          error: HttpErrorResponse,
-        ) => {
+        error: (error: HttpErrorResponse) => {
           this.finishSubmissionFailure(
             this.getErrorMessage(
               error,
@@ -1543,181 +1036,69 @@ if (
 
     if (
       this.formGroup.invalid ||
+      !this.canShowAddProduct ||
       this.lines.length === 0 ||
       !this.header
-    ) {
-      return;
-    }
+    ) return;
 
     this.state.set('submitting');
 
-    const formValue =
-      this.formGroup.getRawValue();
+    const value = this.formGroup.getRawValue();
+    const enroll = Number(localStorage.getItem('Enroll'));
+    const now = new Date();
 
-    const enroll = Number(
-      localStorage.getItem('Enroll'),
-    );
-
-    const currentDate =
-      new Date();
-
-    const requisitionData:
-      IRequisition = {
+    const requisitionData: IRequisition = {
       Header: {
-        ReqID:
-          this.header.ReqID,
-
-        RequisitionNumber:
-          this.header
-            .RequisitionNumber,
-
-        UnitId: Number(
-          formValue.UnitId,
-        ),
-
-        BusinessId: Number(
-          formValue.BusinessId,
-        ),
-
-        ReqDate: new Date(
-          formValue.ReqDate!,
-        ),
-
-        StartDate: new Date(
-          formValue.StartDate!,
-        ),
-
-        EndDate: new Date(
-          formValue.EndDate!,
-        ),
-
-        Remarks:
-          formValue.Remarks
-            ?.trim() ?? '',
-
-        DocStatusId:
-          Number(
-            this.header
-              .DocStatusId,
-          ),
-
-        IsActive:
-          this.header.IsActive,
-
-        CREATEDBY:
-          Number(
-            this.header
-              .CREATEDBY,
-          ),
-
+        ReqID: this.header.ReqID,
+        RequisitionNumber: this.header.RequisitionNumber,
+        UnitId: Number(value.UnitId),
+        BusinessId: Number(value.BusinessId),
+        ReqDate: new Date(value.ReqDate!),
+        StartDate: new Date(value.StartDate!),
+        EndDate: new Date(value.EndDate!),
+        Remarks: value.Remarks?.trim() ?? '',
+        DocStatusId: Number(this.header.DocStatusId),
+        IsActive: this.header.IsActive,
+        CREATEDBY: Number(this.header.CREATEDBY),
         UPDATEDBY: enroll,
-
-        CREATEDDATE:
-          new Date(
-            this.header
-              .CREATEDDATE!,
-          ),
-
-        UPDATEDDATE:
-          currentDate,
+        CREATEDDATE: new Date(this.header.CREATEDDATE!),
+        UPDATEDDATE: now,
       },
-
-      Lines:
-        this.lines
-          .getRawValue()
-          .filter(
-            (line: any) =>
-              Number(line.ID) === 0,
-          )
-          .map((line: any) => ({
-            ID: 0,
-
-            ReqID:
-              this.header!.ReqID,
-
-            ProductTypeId:
-              Number(
-                line.ProductTypeId,
-              ),
-
-            ItemId:
-              Number(
-                line.ProductTypeId,
-              ) === 1
-                ? 0
-                : Number(
-                    line.ItemId,
-                  ),
-
-            ItemName:
-              Number(
-                line.ProductTypeId,
-              ) === 1
-                ? (
-                    line.ItemName
-                      ?.trim() ?? ''
-                  )
-                : null,
-
-            UOMId: 0,
-
-            Quantity:
-              Number(
-                line.Quantity,
-              ),
-
-            StockQuantity:
-              Number(
-                line.StockQuantity,
-              ) || 0,
-
-            SalesQuantity:
-              Number(
-                line.SalesQuantity,
-              ) || 0,
-
-            Remarks:
-              line.Remarks
-                ?.trim() ?? '',
-
-            DocStatusId: 1,
-            IsActive: true,
-          })),
-
-      DeletedLineIds:
-        this.deletedLineIds,
+      Lines: this.lines.getRawValue()
+        .filter((line: any) => Number(line.ID) === 0)
+        .map((line: any) => ({
+          ID: 0,
+          ReqID: this.header!.ReqID,
+          ProductTypeId: Number(line.ProductTypeId),
+          ItemId: Number(line.ProductTypeId) === 1 ? 0 : Number(line.ItemId),
+          ItemName: Number(line.ProductTypeId) === 1
+            ? (line.ItemName?.trim() ?? '')
+            : null,
+          UOMId: 0,
+          Quantity: Number(line.Quantity),
+          StockQuantity: Number(line.StockQuantity) || 0,
+          SalesQuantity: Number(line.SalesQuantity) || 0,
+          Remarks: line.Remarks?.trim() ?? '',
+          DocStatusId: 1,
+          IsActive: true,
+        })),
+      DeletedLineIds: this.deletedLineIds,
     };
 
-    this.requisitionService
-      .updateData(requisitionData)
-      .pipe(
-        takeUntilDestroyed(
-          this.destroyRef,
-        ),
-      )
+    this.requisitionService.updateData(requisitionData)
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (response) => {
+        next: response => {
           if (response.Status) {
-            this.toastr.success(
-              response.Message,
+            this.toastr.success(response.Message);
+            this.activeModal.close({ changed: true });
+          } else {
+            this.finishSubmissionFailure(
+              response.Message || 'Unable to update the requisition.',
             );
-
-            this.activeModal.close({
-              changed: true,
-            });
-
-            return;
           }
-
-          this.finishSubmissionFailure(
-            response.Message ||
-              'Unable to update the requisition.',
-          );
         },
-
-        error: (
-          error: HttpErrorResponse,
-        ) => {
+        error: (error: HttpErrorResponse) => {
           this.finishSubmissionFailure(
             this.getErrorMessage(
               error,
@@ -1728,80 +1109,35 @@ if (
       });
   }
 
-  private finishSubmissionFailure(
-    message: string,
-  ): void {
+  private finishSubmissionFailure(message: string): void {
     this.state.set('failed');
     this.toastr.error(message);
-
-    this.activeModal.dismiss(
-      'submission-failed',
-    );
+    this.activeModal.dismiss('submission-failed');
   }
 
-  private failInitialization(
-    message: string,
-  ): void {
+  private failInitialization(message: string): void {
     this.state.set('failed');
     this.toastr.error(message);
-
-    this.activeModal.dismiss(
-      'initialization-failed',
-    );
+    this.activeModal.dismiss('initialization-failed');
   }
 
-  private getErrorMessage(
-    error: HttpErrorResponse,
-    fallback: string,
-  ): string {
-    const detail =
-      error.error?.detail ??
-      error.error?.Detail;
+  private getErrorMessage(error: HttpErrorResponse, fallback: string): string {
+    const detail = error.error?.detail ?? error.error?.Detail;
+    if (typeof detail === 'string' && detail.trim()) return detail;
 
-    if (
-      typeof detail === 'string' &&
-      detail.trim()
-    ) {
-      return detail;
-    }
-
-    const message =
-      error.error?.message ??
-      error.error?.Message;
-
-    if (
-      typeof message === 'string' &&
-      message.trim()
-    ) {
-      return message;
-    }
+    const message = error.error?.message ?? error.error?.Message;
+    if (typeof message === 'string' && message.trim()) return message;
 
     return fallback;
   }
 
-  private toDateInputValue(
-    value:
-      | Date
-      | string
-      | null
-      | undefined,
-  ): string {
-    if (!value) {
-      return '';
-    }
+  private toDateInputValue(value: Date | string | null | undefined): string {
+    if (!value) return '';
 
     if (value instanceof Date) {
-      const year =
-        value.getFullYear();
-
-      const month = String(
-        value.getMonth() + 1,
-      ).padStart(2, '0');
-
-      const day = String(
-        value.getDate(),
-      ).padStart(2, '0');
-
+      const year = value.getFullYear();
+      const month = String(value.getMonth() + 1).padStart(2, '0');
+      const day = String(value.getDate()).padStart(2, '0');
       return `${year}-${month}-${day}`;
     }
 
