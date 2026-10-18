@@ -357,11 +357,18 @@
   </div>
 </form>
 
+
+
+
+
+
+
+
+
 <ng-template #bulkModal>
   <div class="modal-header">
     <h5 class="modal-title">Bulk Add Products</h5>
-    <button type="button" class="btn-close" aria-label="Close"
-      (click)="closeBulkModal()"></button>
+    <button type="button" class="btn-close" aria-label="Close" (click)="closeBulkModal()"></button>
   </div>
 
   <div class="modal-body bulk-body">
@@ -387,116 +394,82 @@
       </div>
 
       <div class="col-md-4">
-        <button type="button" class="btn btn-success"
-          [disabled]="!canViewBulk" (click)="viewBulkItems()">
-          View
-        </button>
+        <button type="button" class="btn btn-success" [disabled]="!canViewBulk" (click)="viewBulkItems()">View</button>
       </div>
     </div>
 
     @if (bulkFiltersLoading()) {
       <div class="small text-success mt-2">
-        <span class="spinner-border spinner-border-sm me-1"
-          aria-hidden="true"></span>
+        <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
         Loading Size and Subcategory...
       </div>
     }
 
-    <div class="d-flex justify-content-between align-items-center gap-3 mt-4 mb-2">
-      <div class="fw-semibold">
-        Items @if (bulkViewed()) { ({{ bulkRows().length }}) }
-      </div>
-      <input type="search" class="form-control bulk-search"
-        aria-label="Search loaded items"
-        placeholder="Search loaded items by ID or name"
-        [value]="bulkSearch()"
-        [disabled]="!bulkViewed() || bulkItemsLoading()"
-        (input)="setBulkSearch($any($event.target).value)" />
+    <div class="bulk-results">
+      <div class="bulk-search-row">
+        <div class="bulk-search-box">
+          <span class="bulk-search-icon"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></span>
+          <input type="search" class="form-control bulk-search" aria-label="Search items" placeholder="Search items by ID or name" [value]="bulkSearch()" [disabled]="!bulkViewed()" (input)="setBulkSearch($any($event.target).value)" />
+        </div>
+      @if (bulkItemsLoading()) {
+        <div class="spinner-border spinner-border-sm text-success bulk-search-spinner" role="status" aria-label="Loading items"></div>
+      }
     </div>
 
     <div class="table-responsive bulk-table-wrap">
       <table class="table table-hover align-middle bulk-table">
         <thead>
           <tr>
-            <th>
-              <input type="checkbox" aria-label="Select all loaded items"
-                [checked]="bulkAllSelected"
-                [disabled]="!bulkRows().length || bulkItemsLoading()"
-                (change)="selectAllBulk($any($event.target).checked)" />
-            </th>
             <th>ITEM ID</th>
             <th>ITEM NAME</th>
-            <th>UOM</th>
+            <!-- <th>UOM</th> -->
             <th>QUANTITY</th>
-            <th>SALES QUANTITY</th>
             <th>STOCK QUANTITY</th>
+            <th>SALES QUANTITY</th>
             <th>REMARKS</th>
           </tr>
         </thead>
 
         <tbody>
-          @for (row of filteredBulkRows; track row.itemId) {
-            <tr [class.bulk-unselected]="!row.selected">
-              <td>
-                <input type="checkbox" [checked]="row.selected"
-                  (change)="setBulkSelected(row, $any($event.target).checked, $any($event.target))" />
-              </td>
+          @for (row of bulkRows(); track row.itemId) {
+            <tr [class.bulk-already-added]="isAlreadyAdded(row.itemId)">
               <td>{{ row.itemId }}</td>
               <td>{{ row.itemName }}</td>
-              <td>N/A</td>
-              <td>
-                <input type="number" min="0"
-                  class="form-control form-control-sm bulk-quantity"
-                  [class.is-invalid]="row.quantityError"
-                  [value]="row.quantity ?? ''"
-                  (input)="setBulkQuantity(row, $any($event.target).value)" />
-                @if (row.quantityError) {
-                  <div class="invalid-feedback d-block">
-                    Quantity is required.
-                  </div>
-                }
-              </td>
-              <td>{{ row.salesQuantity }}</td>
+              <!-- <td>N/A</td> -->
+              <td><input type="text" inputmode="decimal" class="form-control form-control-sm bulk-quantity" [value]="row.quantity ?? ''" [disabled]="bulkItemsLoading()" (input)="setBulkQuantity(row, $any($event.target).value, $any($event.target))" /> </td>
               <td>{{ row.stockQuantity }}</td>
+              <td>{{ row.salesQuantity }}</td>
               <td>
-                <input type="text" maxlength="500"
-                  class="form-control form-control-sm"
-                  [value]="row.remarks"
-                  (input)="setBulkRemarks(row, $any($event.target).value)" />
+                <input type="text" maxlength="500" class="form-control form-control-sm" [value]="row.remarks" [disabled]="bulkItemsLoading()" (input)="setBulkRemarks(row, $any($event.target).value)" />
               </td>
             </tr>
           } @empty {
             @if (bulkViewed() && !bulkItemsLoading()) {
               <tr>
-                <td colspan="8" class="text-center text-muted py-4">
-                  No matching items.
-                </td>
+                <td colspan="6" class="text-center text-muted py-4">No matching items.</td>
               </tr>
             }
           }
         </tbody>
       </table>
 
-      @if (bulkItemsLoading()) {
-        <div class="bulk-loading" role="status" aria-live="polite">
-          <div class="spinner-border text-success" aria-hidden="true"></div>
-          <span class="ms-2">Loading items and quantities...</span>
-        </div>
-      }
+
     </div>
+
+    @if (bulkViewed()) {
+      <app-pagination [(currentPage)]="bulkCurrentPage" [(pageSize)]="bulkPageSize" [totalItems]="bulkTotalItems()" (pageChanged)="onBulkPageChange($event)" (pageSizeChanged)="onBulkPageSizeChange($event)"></app-pagination>
+    }
 
     @if (bulkError()) {
       <div class="alert alert-danger mt-3">{{ bulkError() }}</div>
     }
+    </div>
   </div>
 
   <div class="modal-footer">
     <span class="me-auto text-muted">{{ bulkSelectedCount }} selected</span>
-    <button type="button" class="btn btn-secondary"
-      (click)="closeBulkModal()">Close</button>
-    <button type="button" class="btn btn-success"
-      [disabled]="!bulkSelectedCount || bulkItemsLoading()"
-      (click)="addBulkLines()">
+    <button type="button" class="btn btn-secondary" (click)="closeBulkModal()">Close</button>
+    <button type="button" class="btn btn-success" [disabled]="!bulkSelectedCount || bulkItemsLoading()" (click)="addBulkLines()">
       <i class="fa-solid fa-plus me-1"></i> Add
     </button>
   </div>

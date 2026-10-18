@@ -79,20 +79,34 @@ return this.http.get<IViewRequisitionLine[]>(
 
 
 
-  GetACRLBulkFilters(unitId: number, businessId: number): Observable<IACRLBulkFilters> {
-    return this.http.post<IACRLBulkFilters>(
-      `${environment.API_URL}${GlobalConstant.API_END_POINTS.ACRLBulkFilters}`,
-      { unitId, businessId },
-    );
-  }
-
-  GetBulkItems(request: IBulkRequisitionItemsRequest): Observable<IBulkRequisitionItem[]> {
-  return this.http.post<IBulkRequisitionItem[]>(
-    `${environment.API_URL}${GlobalConstant.API_END_POINTS.bulkRequisitionItems}`,
-    request,
+GetACRLBulkFilters(unitId: number, businessId: number): Observable<IACRLBulkFilters> {
+  return this.http.get<IACRLBulkFilters>(
+    `${environment.API_URL}${GlobalConstant.API_END_POINTS.ACRLBulkFilters}`,
+    { params: { UnitId: unitId, BusinessId: businessId } },
   );
 }
 
+GetBulkItems(
+  request: IBulkRequisitionItemsRequest,
+  pagination: ServerQueryRequest,
+): Observable<ServerQueryResponse<IBulkRequisitionItem>> {
+  return this.http.get<ServerQueryResponse<IBulkRequisitionItem>>(
+    `${environment.API_URL}${GlobalConstant.API_END_POINTS.bulkRequisitionItems}`,
+    {
+      params: {
+        UnitId: request.UnitID,
+        BusinessId: request.BusinessID,
+        FromDate: String(request.FromDate),
+        ToDate: String(request.ToDate),
+        SizeId: request.SizeID ?? 0,
+        SubCategoryId: request.SubCategoryID ?? 0,
+        GlobalSearch: pagination.globalSearch ?? '',
+        PageIndex: pagination.page,
+        PageSize: pagination.pageSize,
+      },
+    },
+  );
+}
 
 
 

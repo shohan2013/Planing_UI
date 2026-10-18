@@ -4,8 +4,7 @@
 
 .modal-body {
   padding-right: 30px;
-    background-color: #fff;
-
+  background-color: #fff;
 }
 
 .modal-body .form-label,
@@ -98,6 +97,86 @@ fieldset legend {
 .modal-header {
   height: auto;
   min-height: 0;
+}
+
+/* Search, table, and pagination only; the filters and footer retain their size. */
+.bulk-results {
+  zoom: 80%;
+  width: 100%;
+}
+
+.bulk-search-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  margin: 12px 0 8px;
+}
+
+.bulk-search-box {
+  display: flex;
+  width: 50%;
+  min-width: 240px;
+}
+
+.bulk-search {
+  min-width: 0;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.bulk-search-icon {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  color: #fff;
+  background-color: rgb(95, 179, 104);
+  border: 1px solid rgb(95, 179, 104);
+  border-radius: 6px 0 0 6px;
+  pointer-events: none;
+}
+
+.bulk-search-spinner {
+  flex: none;
+}
+
+.bulk-table-wrap {
+  height: 55vh;
+  overflow: auto;
+}
+
+.bulk-table {
+  margin-bottom: 0;
+
+  thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #fff;
+ }
+  td {
+    padding: 6px 10px;
+    vertical-align: middle;
+  }
+
+  .form-control-sm {
+    min-height: 30px;
+    padding: 3px 8px;
+  }
+
+  tr.bulk-already-added {
+    --bs-table-bg: #ffe2b8;
+    --bs-table-hover-bg: #ffd394;
+  }
+}
+
+@media (max-width: 700px) {
+  .bulk-search-box {
+    width: 100%;
+    min-width: 0;
+  }
 }
 
 @media (max-width: 767.98px) {
