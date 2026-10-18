@@ -105,25 +105,9 @@ fieldset legend {
   width: 100%;
 }
 
-.bulk-search-row {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 12px;
-  margin: 12px 0 8px;
-}
 
-.bulk-search-box {
-  display: flex;
-  width: 50%;
-  min-width: 240px;
-}
 
-.bulk-search {
-  min-width: 0;
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-}
+
 
 .bulk-search-icon {
   display: flex;
@@ -138,24 +122,38 @@ fieldset legend {
   pointer-events: none;
 }
 
-.bulk-search-spinner {
-  flex: none;
+.bulk-search-box {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-width: 0;
 }
+
+.bulk-search {
+  min-width: 0;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+
 
 .bulk-table-wrap {
   height: 55vh;
   overflow: auto;
+  margin-top: 12px;
 }
 
 .bulk-table {
   margin-bottom: 0;
 
   thead th {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  background: #fff;
- }
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: #e3e1e1;
+    border-right: 3px solid #fff;
+    font-weight: 700;
+  }
   td {
     padding: 6px 10px;
     vertical-align: middle;
@@ -172,12 +170,7 @@ fieldset legend {
   }
 }
 
-@media (max-width: 700px) {
-  .bulk-search-box {
-    width: 100%;
-    min-width: 0;
-  }
-}
+
 
 @media (max-width: 767.98px) {
   .modal-body {

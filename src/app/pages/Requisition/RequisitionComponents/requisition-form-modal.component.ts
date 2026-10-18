@@ -85,7 +85,7 @@ export class RequisitionFormModalComponent implements OnInit {
   readonly bulkError = signal('');
   readonly bulkSearch = signal('');
   readonly bulkCurrentPage = signal(1);
-  readonly bulkPageSize = signal(10);
+  readonly bulkPageSize = signal(20);
   readonly bulkTotalItems = signal(0);
 
   readonly bulkFilters = new FormGroup({
@@ -146,7 +146,7 @@ export class RequisitionFormModalComponent implements OnInit {
 
     this.bulkReload$
       .pipe(
-        debounceTime(500),
+        debounceTime(300),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe(() => {
@@ -228,10 +228,29 @@ export class RequisitionFormModalComponent implements OnInit {
       row.quantity > 0).length;
   }
 
-   isAlreadyAdded(itemId: number): boolean {
-    return this.lines.controls.some(line =>
+  getAddedBulkLine(itemId: number): AbstractControl | undefined {
+    return this.lines.controls.find(line =>
       Number(line.get('ProductTypeId')?.value) === 2 &&
       Number(line.get('ItemId')?.value) === itemId);
+  }
+
+  isAlreadyAdded(itemId: number): boolean {
+    return !!this.getAddedBulkLine(itemId);
+  }
+
+  private invalidateBulkResults(): void {
+    ++this.bulkRequestId;
+    this.bulkItemsSubscription?.unsubscribe();
+    this.bulkItemsSubscription = undefined;
+    this.bulkDrafts.clear();
+    this.bulkRows.set([]);
+    this.bulkViewed.set(false);
+    this.bulkItemsLoading.set(false);
+    this.bulkTotalItems.set(0);
+    this.bulkSearch.set('');
+    this.bulkCurrentPage.set(1);
+    this.bulkError.set('');
+    this.bulkResultContext = '';
   }
 
   private currentBulkContext(): string {
@@ -298,6 +317,7 @@ export class RequisitionFormModalComponent implements OnInit {
   }
 
   onUnitChange(): void {
+    this.invalidateBulkResults();
     const unitId = this.selectedUnitId;
 
     this.formGroup.get('BusinessId')?.reset('');
@@ -315,6 +335,7 @@ export class RequisitionFormModalComponent implements OnInit {
   }
 
   onBusinessChange(): void {
+    this.invalidateBulkResults();
     this.lines.clear();
     this.syncHeaderLock();
     this.resetLineInput();
@@ -741,6 +762,7 @@ export class RequisitionFormModalComponent implements OnInit {
           this.units.set(units);
           this.productTypes.set(productTypes);
           this.documentStatuses.set(documentStatuses);
+          console.log('productTypes', productTypes);
 
           if (this.isEditMode && this.header) {
             this.initializeEditMode(this.header);
@@ -880,6 +902,7 @@ export class RequisitionFormModalComponent implements OnInit {
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(() => {
           if (this.lines.length > 0 || this.isEditMode) return;
+          this.invalidateBulkResults();
           this.resetLineInput(this.selectedLineProductTypeId);
         });
     }
