@@ -1,0 +1,200 @@
+/* ---------- Design tokens ---------- */
+:host {
+  --bom-primary: #3f6ad8;
+  --bom-primary-dark: #2f55b8;
+  --bom-success: #2fb380;
+  --bom-success-dark: #25996d;
+  --bom-warning: #f5a623;
+  --bom-slate: #4a5568;
+  --bom-muted: #8492a6;
+  --bom-border: #e2e8f0;
+  --bom-bg: #f4f6fb;
+  --bom-radius: 10px;
+  display: block;
+}
+
+/* ---------- Page ---------- */
+.bom-page {
+  background: var(--bom-bg);
+  padding: 24px;
+  min-height: 100%;
+}
+
+.bom-title {
+  margin-bottom: 18px;
+}
+.bom-title h4 {
+  margin: 0;
+  font-weight: 700;
+  color: #1f2a44;
+}
+.bom-title span {
+  font-size: 13px;
+  color: var(--bom-muted);
+}
+
+/* ---------- Cards ---------- */
+.bom-card {
+  background: #fff;
+  border: 1px solid var(--bom-border);
+  border-radius: var(--bom-radius);
+  box-shadow: 0 2px 10px rgba(31, 42, 68, 0.06);
+  margin-bottom: 20px;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
+}
+.bom-card:hover {
+  box-shadow: 0 6px 18px rgba(31, 42, 68, 0.1);
+}
+
+.bom-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: #1f2a44;
+  background: linear-gradient(90deg, #eef2fb 0%, #f8f9fd 100%);
+  border-bottom: 1px solid var(--bom-border);
+}
+
+.bom-card-body {
+  padding: 20px 22px 8px;
+}
+
+.bom-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.bom-dot-primary { background: var(--bom-primary); }
+.bom-dot-success { background: var(--bom-success); }
+.bom-dot-warning { background: var(--bom-warning); }
+
+.bom-divider {
+  height: 1px;
+  background: var(--bom-border);
+  margin: 6px 0 18px;
+}
+
+/* ---------- Labels & inputs ---------- */
+.bom-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--bom-slate);
+}
+
+.bom-input {
+  height: 40px;
+  border: 1px solid var(--bom-border);
+  border-radius: 8px;
+  font-size: 14px;
+  color: #1f2a44;
+  background-color: #fff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.bom-input::placeholder {
+  color: #b3bdcc;
+}
+.bom-input:hover {
+  border-color: #c5cfde;
+}
+.bom-input:focus {
+  border-color: var(--bom-primary);
+  box-shadow: 0 0 0 3px rgba(63, 106, 216, 0.15);
+  outline: none;
+}
+.bom-input[readonly],
+.bom-input:disabled {
+  background: #f1f4f9;
+  color: var(--bom-muted);
+  cursor: not-allowed;
+}
+
+/* validation */
+.bom-input.ng-invalid.ng-touched {
+  border-color: #e5484d;
+}
+.bom-input.ng-invalid.ng-touched:focus {
+  box-shadow: 0 0 0 3px rgba(229, 72, 77, 0.15);
+}
+
+/* input group (percent) */
+.bom-input-group-left {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.bom-addon {
+  height: 40px;
+  background: #f1f4f9;
+  border: 1px solid var(--bom-border);
+  border-left: 0;
+  border-radius: 0 8px 8px 0;
+  color: var(--bom-slate);
+  font-weight: 600;
+}
+
+/* ---------- Buttons ---------- */
+.bom-btn {
+  height: 40px;
+  padding: 0 22px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  transition: transform 0.1s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.bom-btn:active {
+  transform: translateY(1px);
+}
+.bom-btn:focus {
+  box-shadow: 0 0 0 3px rgba(63, 106, 216, 0.25);
+}
+
+.bom-btn-add {
+  background: var(--bom-slate);
+}
+.bom-btn-add:hover {
+  background: #2d3748;
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(45, 55, 72, 0.25);
+}
+.bom-plus {
+  font-size: 16px;
+  font-weight: 700;
+  margin-right: 4px;
+}
+
+.bom-btn-submit {
+  min-width: 140px;
+  background: linear-gradient(135deg, var(--bom-success) 0%, var(--bom-success-dark) 100%);
+}
+.bom-btn-submit:hover:not(:disabled) {
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(47, 179, 128, 0.4);
+}
+.bom-btn-submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.bom-actions {
+  text-align: right;
+  padding: 4px 0 8px;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 767px) {
+  .bom-page { padding: 14px; }
+  .bom-card-body { padding: 16px 14px 4px; }
+  .bom-btn-add { width: 100%; }
+  .bom-btn-submit { width: 100%; }
+}

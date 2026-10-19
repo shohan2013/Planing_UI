@@ -256,6 +256,7 @@ styles: [
 
 })
 export class RequisitionViewModalComponent implements OnInit {
+  
   @Input({ required: true })
   header!: IViewRequisitionHeader;
 

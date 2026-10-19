@@ -137,6 +137,15 @@ export const routes: Routes = [
           ),
       },
 
+      {
+        path: 'bom',
+        loadComponent: () =>
+          import('./pages/MasterConfiguration/BoM/bom').then(
+            (m) => m.Bom,
+          ),
+      },
+
+
       // Elements
       {
         path: 'elements/buttons-standard',
@@ -263,6 +272,13 @@ export const routes: Routes = [
         component: ForgotPasswordBoxedComponent,
         data: { extraParameter: '' },
       },
+
+      {
+        path: 'pages/forgot-password-boxed',
+        component: ForgotPasswordBoxedComponent,
+        data: { extraParameter: '' },
+      },
+      
     ],
   },
 

@@ -1,0 +1,154 @@
+
+<div class="bom-page">
+
+  <div class="bom-title">
+    <h4>Bill of Materials</h4>
+  </div>
+
+  <form [formGroup]="formGroup" (ngSubmit)="onSubmit()" novalidate>
+
+    <!-- ===================== Finished Goods Formula/Recipe ===================== -->
+    <section class="bom-card">
+      <header class="bom-card-header">
+        <span class="bom-dot bom-dot-primary"></span>
+        Finished Goods Formula
+      </header>
+      <div class="bom-card-body">
+        <div class="form-row">
+          <div class="form-group col-sm-3">
+            <label class="bom-label" for="whId">Unit</label>
+            <select id="whId" class="form-control bom-input" formControlName="whId">
+              <!-- <option *ngFor="let wh of warehouses" [value]="wh.id">{{ wh.name }}</option> -->
+            </select>
+          </div>
+
+        <div class="form-group col-sm-3">
+            <label class="bom-label" for="whId">Business</label>
+            <select id="whId" class="form-control bom-input" formControlName="whId">
+              <!-- <option *ngFor="let wh of warehouses" [value]="wh.id">{{ wh.name }}</option> -->
+            </select>
+          </div>
+
+          <div class="form-group col-lg-3 col-md-3">
+            <label class="bom-label" for="itemType">FG Type</label>
+            <select id="itemType" class="form-control bom-input" formControlName="itemType">
+              <!-- <option *ngFor="let t of itemTypes" [value]="t.id">{{ t.name }}</option> -->
+            </select>
+          </div>
+
+          <div class="form-group col-lg-3 col-md-6">
+            <label class="bom-label" for="itemName">SFG/FG Name</label>
+            <input id="itemName" type="text" class="form-control bom-input"
+                   formControlName="itemName" placeholder="Enter SFG / FG name" autocomplete="off" />
+          </div>
+
+          <div class="form-group col-lg-3 col-md-6">
+            <label class="bom-label" for="bomName">BOM Name</label>
+            <input id="bomName" type="text" class="form-control bom-input"
+                   formControlName="bomName" placeholder="Enter BOM name" autocomplete="off" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== Raw Material ===================== -->
+    <section class="bom-card">
+      <header class="bom-card-header">
+        <span class="bom-dot bom-dot-success"></span>
+        Raw Material
+      </header>
+      <div class="bom-card-body" formGroupName="rawMaterial">
+
+        <div class="form-group">
+          <label class="bom-label" for="rawMaterialName">Raw Material</label>
+          <input id="rawMaterialName" type="text" class="form-control bom-input"
+                 formControlName="name" placeholder="Search raw material..." autocomplete="off" />
+        </div>
+
+        <div class="bom-divider"></div>
+
+        <div class="form-row">
+          <div class="form-group col-lg-3 col-md-4">
+            <label class="bom-label" for="uom">UoM</label>
+            <input id="uom" type="text" class="form-control bom-input"
+                   formControlName="uom" readonly />
+          </div>
+
+          <div class="form-group col-lg-4 col-md-4">
+            <label class="bom-label" for="bomUom">BOM UoM</label>
+            <select id="bomUom" class="form-control bom-input" formControlName="bomUom">
+              <!-- <option *ngFor="let u of bomUoms" [value]="u.id">{{ u.name }}</option> -->
+            </select>
+          </div>
+
+          <div class="form-group col-lg-5 col-md-4">
+            <label class="bom-label" for="rmQty">Quantity</label>
+            <input id="rmQty" type="number" class="form-control bom-input"
+                   formControlName="quantity" min="0" />
+          </div>
+        </div>
+
+        <div class="form-row align-items-end">
+          <div class="form-group col-lg-3 col-md-4">
+            <label class="bom-label" for="processLoss">Process Loss (%)</label>
+            <div class="input-group">
+              <input id="processLoss" type="number" class="form-control bom-input bom-input-group-left"
+                     formControlName="processLoss" min="0" max="100" />
+              <div class="input-group-append"><span class="input-group-text bom-addon">%</span></div>
+            </div>
+          </div>
+
+          <div class="form-group col-lg-7 col-md-6">
+            <label class="bom-label" for="remarks">Remarks</label>
+            <input id="remarks" type="text" class="form-control bom-input"
+                   formControlName="remarks" placeholder="Optional remarks" autocomplete="off" />
+          </div>
+
+          <div class="form-group col-lg-2 col-md-2 text-right">
+            <button type="button" class="btn bom-btn bom-btn-add" (click)="addRawMaterial()">
+              <span class="bom-plus">+</span> Add
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===================== Resources/Overhead Cost ===================== -->
+    <section class="bom-card">
+      <header class="bom-card-header">
+        <span class="bom-dot bom-dot-warning"></span>
+        Resources/Overhead Cost
+      </header>
+      <div class="bom-card-body" formGroupName="resource">
+        <div class="form-row align-items-end">
+          <div class="form-group col-lg-6 col-md-12">
+            <label class="bom-label" for="resourceName">Resource Name</label>
+            <input id="resourceName" type="text" class="form-control bom-input"
+                   formControlName="name" placeholder="Search resource..." autocomplete="off" />
+          </div>
+
+          <div class="form-group col-lg-4 col-md-8">
+            <label class="bom-label" for="resourceQty">Quantity</label>
+            <input id="resourceQty" type="number" class="form-control bom-input"
+                   formControlName="quantity" min="0" />
+          </div>
+
+          <div class="form-group col-lg-2 col-md-4 text-right">
+            <button type="button" class="btn bom-btn bom-btn-add" (click)="addResource()">
+              <span class="bom-plus">+</span> Add
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== Actions ===================== -->
+    <div class="bom-actions">
+      <button type="submit" class="btn bom-btn bom-btn-submit" [disabled]="formGroup.invalid">
+        Submit
+      </button>
+    </div>
+
+  </form>
+</div>

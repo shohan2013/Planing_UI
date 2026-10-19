@@ -6,14 +6,4 @@
     <button type="button" role="tab" [attr.aria-selected]="activeTab() === 'workcenter'" [class.active]="activeTab() === 'workcenter'" (click)="selectTab('workcenter')"><span>Workcenter</span></button>
     <button type="button" role="tab" [attr.aria-selected]="activeTab() === 'machine'" [class.active]="activeTab() === 'machine'" (click)="selectTab('machine')"><span>Machine</span></button>
   </div>
-
-  <div class="fg-tab-content" role="tabpanel">
-    @switch (activeTab()) {
-      @case ('bom') { <p>BOM configuration will appear here.</p> }
-      @case ('routing') { <p>Routing configuration will appear here.</p> }
-      @case ('operation') { <p>Operation configuration will appear here.</p> }
-      @case ('workcenter') { <p>Workcenter configuration will appear here.</p> }
-      @case ('machine') { <p>Machine configuration will appear here.</p> }
-    }
-  </div>
 </section>

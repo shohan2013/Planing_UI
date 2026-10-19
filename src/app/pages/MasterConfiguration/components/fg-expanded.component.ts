@@ -17,6 +17,7 @@ export class FGExpandedComponent implements OnDestroy {
   readonly activeTab = signal<FGTab>('bom');
   private tabTimer: ReturnType<typeof setTimeout> | null = null;
 
+  
   selectTab(tab: FGTab): void {
     if (this.tabTimer !== null) clearTimeout(this.tabTimer);
     if (tab === this.activeTab()) return;
@@ -27,7 +28,9 @@ export class FGExpandedComponent implements OnDestroy {
     }, 300);
   }
 
+
   ngOnDestroy(): void {
     if (this.tabTimer !== null) clearTimeout(this.tabTimer);
   }
 }
+
