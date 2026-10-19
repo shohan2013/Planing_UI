@@ -53,12 +53,7 @@
 
         <div class="summary-field">
           <span class="summary-label">Status</span>
-          <span class="g-status g-status-lg" [ngClass]="{
-            'pending': header.DocStatusId === 1,
-            'approve': header.DocStatusId === 2,
-            'reject': header.DocStatusId === 3,
-            'complete': header.DocStatusId === 4
-          }">{{ getDocStatusName(header.DocStatusId) }}</span>
+          <span class="g-status g-status-lg" [ngClass]="getDocStatusClass(header.DocStatusId)">{{ getDocStatusName(header.DocStatusId) }}</span>
         </div>
       </div>
 

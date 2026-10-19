@@ -6,6 +6,7 @@ import { ToastrService } from 'ngx-toastr';
 import { Observable, Subject, takeUntil } from 'rxjs';
 
 import { IBusiness } from 'src/app/core/model/Common/BusinessType/BusinessType';
+import { IDropdownBind } from 'src/app/core/model/Common/dropdown-bind';
 import { IUnit } from 'src/app/core/model/Common/Unit/Unit';
 import { IViewRequisitionHeader } from 'src/app/core/model/Requisition/ViewRequisition';
 import {
@@ -48,6 +49,7 @@ export class Requisition
 
   readonly units = signal<IUnit[]>([]);
   readonly businesses = signal<IBusiness[]>([]);
+  readonly documentStatuses = signal<IDropdownBind[]>([]);
   readonly businessesLoading = signal(false);
   readonly deletingReqId = signal<number | null>(null);
   readonly completingReqId = signal<number | null>(null);
@@ -68,6 +70,7 @@ export class Requisition
 
   ngOnInit(): void {
     this.loadUnits();
+    this.loadDocumentStatuses();
   }
 
   protected override fetchData(
@@ -243,22 +246,25 @@ completeRequisition(reqId: number): void {
 
 
   getDocStatusName(docStatusId: number): string {
-    switch (docStatusId) {
-      case 1:
-        return 'Pending';
+    return this.documentStatuses().find(status =>
+      Number(status.Id) === Number(docStatusId))?.Name ?? '-';
+  }
 
-      case 2:
-        return 'Approve';
+  getDocStatusClass(docStatusId: number): string {
+    const name = this.getDocStatusName(docStatusId).trim().toLowerCase();
+    return ['pending', 'approve', 'reject', 'complete'].includes(name) ? name : '';
+  }
 
-      case 3:
-        return 'Reject';
-        
-      case 4:
-        return 'Complete';
-
-      default:
-        return '-';
-    }
+  private loadDocumentStatuses(): void {
+    this.commonService.GetDocumentStatusList()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: statuses => this.documentStatuses.set(statuses),
+        error: () => {
+          this.documentStatuses.set([]);
+          this.toastr.error('Unable to load document statuses.');
+        },
+      });
   }
 
   private loadUnits(): void {

@@ -15,7 +15,7 @@ import {
 import { ToastrService } from 'ngx-toastr';
 import {
   catchError, debounceTime, distinctUntilChanged, finalize,
-  forkJoin, Observable, of, switchMap, tap,
+  forkJoin, Observable, of, Subject, Subscription, switchMap, tap,
 } from 'rxjs';
 
 import { MenuPermissionDirective } from 'src/app/core/directives/menu-permission.directive';
@@ -31,6 +31,7 @@ import {
 import { PermissionAction } from 'src/app/core/services/Authorization/authorization.service';
 import { CommonService } from 'src/app/core/services/Common/CommonService';
 import { RequisitionService } from 'src/app/core/services/Requisition/requisition.service';
+import { PaginationComponent } from 'src/app/shared/pagination/pagination.component';
 
 export type RequisitionFormMode = 'create' | 'edit';
 type FormModalState = 'initializing' | 'ready' | 'submitting' | 'failed';
@@ -41,10 +42,8 @@ type BulkRow = {
   uomId: number;
   stockQuantity: number;
   salesQuantity: number;
-  selected: boolean;
   quantity: number | null;
   remarks: string;
-  quantityError: boolean;
 };
 
 @Component({
@@ -52,7 +51,7 @@ type BulkRow = {
   standalone: true,
   imports: [
     CommonModule, FormsModule, ReactiveFormsModule,
-    NgbTypeaheadModule, MenuPermissionDirective,
+    NgbTypeaheadModule, MenuPermissionDirective, PaginationComponent,
   ],
   templateUrl: './requisition-form-modal.component.html',
   styleUrl: './requisition-form-modal.component.scss',
@@ -85,6 +84,9 @@ export class RequisitionFormModalComponent implements OnInit {
   readonly bulkViewed = signal(false);
   readonly bulkError = signal('');
   readonly bulkSearch = signal('');
+  readonly bulkCurrentPage = signal(1);
+  readonly bulkPageSize = signal(20);
+  readonly bulkTotalItems = signal(0);
 
   readonly bulkFilters = new FormGroup({
     SizeId: new FormControl(0, { nonNullable: true }),
@@ -124,6 +126,9 @@ export class RequisitionFormModalComponent implements OnInit {
   private bulkRequestId = 0;
   private filterRequestId = 0;
   private bulkResultContext = '';
+  private readonly bulkDrafts = new Map<number, BulkRow>();
+  private readonly bulkReload$ = new Subject<void>();
+  private bulkItemsSubscription?: Subscription;
 
   constructor(
     public readonly activeModal: NgbActiveModal,
@@ -138,6 +143,17 @@ export class RequisitionFormModalComponent implements OnInit {
       this.failInitialization('Requisition header information was not provided.');
       return;
     }
+
+    this.bulkReload$
+      .pipe(
+        debounceTime(300),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => {
+        if (this.bulkModalRef && this.bulkViewed()) {
+          this.loadBulkPage();
+        }
+      });
 
     this.watchItemInput();
     this.watchProductType();
@@ -205,29 +221,36 @@ export class RequisitionFormModalComponent implements OnInit {
       !this.bulkItemsLoading();
   }
 
-  get filteredBulkRows(): BulkRow[] {
-    const query = this.bulkSearch().trim().toLowerCase();
-
-    return query
-      ? this.bulkRows().filter(row =>
-          String(row.itemId).includes(query) ||
-          row.itemName.toLowerCase().includes(query))
-      : this.bulkRows();
-  }
-
   get bulkSelectedCount(): number {
-    return this.bulkRows().filter(row => row.selected).length;
+    return Array.from(this.bulkDrafts.values()).filter(row =>
+      row.quantity !== null &&
+      Number.isFinite(row.quantity) &&
+      row.quantity > 0).length;
   }
 
-  get bulkAllSelected(): boolean {
-    const available = this.bulkRows().filter(row => !this.isAlreadyAdded(row.itemId));
-    return available.length > 0 && available.every(row => row.selected);
-  }
-
-  private isAlreadyAdded(itemId: number): boolean {
-    return this.lines.controls.some(line =>
+  getAddedBulkLine(itemId: number): AbstractControl | undefined {
+    return this.lines.controls.find(line =>
       Number(line.get('ProductTypeId')?.value) === 2 &&
       Number(line.get('ItemId')?.value) === itemId);
+  }
+
+  isAlreadyAdded(itemId: number): boolean {
+    return !!this.getAddedBulkLine(itemId);
+  }
+
+  private invalidateBulkResults(): void {
+    ++this.bulkRequestId;
+    this.bulkItemsSubscription?.unsubscribe();
+    this.bulkItemsSubscription = undefined;
+    this.bulkDrafts.clear();
+    this.bulkRows.set([]);
+    this.bulkViewed.set(false);
+    this.bulkItemsLoading.set(false);
+    this.bulkTotalItems.set(0);
+    this.bulkSearch.set('');
+    this.bulkCurrentPage.set(1);
+    this.bulkError.set('');
+    this.bulkResultContext = '';
   }
 
   private currentBulkContext(): string {
@@ -294,6 +317,7 @@ export class RequisitionFormModalComponent implements OnInit {
   }
 
   onUnitChange(): void {
+    this.invalidateBulkResults();
     const unitId = this.selectedUnitId;
 
     this.formGroup.get('BusinessId')?.reset('');
@@ -311,6 +335,7 @@ export class RequisitionFormModalComponent implements OnInit {
   }
 
   onBusinessChange(): void {
+    this.invalidateBulkResults();
     this.lines.clear();
     this.syncHeaderLock();
     this.resetLineInput();
@@ -510,6 +535,9 @@ export class RequisitionFormModalComponent implements OnInit {
   }
 
   closeBulkModal(): void {
+    ++this.bulkRequestId;
+    this.bulkItemsSubscription?.unsubscribe();
+    this.bulkItemsLoading.set(false);
     this.bulkModalRef?.close();
     this.bulkModalRef = undefined;
   }
@@ -517,46 +545,88 @@ export class RequisitionFormModalComponent implements OnInit {
   viewBulkItems(): void {
     if (!this.canViewBulk) return;
 
-    const requestId = ++this.bulkRequestId;
-
+    this.bulkDrafts.clear();
     this.bulkRows.set([]);
-    this.bulkViewed.set(false);
+    this.bulkViewed.set(true);
     this.bulkError.set('');
     this.bulkSearch.set('');
-    this.bulkItemsLoading.set(true);
+    this.bulkCurrentPage.set(1);
+    this.bulkTotalItems.set(0);
     this.bulkResultContext = this.currentBulkContext();
 
-    this.requisitionService.GetBulkItems({
+    this.queueBulkPage();
+  }
+
+  private queueBulkPage(): void {
+    if (!this.bulkViewed()) return;
+
+    ++this.bulkRequestId;
+    this.bulkRows.set([]);
+    this.bulkItemsLoading.set(true);
+    this.bulkError.set('');
+    this.bulkReload$.next();
+  }
+
+  private loadBulkPage(): void {
+    if (
+      !this.canShowAddProduct ||
+      this.bulkResultContext !== this.currentBulkContext()
+    ) {
+      this.bulkItemsLoading.set(false);
+      this.bulkError.set(
+        'Header or filters changed. View the items again before continuing.',
+      );
+      return;
+    }
+
+    const requestId = ++this.bulkRequestId;
+
+    this.bulkItemsLoading.set(true);
+    this.bulkError.set('');
+
+    this.bulkItemsSubscription = this.requisitionService.GetBulkItems({
       UnitID: this.selectedUnitId,
       BusinessID: Number(this.formGroup.get('BusinessId')?.value),
       FromDate: this.formGroup.get('StartDate')!.value!,
       ToDate: this.formGroup.get('EndDate')!.value!,
       SizeID: this.bulkFilters.controls.SizeId.value,
       SubCategoryID: this.bulkFilters.controls.SubCategoryId.value,
+    }, {
+      page: this.bulkCurrentPage(),
+      pageSize: this.bulkPageSize(),
+      globalSearch: this.bulkSearch(),
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: items => {
+        next: response => {
           if (requestId !== this.bulkRequestId) return;
 
-          this.bulkRows.set(items.map(item => ({
-            itemId: Number(item.ItemID),
-            itemName: item.ItemName,
-            uomId: item.UOMID,
-            stockQuantity: Number(item.StockQuantity),
-            salesQuantity: Number(item.SalesQuantity),
-            selected: false,
-            quantity: null,
-            remarks: '',
-            quantityError: false,
-          })));
+          this.bulkRows.set(response.Data.map(item => {
+            const itemId = Number(item.ItemID);
+            const draft = this.bulkDrafts.get(itemId);
 
-          this.bulkViewed.set(true);
+            const row: BulkRow = {
+              itemId,
+              itemName: item.ItemName,
+              uomId: item.UOMID,
+              stockQuantity: Number(item.StockQuantity),
+              salesQuantity: Number(item.SalesQuantity),
+              quantity: draft?.quantity ?? null,
+              remarks: draft?.remarks ?? '',
+            };
+
+            if (draft) this.bulkDrafts.set(itemId, row);
+
+            return row;
+          }));
+
+          this.bulkTotalItems.set(response.Total);
           this.bulkItemsLoading.set(false);
         },
         error: (error: HttpErrorResponse) => {
           if (requestId !== this.bulkRequestId) return;
 
+          this.bulkRows.set([]);
           this.bulkItemsLoading.set(false);
           this.bulkError.set(
             this.getErrorMessage(error, 'Unable to load bulk items.'),
@@ -567,60 +637,52 @@ export class RequisitionFormModalComponent implements OnInit {
 
   setBulkSearch(value: string): void {
     this.bulkSearch.set(value);
+    this.bulkCurrentPage.set(1);
+    this.queueBulkPage();
   }
 
-  setBulkSelected(
-    row: BulkRow,
-    selected: boolean,
-    checkbox: HTMLInputElement,
-  ): void {
-    if (selected && this.isAlreadyAdded(row.itemId)) {
-      checkbox.checked = false;
+  onBulkPageChange(page: number): void {
+    this.bulkCurrentPage.set(Number(page));
+    this.queueBulkPage();
+  }
+
+  onBulkPageSizeChange(pageSize: number): void {
+    this.bulkPageSize.set(Number(pageSize));
+    this.bulkCurrentPage.set(1);
+    this.queueBulkPage();
+  }
+
+  setBulkQuantity(row: BulkRow, raw: string, input: HTMLInputElement): void {
+    const cleaned = raw.replace(/[^\d.]/g, '');
+    const dot = cleaned.indexOf('.');
+    const validText = dot === -1
+      ? cleaned
+      : cleaned.slice(0, dot + 1) + cleaned.slice(dot + 1).replace(/\./g, '');
+
+    input.value = validText;
+
+    const quantity = validText === '' || validText === '.'
+      ? null
+      : Number(validText);
+
+    if (quantity !== null && quantity > 0 && this.isAlreadyAdded(row.itemId)) {
+      input.value = row.quantity == null ? '' : String(row.quantity);
       this.toastr.warning(`${row.itemName} is already in this requisition.`);
       return;
     }
 
+    const updated: BulkRow = { ...row, quantity };
+    this.bulkDrafts.set(row.itemId, updated);
     this.bulkRows.update(rows => rows.map(current =>
-      current.itemId === row.itemId
-        ? { ...current, selected, quantityError: false }
-        : current));
-  }
-
-  selectAllBulk(selected: boolean): void {
-    const duplicates = this.bulkRows().filter(row =>
-      this.isAlreadyAdded(row.itemId));
-
-    if (selected && duplicates.length) {
-      this.toastr.warning(
-        `${duplicates.length} item(s) are already added and cannot be selected.`,
-      );
-    }
-
-    this.bulkRows.update(rows => rows.map(row => ({
-      ...row,
-      selected: selected && !this.isAlreadyAdded(row.itemId),
-      quantityError: false,
-    })));
-  }
-
-  setBulkQuantity(row: BulkRow, raw: string): void {
-    const quantity = raw.trim() === '' ? null : Number(raw);
-    const selected = quantity !== null && quantity > 0 ? true : row.selected;
-
-    if (selected && this.isAlreadyAdded(row.itemId)) {
-      this.toastr.warning(`${row.itemName} is already in this requisition.`);
-      return;
-    }
-
-    this.bulkRows.update(rows => rows.map(current =>
-      current.itemId === row.itemId
-        ? { ...current, quantity, selected, quantityError: false }
-        : current));
+      current.itemId === row.itemId ? updated : current));
   }
 
   setBulkRemarks(row: BulkRow, remarks: string): void {
+    const updated: BulkRow = { ...row, remarks };
+
+    this.bulkDrafts.set(row.itemId, updated);
     this.bulkRows.update(rows => rows.map(current =>
-      current.itemId === row.itemId ? { ...current, remarks } : current));
+      current.itemId === row.itemId ? updated : current));
   }
 
   addBulkLines(): void {
@@ -633,31 +695,13 @@ export class RequisitionFormModalComponent implements OnInit {
       return;
     }
 
-    const selected = this.bulkRows().filter(row => row.selected);
+    const selected = Array.from(this.bulkDrafts.values()).filter(row =>
+      row.quantity !== null &&
+      Number.isFinite(row.quantity) &&
+      row.quantity > 0);
 
     if (!selected.length) {
-      this.toastr.warning('Select at least one item.');
-      return;
-    }
-
-    const invalid = selected.filter(row =>
-      row.quantity === null ||
-      !Number.isFinite(row.quantity) ||
-      row.quantity <= 0);
-
-    if (invalid.length) {
-      this.bulkRows.update(rows => rows.map(row => ({
-        ...row,
-        quantityError:
-          row.selected &&
-          (
-            row.quantity === null ||
-            !Number.isFinite(row.quantity) ||
-            row.quantity <= 0
-          ),
-      })));
-
-      this.toastr.warning('Quantity is required for every selected item.');
+      this.toastr.warning('Enter a quantity greater than zero for at least one item.');
       return;
     }
 
@@ -694,9 +738,12 @@ export class RequisitionFormModalComponent implements OnInit {
     });
 
     this.syncHeaderLock();
+    this.bulkDrafts.clear();
     this.bulkRows.set([]);
     this.bulkViewed.set(false);
     this.bulkSearch.set('');
+    this.bulkCurrentPage.set(1);
+    this.bulkTotalItems.set(0);
     this.bulkError.set('');
     this.closeBulkModal();
   }
@@ -715,6 +762,7 @@ export class RequisitionFormModalComponent implements OnInit {
           this.units.set(units);
           this.productTypes.set(productTypes);
           this.documentStatuses.set(documentStatuses);
+          console.log('productTypes', productTypes);
 
           if (this.isEditMode && this.header) {
             this.initializeEditMode(this.header);
@@ -854,6 +902,7 @@ export class RequisitionFormModalComponent implements OnInit {
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(() => {
           if (this.lines.length > 0 || this.isEditMode) return;
+          this.invalidateBulkResults();
           this.resetLineInput(this.selectedLineProductTypeId);
         });
     }
@@ -976,7 +1025,7 @@ export class RequisitionFormModalComponent implements OnInit {
         RequisitionNumber: '',
         UnitId: Number(value.UnitId),
         BusinessId: Number(value.BusinessId),
-        ReqDate: new Date(value.ReqDate!),
+        ReqDate: now,//new Date(value.ReqDate!),
         StartDate: new Date(value.StartDate!),
         EndDate: new Date(value.EndDate!),
         Remarks: value.Remarks?.trim() ?? '',
