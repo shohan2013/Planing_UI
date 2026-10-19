@@ -137,15 +137,6 @@ export const routes: Routes = [
           ),
       },
 
-      {
-        path: 'bom',
-        loadComponent: () =>
-          import('./pages/MasterConfiguration/BoM/bom').then(
-            (m) => m.Bom,
-          ),
-      },
-
-
       // Elements
       {
         path: 'elements/buttons-standard',

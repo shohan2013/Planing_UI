@@ -6,4 +6,9 @@
     <button type="button" role="tab" [attr.aria-selected]="activeTab() === 'workcenter'" [class.active]="activeTab() === 'workcenter'" (click)="selectTab('workcenter')"><span>Workcenter</span></button>
     <button type="button" role="tab" [attr.aria-selected]="activeTab() === 'machine'" [class.active]="activeTab() === 'machine'" (click)="selectTab('machine')"><span>Machine</span></button>
   </div>
+
+
+  @if (activeTab() === 'bom') {
+  <app-bom [itemId]="itemId()" [itemName]="itemName()" [unitId]="unitId()" [businessId]="businessId()" />
+}
 </section>

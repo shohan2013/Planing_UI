@@ -6,27 +6,27 @@ export const GlobalConstant = {
     PermissionByEnroll: 'Permission/menupermission',
     PermissionByType: 'Permission/permissionbytype',
 
-    /*===========================MENU===================================== */
+  /*===========================MENU===================================== */
     Menu: 'Menu',
     getMenuById: 'Menu/menu',
     addMenu: 'Menu',
     updateMenu: 'Menu',
     deleteMenu: 'Menu',
 
-    /*===========================SUB MENU===================================== */
+  /*===========================SUB MENU===================================== */
     SubMenu: 'SubMenu',
     getSubMenuById: 'SubMenu/submenu',
     addSubMenu: 'SubMenu',
     updateSubMenu: 'SubMenu',
     deleteSubMenu: 'SubMenu',
 
-    /*===========================MATRIX===================================== */
+  /*===========================MATRIX===================================== */
     ApproveMatrix: 'ApproveMatrix',
     ProvideApproveMatrix: 'ApproveMatrix/updateApproveMatrixPermission',
 
     ApproveMatrixGroup: 'ApprovalMatrixGroup',
 
-    /*===========================REQUISITION===================================== */
+  /*===========================REQUISITION===================================== */
     addRequisition: 'Requisition/save',
     getRequisition: 'Requisition',
     getRequisitionLines: 'Requisition/GetLinesByReqId',
@@ -37,7 +37,7 @@ export const GlobalConstant = {
     ACRLBulkFilters: 'Requisition/ACRLBulkFilters',
     bulkRequisitionItems: 'Requisition/BulkItems',
 
-    /*===========================COMMON===================================== */
+  /*===========================COMMON===================================== */
     Common: 'Common',
     modules: 'Common/modules',
     menus: 'Common/menus',
@@ -69,7 +69,7 @@ export const GlobalConstant = {
     PlanningVsProductionOverview: 'PlanningVsProduction/GetOverview',
     WorkType: 'Common/WorkType',
 
-    /*===========================ROLE===================================== */
+  /*===========================ROLE===================================== */
 
     activeRoles: 'Common/ActiveRoles',
     assignRole: 'Role/Assign',
@@ -86,7 +86,10 @@ export const GlobalConstant = {
   /*==============================MasterConfiguration====================================*/
     MasterConfigurationFGs: 'MasterConfiguration/FGs',
 
-    /*==============================PLANNING====================================*/
+    /*==============================BOM====================================*/
+    getBoMHeaders: 'BoM/GetData',
+
+  /*==============================PLANNING====================================*/
     DeliveryOrders: 'SalesOrderLanding/GetDOData',
     DeliveryOrderLine: 'SalesOrderLanding/GetDOLineData',
     MergeDOs: 'MergeDeliveryOrder/MergeDOs',
