@@ -88,8 +88,11 @@
 </div>
 
 <!-- Create and Edit share this modal. -->
+
+<!-- Create and Edit share this modal. -->
 <ng-template #createBomModal>
   <form [formGroup]="formGroup" (ngSubmit)="onSubmit()" novalidate>
+
     <div class="modal-header">
       <h5 class="modal-title d-flex align-items-center gap-2">
         @if (formMode() === 'edit') {
@@ -103,47 +106,43 @@
       <button type="button" class="btn-close" aria-label="Close" (click)="closeModal()"></button>
     </div>
 
-    <div class="modal-body">
-      <div class="border rounded-3 p-3 mb-3 mt-2">
-        @if (formMode() === 'edit') {
-          <div class="text-end mb-2"><strong>BOM Number :</strong> {{ selectedHeader()?.BoMCode || selectedHeader()?.BoMID }}</div>
-        }
+    <div class="modal-body bom-form-body">
 
-        <div class="row g-3">
-          <div class="col-lg-3 col-md-6">
-            <label class="form-label" for="bomUnitId">Unit :</label>
-            <select id="bomUnitId" class="form-select" formControlName="unitId">
-              <option [ngValue]="formGroup.controls.unitId.value">{{ selectedHeader()?.UnitName || formGroup.controls.unitId.value }}</option>
-            </select>
-          </div>
+      <!-- Finished Goods Formula/Recipe -->
+      <section class="bom-form-section mb-3">
+        <div class="bom-form-section-header">
+          <span class="bom-form-dot bom-form-dot-primary"></span>
+          Finished Goods Formula/Recipe
+          @if (formMode() === 'edit') {
+            <span class="bom-form-number ms-auto">{{ selectedHeader()?.BoMCode || selectedHeader()?.BoMID }}</span>
+          }
+        </div>
 
-          <div class="col-lg-3 col-md-6">
-            <label class="form-label" for="bomBusinessId">Business :</label>
-            <select id="bomBusinessId" class="form-select" formControlName="businessId">
-              <option [ngValue]="formGroup.controls.businessId.value">{{ selectedHeader()?.BusinessName || formGroup.controls.businessId.value }}</option>
-            </select>
-          </div>
+        <div class="bom-form-section-body">
+          <div class="row g-3">
 
-          <div class="col-lg-3 col-md-6">
-            <label class="form-label" for="itemType">FG Type :</label>
-            <select id="itemType" class="form-select" formControlName="itemType">
-              @if (formMode() === 'edit') {
-                <option [ngValue]="selectedHeader()?.FGTypeId">{{ selectedHeader()?.FGTypeName || selectedHeader()?.FGTypeId }}</option>
-              }
-            </select>
-          </div>
+            <div class="col-lg-6 col-md-12">
+              <label class="bom-form-label" for="bomName">BOM Name</label>
+              <input id="bomName" type="text" class="form-control" formControlName="bomName" placeholder="Enter BOM name" autocomplete="off" />
+            </div>
 
-          <div class="col-lg-3 col-md-6">
-            <label class="form-label" for="itemName">SFG/FG Name :</label>
-            <input id="itemName" type="text" class="form-control" formControlName="itemName" placeholder="Enter SFG / FG name" autocomplete="off" readonly />
-          </div>
+            <div class="col-lg-3 col-md-6">
+              <label class="bom-form-label" for="itemType">FG Type</label>
+              <select id="itemType" class="form-select" formControlName="itemType">
+                @if (formMode() === 'edit') {
+                  <option [ngValue]="selectedHeader()?.FGTypeId">{{ selectedHeader()?.FGTypeName || selectedHeader()?.FGTypeId }}</option>
+                }
+              </select>
+            </div>
 
-          <div class="col-lg-6 col-md-12">
-            <label class="form-label" for="bomName">BOM Name :</label>
-            <input id="bomName" type="text" class="form-control" formControlName="bomName" placeholder="Enter BOM name" autocomplete="off" />
+            <div class="col-lg-3 col-md-6">
+              <label class="bom-form-label" for="itemName">SFG/FG Name</label>
+              <input id="itemName" type="text" class="form-control" formControlName="itemName" placeholder="Enter SFG / FG name" autocomplete="off" readonly />
+            </div>
+
           </div>
         </div>
-      </div>
+      </section>
 
       @if (linesError()) {
         <div class="alert alert-danger d-flex align-items-center justify-content-between" role="alert">
@@ -152,88 +151,111 @@
         </div>
       }
 
-      <fieldset class="border rounded-3 p-3 mb-3">
-        <legend class="float-none w-auto px-2 mb-0">Raw Material</legend>
+      <!-- Raw Material -->
+      <section class="bom-form-section mb-3">
+        <div class="bom-form-section-header">
+          <span class="bom-form-dot bom-form-dot-success"></span>
+          Raw Material
+        </div>
 
-        <div formGroupName="rawMaterial">
-          <div class="row g-3">
-            <div class="col-lg-6 col-md-12">
-              <label class="form-label" for="rawMaterialName">Raw Material :</label>
-              <input id="rawMaterialName" type="text" class="form-control" formControlName="name" placeholder="Search raw material..." autocomplete="off" />
-            </div>
+        <div class="bom-form-section-body">
+          <div formGroupName="rawMaterial">
+            <div class="row g-3">
 
-            <div class="col-lg-3 col-md-6">
-              <label class="form-label" for="uom">UoM :</label>
-              <input id="uom" type="text" class="form-control" formControlName="uom" readonly />
-            </div>
-
-            <div class="col-lg-3 col-md-6">
-              <label class="form-label" for="bomUom">BOM UoM :</label>
-              <select id="bomUom" class="form-select" formControlName="bomUom"></select>
-            </div>
-
-            <div class="col-lg-3 col-md-6">
-              <label class="form-label" for="rmQty">Quantity :</label>
-              <input id="rmQty" type="number" class="form-control" formControlName="quantity" min="0" />
-            </div>
-
-            <div class="col-lg-3 col-md-6">
-              <label class="form-label" for="processLoss">Process Loss (%) :</label>
-              <div class="input-group">
-                <input id="processLoss" type="number" class="form-control" formControlName="processLoss" min="0" max="100" />
-                <span class="input-group-text">%</span>
+              <div class="col-lg-6 col-md-12">
+                <label class="bom-form-label" for="rawMaterialName">Raw Material</label>
+                <input id="rawMaterialName" type="text" class="form-control" formControlName="name" placeholder="Search raw material..." autocomplete="off" />
               </div>
-            </div>
 
-            <div class="col-lg-4 col-md-8">
-              <label class="form-label" for="remarks">Remarks :</label>
-              <input id="remarks" type="text" class="form-control" formControlName="remarks" placeholder="Optional remarks" autocomplete="off" />
-            </div>
+              <div class="col-lg-3 col-md-6">
+                <label class="bom-form-label" for="uom">UoM</label>
+                <input id="uom" type="text" class="form-control" formControlName="uom" readonly />
+              </div>
 
-            <div class="col-lg-2 col-md-4 d-flex align-items-end justify-content-end">
-              <button type="button" class="btn bom-primary-btn" (click)="addRawMaterial()"><i class="fa-solid fa-plus me-1"></i>Add</button>
-            </div>
-          </div>
-        </div>
+              <div class="col-lg-3 col-md-6">
+                <label class="bom-form-label" for="bomUom">BOM UoM</label>
+                <select id="bomUom" class="form-select" formControlName="bomUom"></select>
+              </div>
 
-        @if (formMode() === 'edit') {
-          <div class="mt-3"><ng-container [ngTemplateOutlet]="materialList"></ng-container></div>
-        }
-      </fieldset>
+              <div class="col-lg-3 col-md-6">
+                <label class="bom-form-label" for="rmQty">Quantity</label>
+                <input id="rmQty" type="number" class="form-control" formControlName="quantity" min="0" />
+              </div>
 
-      <fieldset class="border rounded-3 p-3 mb-3">
-        <legend class="float-none w-auto px-2 mb-0">Resources/Overhead Cost</legend>
+              <div class="col-lg-3 col-md-6">
+                <label class="bom-form-label" for="processLoss">Process Loss (%)</label>
+                <div class="input-group">
+                  <input id="processLoss" type="number" class="form-control" formControlName="processLoss" min="0" max="100" />
+                  <span class="input-group-text">%</span>
+                </div>
+              </div>
 
-        <div formGroupName="resource">
-          <div class="row g-3">
-            <div class="col-lg-6 col-md-12">
-              <label class="form-label" for="resourceName">Resource Name :</label>
-              <input id="resourceName" type="text" class="form-control" formControlName="name" placeholder="Search resource..." autocomplete="off" />
-            </div>
+              <div class="col-lg-4 col-md-8">
+                <label class="bom-form-label" for="remarks">Remarks</label>
+                <input id="remarks" type="text" class="form-control" formControlName="remarks" placeholder="Optional remarks" autocomplete="off" />
+              </div>
 
-            <div class="col-lg-4 col-md-8">
-              <label class="form-label" for="resourceQty">Quantity :</label>
-              <input id="resourceQty" type="number" class="form-control" formControlName="quantity" min="0" />
-            </div>
+              <div class="col-lg-2 col-md-4 d-flex align-items-end justify-content-end">
+                <button type="button" class="btn bom-form-btn-add" (click)="addRawMaterial()"><i class="fa-solid fa-plus me-1"></i> Add</button>
+              </div>
 
-            <div class="col-lg-2 col-md-4 d-flex align-items-end justify-content-end">
-              <button type="button" class="btn bom-primary-btn" (click)="addResource()"><i class="fa-solid fa-plus me-1"></i>Add</button>
             </div>
           </div>
+
+          @if (formMode() === 'edit') {
+            <div class="mt-3">
+              <ng-container [ngTemplateOutlet]="materialList"></ng-container>
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- Resources/Overhead Cost -->
+      <section class="bom-form-section mb-3">
+        <div class="bom-form-section-header">
+          <span class="bom-form-dot bom-form-dot-warning"></span>
+          Resources/Overhead Cost
         </div>
 
-        @if (formMode() === 'edit') {
-          <div class="mt-3"><ng-container [ngTemplateOutlet]="resourceList"></ng-container></div>
-        }
-      </fieldset>
+        <div class="bom-form-section-body">
+          <div formGroupName="resource">
+            <div class="row g-3">
+
+              <div class="col-lg-6 col-md-12">
+                <label class="bom-form-label" for="resourceName">Resource Name</label>
+                <input id="resourceName" type="text" class="form-control" formControlName="name" placeholder="Search resource..." autocomplete="off" />
+              </div>
+
+              <div class="col-lg-4 col-md-8">
+                <label class="bom-form-label" for="resourceQty">Quantity</label>
+                <input id="resourceQty" type="number" class="form-control" formControlName="quantity" min="0" />
+              </div>
+
+              <div class="col-lg-2 col-md-4 d-flex align-items-end justify-content-end">
+                <button type="button" class="btn bom-form-btn-add" (click)="addResource()"><i class="fa-solid fa-plus me-1"></i> Add</button>
+              </div>
+
+            </div>
+          </div>
+
+          @if (formMode() === 'edit') {
+            <div class="mt-3">
+              <ng-container [ngTemplateOutlet]="resourceList"></ng-container>
+            </div>
+          }
+        </div>
+      </section>
+
     </div>
 
     <div class="modal-footer">
       <button type="button" class="btn btn-secondary" (click)="closeModal()"><i class="fa-solid fa-fw fa-xmark"></i> Close</button>
-      <button type="submit" class="btn bom-primary-btn" [disabled]="formGroup.invalid || linesLoading() || !!linesError()"><i class="fa-solid fa-fw fa-check"></i> {{ formMode() === 'edit' ? 'Update' : 'Submit' }}</button>
+      <button type="submit" class="btn bom-form-btn-submit" [disabled]="formGroup.invalid || linesLoading() || !!linesError()"><i class="fa-solid fa-fw fa-check"></i> {{ formMode() === 'edit' ? 'Update' : 'Submit' }}</button>
     </div>
+
   </form>
 </ng-template>
+
 
 <!-- Fullscreen View modal. -->
 <ng-template #viewBomModal>
