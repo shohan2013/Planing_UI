@@ -9,5 +9,10 @@ export interface ProductionBOMHeader {
   UnitName: string | null;
   BusinessId: number | null;
   BusinessName: string | null;
+  CreatedBy: number | null;
+  CreatedByName: string | null;
+  UpdatedBy: number | null;
+  UpdatedByName: string | null;
   CreateDate: string | null;
+  UpdatedDate: string | null;
 }

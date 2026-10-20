@@ -77,13 +77,15 @@ router-outlet + * {
 
 /*=======================================================FULL SCREEN MODAL============================================================*/
 
-.fullscreen-modal .modal-content {
+.fullscreen-modal .modal-content,
+.modal-dialog.modal-fullscreen .modal-content {
   min-height: 100vh;
-  background-color: #ffffff;
+  background-color: #fff;
 }
 
-.fullscreen-modal .modal-body {
-  background-color: #ffffff;
+.fullscreen-modal .modal-body,
+.modal-dialog.modal-fullscreen .modal-body {
+  background-color: #fff;
   overflow-y: auto;
 }
 

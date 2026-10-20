@@ -88,6 +88,8 @@ export const GlobalConstant = {
 
     /*==============================BOM====================================*/
     getBoMHeaders: 'BoM/GetData',
+    getBoMLines: 'BoM/GetLines',
+    deleteBoM: 'BoM/Delete',
 
   /*==============================PLANNING====================================*/
     DeliveryOrders: 'SalesOrderLanding/GetDOData',
