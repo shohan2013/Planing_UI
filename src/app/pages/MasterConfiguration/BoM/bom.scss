@@ -55,6 +55,7 @@
   max-height: 28vh;
   overflow: auto;
 }
+
 .bom-lines-scroll thead th {
   position: sticky;
   top: 0;
@@ -68,19 +69,18 @@
   }
 }
 
-
-
 /* BOM Create/Edit form sections */
 .bom-form-section {
   background: #fff;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .bom-form-section-header {
   display: flex;
   align-items: center;
+  border-radius: 9px 9px 0 0;
   gap: 10px;
   padding: 12px 20px;
   font-size: 14px;
@@ -114,7 +114,6 @@
   background: #f5a623;
 }
 
-/* Form labels */
 .bom-form-label {
   display: block;
   margin-bottom: 6px;
@@ -125,7 +124,6 @@
   color: #4a5568;
 }
 
-/* Add buttons */
 .bom-form-btn-add {
   background: #4a5568;
   border-color: #4a5568;
@@ -140,7 +138,6 @@
   color: #fff;
 }
 
-/* Submit/Update button */
 .bom-form-btn-submit {
   min-width: 140px;
   background: linear-gradient(135deg, #2fb380, #25996d);
@@ -161,9 +158,49 @@
   cursor: not-allowed;
 }
 
-
 .bom-form-number {
   color: #2fb380;
   font-weight: 700;
   font-size: 14px;
+}
+
+.bom-percent-symbol {
+  background: rgb(47, 179, 128);
+  border-color: rgb(47, 179, 128);
+  color: #fff;
+}
+
+/*
+  ngbTypeahead uses container="body", so Angular places this dropdown
+  outside the component host. ::ng-deep lets this component SCSS reach it.
+*/
+::ng-deep .bom-item-dropdown {
+  z-index: 2000 !important;
+  width: min(100vw - 32px, 600px);
+  max-width: calc(100vw - 32px);
+  max-height: 240px !important;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+::ng-deep .bom-item-dropdown .dropdown-item {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+::ng-deep .bom-item-dropdown .dropdown-item:hover,
+::ng-deep .bom-item-dropdown .dropdown-item.active {
+  color: #173d30 !important;
+  background-color: rgba(47, 179, 128, 0.6) !important;
+}
+
+::ng-deep .bom-item-dropdown .bom-item-option {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

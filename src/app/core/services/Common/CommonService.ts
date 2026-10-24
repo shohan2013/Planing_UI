@@ -97,6 +97,11 @@ export class CommonService {
     );
   }
 
+  getWarehousesList(unitId: number): Observable<IDropdownBind[]> {
+    return this.http.get<IDropdownBind[]>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.warehousesList}?unitId=${unitId}`,
+    );
+  }
   GetProductTypeList(): Observable<IProductType[]> {
     return this.http.get<IProductType[]>(
       `${environment.API_URL}${GlobalConstant.API_END_POINTS.ProductType}`,
@@ -195,6 +200,8 @@ export class CommonService {
       `${environment.API_URL}${GlobalConstant.API_END_POINTS.ProductionStepsForPlanning}?UnitId=${unitId}&BusinessId=${BusinessesId}`,
     );
   }
+
+
 
   GetMachine(
     unitId: number,
