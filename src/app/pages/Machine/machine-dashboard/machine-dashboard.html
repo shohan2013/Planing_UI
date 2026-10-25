@@ -1,8 +1,8 @@
 <div class="user-card md-shell">
   <div class="page-header">
   <h5 class="d-flex align-items-center gap-2 mb-0">
-    <img src="assets/icons/globe.svg" width="20" height="20" alt=""/>
-    MACHINE UTILIZATION DASHBOARD
+    <i class= "fa-brands fa-instalod" style="color: rgb(79, 171, 89); font-size: 17px;  transform: translateY(0px);"></i>
+    <b>MACHINE UTILIZATION</b>
   </h5>
   </div>
   <br />
@@ -89,12 +89,11 @@
 
           <button
             type="button"
-            class="btn btn-success btn-shadow d-inline-flex align-items-center ms-auto"
+            class="d-inline-flex align-items-center ms-auto btn btn-success"
             (click)="refresh()"
             [disabled]="loading() || selectedUnitId === 0 || selectedBusinessId === 0"
           >
-            <i
-              class="fa-solid fa-fw fa-arrows-rotate me-2"
+            <i class="fa-solid fa-fw fa-arrows-rotate me-2"
               [class.fa-spin]="loading()"
             ></i>
             Refresh

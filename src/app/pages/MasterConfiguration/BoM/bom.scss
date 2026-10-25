@@ -1,3 +1,4 @@
+
 :host {
   display: block;
 }
@@ -55,18 +56,18 @@
   font-weight: 600;
 }
 
-.bom-primary-btn {
-  border: 1px solid rgba(47, 179, 128);
-  background: rgba(47, 179, 128, 0.9);
-  color: #173d30;
-  font-weight: 600;
+// .bom-primary-btn {
+//   border: 1px solid rgba(47, 179, 128);
+//   background: rgba(47, 179, 128, 0.9);
+//   color: #173d30;
+//   font-weight: 600;
 
-  &:hover:not(:disabled) {
-    border-color: rgba(47, 179, 128, 0.6);
-    background: rgba(47, 179, 128, 0.6);
-    color: #173d30;
-  }
-}
+//   &:hover:not(:disabled) {
+//     border-color: rgba(47, 179, 128, 0.6);
+//     background: rgba(47, 179, 128, 0.6);
+//     color: #173d30;
+//   }
+// }
 
 @media (max-width: 640px) {
   .bom-toolbar {
