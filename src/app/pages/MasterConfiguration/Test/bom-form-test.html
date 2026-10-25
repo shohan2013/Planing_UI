@@ -1,0 +1,207 @@
+
+<div class="bom-form-test">
+
+  <div class="modal-header bom-test-modal-header">
+    <h5 class="modal-title d-flex align-items-center gap-2">
+      @if (formMode() === 'edit') {
+        <img src="assets/icons/edit.svg" width="16" height="16" alt="" />
+        Edit BOM
+      } @else {
+        <img src="assets/icons/create.svg" width="17.5" height="17.5" alt="" />
+        Create BOM
+      }
+    </h5>
+
+    <button type="button" class="btn-close" aria-label="Close" (click)="closeForm()"></button>
+  </div>
+  
+
+
+  <form [formGroup]="formGroup" (ngSubmit)="onSubmit()" novalidate>
+
+    <!-- BOM Information -->
+    <section class="bom-section mb-3">
+      <div class="bom-section-header">
+        <span class="bom-dot bom-dot-primary"></span>
+        Finished Goods Formula/Recipe
+      </div>
+
+      <div class="bom-section-body">
+        <div class="row g-3">
+
+          <div class="col-lg-6 col-md-12">
+            <label class="bom-label" for="bomName">BOM Name</label>
+            <input id="bomName" type="text" class="form-control" formControlName="bomName" placeholder="Enter BOM name" autocomplete="off" />
+          </div>
+
+          <div class="col-lg-3 col-md-6">
+            <label class="bom-label" for="itemType">FG Type</label>
+            <select id="itemType" class="form-select" formControlName="itemType">
+              <option [ngValue]="1">FG</option>
+              <option [ngValue]="2">SFG</option>
+            </select>
+          </div>
+
+          <div class="col-lg-3 col-md-6">
+            <label class="bom-label" for="itemName">SFG/FG Name</label>
+            <input id="itemName" type="text" class="form-control" formControlName="itemName" placeholder="Enter SFG / FG name" autocomplete="off" readonly />
+          </div>
+
+          <div class="col-lg-6 col-md-12">
+            <label class="bom-label" for="bomName">BOM Name</label>
+            <input id="bomName" type="text" class="form-control" formControlName="bomName" placeholder="Enter BOM name" autocomplete="off" />
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Raw Material -->
+    <section class="bom-section mb-3">
+      <div class="bom-section-header">
+        <span class="bom-dot bom-dot-success"></span>
+        Raw Material
+      </div>
+
+      <div class="bom-section-body">
+        <div formGroupName="rawMaterial">
+          <div class="row g-3">
+
+            <div class="col-lg-6 col-md-12">
+              <label class="bom-label" for="rawMaterialName">Raw Material</label>
+              <input id="rawMaterialName" type="text" class="form-control" formControlName="name" placeholder="Search raw material..." autocomplete="off" />
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+              <label class="bom-label" for="uom">UoM</label>
+              <input id="uom" type="text" class="form-control" formControlName="uom" readonly />
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+              <label class="bom-label" for="bomUom">BOM UoM</label>
+              <select id="bomUom" class="form-select" formControlName="bomUom">
+                <option value="KG">KG</option>
+                <option value="PCS">PCS</option>
+                <option value="TON">TON</option>
+              </select>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+              <label class="bom-label" for="rmQty">Quantity</label>
+              <input id="rmQty" type="number" class="form-control" formControlName="quantity" min="0" />
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+              <label class="bom-label" for="processLoss">Process Loss (%)</label>
+              <div class="input-group">
+                <input id="processLoss" type="number" class="form-control" formControlName="processLoss" min="0" max="100" />
+                <span class="input-group-text">%</span>
+              </div>
+            </div>
+
+            <div class="col-lg-4 col-md-8">
+              <label class="bom-label" for="remarks">Remarks</label>
+              <input id="remarks" type="text" class="form-control" formControlName="remarks" placeholder="Optional remarks" autocomplete="off" />
+            </div>
+
+            <div class="col-lg-2 col-md-4 d-flex align-items-end justify-content-end">
+              <button type="button" class="btn bom-btn-add" (click)="addRawMaterial()"><i class="fa-solid fa-plus me-1"></i> Add</button>
+            </div>
+
+          </div>
+        </div>
+
+        @if (materialLines().length > 0) {
+          <div class="table-responsive mt-3">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>RAW MATERIAL</th>
+                  <th>QUANTITY</th>
+                  <th>UOM</th>
+                  <th>PROCESS LOSS</th>
+                  <th>REMARKS</th>
+                  <th>ACTION</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (line of materialLines(); track $index) {
+                  <tr>
+                    <td>{{ line.name }}</td>
+                    <td>{{ line.quantity }}</td>
+                    <td>{{ line.uom || '-' }}</td>
+                    <td>{{ line.processLoss ?? 0 }}%</td>
+                    <td>{{ line.remarks || '-' }}</td>
+                    <td><button type="button" class="btn btn-sm btn-outline-danger" (click)="removeMaterial($index)"><i class="fa-solid fa-trash-can"></i></button></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- Resources/Overhead Cost -->
+    <section class="bom-section mb-3">
+      <div class="bom-section-header">
+        <span class="bom-dot bom-dot-warning"></span>
+        Resources/Overhead Cost
+      </div>
+
+      <div class="bom-section-body">
+        <div formGroupName="resource">
+          <div class="row g-3">
+
+            <div class="col-lg-6 col-md-12">
+              <label class="bom-label" for="resourceName">Resource Name</label>
+              <input id="resourceName" type="text" class="form-control" formControlName="name" placeholder="Search resource..." autocomplete="off" />
+            </div>
+
+            <div class="col-lg-4 col-md-8">
+              <label class="bom-label" for="resourceQty">Quantity</label>
+              <input id="resourceQty" type="number" class="form-control" formControlName="quantity" min="0" />
+            </div>
+
+            <div class="col-lg-2 col-md-4 d-flex align-items-end justify-content-end">
+              <button type="button" class="btn bom-btn-add" (click)="addResource()"><i class="fa-solid fa-plus me-1"></i> Add</button>
+            </div>
+
+          </div>
+        </div>
+
+        @if (resourceLines().length > 0) {
+          <div class="table-responsive mt-3">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>RESOURCE</th>
+                  <th>QUANTITY</th>
+                  <th>ACTION</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (line of resourceLines(); track $index) {
+                  <tr>
+                    <td>{{ line.name }}</td>
+                    <td>{{ line.quantity }}</td>
+                    <td><button type="button" class="btn btn-sm btn-outline-danger" (click)="removeResource($index)"><i class="fa-solid fa-trash-can"></i></button></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </section>
+
+    @if (message()) {
+      <div class="alert alert-info" role="status">{{ message() }}</div>
+    }
+
+    <div class="d-flex justify-content-end">
+      <button type="submit" class="btn bom-btn-submit" [disabled]="formGroup.invalid"><i class="fa-solid fa-check me-1"></i> Submit</button>
+    </div>
+
+  </form>
+</div>

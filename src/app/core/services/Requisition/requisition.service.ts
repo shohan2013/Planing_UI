@@ -9,6 +9,8 @@ import { IRequisition } from 'src/app/core/model/Requisition/Requisition';
 import { ServerQueryRequest, ServerQueryResponse } from 'src/app/core/model/Common/Pagination/ServerQueryRequest';
 
 import { IViewRequisitionHeader, IViewRequisitionLine } from 'src/app/core/model/Requisition/ViewRequisition';
+import { IBulkRequisitionItem, IBulkRequisitionItemsRequest } from '../../model/Requisition/BulkRequisitionItems';
+import { IACRLBulkFilters } from '../../model/Requisition/ACRLBulkFilters';
 
 @Injectable({
   providedIn: 'root'
@@ -75,6 +77,36 @@ return this.http.get<IViewRequisitionLine[]>(
     );
   }
 
+
+
+GetACRLBulkFilters(unitId: number, businessId: number): Observable<IACRLBulkFilters> {
+  return this.http.get<IACRLBulkFilters>(
+    `${environment.API_URL}${GlobalConstant.API_END_POINTS.ACRLBulkFilters}`,
+    { params: { UnitId: unitId, BusinessId: businessId } },
+  );
+}
+
+GetBulkItems(
+  request: IBulkRequisitionItemsRequest,
+  pagination: ServerQueryRequest,
+): Observable<ServerQueryResponse<IBulkRequisitionItem>> {
+  return this.http.get<ServerQueryResponse<IBulkRequisitionItem>>(
+    `${environment.API_URL}${GlobalConstant.API_END_POINTS.bulkRequisitionItems}`,
+    {
+      params: {
+        UnitId: request.UnitID,
+        BusinessId: request.BusinessID,
+        FromDate: String(request.FromDate),
+        ToDate: String(request.ToDate),
+        SizeId: request.SizeID ?? 0,
+        SubCategoryId: request.SubCategoryID ?? 0,
+        GlobalSearch: pagination.globalSearch ?? '',
+        PageIndex: pagination.page,
+        PageSize: pagination.pageSize,
+      },
+    },
+  );
+}
 
 
 

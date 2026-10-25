@@ -51,6 +51,7 @@ export class Menu extends ServerSideFilteredPaginatedComponent<IMenu> {
   private destroy$ = new Subject<void>();
   isLoadingdata = false;
 
+  
   protected override fetchData(
     request: ServerQueryRequest,
   ): Observable<ServerQueryResponse<IMenu>> {

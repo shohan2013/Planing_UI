@@ -1,0 +1,130 @@
+
+:host {
+  display: block;
+}
+
+/* Card structure */
+.bom-section {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* Selected design: card headers */
+.bom-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: #1f2a44;
+  background: linear-gradient(90deg, #eef2fb 0%, #f8f9fd 100%);
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.bom-section-body {
+  padding: 16px;
+}
+
+/* Colored section indicators */
+.bom-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.bom-dot-primary {
+  background: #3f6ad8;
+}
+
+.bom-dot-success {
+  background: #2fb380;
+}
+
+.bom-dot-warning {
+  background: #f5a623;
+}
+
+/* Selected design: labels */
+.bom-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #4a5568;
+}
+
+/* Selected design: Add buttons */
+.bom-btn-add {
+  background: #4a5568;
+  border-color: #4a5568;
+  color: #fff;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+.bom-btn-add:hover {
+  background: #2d3748;
+  border-color: #2d3748;
+  color: #fff;
+}
+
+/* Selected design: Submit button */
+.bom-btn-submit {
+  min-width: 140px;
+  background: linear-gradient(135deg, #2fb380, #25996d);
+  border-color: #2fb380;
+  color: #fff;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+.bom-btn-submit:hover:not(:disabled) {
+  background: #25996d;
+  border-color: #25996d;
+  color: #fff;
+}
+
+.bom-btn-submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Replicate the application's modal header on the test page */
+.bom-test-modal-header {
+  display: flex;
+  align-items: center;
+  min-height: 60px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 16px;
+  border-radius: 6px 6px 0 0;
+
+  .modal-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 500;
+  }
+}
+
+
+.bom-test-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 60px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 16px;
+  border-radius: 6px 6px 0 0;
+
+  .modal-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 500;
+  }
+}

@@ -97,6 +97,11 @@ export class CommonService {
     );
   }
 
+  getWarehousesList(unitId: number): Observable<IDropdownBind[]> {
+    return this.http.get<IDropdownBind[]>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.warehousesList}?unitId=${unitId}`,
+    );
+  }
   GetProductTypeList(): Observable<IProductType[]> {
     return this.http.get<IProductType[]>(
       `${environment.API_URL}${GlobalConstant.API_END_POINTS.ProductType}`,
@@ -196,6 +201,8 @@ export class CommonService {
     );
   }
 
+
+
   GetMachine(
     unitId: number,
     BusinessesId: number,
@@ -226,13 +233,15 @@ export class CommonService {
 
   getActiveRoles(): Observable<IActiveRole[]> {
     return this.http.get<IActiveRole[]>(
-      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.activeRoles}`,
+      // `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.activeRoles}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.activeRoles}`
     );
   }
 
   getWorkTypes(): Observable<IWorkType[]> {
     return this.http.get<IWorkType[]>(
-      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.WorkType}`,
+      // `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.WorkType}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.WorkType}`
     );
   }
 }

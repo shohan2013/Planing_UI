@@ -103,7 +103,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/Requisition/requisition').then((m) => m.Requisition),
       },
-
+      {
+        path: 'masterconfiguration',
+        loadComponent: () =>
+          import('./pages/MasterConfiguration/master-configuration').then((m) => m.MasterConfiguration),
+      },
       {
         path: 'testreport',
         loadComponent: () =>
@@ -124,6 +128,19 @@ export const routes: Routes = [
             (m) => m.MachineDashboard,
           ),
       },
+
+
+{
+  path: 'qq',
+  pathMatch: 'full',
+  loadComponent: () =>
+    import('./pages/MasterConfiguration/Test/bom-form-test').then(
+      (m) => m.BomFormTest,
+    ),
+},
+
+
+
       {
         path: 'PlanningVsProductionOverview',
         pathMatch: 'full',
@@ -133,6 +150,7 @@ export const routes: Routes = [
           ),
       },
 
+      
       // Elements
       {
         path: 'elements/buttons-standard',
@@ -259,6 +277,13 @@ export const routes: Routes = [
         component: ForgotPasswordBoxedComponent,
         data: { extraParameter: '' },
       },
+
+      {
+        path: 'pages/forgot-password-boxed',
+        component: ForgotPasswordBoxedComponent,
+        data: { extraParameter: '' },
+      },
+      
     ],
   },
 
