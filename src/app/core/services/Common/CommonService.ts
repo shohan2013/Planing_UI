@@ -107,6 +107,7 @@ export class CommonService {
       `${environment.API_URL}${GlobalConstant.API_END_POINTS.ProductType}`,
     );
   }
+  
 
   GetItemList(unitId: number, searchText: string): Observable<IItem[]> {
     return this.http.get<IItem[]>(
@@ -244,4 +245,10 @@ export class CommonService {
       `${environment.API_URL}${GlobalConstant.API_END_POINTS.WorkType}`
     );
   }
+
+  getFGTypes(): Observable<IDropdownBind[]> {
+  return this.http.get<IDropdownBind[]>(
+    `${environment.API_URL}${GlobalConstant.API_END_POINTS.getFGTypes}`
+  );
+}
 }

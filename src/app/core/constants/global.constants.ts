@@ -53,6 +53,7 @@ export const GlobalConstant = {
     Businesses: 'Common/BusinessList',
     warehousesList: 'Common/WarehouseList',
     ProductType: 'Common/ProductTypeList',
+    getFGTypes: 'Common/FGTypes',
     Item: 'Common/ItemList',
     StockQuantity: 'Common/StockQty',
     SalesQuantity: 'Common/GetSalesQty',
@@ -88,9 +89,15 @@ export const GlobalConstant = {
     MasterConfigurationFGs: 'MasterConfiguration/FGs',
 
     /*==============================BOM====================================*/
+    addBoM: 'BoM/save',
+    updateBoM: 'BoM/update',
+    saveBoMLine: 'BoM/SaveLine',
+
     getBoMHeaders: 'BoM/GetData',
     getBoMLines: 'BoM/GetLines',
+    
     deleteBoM: 'BoM/Delete',
+    deleteBoMLine: 'BoM/DeleteLine',
     
     getBoMItems: 'BoM/GetItems',
     getProductionMaterialUoM: 'BoM/GetProductionMaterialUoM',
