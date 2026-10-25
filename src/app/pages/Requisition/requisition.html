@@ -156,19 +156,7 @@
             </td>
 
             <td>
-              <span
-                class="g-status"
-                [ngClass]="{
-                      'pending': item.DocStatusId === 1,
-                      'approve': item.DocStatusId === 2,
-                      'reject': item.DocStatusId === 3,
-                      'complete': item.DocStatusId === 4
-                    }"
-              >
-                 
-
-                {{ getDocStatusName( item.DocStatusId ) }}
-              </span>
+              <span class="g-status" [ngClass]="getDocStatusClass(item.DocStatusId)">{{ getDocStatusName(item.DocStatusId) }}</span>
             </td>
 
             <td class="g-action-column">
@@ -232,7 +220,8 @@
                   class="action-btn btn-complete"
                   title="Complete"
                   [disabled]="
-                    item.DocStatusId === 4 ||
+                    !documentStatuses().length ||
+                    getDocStatusClass(item.DocStatusId) === 'complete' ||
                     deletingReqId() !== null ||
                     completingReqId() !== null
                   "

@@ -1,0 +1,87 @@
+.user-card .card-body {
+  padding: 20px;
+}
+
+.master-filters {
+  width: 75%;
+}
+
+.master-select {
+  width: 230px;
+  flex: none;
+}
+
+.master-click-cell {
+  padding-left: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.master-sl-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.master-expand-chevron {
+  display: inline-block;
+  width: 12px;
+  color: #4fab59;
+  text-align: center;
+  transition: transform 0.2s ease;
+
+  &.is-expanded {
+    transform: rotate(90deg);
+  }
+}
+
+.custom-table tbody tr.master-row-expanded > td {
+  background: #e8f1ff;
+}
+
+.custom-table tbody td.master-expanded-cell {
+  padding: 0;
+  background: #fff;
+  vertical-align: top;
+  border-bottom: 3px solid #111;
+}
+
+@media (max-width: 900px) {
+  .master-filters {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .master-select {
+    flex: 1 1 180px;
+  }
+
+  .master-filters > .flex-fill {
+    flex: 1 1 100%;
+  }
+}
+
+.master-fg-table {
+  table-layout: auto;
+
+  th:first-child,
+  td.master-click-cell,
+  th:nth-child(2),
+  td:nth-child(2),
+  th:nth-child(3),
+  td:nth-child(3),
+  .g-action-column {
+    width: 1%;
+    white-space: nowrap;
+  }
+
+  th:nth-child(2),
+  td:nth-child(2),
+  th:nth-child(3),
+  td:nth-child(3) {
+    padding-inline: 12px;
+  }
+}
+.master-fg-table td.master-click-cell {
+  padding-right: 10px;
+}

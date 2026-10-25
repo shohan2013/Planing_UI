@@ -77,13 +77,15 @@ router-outlet + * {
 
 /*=======================================================FULL SCREEN MODAL============================================================*/
 
-.fullscreen-modal .modal-content {
+.fullscreen-modal .modal-content,
+.modal-dialog.modal-fullscreen .modal-content {
   min-height: 100vh;
-  background-color: #ffffff;
+  background-color: #fff;
 }
 
-.fullscreen-modal .modal-body {
-  background-color: #ffffff;
+.fullscreen-modal .modal-body,
+.modal-dialog.modal-fullscreen .modal-body {
+  background-color: #fff;
   overflow-y: auto;
 }
 
@@ -251,7 +253,6 @@ tbody tr {
   font-size: 16px;
   font-weight: 600;
   font-family: calibri;
-  // font-style: italic;
 }
 
 h6 {
@@ -350,31 +351,6 @@ td:has(> .g-scrollable-text.md) {
   vertical-align: middle;
 }
 
-/*Usage Example
-  <td class="g-action-column">
-    <div class="action-buttons">
-      <button
-        *menuPermission="PermissionAction.View"
-        type="button"
-        class="action-btn btn-view"
-        title="View"
-        [disabled]="deletingReqId() !== null"
-        (click)="openViewModal(item)"
-      >
-        <i class="fa-solid fa-magnifying-glass-plus"></i>
-      </button>
-
-      <button
-        *menuPermission="PermissionAction.Update"
-        type="button"
-        class="action-btn btn-edit"
-        title="Edit"
-        [disabled]="deletingReqId() !== null
-        (click)="openEditModal(item)"
-      >
-        <i class="fa-regular fa-pen-to-square"></i>
-      </button>
-*/
 
 .action-btn {
   width: 36px;
@@ -430,15 +406,16 @@ td:has(> .g-scrollable-text.md) {
 }
 
 .input-group-text {
-  background-color: #4daa57 !important;
-  border: #4daa57 !important;
+  background-color: rgb(45, 172, 123);
+  border: rgb(45, 172, 123);
   color: white;
 }
 /* Remove this section - transitions are now defined in component styles */
 .btn-success {
-  background-color: #4daa57 !important;
-  border: #4daa57 !important;
-  color: white;
+  border: 1px solid rgb(45, 172, 123);
+  background: rgb(45, 172, 123);
+  color: #173d30;
+  font-weight: 600;
 }
 
 label {

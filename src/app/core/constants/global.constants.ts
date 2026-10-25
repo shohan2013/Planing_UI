@@ -6,27 +6,27 @@ export const GlobalConstant = {
     PermissionByEnroll: 'Permission/menupermission',
     PermissionByType: 'Permission/permissionbytype',
 
-    /*===========================MENU===================================== */
+  /*===========================MENU===================================== */
     Menu: 'Menu',
     getMenuById: 'Menu/menu',
     addMenu: 'Menu',
     updateMenu: 'Menu',
     deleteMenu: 'Menu',
 
-    /*===========================SUB MENU===================================== */
+  /*===========================SUB MENU===================================== */
     SubMenu: 'SubMenu',
     getSubMenuById: 'SubMenu/submenu',
     addSubMenu: 'SubMenu',
     updateSubMenu: 'SubMenu',
     deleteSubMenu: 'SubMenu',
 
-    /*===========================MATRIX===================================== */
+  /*===========================MATRIX===================================== */
     ApproveMatrix: 'ApproveMatrix',
     ProvideApproveMatrix: 'ApproveMatrix/updateApproveMatrixPermission',
 
     ApproveMatrixGroup: 'ApprovalMatrixGroup',
 
-    /*===========================REQUISITION===================================== */
+  /*===========================REQUISITION===================================== */
     addRequisition: 'Requisition/save',
     getRequisition: 'Requisition',
     getRequisitionLines: 'Requisition/GetLinesByReqId',
@@ -34,7 +34,10 @@ export const GlobalConstant = {
     deleteRequisition: 'Requisition/Delete',
     completeRequisition: 'Requisition/complete',
 
-    /*===========================COMMON===================================== */
+    ACRLBulkFilters: 'Requisition/ACRLBulkFilters',
+    bulkRequisitionItems: 'Requisition/BulkItems',
+
+  /*===========================COMMON===================================== */
     Common: 'Common',
     modules: 'Common/modules',
     menus: 'Common/menus',
@@ -48,6 +51,7 @@ export const GlobalConstant = {
     SideBar: 'SideBar',
     UserMenuPermission: 'UserMenuPermission',
     Businesses: 'Common/BusinessList',
+    warehousesList: 'Common/WarehouseList',
     ProductType: 'Common/ProductTypeList',
     Item: 'Common/ItemList',
     StockQuantity: 'Common/StockQty',
@@ -67,7 +71,7 @@ export const GlobalConstant = {
     PlanningVsProductionOverviewTotals: 'PlanningVsProduction/GetOverviewTotals',
     WorkType: 'Common/WorkType',
 
-    /*===========================ROLE===================================== */
+  /*===========================ROLE===================================== */
 
     activeRoles: 'Common/ActiveRoles',
     assignRole: 'Role/Assign',
@@ -81,7 +85,18 @@ export const GlobalConstant = {
     updateRolePermission: 'RolePermission',
     deleteRolePermission: 'RolePermission/Delete',
 
-    /*==============================PLANNING====================================*/
+  /*==============================MasterConfiguration====================================*/
+    MasterConfigurationFGs: 'MasterConfiguration/FGs',
+
+    /*==============================BOM====================================*/
+    getBoMHeaders: 'BoM/GetData',
+    getBoMLines: 'BoM/GetLines',
+    deleteBoM: 'BoM/Delete',
+    
+    getBoMItems: 'BoM/GetItems',
+    getProductionMaterialUoM: 'BoM/GetProductionMaterialUoM',
+
+  /*==============================PLANNING====================================*/
     DeliveryOrders: 'SalesOrderLanding/GetDOData',
     DeliveryOrderLine: 'SalesOrderLanding/GetDOLineData',
     MergeDOs: 'MergeDeliveryOrder/MergeDOs',
