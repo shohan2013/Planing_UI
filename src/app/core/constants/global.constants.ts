@@ -51,6 +51,7 @@ export const GlobalConstant = {
     SideBar: 'SideBar',
     UserMenuPermission: 'UserMenuPermission',
     Businesses: 'Common/BusinessList',
+    warehousesList: 'Common/WarehouseList',
     ProductType: 'Common/ProductTypeList',
     Item: 'Common/ItemList',
     StockQuantity: 'Common/StockQty',
@@ -88,6 +89,11 @@ export const GlobalConstant = {
 
     /*==============================BOM====================================*/
     getBoMHeaders: 'BoM/GetData',
+    getBoMLines: 'BoM/GetLines',
+    deleteBoM: 'BoM/Delete',
+    
+    getBoMItems: 'BoM/GetItems',
+    getProductionMaterialUoM: 'BoM/GetProductionMaterialUoM',
 
   /*==============================PLANNING====================================*/
     DeliveryOrders: 'SalesOrderLanding/GetDOData',

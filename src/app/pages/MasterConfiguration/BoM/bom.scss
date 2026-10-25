@@ -3,20 +3,18 @@
   display: block;
 }
 
-.bom-page {
-  .card-body {
-    padding: 20px;
-  }
+.bom-page .card-body {
+  padding: 20px;
+}
 
-  .page-header h5 {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-  }
+.bom-page .page-header h5 {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
 }
 
 .bom-heading-icon {
-  color: rgba(47, 179, 128, 0.4);
+  color: rgb(47, 179, 128);
   font-size: 18px;
 }
 
@@ -33,28 +31,16 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 0.6rem;
-  color: #64748b;
-
-  strong {
-    color: #334155;
-  }
-
-  span {
-    padding: 0.25rem 0.65rem;
-    border-radius: 15px;
-    background: rgba(47, 179, 128, 0.4);
-    color: #173d30;
-  }
 }
 
+.bom-item-context span,
 .bom-version {
-  display: inline-block;
   padding: 3px 8px;
   border-radius: 15px;
   background: rgba(47, 179, 128, 0.4);
   color: #173d30;
-  font-weight: 600;
 }
+
 
 // .bom-primary-btn {
 //   border: 1px solid rgba(47, 179, 128);
@@ -69,9 +55,167 @@
 //   }
 // }
 
+.bom-primary-btn {
+  border-color: rgb(47, 179, 128);
+  background: rgb(47, 179, 128);
+  color: #fff;
+}
+
+.btn-approve {
+  background: rgba(47, 179, 128, 0.4);
+  color: #173d30;
+}
+
+.bom-lines-scroll {
+  max-height: 28vh;
+  overflow: auto;
+}
+
+.bom-lines-scroll thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
 @media (max-width: 640px) {
   .bom-toolbar {
     align-items: flex-start;
     flex-direction: column-reverse;
   }
+}
+
+/* BOM Create/Edit form sections */
+.bom-form-section {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: visible;
+}
+
+.bom-form-section-header {
+  display: flex;
+  align-items: center;
+  border-radius: 9px 9px 0 0;
+  gap: 10px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: #1f2a44;
+  background: linear-gradient(90deg, #eef2fb 0%, #f8f9fd 100%);
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.bom-form-section-body {
+  padding: 16px;
+}
+
+.bom-form-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.bom-form-dot-primary {
+  background: #3f6ad8;
+}
+
+.bom-form-dot-success {
+  background: #2fb380;
+}
+
+.bom-form-dot-warning {
+  background: #f5a623;
+}
+
+.bom-form-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #4a5568;
+}
+
+.bom-form-btn-add {
+  background: #4a5568;
+  border-color: #4a5568;
+  color: #fff;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+.bom-form-btn-add:hover {
+  background: #2d3748;
+  border-color: #2d3748;
+  color: #fff;
+}
+
+.bom-form-btn-submit {
+  min-width: 140px;
+  background: linear-gradient(135deg, #2fb380, #25996d);
+  border-color: #2fb380;
+  color: #fff;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+.bom-form-btn-submit:hover:not(:disabled) {
+  background: #25996d;
+  border-color: #25996d;
+  color: #fff;
+}
+
+.bom-form-btn-submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.bom-form-number {
+  color: #2fb380;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.bom-percent-symbol {
+  background: rgb(47, 179, 128);
+  border-color: rgb(47, 179, 128);
+  color: #fff;
+}
+
+/*
+  ngbTypeahead uses container="body", so Angular places this dropdown
+  outside the component host. ::ng-deep lets this component SCSS reach it.
+*/
+::ng-deep .bom-item-dropdown {
+  z-index: 2000 !important;
+  width: min(100vw - 32px, 600px);
+  max-width: calc(100vw - 32px);
+  max-height: 240px !important;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+::ng-deep .bom-item-dropdown .dropdown-item {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+::ng-deep .bom-item-dropdown .dropdown-item:hover,
+::ng-deep .bom-item-dropdown .dropdown-item.active {
+  color: #173d30 !important;
+  background-color: rgba(47, 179, 128, 0.6) !important;
+}
+
+::ng-deep .bom-item-dropdown .bom-item-option {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

@@ -128,6 +128,19 @@ export const routes: Routes = [
             (m) => m.MachineDashboard,
           ),
       },
+
+
+{
+  path: 'qq',
+  pathMatch: 'full',
+  loadComponent: () =>
+    import('./pages/MasterConfiguration/Test/bom-form-test').then(
+      (m) => m.BomFormTest,
+    ),
+},
+
+
+
       {
         path: 'PlanningVsProductionOverview',
         pathMatch: 'full',
