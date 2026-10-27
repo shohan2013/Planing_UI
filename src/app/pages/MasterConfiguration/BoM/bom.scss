@@ -117,17 +117,25 @@
 }
 
 .bom-form-btn-add {
-  background: #4a5568;
-  border-color: #4a5568;
-  color: #fff;
+  background: #dcfce7;
+  border-color: #dcfce7;
+  color: #16a34a;
   font-weight: 600;
   border-radius: 8px;
 }
 
-.bom-form-btn-add:hover {
-  background: #2d3748;
-  border-color: #2d3748;
+.bom-form-btn-add:hover:not(:disabled) {
+  background: #16a34a;
+  border-color: #16a34a;
   color: #fff;
+}
+
+
+.bom-lines-scroll .action-btn.btn-edit:disabled {
+  opacity: 0.4;
+  filter: grayscale(1);
+  cursor: not-allowed;
+  transform: none;
 }
 
 .bom-form-btn-submit {

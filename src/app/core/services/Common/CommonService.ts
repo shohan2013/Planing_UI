@@ -30,6 +30,7 @@ import {
 import { IRecipe } from '../../model/Common/Recipe/Recipe';
 import { IActiveRole } from '../../model/Role/Role';
 import { IWorkType } from '../../model/WorkType/WorkType';
+import { IWareHouse } from '../../model/Common/WareHouse/WareHouse';
 
 @Injectable({
   providedIn: 'root',
@@ -97,9 +98,9 @@ export class CommonService {
     );
   }
 
-  getWarehousesList(unitId: number): Observable<IDropdownBind[]> {
-    return this.http.get<IDropdownBind[]>(
-      `${environment.API_URL}${GlobalConstant.API_END_POINTS.warehousesList}?unitId=${unitId}`,
+  getWarehousesList(enroll: number): Observable<IWareHouse[]> {
+    return this.http.get<IWareHouse[]>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.warehousesList}?unitId=${enroll}`,
     );
   }
   GetProductTypeList(): Observable<IProductType[]> {

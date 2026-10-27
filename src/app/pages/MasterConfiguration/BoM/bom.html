@@ -113,10 +113,7 @@
 
         <div class="bom-form-section-body">
           <div class="row g-3 align-items-end">
-            <div class="col-lg-6 col-md-12">
-              <label class="bom-form-label" for="bomName">BOM Name</label>
-              <input id="bomName" type="text" class="form-control" formControlName="bomName" maxlength="500" placeholder="Enter BOM name" autocomplete="off" />
-            </div>
+
 
             <div class="col-lg-3 col-md-6">
               <label class="bom-form-label" for="itemType">FG Type</label>
@@ -131,9 +128,17 @@
               </select>
             </div>
 
+            <div class="col-lg-6 col-md-12">
+              <label class="bom-form-label" for="bomName">BOM Name</label>
+              <input id="bomName" type="text" class="form-control" formControlName="bomName" maxlength="500" placeholder="Enter BOM name" autocomplete="off" />
+            </div>
+
+
+
+
             @if (formMode() === 'edit') {
-              <div class="col-lg-3 col-md-6">
-                <button type="button" class="btn bom-form-btn-submit w-100" [disabled]="!headerChanged() || formGroup.controls.bomName.invalid || formGroup.controls.itemType.invalid || savingHeader()" (click)="updateHeader()">
+              <div class="col-lg-3 col-md-6 d-flex justify-content-end">
+                <button type="button" class="btn bom-form-btn-submit" [disabled]="!headerChanged() || formGroup.controls.bomName.invalid || formGroup.controls.itemType.invalid || savingHeader()" (click)="updateHeader()">
                   @if (savingHeader()) {
                     <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
                   } @else {
@@ -172,12 +177,11 @@
             <div class="row g-3">
               <div class="col-lg-2 col-md-6">
                 <label class="bom-form-label" for="materialWarehouse">Warehouse</label>
-                <ng-select id="materialWarehouse" [items]="warehouseOptions()" bindLabel="Name" bindValue="Id" formControlName="warehouseId" [clearable]="false" dropdownPosition="bottom"></ng-select>
-              </div>
+                <ng-select id="materialWarehouse" [items]="warehouseOptions()" bindLabel="WareHouse" bindValue="WareHouseID" formControlName="warehouseId" placeholder="Select Warehouse" [clearable]="false" dropdownPosition="bottom"></ng-select>              </div>
 
               <div class="col-lg-2 col-md-6">
                 <label class="bom-form-label" for="rawMaterialName">Raw Material</label>
-                <input id="rawMaterialName" type="text" class="form-control" formControlName="name" placeholder="Search item" autocomplete="off" [ngbTypeahead]="searchMaterialItems" [resultTemplate]="bomItemResult" [placement]="['bottom-start', 'top-start']" container="body" popupClass="bom-item-dropdown" [resultFormatter]="itemFormatter" [inputFormatter]="itemFormatter" (selectItem)="onMaterialItemSelect($event)" (keydown.arrowdown)="scrollActiveItem()" (keydown.arrowup)="scrollActiveItem()" />
+                <input id="rawMaterialName" type="text" class="form-control" formControlName="name" placeholder="Search item" autocomplete="off" [ngbTypeahead]="searchMaterialItems" [resultTemplate]="bomItemResult" [placement]="['bottom-start', 'top-start']" container="body" popupClass="bom-item-dropdown" [resultFormatter]="itemFormatter" [inputFormatter]="itemFormatter" [readonly]="formGroup.controls.rawMaterial.controls.warehouseId.value === null" (selectItem)="onMaterialItemSelect($event)" (keydown.arrowdown)="scrollActiveItem()" (keydown.arrowup)="scrollActiveItem()" />
                 @if (materialSearching()) {
                   <div class="small text-primary mt-1"><span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>Searching...</div>
                 }
@@ -185,25 +189,25 @@
 
               <div class="col-lg-2 col-md-6">
                 <label class="bom-form-label" for="rmQty">Quantity</label>
-                <input id="rmQty" type="number" class="form-control" formControlName="quantity" min="0.0000000001" step="any" />
+                <input id="rmQty" type="text" inputmode="decimal" class="form-control" formControlName="quantity" bomDecimalInput [bomWholeDigits]="8" [bomDecimalDigits]="4" [bomMultiplier]="selectedCValue()" />
               </div>
 
               <div class="col-lg-2 col-md-6">
                 <label class="bom-form-label" for="wastagePercent">Wastage</label>
                 <div class="input-group">
-                  <input id="wastagePercent" type="number" class="form-control" formControlName="wastagePercent" min="0" max="100" step="any" />
+                  <input id="wastagePercent" type="text" inputmode="decimal" class="form-control" formControlName="wastagePercent" bomDecimalInput [bomWholeDigits]="12" [bomDecimalDigits]="2" />
                   <span class="input-group-text bom-percent-symbol">%</span>
                 </div>
               </div>
 
               <div class="col-lg-2 col-md-6">
                 <label class="bom-form-label" for="processLoss">Process Loss</label>
-                <input id="processLoss" type="number" class="form-control" formControlName="processLoss" min="0" step="any" />
+                <input id="processLoss" type="text" inputmode="decimal" class="form-control" formControlName="processLoss" bomDecimalInput [bomWholeDigits]="8" [bomDecimalDigits]="2" />
               </div>
 
               <div class="col-lg-2 col-md-6">
                 <label class="bom-form-label" for="materialRate">Rate</label>
-                <input id="materialRate" type="number" class="form-control" formControlName="rate" min="0" step="any" />
+                <input id="materialRate" type="text" inputmode="decimal" class="form-control" formControlName="rate" bomDecimalInput [bomWholeDigits]="16" [bomDecimalDigits]="2" />
               </div>
 
               <div class="col-lg-2 col-md-6">
@@ -212,8 +216,13 @@
               </div>
 
               <div class="col-lg-2 col-md-6">
-                <label class="bom-form-label" for="bomUom">CUoM</label>
-                <input id="bomUom" type="text" class="form-control" formControlName="bomUom" readonly />
+              <label class="bom-form-label" for="bomUom">CUoM</label>
+              <select id="bomUom" class="form-select" formControlName="bomUom">
+                <option value="">Select CUoM</option>
+                @for (conversion of materialConversions(); track conversion.CUoM) {
+                  <option [value]="conversion.CUoM">{{ conversion.CUoM }}</option>
+                }
+              </select>
               </div>
 
               <div class="col-lg-2 col-md-6">
@@ -256,12 +265,12 @@
             <div class="row g-3">
               <div class="col-lg-2 col-md-6">
                 <label class="bom-form-label" for="resourceWarehouse">Warehouse</label>
-                <ng-select id="resourceWarehouse" [items]="warehouseOptions()" bindLabel="Name" bindValue="Id" formControlName="warehouseId" [clearable]="false" dropdownPosition="bottom"></ng-select>
+                <ng-select id="resourceWarehouse" [items]="warehouseOptions()" bindLabel="WareHouse" bindValue="WareHouseID" formControlName="warehouseId" placeholder="Select Warehouse" [clearable]="false" dropdownPosition="bottom"></ng-select>
               </div>
 
-              <div class="col-lg-3 col-md-6">
+              <div class="col-lg-2 col-md-6">
                 <label class="bom-form-label" for="resourceName">Resource Name</label>
-                <input id="resourceName" type="text" class="form-control" formControlName="name" placeholder="Search item" autocomplete="off" [ngbTypeahead]="searchResourceItems" [resultTemplate]="bomItemResult" [placement]="['bottom-start', 'top-start']" container="body" popupClass="bom-item-dropdown" [resultFormatter]="itemFormatter" [inputFormatter]="itemFormatter" (selectItem)="onResourceItemSelect($event)" (keydown.arrowdown)="scrollActiveItem()" (keydown.arrowup)="scrollActiveItem()" />
+                <input id="resourceName" type="text" class="form-control" formControlName="name" placeholder="Search item" autocomplete="off" [ngbTypeahead]="searchResourceItems" [resultTemplate]="bomItemResult" [placement]="['bottom-start', 'top-start']" container="body" popupClass="bom-item-dropdown" [resultFormatter]="itemFormatter" [inputFormatter]="itemFormatter" [readonly]="formGroup.controls.resource.controls.warehouseId.value === null" (selectItem)="onResourceItemSelect($event)" (keydown.arrowdown)="scrollActiveItem()" (keydown.arrowup)="scrollActiveItem()" />
                 @if (resourceSearching()) {
                   <div class="small text-primary mt-1"><span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>Searching...</div>
                 }
@@ -269,15 +278,15 @@
 
               <div class="col-lg-2 col-md-6">
                 <label class="bom-form-label" for="resourceQty">Quantity</label>
-                <input id="resourceQty" type="number" class="form-control" formControlName="quantity" min="0.0000000001" step="any" />
+                <input id="resourceQty" type="text" inputmode="decimal" class="form-control" formControlName="quantity" bomDecimalInput [bomWholeDigits]="8" [bomDecimalDigits]="2" />
               </div>
 
               <div class="col-lg-2 col-md-6">
                 <label class="bom-form-label" for="resourceRate">Rate</label>
-                <input id="resourceRate" type="number" class="form-control" formControlName="rate" min="0" step="any" />
+                <input id="resourceRate" type="text" inputmode="decimal" class="form-control" formControlName="rate" bomDecimalInput [bomWholeDigits]="16" [bomDecimalDigits]="2" />
               </div>
 
-              <div class="col-lg-3 col-md-8">
+              <div class="col-lg-2 col-md-6">
                 <label class="bom-form-label" for="resourceRemarks">Remarks</label>
                 <input id="resourceRemarks" type="text" class="form-control" formControlName="remarks" maxlength="500" placeholder="Remarks" autocomplete="off" />
               </div>
@@ -384,19 +393,28 @@
           <tr><td colspan="12" class="text-center py-4">Loading materials...</td></tr>
         } @else {
           @for (line of materialLines(); track formMode() === 'create' ? $index : line.ID; let index = $index) {
-            <tr>
+            <tr (focusin)="activateLine('M', line.ID, $event)">
               <td>{{ line.ItemID ?? '-' }}</td>
               <td [title]="line.ItemName || ''">{{ line.ItemName || '-' }}</td>
               <td>{{ line.WarehouseName || 'Any Warehouse' }}</td>
 
-              @if (formMode() === 'edit' && line.ID > 0) {
-                <td><input type="number" class="form-control form-control-sm" min="0.0000000001" step="any" [value]="materialEdit(line).Quantity ?? ''" (input)="changeMaterialNumber(line, 'Quantity', $any($event.target).value)" /></td>
-                <td><input type="number" class="form-control form-control-sm" min="0" max="100" step="any" [value]="materialEdit(line).WastagePercent ?? ''" (input)="changeMaterialNumber(line, 'WastagePercent', $any($event.target).value)" /></td>
-                <td><input type="number" class="form-control form-control-sm" min="0" step="any" [value]="materialEdit(line).Rate ?? ''" (input)="changeMaterialNumber(line, 'Rate', $any($event.target).value)" /></td>
+              @if (!viewing() && formMode() === 'edit' && line.ID > 0) {
+                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm" bomDecimalInput [bomWholeDigits]="8" [bomDecimalDigits]="4" [bomMultiplier]="line.CValue" [value]="materialEdit(line).Quantity ?? ''" (bomValue)="changeMaterialNumber(line, 'Quantity', $event === null ? '' : $event.toString())" /></td>
+                <td><input type="text" inputmode="decimal" class="form-control form-control-sm" bomDecimalInput [bomWholeDigits]="12" [bomDecimalDigits]="2" [value]="materialEdit(line).WastagePercent ?? ''" (bomValue)="changeMaterialNumber(line, 'WastagePercent', $event === null ? '' : $event.toString())" /></td>
+                <td><input type="text" inputmode="decimal" class="form-control form-control-sm" bomDecimalInput [bomWholeDigits]="16" [bomDecimalDigits]="2" [value]="materialEdit(line).Rate ?? ''" (bomValue)="changeMaterialNumber(line, 'Rate', $event === null ? '' : $event.toString())" /></td>
                 <td>{{ line.UoM || '-' }}</td>
-                <td>{{ line.CUoM || '-' }}</td>
+                <td>
+                  <select class="form-select form-select-sm" [value]="materialEdit(line).CUoM ?? ''" (focus)="loadMaterialLineConversions(line)" (change)="changeMaterialCUoM(line, $any($event.target).value)">
+                    <option [value]="line.CUoM ?? ''">{{ line.CUoM || 'Select CUoM' }}</option>
+                    @for (conversion of materialLineConversions()[line.ID] ?? []; track conversion.CUoM) {
+                      @if (conversion.CUoM !== line.CUoM) {
+                        <option [value]="conversion.CUoM">{{ conversion.CUoM }}</option>
+                      }
+                    }
+                  </select>
+                </td>
                 <td>{{ materialEdit(line).ConvertedQty ?? '-' }}</td>
-                <td><input type="number" class="form-control form-control-sm" min="0" step="any" [value]="materialEdit(line).ProcessLoss ?? ''" (input)="changeMaterialNumber(line, 'ProcessLoss', $any($event.target).value)" /></td>
+                <td><input type="text" inputmode="decimal" class="form-control form-control-sm" bomDecimalInput [bomWholeDigits]="8" [bomDecimalDigits]="2" [value]="materialEdit(line).ProcessLoss ?? ''" (bomValue)="changeMaterialNumber(line, 'ProcessLoss', $event === null ? '' : $event.toString())" /></td>
                 <td><input type="text" class="form-control form-control-sm" maxlength="500" [value]="materialEdit(line).Remarks ?? ''" (input)="changeMaterialRemarks(line, $any($event.target).value)" /></td>
                 <td class="g-action-column">
                   <div class="action-buttons">
@@ -450,14 +468,14 @@
           <tr><td colspan="8" class="text-center py-4">Loading resources...</td></tr>
         } @else {
           @for (line of resourceLines(); track formMode() === 'create' ? $index : line.ID; let index = $index) {
-            <tr>
+            <tr (focusin)="activateLine('R', line.ID, $event)">
               <td>{{ line.ItemID ?? '-' }}</td>
               <td [title]="line.ItemName || ''">{{ line.ItemName || '-' }}</td>
               <td>{{ line.WarehouseName || 'Any Warehouse' }}</td>
 
-              @if (formMode() === 'edit' && line.ID > 0) {
-                <td><input type="number" class="form-control form-control-sm" min="0.0000000001" step="any" [value]="resourceEdit(line).Quantity ?? ''" (input)="changeResourceNumber(line, 'Quantity', $any($event.target).value)" /></td>
-                <td><input type="number" class="form-control form-control-sm" min="0" step="any" [value]="resourceEdit(line).Rate ?? ''" (input)="changeResourceNumber(line, 'Rate', $any($event.target).value)" /></td>
+              @if (!viewing() && formMode() === 'edit' && line.ID > 0) {
+                <td><input type="text" inputmode="decimal" class="form-control form-control-sm" bomDecimalInput [bomWholeDigits]="8" [bomDecimalDigits]="2" [value]="resourceEdit(line).Quantity ?? ''" (bomValue)="changeResourceNumber(line, 'Quantity', $event === null ? '' : $event.toString())" /></td>
+                <td><input type="text" inputmode="decimal" class="form-control form-control-sm" bomDecimalInput [bomWholeDigits]="16" [bomDecimalDigits]="2" [value]="resourceEdit(line).Rate ?? ''" (bomValue)="changeResourceNumber(line, 'Rate', $event === null ? '' : $event.toString())" /></td>
                 <td>{{ line.UoM || '-' }}</td>
                 <td><input type="text" class="form-control form-control-sm" maxlength="500" [value]="resourceEdit(line).Remarks ?? ''" (input)="changeResourceRemarks(line, $any($event.target).value)" /></td>
                 <td class="g-action-column">

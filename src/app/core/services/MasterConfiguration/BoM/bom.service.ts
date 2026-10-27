@@ -105,16 +105,14 @@ deleteData(boMId: number, enroll: number): Observable<unknown> {
     );
   }
 
-  getProductionMaterialUoM(itemId: number, warehouseId: number, unitId: number): Observable<ProductionMaterialUoM[]> {
+  getProductionMaterialUoM(itemId: number, UoM: string, warehouseId: number, unitId: number): Observable<ProductionMaterialUoM[]> {
     const params = new HttpParams()
-      .set('ItemID', itemId)
-      .set('WarehouseID', warehouseId)
-      .set('UnitID', unitId);
+    .set('ItemID', itemId)
+    .set('UoM', UoM)
+    .set('WarehouseID', warehouseId)
+    .set('UnitID', unitId);
 
-    return this.http.get<ProductionMaterialUoM[]>(
-      `${environment.API_URL}${GlobalConstant.API_END_POINTS.getProductionMaterialUoM}`,
-      { params }
-    );
+    return this.http.get<ProductionMaterialUoM[]>(`${environment.API_URL}${GlobalConstant.API_END_POINTS.getProductionMaterialUoM}`,{ params });
   }
 
 
