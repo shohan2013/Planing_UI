@@ -19,7 +19,7 @@
       <button
         type="button"
         class="btn btn-success btn-shadow pvp-refresh"
-        (click)="load()"
+        (click)="refresh()"
         [disabled]="loading()"
       >
         <i class="fas fa-sync-alt" [class.fa-spin]="loading()"></i>
@@ -48,6 +48,13 @@
     (reset)="onReset()"
   />
 
-  <app-pvp-kpi-cards [totals]="totals()" [loading]="loading()" />
-  <app-pvp-overview-table [rows]="rows()" [loading]="loading()" />
+  <app-pvp-kpi-cards [totals]="totals()" [loading]="totalsLoading()" />
+  <app-pvp-overview-table
+    [rows]="rows()"
+    [loading]="loading()"
+    [totalCustomers]="totalCustomers()"
+    [pageQuery]="pageQuery()"
+    [fetchAllRows]="fetchAllRows"
+    (pageQueryChange)="onPageQueryChange($event)"
+  />
 </div>

@@ -37,10 +37,10 @@ export function computeTotals(rows: Pick<IPvpItemRow, 'OrderQty' | 'PlannedQty' 
 /** Used when the API does not send a status for an item. */
 export function deriveStatus(r: IPvpItemRow): PvpStatus {
   if (r.Status) return r.Status;
-  if (r.OrderQty > 0 && r.ProducedQty >= r.OrderQty) return 'Completed';
-  if (r.PlannedQty <= 0) return 'Not Planned';
-  if (r.PlannedQty < r.OrderQty) return 'Partially Planned';
-  return r.ProducedQty > 0 ? 'In Production' : 'Fully Planned';
+  if (r.OrderQty > 0 && r.ProducedQty >= r.OrderQty) return PvpStatus.Completed;
+  if (r.PlannedQty <= 0) return PvpStatus.NotPlanned;
+  if (r.PlannedQty < r.OrderQty) return PvpStatus.PartiallyPlanned;
+  return r.ProducedQty > 0 ? PvpStatus.InProduction : PvpStatus.FullyPlanned;
 }
 
 /** Builds the Customer -> Delivery Order -> Item tree from flat API rows. */

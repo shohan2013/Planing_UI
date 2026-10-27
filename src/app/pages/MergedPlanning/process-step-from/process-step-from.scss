@@ -125,6 +125,35 @@
   font-weight: 600;
 }
 
+/* Label + "View schedule" link on one line above the machine select. */
+.label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.schedule-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-bottom: 4px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--bs-primary);
+  text-decoration: none;
+  white-space: nowrap;
+
+  &:hover:not(:disabled) {
+    text-decoration: underline;
+  }
+
+  &:disabled {
+    color: #adb5bd;
+    opacity: 1;
+  }
+}
+
 .form-control,
 .form-select {
   min-width: 0;

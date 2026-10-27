@@ -23,11 +23,13 @@ import { IBusinessFlowForPlanning } from 'src/app/core/model/Common/BusinessFlow
 import { IMachine } from 'src/app/core/model/Common/Machine/machine';
 import {
   IMachineJob,
+  IMachineSlotPick,
   MachineBusyAction,
 } from 'src/app/core/model/MergedPlanning/machine-schedule-model';
 import { MachineScheduleService } from 'src/app/core/services/MergedPlanning/machine-schedule-service';
 
 import { MachineBusyDialog } from './machine-busy-dialog/machine-busy-dialog';
+import { MachineScheduleDialog } from './machine-schedule-dialog/machine-schedule-dialog';
 
 /** Machine + slot whose availability is checked. */
 interface ISlot {
@@ -62,6 +64,12 @@ export class ProcessStepFrom implements OnInit, OnChanges {
   @Input() machineOptions: IMachine[] = [];
   /** Seeds the form with an already-saved value (e.g. editing a saved plan) instead of starting blank. */
   @Input() initialValue: IProcessStepInput | null = null;
+  /**
+   * The saved job of this step when editing a saved plan (IPlanningHistoryStep.Id).
+   * The plan's own job must not count as a clash, so it's excluded from the
+   * availability check and the schedule view.
+   */
+  @Input() excludeJobId: number | null = null;
 
   @Output() formValueChange = new EventEmitter<IProcessStepInput | null>();
 
@@ -84,6 +92,7 @@ export class ProcessStepFrom implements OnInit, OnChanges {
   /** Key of the slot last sent for checking, so unrelated re-emits don't re-check. */
   private lastSlotKey = '';
   private busyModal: NgbModalRef | null = null;
+  private scheduleModal: NgbModalRef | null = null;
 
   ngOnInit(): void {
     this.form.valueChanges
@@ -105,9 +114,11 @@ export class ProcessStepFrom implements OnInit, OnChanges {
                   MachineId: slot.machineId,
                   StartDate: slot.startDate,
                   EndDate: slot.endDate,
+                  ExcludeJobId: this.excludeJobId,
                 })
                 .pipe(
-                  map((jobs) => ({ slot, jobs: jobs ?? [] })),
+                  // Also filtered here, in case the API returns the plan's own job anyway.
+                  map((jobs) => ({ slot, jobs: (jobs ?? []).filter((j) => !this.isOwnJob(j)) })),
                   catchError(() => of({ slot, jobs: null as IMachineJob[] | null })),
                 ),
         ),
@@ -192,8 +203,7 @@ export class ProcessStepFrom implements OnInit, OnChanges {
   openBusyDialog(): void {
     if (this.busyModal || !this.busyJobs().length) return;
 
-    const machineName =
-      this.machineOptions.find((m) => m.Id === this.machineNumber)?.Name ?? `Machine #${this.machineNumber}`;
+    const machineName = this.selectedMachineName;
 
     // The browser's native date/time picker is drawn above the page and can't be
     // covered by CSS, so close it (by blurring its input) before the dialog opens.
@@ -229,9 +239,60 @@ export class ProcessStepFrom implements OnInit, OnChanges {
     if (action === 'change-machine') {
       this.form.controls.machineId.setValue(0);
       this.machineSelect?.nativeElement.focus();
+    } else if (action === 'view-schedule') {
+      this.openScheduleDialog();
     } else {
       this.startDateInput?.nativeElement.focus();
     }
+  }
+
+  private isOwnJob(job: IMachineJob): boolean {
+    return !!this.excludeJobId && job.JobId === this.excludeJobId;
+  }
+
+  get selectedMachineName(): string {
+    return (
+      this.machineOptions.find((m) => m.Id === this.machineNumber)?.Name ?? `Machine #${this.machineNumber}`
+    );
+  }
+
+  /**
+   * "View schedule": the selected machine's jobs from now to its last planned job. The
+   * card's slot (if complete) is checked against it; picking a slot there fills the
+   * start / end inputs, which re-runs the availability check.
+   */
+  openScheduleDialog(): void {
+    if (!this.machineNumber || this.scheduleModal) return;
+    (document.activeElement as HTMLElement | null)?.blur(); // close a native date picker
+
+    const slot = this.currentSlot;
+    this.scheduleModal = this.modalService.open(MachineScheduleDialog, {
+      scrollable: true,
+      backdropClass: 'machine-busy-backdrop',
+      windowClass: 'machine-schedule-modal',
+      ariaLabelledBy: 'machineScheduleTitle',
+    });
+    (this.scheduleModal.componentInstance as MachineScheduleDialog).init({
+      businessFlowConfigureId: this.step.Id,
+      machineId: this.machineNumber,
+      machineName: this.selectedMachineName,
+      stepName: this.step.Name,
+      slotStart: slot?.startDate ?? null,
+      slotEnd: slot?.endDate ?? null,
+      excludeJobId: this.excludeJobId,
+    });
+
+    let pick: IMachineSlotPick | null = null;
+    this.scheduleModal.result.then(
+      (p: IMachineSlotPick) => (pick = p),
+      () => {}, // closed without picking a slot
+    );
+    this.scheduleModal.hidden.subscribe(() => {
+      this.scheduleModal = null;
+      if (pick) {
+        this.form.patchValue({ startDate: pick.startDate, endDate: pick.endDate });
+      }
+    });
   }
 
   get machineNumber(): number {

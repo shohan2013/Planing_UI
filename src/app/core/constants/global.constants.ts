@@ -69,6 +69,7 @@ export const GlobalConstant = {
     MachineUtilization: 'MachineDashboard/GetMachineUtilization',
     PlanningVsProductionDeliveryOrders: 'Common/GetDeliveryOrders',
     PlanningVsProductionOverview: 'PlanningVsProduction/GetOverview',
+    PlanningVsProductionOverviewTotals: 'PlanningVsProduction/GetOverviewTotals',
     WorkType: 'Common/WorkType',
 
   /*===========================ROLE===================================== */
@@ -113,6 +114,7 @@ export const GlobalConstant = {
     PlanningHistoryDetails: 'PlanningHistory/GetDataById',
     UpdatePlan: 'PlanningHistory/UpdateProductionPlan',
     MachineJobs: 'MergedPlanning/GetMachineJobs',
+    MachineSchedule: 'MergedPlanning/GetMachineSchedule',
   },
 
   URL: { API_URL: 'https://localhost:7111/api/' },

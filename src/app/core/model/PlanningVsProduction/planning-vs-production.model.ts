@@ -1,26 +1,42 @@
-/** Item-level status returned by the API (or derived client-side when absent). */
-export type PvpStatus =
-  | 'Not Planned'
-  | 'Partially Planned'
-  | 'Fully Planned'
-  | 'In Production'
-  | 'Completed';
+import { ServerQueryResponse } from '../Common/Pagination/ServerQueryRequest';
 
-export const PVP_STATUSES: PvpStatus[] = [
-  'Not Planned',
-  'Partially Planned',
-  'Fully Planned',
-  'In Production',
-  'Completed',
-];
+/** Item-level status as the API sends it (numeric), or derived client-side when absent. */
+export enum PvpStatus {
+  NotPlanned = 1,
+  PartiallyPlanned = 2,
+  FullyPlanned = 3,
+  InProduction = 4,
+  Completed = 5,
+}
+
+export const PVP_STATUS_LABELS: Record<PvpStatus, string> = {
+  [PvpStatus.NotPlanned]: 'Not Planned',
+  [PvpStatus.PartiallyPlanned]: 'Partially Planned',
+  [PvpStatus.FullyPlanned]: 'Fully Planned',
+  [PvpStatus.InProduction]: 'In Production',
+  [PvpStatus.Completed]: 'Completed',
+};
+
+/** Status dropdown options: `id` is sent to the API, `name` is shown. */
+export const PVP_STATUSES = Object.values(PvpStatus)
+  .filter((value): value is PvpStatus => typeof value === 'number')
+  .map((value) => ({
+    id: value,
+    name: PVP_STATUS_LABELS[value],
+  }));
+
+/** Display name of a numeric status ('' when missing or unknown). */
+export function pvpStatusLabel(status: PvpStatus | null | undefined): string {
+  return status ? (PVP_STATUS_LABELS[status] ?? '') : '';
+}
 
 /**
  * One flat row per delivery-order item, exactly as the API is expected to return it.
  * The page builds the Customer -> Delivery Order -> Item tree from these rows.
  */
 export interface IPvpItemRow {
-  UnitId?: number;
-  BusinessId?: number;
+  UnitId: number;
+  BusinessId: number;
   CustomerId: number;
   CustomerName: string;
   DeliveryOrderId: number;
@@ -37,11 +53,11 @@ export interface IPvpItemRow {
 
 /** Filter payload sent to the API. */
 export interface IPvpFilter {
-  UnitId: number | null;
-  BusinessId: number | null;
-  CustomerId: number | null;
-  DeliveryOrderId: number | null;
-  ItemId: number | null;
+  UnitId: number;
+  BusinessId: number;
+  CustomerId: number;
+  DeliveryOrderId: number;
+  ItemId: number;
   FromDate: string;
   ToDate: string;
   Status: PvpStatus | null;
@@ -54,8 +70,10 @@ export interface IPvpCustomerScope {
 }
 
 /** Selections plus typed text that scope the delivery order dropdown (null = all). */
-export interface IPvpDeliveryOrderScope
-  extends Pick<IPvpFilter, 'UnitId' | 'BusinessId' | 'CustomerId'> {
+export interface IPvpDeliveryOrderScope extends Pick<
+  IPvpFilter,
+  'UnitId' | 'BusinessId' | 'CustomerId'
+> {
   Prefix?: string;
 }
 
@@ -65,8 +83,13 @@ export interface IPvpItemScope {
   Prefix?: string;
 }
 
-export interface IPvpOverviewResponse {
-  Rows: IPvpItemRow[];
+/**
+ * GetOverview response, the project's paged shape (ServerQueryResponse) plus LastUpdated:
+ * - Data: item rows of the customers on this page;
+ * - Total: number of customers matching the filter + search (the paging unit).
+ * KPI totals come from GetOverviewTotals instead, so paging / search / sort don't touch them.
+ */
+export interface IPvpOverviewResponse extends ServerQueryResponse<IPvpItemRow> {
   LastUpdated: string; // ISO date-time
 }
 

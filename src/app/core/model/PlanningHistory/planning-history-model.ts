@@ -27,6 +27,8 @@ export interface IPlanningHistoryLine {
   Id: number;
   ProductId: number;
   ProductName: string | null;
+  /** UOM id; same line shape as IMergedPlanningLine (shared item-planning fields). */
+  UOMId: number;
   UOM: string | null;
   Quantity: number;
   PlannedQuantity: number;

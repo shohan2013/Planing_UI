@@ -43,6 +43,7 @@
         [step]="step"
         [machineOptions]="machinesForStep(step.Id)"
         [initialValue]="initialValueFor(step.Id)"
+        [excludeJobId]="savedJobIdFor(step.Id)"
         (formValueChange)="onFormChange($event, step.Id)"
       ></app-process-step-from>
 

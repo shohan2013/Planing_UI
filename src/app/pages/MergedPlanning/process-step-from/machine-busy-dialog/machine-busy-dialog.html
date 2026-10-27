@@ -6,11 +6,23 @@
   <div class="mbd-title-wrap">
     <h5 class="modal-title mbd-title" id="machineBusyTitle">Machine is busy</h5>
     <p class="mbd-subtitle">
-      <strong>{{ i.machineName }}</strong> already has
-      {{ i.jobs.length }} {{ i.jobs.length === 1 ? 'job' : 'jobs' }} in this time slot.
+      <strong>{{ i.machineName }}</strong> already has {{ i.jobs.length }} {{
+      i.jobs.length === 1 ? 'job' : 'jobs' }} in this time slot.
+      <button
+        type="button"
+        class="mbd-schedule-link"
+        (click)="close('view-schedule')"
+      >
+        <i class="fa-regular fa-calendar-days"></i> View schedule
+      </button>
     </p>
   </div>
-  <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  <button
+    type="button"
+    class="btn-close"
+    aria-label="Close"
+    (click)="modal.dismiss()"
+  ></button>
 </div>
 
 <div class="modal-body mbd-body">
@@ -29,13 +41,16 @@
     <li class="mbd-job">
       <div class="mbd-job-main">
         <span class="mbd-job-no">{{ job.JobNo }}</span>
-        <span class="mbd-job-item" [title]="job.ItemName">{{ job.ItemName }}</span>
+        <span class="mbd-job-item" [title]="job.ItemName + ' · Qty ' + (job.PlannedQty | number) + ' ' + (job.UOM ?? '')"
+          >{{ job.ItemName }}</span
+        >
+        <span class="mbd-job-qty">Qty {{ job.PlannedQty | number }} {{ job.UOM }}</span>
       </div>
       <div class="mbd-job-meta">
-        <span><i class="fa-regular fa-file-lines"></i> {{ job.DeliveryOrderNo }}</span>
         <span>
           <i class="fa-regular fa-clock"></i>
-          {{ job.StartDate | date: 'dd MMM, hh:mm a' }} – {{ job.EndDate | date: 'dd MMM, hh:mm a' }}
+          {{ job.StartDate | date: 'dd MMM, hh:mm a' }} – {{ job.EndDate | date:
+          'dd MMM, hh:mm a' }}
         </span>
       </div>
     </li>
@@ -51,11 +66,20 @@
 </div>
 
 <div class="modal-footer mbd-footer">
-  <button type="button" class="btn btn-sm mbd-btn mbd-btn-outline" (click)="close('change-machine')">
+  <button
+    type="button"
+    class="btn btn-sm mbd-btn mbd-btn-outline"
+    (click)="close('change-machine')"
+  >
     <i class="fa-solid fa-gears"></i>
     Try another machine
   </button>
-  <button type="button" class="btn btn-sm mbd-btn mbd-btn-primary" ngbAutofocus (click)="close('change-time')">
+  <button
+    type="button"
+    class="btn btn-sm mbd-btn mbd-btn-primary"
+    ngbAutofocus
+    (click)="close('change-time')"
+  >
     <i class="fa-regular fa-calendar"></i>
     Change time slot
   </button>

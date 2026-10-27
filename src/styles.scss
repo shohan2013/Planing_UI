@@ -90,7 +90,8 @@ router-outlet + * {
 }
 
 /*=======================================================MACHINE BUSY MODAL===========================================================*/
-/* Opened from ProcessStepFrom (NgbModal backdropClass / windowClass); lives on <body>, so it is styled globally. */
+/* Busy pop-up and "View schedule" dialog, opened from ProcessStepFrom (NgbModal backdropClass /
+   windowClass); they live on <body>, so they are styled globally. */
 
 /* Above every other modal (Bootstrap 1050-1055, Requisition 2000), dropdowns and
    tooltips; only toasts (ngx-toastr #toast-container, 999999) stay on top. */
@@ -103,24 +104,31 @@ router-outlet + * {
   backdrop-filter: blur(5px);
 }
 
-.modal.machine-busy-modal {
+.modal.machine-busy-modal,
+.modal.machine-schedule-modal {
   z-index: 999998 !important;
 }
 
 /* The theme gives every .modal-dialog a shadow + radius (assets/elements/_modals.scss).
    Centered dialogs are stretched to ~full viewport height, so that shadow outlined a
    tall empty box around the card. The card (.modal-content) carries the shadow instead. */
-.machine-busy-modal .modal-dialog {
+.machine-busy-modal .modal-dialog,
+.machine-schedule-modal .modal-dialog {
   box-shadow: none;
   border-radius: 0;
   background: transparent;
 }
 
-.machine-busy-modal .modal-content {
+.machine-busy-modal .modal-content,
+.machine-schedule-modal .modal-content {
   border: 0;
   border-radius: 14px;
   box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
   overflow: hidden;
+}
+
+.machine-schedule-modal .modal-dialog {
+  max-width: min(1100px, calc(100vw - 2rem));
 }
 
 /*========================================================TABLE========================================================================*/
