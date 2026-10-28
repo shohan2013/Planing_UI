@@ -31,8 +31,23 @@ export function pvpStatusLabel(status: PvpStatus | null | undefined): string {
 }
 
 /**
- * One flat row per delivery-order item, exactly as the API is expected to return it.
- * The page builds the Customer -> Delivery Order -> Item tree from these rows.
+ * One aggregated row per delivery order (MDO / MREQ), as GetOverview returns it.
+ * Its items are loaded separately (GetOverviewItems) when the row is expanded.
+ */
+export interface IPvpOrderRow {
+  CustomerId: number;
+  CustomerName: string;
+  DeliveryOrderId: number;
+  DeliveryOrderNo: string;
+  OrderDate: string; // ISO date (yyyy-MM-dd)
+  OrderQty: number;
+  PlannedQty: number;
+  ProducedQty: number;
+}
+
+/**
+ * One flat row per delivery-order item, as GetOverviewItems (one order) and
+ * GetOverviewExport (every order) return it.
  */
 export interface IPvpItemRow {
   UnitId: number;
@@ -84,14 +99,12 @@ export interface IPvpItemScope {
 }
 
 /**
- * GetOverview response, the project's paged shape (ServerQueryResponse) plus LastUpdated:
- * - Data: item rows of the customers on this page;
- * - Total: number of customers matching the filter + search (the paging unit).
+ * GetOverview response, the project's paged shape (ServerQueryResponse):
+ * - Data: the delivery orders on this page, aggregated (no items);
+ * - Total: number of delivery orders matching the filter + search (the paging unit).
  * KPI totals come from GetOverviewTotals instead, so paging / search / sort don't touch them.
  */
-export interface IPvpOverviewResponse extends ServerQueryResponse<IPvpItemRow> {
-  LastUpdated: string; // ISO date-time
-}
+export type IPvpOverviewResponse = ServerQueryResponse<IPvpOrderRow>;
 
 /** Lookup option for customer / delivery order dropdowns. */
 export interface IPvpOption {
@@ -111,13 +124,16 @@ export interface IPvpTotals {
   ProductionPercent: number; // Produced / Order
 }
 
-export type PvpNodeLevel = 'customer' | 'order' | 'item';
+export type PvpNodeLevel = 'order' | 'item';
 
 export interface IPvpTreeNode extends IPvpTotals {
   Key: string;
   Level: PvpNodeLevel;
-  Label: string; // customer name / DO no / item code
+  Label: string; // DO no (MDO / MREQ) / item code
   SubLabel?: string; // item name
+  CustomerName?: string; // order rows only
+  OrderId?: number; // order rows only: DeliveryOrderId, used to load its items
+  ItemsLoaded?: boolean; // order rows only: Children hold the order's items (possibly none)
   OrderDate?: string;
   Status?: PvpStatus;
   Children: IPvpTreeNode[];
@@ -125,6 +141,7 @@ export interface IPvpTreeNode extends IPvpTotals {
 
 export type PvpSortKey =
   | 'Label'
+  | 'CustomerName'
   | 'OrderDate'
   | 'OrderQty'
   | 'PlannedQty'

@@ -69,6 +69,8 @@ export const GlobalConstant = {
     PlanningVsProductionDeliveryOrders: 'Common/GetDeliveryOrders',
     PlanningVsProductionOverview: 'PlanningVsProduction/GetOverview',
     PlanningVsProductionOverviewTotals: 'PlanningVsProduction/GetOverviewTotals',
+    PlanningVsProductionOverviewItems: 'PlanningVsProduction/GetOverviewItems',
+    PlanningVsProductionOverviewExport: 'PlanningVsProduction/GetOverviewExport',
     WorkType: 'Common/WorkType',
 
   /*===========================ROLE===================================== */

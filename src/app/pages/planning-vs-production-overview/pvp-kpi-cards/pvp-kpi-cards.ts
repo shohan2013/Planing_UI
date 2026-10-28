@@ -1,5 +1,5 @@
 import { DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, signal, untracked } from '@angular/core';
 
 import { IPvpTotals } from 'src/app/core/model/PlanningVsProduction/planning-vs-production.model';
 import { EMPTY_PVP_TOTALS } from 'src/app/core/model/PlanningVsProduction/planning-vs-production.util';
@@ -49,7 +49,9 @@ export class PvpKpiCards {
 
   private animateTo(target: IPvpTotals): void {
     cancelAnimationFrame(this.frame);
-    const from = this.display();
+    // untracked: otherwise the effect depends on display() and restarts every frame,
+    // stalling the count-up a few units short of the real total.
+    const from = untracked(() => this.display());
     const start = performance.now();
     const duration = 700;
     const keys = Object.keys(target) as (keyof IPvpTotals)[];

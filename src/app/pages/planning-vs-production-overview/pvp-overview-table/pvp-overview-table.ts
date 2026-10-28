@@ -1,3 +1,5 @@
+import { CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
+import { CdkScrollable } from '@angular/cdk/scrolling';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -16,11 +18,12 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { Observable, Subject, debounceTime, distinctUntilChanged, finalize } from 'rxjs';
+import { Observable, Subject, Subscription, debounceTime, distinctUntilChanged, finalize } from 'rxjs';
 
 import {
   IPvpColumn,
   IPvpItemRow,
+  IPvpOrderRow,
   IPvpTreeNode,
   PvpSortKey,
   PvpStatus,
@@ -31,7 +34,18 @@ import { ServerQueryRequest } from 'src/app/core/model/Common/Pagination/ServerQ
 import { PaginationComponent } from 'src/app/shared/pagination/pagination.component';
 import { PvpProgressBar } from '../pvp-progress-bar/pvp-progress-bar';
 
+/** Copy of a set without one value (signals need a new instance to notice the change). */
+function without<T>(set: ReadonlySet<T>, value: T): Set<T> {
+  const next = new Set(set);
+  next.delete(value);
+  return next;
+}
+
 interface IFlatRow {
+  /** Unique per rendered row (node rows use node.Key; status rows add a suffix). */
+  key: string;
+  /** Status rows under an expanded order: items loading, failed to load, or none found. */
+  kind: 'node' | 'loading' | 'error' | 'empty';
   node: IPvpTreeNode;
   depth: number;
   expandable: boolean;
@@ -42,35 +56,38 @@ interface IFlatRow {
 const SEARCH_DEBOUNCE_MS = 300;
 
 const DEFAULT_COLUMNS: IPvpColumn[] = [
+  { Key: 'CustomerName', Title: 'Customer', Visible: true, Sortable: 'CustomerName' },
   { Key: 'OrderDate', Title: 'Order Date', Visible: true, Sortable: 'OrderDate' },
+  { Key: 'PlanningProgress', Title: 'Planning Progress', Visible: true },
+  { Key: 'ProductionProgress', Title: 'Production Progress', Visible: true },
   { Key: 'OrderQty', Title: 'Order Qty', Visible: true, Sortable: 'OrderQty' },
   { Key: 'PlannedQty', Title: 'Planned Qty', Visible: true, Sortable: 'PlannedQty' },
   { Key: 'ProducedQty', Title: 'Produced Qty', Visible: true, Sortable: 'ProducedQty' },
   { Key: 'PendingProduction', Title: 'Pending Production', Visible: true, Sortable: 'PendingProduction' },
   { Key: 'RemainToPlan', Title: 'Remain To Plan', Visible: true, Sortable: 'RemainToPlan' },
-  { Key: 'PlanningProgress', Title: 'Planning Progress', Visible: true },
-  { Key: 'ProductionProgress', Title: 'Production Progress', Visible: true },
   { Key: 'Status', Title: 'Status', Visible: true },
 ];
 
 @Component({
   selector: 'app-pvp-overview-table',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, FormsModule, PaginationComponent, PvpProgressBar],
+  imports: [CdkDropList, CdkDrag, CdkDragHandle, CdkScrollable, DatePipe, DecimalPipe, FormsModule, PaginationComponent, PvpProgressBar],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './pvp-overview-table.html',
   styleUrl: './pvp-overview-table.scss',
 })
 export class PvpOverviewTable {
 
-  /** Item rows of the customers on the current page (already searched / sorted / paged by the API). */
-  readonly rows = input<IPvpItemRow[]>([]);
+  /** Aggregated delivery orders on the current page (already searched / sorted / paged by the API). */
+  readonly rows = input<IPvpOrderRow[]>([]);
   readonly loading = input(false);
-  /** Customers matching the filter + search: the paging total. */
-  readonly totalCustomers = input(0);
+  /** Delivery orders matching the filter + search: the paging total. */
+  readonly totalOrders = input(0);
   readonly pageQuery = input.required<ServerQueryRequest>();
-  /** Loads every row for the current filter / search / sort (all pages), for the export. */
+  /** Loads every item row for the current filter / search / sort (all orders), for the export. */
   readonly fetchAllRows = input<(() => Observable<IPvpItemRow[]>) | null>(null);
+  /** Loads the item rows of one delivery order, called the first time it is expanded. */
+  readonly fetchOrderItems = input<((deliveryOrderId: number) => Observable<IPvpItemRow[]>) | null>(null);
 
   /** Page, page size, search or sort changed: the parent re-queries the API. */
   readonly pageQueryChange = output<Partial<ServerQueryRequest>>();
@@ -85,37 +102,50 @@ export class PvpOverviewTable {
   readonly visibleColumns = computed(() => this.columns().filter((c) => c.Visible));
   readonly visibleKeys = computed(() => new Set(this.visibleColumns().map((c) => c.Key)));
 
-  /** Rows arrive in the API order (search / sort / paging done there); the tree keeps that order. */
-  readonly tree = computed(() => buildPvpTree(this.rows()));
+  /** Items loaded so far, per DeliveryOrderId; cleared whenever a new page of orders arrives. */
+  readonly itemsByOrder = signal<ReadonlyMap<number, IPvpItemRow[]>>(new Map());
+  readonly itemsLoading = signal<ReadonlySet<number>>(new Set());
+  readonly itemsFailed = signal<ReadonlySet<number>>(new Set());
+  private readonly itemSubs = new Map<number, Subscription>();
 
-  /** Counts for the current page. */
-  readonly counts = computed(() => {
-    const rows = this.rows();
-    return {
-      orders: new Set(rows.map((r) => r.DeliveryOrderId)).size,
-      items: rows.length,
-    };
-  });
+  /** Rows arrive in the API order (search / sort / paging done there); the tree keeps that order. */
+  readonly tree = computed(() => buildPvpTree(this.rows(), this.itemsByOrder()));
+
+  /** Delivery orders on the current page (item counts are only known once expanded). */
+  readonly pageOrderCount = computed(() => this.rows().length);
 
   readonly sortKey = computed(() => this.pageQuery().sortBy ?? null);
 
   readonly flatRows = computed<IFlatRow[]>(() => {
     const open = this.expanded();
-    const forceOpen = !!this.pageQuery().globalSearch?.trim();
+    const loadingIds = this.itemsLoading();
+    const failedIds = this.itemsFailed();
     const out: IFlatRow[] = [];
-    const walk = (nodes: IPvpTreeNode[], depth: number) => {
-      for (const node of nodes) {
-        const expandable = node.Children.length > 0;
-        const expanded = expandable && (forceOpen || open.has(node.Key));
-        out.push({ node, depth, expandable, expanded });
-        if (expanded) walk(node.Children, depth + 1);
+    for (const node of this.tree()) {
+      // Every order can be expanded; whether it has items is only known after loading them.
+      const expanded = open.has(node.Key);
+      out.push({ key: node.Key, kind: 'node', node, depth: 0, expandable: true, expanded });
+      if (!expanded) continue;
+
+      if (loadingIds.has(node.OrderId)) {
+        out.push({ key: `${node.Key}-loading`, kind: 'loading', node, depth: 1, expandable: false, expanded: false });
+      } else if (failedIds.has(node.OrderId)) {
+        out.push({ key: `${node.Key}-error`, kind: 'error', node, depth: 1, expandable: false, expanded: false });
+      } else if (node.ItemsLoaded && !node.Children.length) {
+        out.push({ key: `${node.Key}-empty`, kind: 'empty', node, depth: 1, expandable: false, expanded: false });
+      } else {
+        for (const child of node.Children) {
+          out.push({ key: child.Key, kind: 'node', node: child, depth: 1, expandable: false, expanded: false });
+        }
       }
-    };
-    walk(this.tree(), 0);
+    }
     return out;
   });
 
-  readonly allExpanded = computed(() => this.flatRows().every((r) => !r.expandable || r.expanded));
+  readonly allExpanded = computed(() => {
+    const open = this.expanded();
+    return this.tree().every((n) => open.has(n.Key));
+  });
 
   readonly skeletonRows = Array.from({ length: 8 });
 
@@ -157,14 +187,61 @@ export class PvpOverviewTable {
         if (term !== (this.pageQuery().globalSearch ?? '')) this.pageQueryChange.emit({ globalSearch: term });
       });
 
-    // New page from the API: open the first customer like the design.
+    // New page from the API: drop the old items and start with every order collapsed;
+    // items are fetched only when the user expands an order (or uses Expand All).
     effect(() => {
-      const rows = this.rows();
+      this.rows();
       untracked(() => {
-        const first = buildPvpTree(rows)[0];
-        this.expanded.set(new Set(first ? [first.Key, ...first.Children.map((c) => c.Key)] : []));
+        this.clearItems();
+        this.expanded.set(new Set());
       });
     });
+
+    this.destroyRef.onDestroy(() => this.clearItems());
+  }
+
+  /** Opens these orders and loads the items of any not loaded yet. */
+  private expandOrders(orderIds: number[], keepOpen = false): void {
+    const next = new Set(keepOpen ? this.expanded() : []);
+    orderIds.forEach((id) => next.add(`o-${id}`));
+    this.expanded.set(next);
+    orderIds.forEach((id) => this.loadItems(id));
+  }
+
+  /** Fetches one order's items unless they are already loaded or on the way. */
+  private loadItems(orderId: number): void {
+    const fetch = this.fetchOrderItems();
+    if (!fetch || this.itemsByOrder().has(orderId) || this.itemsLoading().has(orderId)) return;
+
+    this.itemsFailed.update((s) => without(s, orderId));
+    this.itemsLoading.update((s) => new Set(s).add(orderId));
+    const sub = fetch(orderId)
+      .pipe(
+        finalize(() => {
+          this.itemSubs.delete(orderId);
+          this.itemsLoading.update((s) => without(s, orderId));
+        }),
+      )
+      .subscribe({
+        next: (items) => this.itemsByOrder.update((m) => new Map(m).set(orderId, items)),
+        error: () => this.itemsFailed.update((s) => new Set(s).add(orderId)),
+      });
+    this.itemSubs.set(orderId, sub);
+  }
+
+  /** Cancels item requests in flight and forgets loaded items (new page / filter / search). */
+  private clearItems(): void {
+    this.itemSubs.forEach((sub) => sub.unsubscribe());
+    this.itemSubs.clear();
+    this.itemsByOrder.set(new Map());
+    this.itemsLoading.set(new Set());
+    this.itemsFailed.set(new Set());
+  }
+
+  /** "Retry" on an order whose items failed to load. */
+  retryItems(row: IFlatRow, event: Event): void {
+    event.stopPropagation();
+    if (row.node.OrderId) this.loadItems(row.node.OrderId);
   }
 
   updateScrollState(): void {
@@ -194,29 +271,21 @@ export class PvpOverviewTable {
   }
 
   toggle(row: IFlatRow): void {
-    if (!row.expandable) return;
-    this.expanded.update((set) => {
-      const next = new Set(set);
-      next.has(row.node.Key) ? next.delete(row.node.Key) : next.add(row.node.Key);
-      return next;
-    });
+    if (!row.expandable || !row.node.OrderId) return;
+    if (row.expanded) {
+      this.expanded.update((set) => without(set, row.node.Key));
+    } else {
+      this.expandOrders([row.node.OrderId], true);
+    }
   }
 
+  /** Expand All loads every order on the page that isn't loaded yet (one request each). */
   toggleAll(): void {
     if (this.allExpanded()) {
       this.expanded.set(new Set());
       return;
     }
-    const keys = new Set<string>();
-    const walk = (nodes: IPvpTreeNode[]) =>
-      nodes.forEach((n) => {
-        if (n.Children.length) {
-          keys.add(n.Key);
-          walk(n.Children);
-        }
-      });
-    walk(this.tree());
-    this.expanded.set(keys);
+    this.expandOrders(this.rows().map((r) => r.DeliveryOrderId));
   }
 
   /** Sorting is done by the API: asc -> desc -> off. */
@@ -240,6 +309,16 @@ export class PvpOverviewTable {
 
   toggleColumn(key: string): void {
     this.columns.update((cols) => cols.map((c) => (c.Key === key ? { ...c, Visible: !c.Visible } : c)));
+  }
+
+  /** Column dragged in the Columns menu: the table and the export follow the new order. */
+  moveColumn(event: CdkDragDrop<IPvpColumn[]>): void {
+    if (event.previousIndex === event.currentIndex) return;
+    this.columns.update((cols) => {
+      const next = [...cols];
+      moveItemInArray(next, event.previousIndex, event.currentIndex);
+      return next;
+    });
   }
 
   onPageChange(page: number): void {
@@ -267,7 +346,8 @@ export class PvpOverviewTable {
   exportExcel(): void {
     const fetchAll = this.fetchAllRows();
     if (!fetchAll) {
-      this.downloadCsv(this.rows());
+      // No export API: fall back to the items loaded on this page.
+      this.downloadCsv([...this.itemsByOrder().values()].flat());
       return;
     }
     this.exporting.set(true);
@@ -280,26 +360,29 @@ export class PvpOverviewTable {
   }
 
   private downloadCsv(rows: IPvpItemRow[]): void {
-    const cols = this.visibleKeys();
-    const header = ['Customer', 'Delivery Order', 'Item Code', 'Item Name'];
+    const header = ['Delivery Order', 'Item Code', 'Item Name'];
     const pick: [string, string, (r: IPvpItemRow) => string | number][] = [
+      ['CustomerName', 'Customer', (r) => r.CustomerName],
       ['OrderDate', 'Order Date', (r) => r.OrderDate],
+      ['PlanningProgress', 'Planning %', (r) => (r.OrderQty ? ((r.PlannedQty / r.OrderQty) * 100).toFixed(1) : 0)],
+      ['ProductionProgress', 'Production %', (r) => (r.OrderQty ? ((r.ProducedQty / r.OrderQty) * 100).toFixed(1) : 0)],
       ['OrderQty', 'Order Qty', (r) => r.OrderQty],
       ['PlannedQty', 'Planned Qty', (r) => r.PlannedQty],
       ['ProducedQty', 'Produced Qty', (r) => r.ProducedQty],
       ['PendingProduction', 'Pending Production', (r) => Math.max(r.PlannedQty - r.ProducedQty, 0)],
       ['RemainToPlan', 'Remain To Plan', (r) => Math.max(r.OrderQty - r.PlannedQty, 0)],
-      ['PlanningProgress', 'Planning %', (r) => (r.OrderQty ? ((r.PlannedQty / r.OrderQty) * 100).toFixed(1) : 0)],
-      ['ProductionProgress', 'Production %', (r) => (r.OrderQty ? ((r.ProducedQty / r.OrderQty) * 100).toFixed(1) : 0)],
       ['Status', 'Status', (r) => pvpStatusLabel(deriveStatus(r))],
     ];
-    const active = pick.filter(([key]) => cols.has(key));
+    // Visible columns in the order the user arranged them.
+    const active = this.visibleColumns()
+      .map((c) => pick.find(([key]) => key === c.Key))
+      .filter((p): p is (typeof pick)[number] => !!p);
     const esc = (v: string | number) => `"${String(v ?? '').replace(/"/g, '""')}"`;
 
     const lines = [
       [...header, ...active.map(([, title]) => title)].map(esc).join(','),
       ...rows.map((r) =>
-        [r.CustomerName, r.DeliveryOrderNo, r.ItemCode, r.ItemName, ...active.map(([, , fn]) => fn(r))]
+        [r.DeliveryOrderNo, r.ItemCode, r.ItemName, ...active.map(([, , fn]) => fn(r))]
           .map(esc)
           .join(','),
       ),

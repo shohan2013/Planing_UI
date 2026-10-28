@@ -3,9 +3,8 @@
   <div class="pvp-toolbar">
     <div class="pvp-toolbar__summary">
       Showing
-      <strong>{{ counts().orders | number }}</strong> Delivery Orders /
-      <strong>{{ counts().items | number }}</strong> Items
-      <span class="pvp-chip">{{ totalCustomers() | number }} Customers</span>
+      <strong>{{ pageOrderCount() | number }}</strong> Delivery Orders
+      <span class="pvp-chip">{{ totalOrders() | number }} Total Orders</span>
     </div>
 
     <div class="pvp-toolbar__actions">
@@ -51,14 +50,18 @@
           <i class="fas fa-cog"></i>
           Columns
         </button>
-        <div class="dropdown-menu dropdown-menu-end pvp-columns-menu">
-          <div class="pvp-columns-menu__title">Visible columns</div>
-          @for (col of columns(); track col.Key) {
-            <label class="pvp-columns-menu__item">
-              <input type="checkbox" class="form-check-input" [checked]="col.Visible" (change)="toggleColumn(col.Key)" />
-              {{ col.Title }}
-            </label>
-          }
+        <!-- cdkScrollable: lets a column being dragged auto-scroll this menu near its top / bottom edge. -->
+        <div class="dropdown-menu dropdown-menu-end pvp-columns-menu" cdkScrollable>
+          <div class="pvp-columns-menu__title">Visible columns <span>(drag to reorder)</span></div>
+          <div cdkDropList cdkDropListLockAxis="y" [cdkDropListAutoScrollStep]="8" (cdkDropListDropped)="moveColumn($event)">
+            @for (col of columns(); track col.Key) {
+              <label class="pvp-columns-menu__item" cdkDrag>
+                <i class="fas fa-grip-vertical pvp-columns-menu__handle" cdkDragHandle title="Drag to reorder"></i>
+                <input type="checkbox" class="form-check-input" [checked]="col.Visible" (change)="toggleColumn(col.Key)" />
+                {{ col.Title }}
+              </label>
+            }
+          </div>
         </div>
       </div>
     </div>
@@ -73,7 +76,7 @@
           <th #frozenHeader class="pvp-col-name" (click)="sortBy('Label')">
             <span class="pvp-th">
               <i class="fas fa-thumbtack pvp-pin"></i>
-              Customer / Delivery Order / Item
+              MDO / MREQ / Item
               <i class="fas pvp-sort" [class]="'fas pvp-sort ' + sortIcon('Label')" [class.active]="sortKey() === 'Label'"></i>
             </span>
           </th>
@@ -105,22 +108,54 @@
             </tr>
           }
         } @else {
-          @for (row of flatRows(); track row.node.Key) {
+          @for (row of flatRows(); track row.key) {
+            @if (row.kind === 'loading') {
+              <tr class="pvp-row pvp-row--status">
+                <td class="pvp-col-name">
+                  <div class="pvp-items-status" [style.padding-left.px]="row.depth * 18">
+                    <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                    Loading items…
+                  </div>
+                </td>
+                <td [attr.colspan]="visibleColumns().length"></td>
+              </tr>
+            } @else if (row.kind === 'error') {
+              <tr class="pvp-row pvp-row--status">
+                <td class="pvp-col-name">
+                  <div class="pvp-items-status pvp-items-status--error" [style.padding-left.px]="row.depth * 18">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Failed to load items.
+                    <button type="button" class="btn btn-link btn-sm p-0" (click)="retryItems(row, $event)">Retry</button>
+                  </div>
+                </td>
+                <td [attr.colspan]="visibleColumns().length"></td>
+              </tr>
+            } @else if (row.kind === 'empty') {
+              <tr class="pvp-row pvp-row--status">
+                <td class="pvp-col-name">
+                  <div class="pvp-items-status" [style.padding-left.px]="row.depth * 18">
+                    <i class="fas fa-info-circle"></i>
+                    No items found for this order.
+                  </div>
+                </td>
+                <td [attr.colspan]="visibleColumns().length"></td>
+              </tr>
+            } @else {
             <tr [class]="'pvp-row pvp-row--' + row.node.Level" (click)="toggle(row)">
               <td class="pvp-col-name">
                 <div class="pvp-name" [style.padding-left.px]="row.depth * 18">
+                  <!-- Items (leaves) get no caret placeholder, so their code sits further left. -->
                   @if (row.expandable) {
                     <span class="pvp-caret" [class.open]="row.expanded">
                       <i class="fas fa-chevron-right"></i>
                     </span>
-                  } @else {
-                    <span class="pvp-caret pvp-caret--leaf"></span>
                   }
                   <span class="pvp-name__label">{{ row.node.Label }}</span>
                   @if (row.node.SubLabel) {
                     <span class="pvp-name__sub">{{ row.node.SubLabel }}</span>
                   }
-                  @if (row.node.Level !== 'item') {
+                  <!-- Item count is known only once the order's items are loaded. -->
+                  @if (row.node.ItemsLoaded) {
                     <span class="pvp-count">{{ row.node.Children.length }}</span>
                   }
                 </div>
@@ -128,6 +163,9 @@
 
               @for (col of visibleColumns(); track col.Key) {
                 @switch (col.Key) {
+                  @case ('CustomerName') {
+                    <td class="pvp-customer">{{ row.node.CustomerName }}</td>
+                  }
                   @case ('OrderDate') {
                     <td class="pvp-date">{{ row.node.OrderDate ? (row.node.OrderDate | date: 'dd MMM yyyy') : '' }}</td>
                   }
@@ -162,6 +200,7 @@
                 }
               }
             </tr>
+            }
           } @empty {
             <tr>
               <td [attr.colspan]="visibleColumns().length + 1">
@@ -187,10 +226,10 @@
     </div>
   </div>
 
-  <!-- Paged by customer on the server: totalItems = customers matching filter + search. -->
-  @if (!loading() && totalCustomers()) {
+  <!-- Paged by delivery order on the server: totalItems = orders matching filter + search. -->
+  @if (!loading() && totalOrders()) {
     <app-pagination
-      [totalItems]="totalCustomers()"
+      [totalItems]="totalOrders()"
       [pageSizes]="[5, 10, 25, 50]"
       [currentPage]="pageQuery().page"
       (currentPageChange)="onPageChange($event)"

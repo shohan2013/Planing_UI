@@ -136,14 +136,30 @@ $pvp-line: #eef2f7;
   border-radius: 12px;
   border: 1px solid $pvp-border;
   box-shadow: 0 14px 34px rgba(15, 23, 42, 0.14);
+  // Scroll inside the menu instead of running off the screen.
+  max-height: min(320px, 60vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 
   &__title {
-    padding: 0.25rem 0.5rem 0.4rem;
+    // Stays visible while the list scrolls.
+    position: sticky;
+    top: -0.5rem;
+    z-index: 1;
+    margin-top: -0.5rem;
+    padding: 0.75rem 0.5rem 0.4rem;
+    background: #fff;
     font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: #94a3b8;
+
+    span {
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
+    }
   }
 
   &__item {
@@ -155,6 +171,7 @@ $pvp-line: #eef2f7;
     font-size: 0.85rem;
     cursor: pointer;
     margin: 0;
+    background: #fff;
 
     &:hover {
       background: #f1f5fb;
@@ -162,6 +179,32 @@ $pvp-line: #eef2f7;
 
     .form-check-input {
       margin: 0;
+    }
+
+    // Floating copy that follows the pointer while dragging (rendered in <body>).
+    &.cdk-drag-preview {
+      box-shadow: 0 8px 22px rgba(15, 23, 42, 0.18);
+      background: #fff;
+    }
+
+    // The slot the item will drop into.
+    &.cdk-drag-placeholder {
+      opacity: 0.35;
+    }
+
+    &.cdk-drag-animating,
+    .cdk-drop-list-dragging &:not(.cdk-drag-placeholder) {
+      transition: transform 0.2s cubic-bezier(0, 0, 0.2, 1);
+    }
+  }
+
+  &__handle {
+    color: #a3b1c6;
+    font-size: 0.8rem;
+    cursor: grab;
+
+    &:active {
+      cursor: grabbing;
     }
   }
 }
@@ -255,13 +298,19 @@ $pvp-accent: #2563eb;
     }
   }
 
-  // Frozen first column
+  // Frozen first column, fixed width: long item names wrap instead of widening it
   .pvp-col-name {
     position: sticky;
     left: 0;
     z-index: 1;
+    width: 340px;
     min-width: 340px;
+    max-width: 340px;
     background: inherit;
+  }
+
+  tbody .pvp-col-name {
+    white-space: normal;
   }
 
   thead .pvp-col-name {
@@ -308,6 +357,18 @@ th.pvp-num .pvp-th {
   color: #334155;
 }
 
+// Fixed width: long customer names wrap instead of widening the column.
+// Nested under .pvp-table to beat its `td { white-space: nowrap }`.
+.pvp-table .pvp-customer {
+  width: 200px;
+  min-width: 200px;
+  max-width: 200px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.3;
+  color: #334155;
+}
+
 /* Row levels */
 .pvp-row {
   cursor: default;
@@ -319,11 +380,10 @@ th.pvp-num .pvp-th {
     background: inherit;
   }
 
-  &--customer {
+  &--order {
     background: #f8fafc;
     cursor: pointer;
-    font-weight: 800;
-    font-size: 0.9rem;
+    font-weight: 700;
     color: #0f172a;
 
     td {
@@ -331,13 +391,12 @@ th.pvp-num .pvp-th {
     }
   }
 
-  &--order {
-    background: #f3f7fd;
-    cursor: pointer;
-    font-weight: 700;
+  &--item {
+    font-weight: 400;
   }
 
-  &--item {
+  // "Loading items…" / "Failed to load items" under an expanded order
+  &--status {
     font-weight: 400;
   }
 
@@ -352,16 +411,52 @@ th.pvp-num .pvp-th {
   gap: 0.5rem;
 
   &__label {
+    flex: 0 0 auto;
     min-width: 110px;
+    white-space: nowrap;
+
+    // Item code takes only its own width, leaving the rest to the item name.
+    .pvp-row--item & {
+      min-width: 0;
+    }
   }
 
+  // Vertical divider between item code and item name.
+  &__label + &__sub {
+    padding-left: 0.5rem;
+    border-left: 1px solid #cbd5e1;
+  }
+
+  // Takes the rest of the fixed-width column and wraps onto the next line(s).
   &__sub {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    line-height: 1.3;
     color: #3b5b8f;
     font-size: 0.82rem;
   }
 }
 
+.pvp-items-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #64748b;
+  font-size: 0.82rem;
+
+  &--error {
+    color: #b91c1c;
+  }
+
+  .btn-link {
+    font-size: 0.82rem;
+    text-decoration: none;
+  }
+}
+
 .pvp-count {
+  flex: 0 0 auto;
   padding: 0 0.45rem;
   border-radius: 999px;
   background: #e2e8f0;
@@ -386,7 +481,7 @@ th.pvp-num .pvp-th {
     transform: rotate(90deg);
   }
 
-  .pvp-row:hover &:not(.pvp-caret--leaf) {
+  .pvp-row:hover & {
     background: #dbe6f7;
   }
 }

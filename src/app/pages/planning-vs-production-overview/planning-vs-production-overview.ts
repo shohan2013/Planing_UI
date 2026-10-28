@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import {
   Component,
   DestroyRef,
@@ -8,7 +7,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ToastrService } from 'ngx-toastr';
-import { Observable, Subscription, finalize, map } from 'rxjs';
+import { Observable, Subscription, finalize } from 'rxjs';
 
 import { IBusiness } from 'src/app/core/model/Common/BusinessType/BusinessType';
 import { IUnit } from 'src/app/core/model/Common/Unit/Unit';
@@ -19,6 +18,7 @@ import {
   IPvpItemRow,
   IPvpItemScope,
   IPvpOption,
+  IPvpOrderRow,
   IPvpTotals,
 } from 'src/app/core/model/PlanningVsProduction/planning-vs-production.model';
 import { EMPTY_PVP_TOTALS } from 'src/app/core/model/PlanningVsProduction/planning-vs-production.util';
@@ -32,7 +32,7 @@ import { PvpOverviewTable } from './pvp-overview-table/pvp-overview-table';
 
 const DEFAULT_PAGE_SIZE = 10;
 
-/** Paging is by customer: page / pageSize count customers. */
+/** Paging is by delivery order: page / pageSize count delivery orders. */
 function defaultPageQuery(pageSize = DEFAULT_PAGE_SIZE): ServerQueryRequest {
   return { page: 1, pageSize, globalSearch: '', sortBy: null, sortOrder: null };
 }
@@ -54,7 +54,7 @@ function defaultFilter(): IPvpFilter {
 @Component({
   selector: 'app-planning-vs-production-overview',
   standalone: true,
-  imports: [DatePipe, PvpFilterBar, PvpKpiCards, PvpOverviewTable],
+  imports: [PvpFilterBar, PvpKpiCards, PvpOverviewTable],
   templateUrl: './planning-vs-production-overview.html',
   styleUrl: './planning-vs-production-overview.scss',
 })
@@ -75,15 +75,14 @@ export class PlanningVsProductionOverview implements OnInit {
   readonly deliveryOrdersLoading = signal(false);
   readonly itemsLoading = signal(false);
 
-  /** Item rows of the customers on the current page. */
-  readonly rows = signal<IPvpItemRow[]>([]);
+  /** Aggregated delivery orders on the current page (their items load on expand). */
+  readonly rows = signal<IPvpOrderRow[]>([]);
   readonly loading = signal(false);
-  readonly lastUpdated = signal<string | null>(null);
 
   /** Server-side paging / search / sort, sent with every GetOverview call. */
   readonly pageQuery = signal<ServerQueryRequest>(defaultPageQuery());
-  /** Customers matching the filter + search (the paging unit). */
-  readonly totalCustomers = signal(0);
+  /** Delivery orders matching the filter + search (the paging unit). */
+  readonly totalOrders = signal(0);
   /** KPI totals for the whole filter (GetOverviewTotals); paging / search / sort don't touch them. */
   readonly totals = signal<IPvpTotals>(EMPTY_PVP_TOTALS);
   readonly totalsLoading = signal(false);
@@ -117,12 +116,11 @@ export class PlanningVsProductionOverview implements OnInit {
       .subscribe({
         next: (res) => {
           this.rows.set(res?.Data ?? []);
-          this.totalCustomers.set(res?.Total ?? 0);
-          this.lastUpdated.set(res?.LastUpdated ?? new Date().toISOString());
+          this.totalOrders.set(res?.Total ?? 0);
         },
         error: () => {
           this.rows.set([]);
-          this.totalCustomers.set(0);
+          this.totalOrders.set(0);
           this.toastr.error('Failed to load planning vs production overview.');
         },
       });
@@ -166,18 +164,13 @@ export class PlanningVsProductionOverview implements OnInit {
     this.load();
   }
 
-  /**
-   * Every row for the current filter + search + sort (all pages), for the Excel export.
-   * Asks for one page as large as the customer count.
-   */
+  /** Every item row for the current filter + search + sort (all orders), for the Excel export. */
   readonly fetchAllRows = (): Observable<IPvpItemRow[]> =>
-    this.service
-      .GetOverview(this.filter(), {
-        ...this.pageQuery(),
-        page: 1,
-        pageSize: Math.max(this.totalCustomers(), 1),
-      })
-      .pipe(map((res) => res?.Data ?? []));
+    this.service.GetOverviewExport(this.filter(), this.pageQuery());
+
+  /** Item rows of one delivery order, loaded by the table when the order is expanded. */
+  readonly fetchOrderItems = (deliveryOrderId: number): Observable<IPvpItemRow[]> =>
+    this.service.GetOverviewItems(deliveryOrderId, this.filter(), this.pageQuery().globalSearch);
 
   /**
    * Businesses come from the API for the selected unit only; without a unit nothing

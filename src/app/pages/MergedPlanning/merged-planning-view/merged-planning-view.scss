@@ -502,3 +502,29 @@
   margin-top: 6px;
   border-top: 1px solid #e2e5e9;
 }
+
+// Combined / Single
+
+.combine-badge,
+.single-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  padding: 4px 9px;
+
+  border-radius: 15px;
+
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.combine-badge {
+  color: #0d6efd;
+  background-color: #e7f1ff;
+}
+
+.single-badge {
+  color: #6f42c1;
+  background-color: #f3ecfd;
+}
