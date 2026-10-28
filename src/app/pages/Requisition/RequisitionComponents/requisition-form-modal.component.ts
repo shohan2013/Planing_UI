@@ -24,6 +24,8 @@ import { IDropdownBind } from 'src/app/core/model/Common/dropdown-bind';
 import { IItem } from 'src/app/core/model/Common/Items/Item';
 import { IProductType } from 'src/app/core/model/Common/ProductType/ProductType';
 import { IUnit } from 'src/app/core/model/Common/Unit/Unit';
+import { IPlannerUoM } from 'src/app/core/model/Common/UOM/PlannerUoM';
+import { DocumentStatusId } from 'src/app/core/model/document-status';
 import { IRequisition } from 'src/app/core/model/Requisition/Requisition';
 import {
   IViewRequisitionHeader, IViewRequisitionLine,
@@ -39,7 +41,7 @@ type FormModalState = 'initializing' | 'ready' | 'submitting' | 'failed';
 type BulkRow = {
   itemId: number;
   itemName: string;
-  uomId: number;
+  uomId: number | null;
   stockQuantity: number;
   salesQuantity: number;
   quantity: number | null;
@@ -58,6 +60,7 @@ type BulkRow = {
 })
 export class RequisitionFormModalComponent implements OnInit {
   readonly PermissionAction = PermissionAction;
+  readonly DocumentStatusId = DocumentStatusId;
 
   @Input({ required: true }) mode: RequisitionFormMode = 'create';
   @Input() header: IViewRequisitionHeader | null = null;
@@ -66,6 +69,8 @@ export class RequisitionFormModalComponent implements OnInit {
   readonly state = signal<FormModalState>('initializing');
   readonly units = signal<IUnit[]>([]);
   readonly businesses = signal<IBusiness[]>([]);
+  readonly plannerUoMs = signal<IPlannerUoM[]>([]);
+  readonly plannerUoMsLoading = signal(false);
   readonly productTypes = signal<IProductType[]>([]);
   readonly documentStatuses = signal<IDropdownBind[]>([]);
   readonly unitDataLoading = signal(false);
@@ -111,6 +116,7 @@ export class RequisitionFormModalComponent implements OnInit {
     ItemSearch: new FormControl('', Validators.required),
     ItemId: new FormControl('', Validators.required),
     ItemName: new FormControl(''),
+    UOMId: new FormControl('', Validators.required),
     Quantity: new FormControl('', [Validators.required, Validators.min(1)]),
     StockQuantity: new FormControl(0),
     SalesQuantity: new FormControl(0),
@@ -125,6 +131,7 @@ export class RequisitionFormModalComponent implements OnInit {
   private bulkModalRef?: NgbModalRef;
   private bulkRequestId = 0;
   private filterRequestId = 0;
+  private plannerUoMRequestId = 0;
   private bulkResultContext = '';
   private readonly bulkDrafts = new Map<number, BulkRow>();
   private readonly bulkReload$ = new Subject<void>();
@@ -316,36 +323,53 @@ export class RequisitionFormModalComponent implements OnInit {
     else this.create();
   }
 
-  onUnitChange(): void {
-    this.invalidateBulkResults();
-    const unitId = this.selectedUnitId;
+onUnitChange(): void {
+  this.invalidateBulkResults();
+  this.clearPlannerUoMs();
+  const unitId = this.selectedUnitId;
 
-    this.formGroup.get('BusinessId')?.reset('');
-    this.businesses.set([]);
-    this.lines.clear();
-    this.syncHeaderLock();
-    this.resetLineInput();
+  this.formGroup.get('BusinessId')?.reset('');
+  this.businesses.set([]);
+  this.lines.clear();
+  this.syncHeaderLock();
+  this.resetLineInput();
 
-    if (unitId <= 0) {
-      this.unitDataLoading.set(false);
-      return;
-    }
-
-    this.loadUnitDependentData(unitId);
+  if (unitId <= 0) {
+    this.unitDataLoading.set(false);
+    return;
   }
 
-  onBusinessChange(): void {
-    this.invalidateBulkResults();
-    this.lines.clear();
-    this.syncHeaderLock();
-    this.resetLineInput();
+  this.loadUnitDependentData(unitId);
+}
+
+onBusinessChange(): void {
+  this.invalidateBulkResults();
+  this.clearPlannerUoMs();
+  this.lines.clear();
+  this.syncHeaderLock();
+  this.resetLineInput();
+
+  const unitId = this.selectedUnitId;
+  const businessId = Number(this.formGroup.get('BusinessId')?.value);
+  if (unitId > 0 && businessId > 0) {
+    this.loadPlannerUoMs(unitId, businessId);
   }
+}
 
   addLine(): void {
     this.lineSubmitted = true;
     this.lineFormGroup.markAllAsTouched();
 
     if (!this.canAddLine || this.lineFormGroup.invalid) return;
+
+
+    const selectedUoM = this.plannerUoMs().find(
+    uom => uom.UoMId === Number(this.lineFormGroup.controls.UOMId.value),
+    );
+    if (!selectedUoM) {
+      this.toastr.warning('Please select a valid UoM.');
+      return;
+    }
 
     const value = this.lineFormGroup.getRawValue();
     const productTypeId = Number(value.ProductTypeId);
@@ -364,14 +388,14 @@ export class RequisitionFormModalComponent implements OnInit {
       ItemName: new FormControl(
         productTypeId === 1 ? (value.ItemName?.trim() ?? '') : (value.ItemName ?? ''),
       ),
-      UOMId: new FormControl(0),
-      UOMName: new FormControl('N/A'),
+      UOMId: new FormControl(selectedUoM.UoMId),
+      UOMName: new FormControl(selectedUoM.UoMName ?? ''),
       Quantity: new FormControl(Number(value.Quantity)),
       RemainingQuantity: new FormControl<number | null>(null),
       StockQuantity: new FormControl(Number(value.StockQuantity) || 0),
       SalesQuantity: new FormControl(Number(value.SalesQuantity) || 0),
       Remarks: new FormControl(value.Remarks ?? ''),
-      DocStatusId: new FormControl(1),
+      DocStatusId: new FormControl(DocumentStatusId.Pending),
       IsActive: new FormControl(true),
     }));
 
@@ -608,7 +632,7 @@ export class RequisitionFormModalComponent implements OnInit {
             const row: BulkRow = {
               itemId,
               itemName: item.ItemName,
-              uomId: item.UOMID,
+              uomId: draft?.uomId ?? (this.plannerUoMs().length === 1 ? this.plannerUoMs()[0].UoMId : null),
               stockQuantity: Number(item.StockQuantity),
               salesQuantity: Number(item.SalesQuantity),
               quantity: draft?.quantity ?? null,
@@ -685,6 +709,22 @@ export class RequisitionFormModalComponent implements OnInit {
       current.itemId === row.itemId ? updated : current));
   }
 
+
+  setBulkUoM(row: BulkRow, value: string): void {
+    const uomId = Number(value);
+    const updated: BulkRow = {
+      ...row,
+      uomId: this.plannerUoMs().some(uom => uom.UoMId === uomId)
+        ? uomId
+        : null,
+    };
+
+    this.bulkDrafts.set(row.itemId, updated);
+    this.bulkRows.update(rows => rows.map(current =>
+      current.itemId === row.itemId ? updated : current));
+  }
+  
+
   addBulkLines(): void {
     if (!this.canShowAddProduct || this.bulkItemsLoading()) return;
 
@@ -704,6 +744,14 @@ export class RequisitionFormModalComponent implements OnInit {
       this.toastr.warning('Enter a quantity greater than zero for at least one item.');
       return;
     }
+    
+    if (selected.some(row =>
+      row.uomId === null ||
+      !this.plannerUoMs().some(uom => uom.UoMId === row.uomId)
+    )) {
+      this.toastr.warning('Please select UoM for every selected item.');
+      return;
+    }
 
     if (selected.some(row => this.isAlreadyAdded(row.itemId))) {
       this.toastr.warning('Some selected items are already in this requisition.');
@@ -719,20 +767,22 @@ export class RequisitionFormModalComponent implements OnInit {
     }
 
     selected.forEach(row => {
+      const selectedUoM = this.plannerUoMs().find(uom => uom.UoMId === row.uomId)!;
+
       this.lines.push(new FormGroup({
         ID: new FormControl(0),
         ReqID: new FormControl(this.header?.ReqID ?? 0),
         ProductTypeId: new FormControl(2),
         ItemId: new FormControl(row.itemId),
         ItemName: new FormControl(row.itemName),
-        UOMId: new FormControl(0),
-        UOMName: new FormControl('N/A'),
+        UOMId: new FormControl(selectedUoM.UoMId),
+        UOMName: new FormControl(selectedUoM.UoMName ?? ''),
         Quantity: new FormControl(row.quantity),
         RemainingQuantity: new FormControl<number | null>(null),
         StockQuantity: new FormControl(row.stockQuantity),
         SalesQuantity: new FormControl(row.salesQuantity),
         Remarks: new FormControl(row.remarks.trim()),
-        DocStatusId: new FormControl(1),
+        DocStatusId: new FormControl(DocumentStatusId.Pending),
         IsActive: new FormControl(true),
       }));
     });
@@ -797,11 +847,16 @@ export class RequisitionFormModalComponent implements OnInit {
     forkJoin({
       businesses: this.commonService.GetBusinessList(header.UnitId),
       lines: this.requisitionService.GetLinesByReqId(header.ReqID),
+      plannerUoMs: this.commonService.GetPlannerUoM(header.UnitId, header.BusinessId),
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: ({ businesses, lines }) => {
+        next: ({ businesses, lines, plannerUoMs }) => {
           this.businesses.set(businesses);
+          this.plannerUoMs.set(plannerUoMs);
+          this.lineFormGroup.controls.UOMId.setValue(
+            plannerUoMs.length === 1 ? String(plannerUoMs[0].UoMId) : '',
+          );
           this.populateExistingLines(lines.filter(line => line.IsActive));
           this.state.set('ready');
         },
@@ -811,6 +866,46 @@ export class RequisitionFormModalComponent implements OnInit {
               error,
               'Unable to load the requisition for editing.',
             ),
+          );
+        },
+      });
+  }
+
+
+  private clearPlannerUoMs(): void {
+    ++this.plannerUoMRequestId;
+    this.lineFormGroup.controls.UOMId.setValue('');
+    this.plannerUoMs.set([]);
+    this.plannerUoMsLoading.set(false);
+  }
+
+  private loadPlannerUoMs(unitId: number, businessId: number): void {
+    const requestId = ++this.plannerUoMRequestId;
+    this.plannerUoMs.set([]);
+    this.plannerUoMsLoading.set(true);
+
+    this.commonService.GetPlannerUoM(unitId, businessId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: plannerUoMs => {
+          if (
+            requestId !== this.plannerUoMRequestId ||
+            unitId !== this.selectedUnitId ||
+            businessId !== Number(this.formGroup.get('BusinessId')?.value)
+          ) return;
+
+          this.plannerUoMs.set(plannerUoMs);
+          this.lineFormGroup.controls.UOMId.setValue(
+            plannerUoMs.length === 1 ? String(plannerUoMs[0].UoMId) : '',
+          );
+          this.plannerUoMsLoading.set(false);
+        },
+        error: (error: HttpErrorResponse) => {
+          if (requestId !== this.plannerUoMRequestId) return;
+
+          this.plannerUoMsLoading.set(false);
+          this.toastr.error(
+            this.getErrorMessage(error, 'Unable to load UoM options.'),
           );
         },
       });
@@ -986,6 +1081,7 @@ export class RequisitionFormModalComponent implements OnInit {
       ItemSearch: '',
       ItemId: '',
       ItemName: '',
+      UOMId: this.plannerUoMs().length === 1 ? String(this.plannerUoMs()[0].UoMId) : '',
       Quantity: '',
       StockQuantity: 0,
       SalesQuantity: 0,
@@ -1029,7 +1125,7 @@ export class RequisitionFormModalComponent implements OnInit {
         StartDate: new Date(value.StartDate!),
         EndDate: new Date(value.EndDate!),
         Remarks: value.Remarks?.trim() ?? '',
-        DocStatusId: 1,
+        DocStatusId: DocumentStatusId.Pending,
         IsActive: true,
         CREATEDBY: enroll,
         UPDATEDBY: enroll,
@@ -1044,12 +1140,12 @@ export class RequisitionFormModalComponent implements OnInit {
         ItemName: Number(line.ProductTypeId) === 1
           ? (line.ItemName?.trim() ?? '')
           : null,
-        UOMId: 0,
+        UOMId: Number(line.UOMId),
         Quantity: Number(line.Quantity),
         StockQuantity: Number(line.StockQuantity) || 0,
         SalesQuantity: Number(line.SalesQuantity) || 0,
         Remarks: line.Remarks?.trim() ?? '',
-        DocStatusId: 1,
+        DocStatusId: DocumentStatusId.Pending,
         IsActive: true,
       })),
       DeletedLineIds: [],
@@ -1123,12 +1219,12 @@ export class RequisitionFormModalComponent implements OnInit {
           ItemName: Number(line.ProductTypeId) === 1
             ? (line.ItemName?.trim() ?? '')
             : null,
-          UOMId: 0,
+          UOMId: Number(line.UOMId),
           Quantity: Number(line.Quantity),
           StockQuantity: Number(line.StockQuantity) || 0,
           SalesQuantity: Number(line.SalesQuantity) || 0,
           Remarks: line.Remarks?.trim() ?? '',
-          DocStatusId: 1,
+          DocStatusId: DocumentStatusId.Pending,
           IsActive: true,
         })),
       DeletedLineIds: this.deletedLineIds,
