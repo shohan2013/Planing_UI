@@ -59,6 +59,7 @@ export const GlobalConstant = {
     SalesQuantity: 'Common/GetSalesQty',
     RequisitionItemNames: 'Common/RequisitionItemNames',
     UOM: 'Common/UOMList',
+    PlannerUoM: 'Common/PlannerUoM',
     DocumentStatus: 'Common/DocumentStatusList',
     ProductionStepsForPlanning: 'Common/GetBusinessConfigure',
     Machine: 'Common/GetMachine',

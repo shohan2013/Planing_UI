@@ -1,0 +1,52 @@
+.user-card .card-body {
+  padding: 20px;
+}
+
+.requisition-approval-icon {
+  color: rgb(79, 171, 89);
+  font-size: 17px;
+}
+
+.approval-filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.approval-filter {
+  flex: 0 0 230px;
+}
+
+.approval-search {
+  flex: 1;
+  max-width: 420px;
+  min-width: 220px;
+}
+
+.btn-complete {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.btn-complete:hover:not(:disabled) {
+  background: #bfdbfe;
+}
+
+.btn-complete:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 991.98px) {
+  .approval-filter-row {
+    flex-wrap: wrap;
+  }
+
+  .approval-filter,
+  .approval-search {
+    flex: 1 1 220px;
+    max-width: none;
+    min-width: 0;
+  }
+}

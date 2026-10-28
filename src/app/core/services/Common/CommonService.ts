@@ -31,6 +31,7 @@ import { IRecipe } from '../../model/Common/Recipe/Recipe';
 import { IActiveRole } from '../../model/Role/Role';
 import { IWorkType } from '../../model/WorkType/WorkType';
 import { IWareHouse } from '../../model/Common/WareHouse/WareHouse';
+import { IPlannerUoM } from '../../model/Common/UOM/PlannerUoM';
 
 @Injectable({
   providedIn: 'root',
@@ -175,6 +176,14 @@ export class CommonService {
       `${environment.API_URL}${GlobalConstant.API_END_POINTS.UOM}?unitId=${unitId}`,
     );
   }
+
+
+  GetPlannerUoM(UnitId: number, BusinessId: number): Observable<IPlannerUoM[]> {
+  return this.http.get<IPlannerUoM[]>(
+    `${environment.API_URL}${GlobalConstant.API_END_POINTS.PlannerUoM}?UnitId=${UnitId}&BusinessId=${BusinessId}`,
+  );
+}
+
 
   GetDocumentStatusList(): Observable<IDropdownBind[]> {
     return this.http.get<IDropdownBind[]>(
