@@ -82,6 +82,7 @@ export class RequisitionFormModalComponent implements OnInit {
 
   readonly bulkSizes = signal<{ ID: number; Name: string }[]>([]);
   readonly bulkSubCategories = signal<{ ID: number; Name: string }[]>([]);
+  readonly bulkGrades = signal<{ ID: number; Name: string }[]>([]);
   readonly bulkFiltersLoading = signal(false);
   readonly bulkFiltersReady = signal(false);
   readonly bulkRows = signal<BulkRow[]>([]);
@@ -96,6 +97,7 @@ export class RequisitionFormModalComponent implements OnInit {
   readonly bulkFilters = new FormGroup({
     SizeId: new FormControl(0, { nonNullable: true }),
     SubCategoryId: new FormControl(0, { nonNullable: true }),
+    GradeId: new FormControl(0, { nonNullable: true }),
   });
 
   readonly formGroup = new FormGroup({
@@ -268,6 +270,7 @@ export class RequisitionFormModalComponent implements OnInit {
       this.formGroup.get('EndDate')?.value,
       this.bulkFilters.controls.SizeId.value,
       this.bulkFilters.controls.SubCategoryId.value,
+      this.bulkFilters.controls.GradeId.value,
     ].join('|');
   }
 
@@ -544,6 +547,7 @@ onBusinessChange(): void {
 
           this.bulkSizes.set(filters.Sizes);
           this.bulkSubCategories.set(filters.SubCategories);
+          this.bulkGrades.set(filters.Grades);
           this.bulkFiltersLoading.set(false);
           this.bulkFiltersReady.set(true);
         },
@@ -615,6 +619,7 @@ onBusinessChange(): void {
       ToDate: this.formGroup.get('EndDate')!.value!,
       SizeID: this.bulkFilters.controls.SizeId.value,
       SubCategoryID: this.bulkFilters.controls.SubCategoryId.value,
+      GradeID: this.bulkFilters.controls.GradeId.value,
     }, {
       page: this.bulkCurrentPage(),
       pageSize: this.bulkPageSize(),

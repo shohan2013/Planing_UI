@@ -100,6 +100,7 @@ GetBulkItems(
         ToDate: String(request.ToDate),
         SizeId: request.SizeID ?? 0,
         SubCategoryId: request.SubCategoryID ?? 0,
+        GradeId: request.GradeID ?? 0,
         GlobalSearch: pagination.globalSearch ?? '',
         PageIndex: pagination.page,
         PageSize: pagination.pageSize,

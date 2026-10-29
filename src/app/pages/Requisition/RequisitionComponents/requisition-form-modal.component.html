@@ -383,7 +383,7 @@
 
   <div class="modal-body bulk-body">
     <div class="row g-3 align-items-end" [formGroup]="bulkFilters">
-      <div class="col-md-3">
+      <div class="col-md-2">
         <label class="form-label" for="bulkSize">Size</label>
         <select id="bulkSize" class="form-select" formControlName="SizeId">
           <option [ngValue]="0">All sizes</option>
@@ -393,11 +393,21 @@
         </select>
       </div>
 
-      <div class="col-md-3">
+      <div class="col-md-2">
         <label class="form-label" for="bulkSubCategory">Subcategory</label>
         <select id="bulkSubCategory" class="form-select" formControlName="SubCategoryId">
           <option [ngValue]="0">All subcategories</option>
           @for (option of bulkSubCategories(); track option.ID) {
+            <option [ngValue]="option.ID">{{ option.Name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label" for="bulkGrade">Grade</label>
+        <select id="bulkGrade" class="form-select" formControlName="GradeId">
+          <option [ngValue]="0">All grades</option>
+          @for (option of bulkGrades(); track option.ID) {
             <option [ngValue]="option.ID">{{ option.Name }}</option>
           }
         </select>
