@@ -7,7 +7,7 @@
   @if (state() === 'loading') {
     <div class="d-flex justify-content-center align-items-center py-5">
       <div class="spinner-border text-success" role="status">
-        <span class="visually-hidden">Loading requisition lines...</span>
+        <span class="visually-hidden">Loading requisition details...</span>
       </div>
     </div>
   } @else if (state() === 'failed') {
@@ -52,6 +52,27 @@
         <div class="g-scrollable-text full" [title]="header.Remarks || ''">{{ header.Remarks || '-' }}</div>
       </div>
     </section>
+
+    <section class="requisition-card personnel-section">
+      <h6>Approval Personnel</h6>
+      <div class="personnel-initiator">
+        <span class="summary-label">Initiator</span>
+        <span class="summary-value">{{ initiator()?.InitiatorName || '-' }}</span>
+      </div>
+      <div class="personnel-approvers">
+        <span class="summary-label">Action Takers</span>
+        @if (actionTakers().length === 0) {
+          <span class="summary-value">-</span>
+        } @else {
+          <ul>
+            @for (person of actionTakers(); track person.ApprovalHistoryId) {
+              <li>{{ person.ApproverName || '-' }}</li>
+            }
+          </ul>
+        }
+      </div>
+    </section>
+
     <section class="requisition-card product-section">
       <div class="section-heading">
         <span class="section-icon" aria-hidden="true">
@@ -89,9 +110,7 @@
           <tbody>
             @if (lines().length === 0) {
               <tr>
-                <td colspan="8" class="empty-table-message">
-                  No active Requisition Lines found.
-                </td>
+                <td colspan="8" class="empty-table-message">No active Requisition Lines found.</td>
               </tr>
             } @else {
               @for (line of lines(); track line.ID) {

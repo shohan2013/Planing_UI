@@ -37,6 +37,10 @@ export const GlobalConstant = {
     ACRLBulkFilters: 'Requisition/ACRLBulkFilters',
     bulkRequisitionItems: 'Requisition/BulkItems',
 
+ /*===========================REQUISITION APPROVAL===================================== */
+    RequisitionApproval: 'RequisitionApproval/GetData',
+    RequisitionApprovalDetails: 'RequisitionApproval/GetDetails',
+
   /*===========================COMMON===================================== */
     Common: 'Common',
     modules: 'Common/modules',
@@ -72,6 +76,8 @@ export const GlobalConstant = {
     PlanningVsProductionOverview: 'PlanningVsProduction/GetOverview',
     PlanningVsProductionOverviewTotals: 'PlanningVsProduction/GetOverviewTotals',
     WorkType: 'Common/WorkType',
+
+
 
   /*===========================ROLE===================================== */
 

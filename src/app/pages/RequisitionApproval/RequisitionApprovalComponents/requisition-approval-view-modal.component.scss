@@ -67,6 +67,37 @@
   flex: 0 0 80px;
 }
 
+.personnel-section {
+  align-self: flex-start;
+  min-width: 260px;
+}
+
+.personnel-section h6 {
+  margin: 0 0 12px;
+  color: #263442;
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.personnel-initiator,
+.personnel-approvers {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.personnel-approvers {
+  margin-top: 12px;
+}
+
+.personnel-approvers ul {
+  margin: 0;
+  padding-left: 20px;
+  color: #273442;
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .section-heading {
   display: flex;
   align-items: center;

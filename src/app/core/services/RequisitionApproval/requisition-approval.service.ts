@@ -1,32 +1,38 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, of, throwError } from 'rxjs';
-import { ServerQueryRequest, ServerQueryResponse } from 'src/app/core/model/Common/Pagination/ServerQueryRequest';
-import { IViewRequisitionHeader, IViewRequisitionLine } from 'src/app/core/model/Requisition/ViewRequisition';
+import { Observable } from 'rxjs';
+import { GlobalConstant } from '../../constants/global.constants';
+import { ServerQueryRequest, ServerQueryResponse, } from '../../model/Common/Pagination/ServerQueryRequest';
 
-export interface IRequisitionApprovalResult {
-  Status: boolean;
-  Message: string;
-}
+import { environment } from 'src/environments/environment';
+import { IRequisitionApprovalDetails, IRequisitionApprovalHeader } from '../../model/RequisitionApproval/requisition-approval.model';
 
 @Injectable({
   providedIn: 'root',
 })
-export class RequisitionApprovalService {
-  GetRequisition(request: ServerQueryRequest, unitId: number, businessId: number): Observable<ServerQueryResponse<IViewRequisitionHeader>> {
-    // Connect the approval list API here later.
-    return throwError(() => new Error('The requisition approval API has not been connected yet.'));
+export class RequisitionApprovalService {constructor(private http: HttpClient) {}
+
+  GetData(request: ServerQueryRequest, enroll: number, statusCode: string, unitId: number | null, businessId: number,): Observable<ServerQueryResponse<IRequisitionApprovalHeader>> {
+    const params = {
+      enroll,
+      statusCode,
+      unitId,
+      businessId,
+      globalSearch: request.globalSearch ?? '',
+      pageIndex: request.page,
+      pageSize: request.pageSize,
+    };
+
+    return this.http.post<ServerQueryResponse<IRequisitionApprovalHeader>>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.RequisitionApproval}`, params,);
   }
 
-  GetLinesByReqId(reqId: number): Observable<IViewRequisitionLine[]> {
-    // Connect the approval lines API here later.
-    return of([]);
-  }
+  GetDetails(reqId: number, docStatus: string,): Observable<IRequisitionApprovalDetails> {
+    const params = {
+      reqID: reqId,
+      docStatus,
+    };
 
-  completeData(reqId: number): Observable<IRequisitionApprovalResult> {
-    // Connect the approval Complete API here later.
-    return of({
-      Status: false,
-      Message: 'The Complete API has not been connected yet.',
-    });
+    return this.http.post<IRequisitionApprovalDetails>(`${environment.API_URL}${GlobalConstant.API_END_POINTS.RequisitionApprovalDetails}`, params,);
   }
 }
