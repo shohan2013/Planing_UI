@@ -86,10 +86,7 @@ GetACRLBulkFilters(unitId: number, businessId: number): Observable<IACRLBulkFilt
   );
 }
 
-GetBulkItems(
-  request: IBulkRequisitionItemsRequest,
-  pagination: ServerQueryRequest,
-): Observable<ServerQueryResponse<IBulkRequisitionItem>> {
+GetBulkItems(request: IBulkRequisitionItemsRequest, pagination: ServerQueryRequest,): Observable<ServerQueryResponse<IBulkRequisitionItem>> {
   return this.http.get<ServerQueryResponse<IBulkRequisitionItem>>(
     `${environment.API_URL}${GlobalConstant.API_END_POINTS.bulkRequisitionItems}`,
     {
