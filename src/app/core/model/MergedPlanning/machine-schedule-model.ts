@@ -76,6 +76,10 @@ export interface IMachineScheduleContext {
   slotEnd: string | null;
   /** The plan's own job when editing a saved plan; left out of the schedule. */
   excludeJobId: number | null;
+  /** Saved jobs whose current version is on the Planning Desk; left out of the API's jobs. */
+  hiddenJobIds?: number[];
+  /** Unsaved Planning Desk jobs on this machine, shown alongside the API's jobs. */
+  deskJobs?: IMachineJob[];
 }
 
 /** A slot picked in the schedule dialog ("Use this slot"); local yyyy-MM-ddTHH:mm. */

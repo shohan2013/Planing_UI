@@ -61,7 +61,10 @@
             Combined
           </span>
           } @else {
-          <span class="single-badge">Single</span>
+          <span class="single-badge">
+            <i class="fa-solid fa-code-compare"></i>
+            Single
+          </span>
           }
         </span>
       </div>
@@ -133,7 +136,8 @@
               <div class="mpv-item-caption">
                 <div class="mpv-product-name">{{ line.ProductName }}</div>
                 <div class="mpv-product-meta">
-                  {{ line.UOM }} &nbsp;•&nbsp; Qty: {{ line.Quantity | number:
+                  Product ID: {{ line.ProductId }} &nbsp;•&nbsp; {{ line.UOM }}
+                  &nbsp;•&nbsp; Qty: {{ line.Quantity | number:
                   '1.2-2' }} &nbsp;•&nbsp; Rate: {{ line.Rate | number: '1.2-2'
                   }}
                 </div>

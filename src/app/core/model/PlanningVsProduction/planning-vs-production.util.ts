@@ -1,4 +1,4 @@
-import { IPvpItemRow, IPvpTotals, IPvpTreeNode, PvpSortKey, PvpStatus } from './planning-vs-production.model';
+import { IPvpItemRow, IPvpOrderRow, IPvpTotals, IPvpTreeNode, PvpSortKey, PvpStatus } from './planning-vs-production.model';
 
 export const EMPTY_PVP_TOTALS: IPvpTotals = {
   OrderQty: 0,
@@ -43,57 +43,31 @@ export function deriveStatus(r: IPvpItemRow): PvpStatus {
   return r.ProducedQty > 0 ? PvpStatus.InProduction : PvpStatus.FullyPlanned;
 }
 
-/** Builds the Customer -> Delivery Order -> Item tree from flat API rows. */
-export function buildPvpTree(rows: IPvpItemRow[]): IPvpTreeNode[] {
-  const customers = new Map<number, { name: string; orders: Map<number, IPvpItemRow[]> }>();
-
-  for (const r of rows) {
-    let c = customers.get(r.CustomerId);
-    if (!c) {
-      c = { name: r.CustomerName, orders: new Map() };
-      customers.set(r.CustomerId, c);
-    }
-    const list = c.orders.get(r.DeliveryOrderId) ?? [];
-    list.push(r);
-    c.orders.set(r.DeliveryOrderId, list);
-  }
-
-  const tree: IPvpTreeNode[] = [];
-  customers.forEach((c, customerId) => {
-    const orderNodes: IPvpTreeNode[] = [];
-    const customerRows: IPvpItemRow[] = [];
-
-    c.orders.forEach((items, orderId) => {
-      customerRows.push(...items);
-      orderNodes.push({
-        Key: `o-${orderId}`,
-        Level: 'order',
-        Label: items[0].DeliveryOrderNo,
-        OrderDate: items[0].OrderDate,
-        ...computeTotals(items),
-        Children: items.map((i) => ({
-          Key: `i-${orderId}-${i.ItemId}`,
-          Level: 'item',
-          Label: i.ItemCode,
-          SubLabel: i.ItemName,
-          OrderDate: i.OrderDate,
-          Status: deriveStatus(i),
-          ...computeTotals([i]),
-          Children: [],
-        })),
-      });
-    });
-
-    tree.push({
-      Key: `c-${customerId}`,
-      Level: 'customer',
-      Label: c.name,
-      ...computeTotals(customerRows),
-      Children: orderNodes,
-    });
-  });
-
-  return tree;
+/**
+ * Builds the Delivery Order (MDO / MREQ) -> Item tree: order rows from GetOverview,
+ * children from the items loaded so far (an order not loaded yet has no children).
+ */
+export function buildPvpTree(orders: IPvpOrderRow[], itemsByOrder: ReadonlyMap<number, IPvpItemRow[]>): IPvpTreeNode[] {
+  return orders.map((o) => ({
+    Key: `o-${o.DeliveryOrderId}`,
+    Level: 'order',
+    Label: o.DeliveryOrderNo,
+    CustomerName: o.CustomerName,
+    OrderId: o.DeliveryOrderId,
+    ItemsLoaded: itemsByOrder.has(o.DeliveryOrderId),
+    OrderDate: o.OrderDate,
+    ...computeTotals([o]),
+    Children: (itemsByOrder.get(o.DeliveryOrderId) ?? []).map((i) => ({
+      Key: `i-${o.DeliveryOrderId}-${i.ItemId}`,
+      Level: 'item',
+      Label: i.ItemCode,
+      SubLabel: i.ItemName,
+      OrderDate: i.OrderDate,
+      Status: deriveStatus(i),
+      ...computeTotals([i]),
+      Children: [],
+    })),
+  }));
 }
 
 /** Sorts every level of the tree by the same key (non-mutating). */

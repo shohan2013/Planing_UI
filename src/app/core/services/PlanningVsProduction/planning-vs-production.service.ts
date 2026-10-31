@@ -8,6 +8,7 @@ import {
   IPvpCustomerScope,
   IPvpDeliveryOrderScope,
   IPvpFilter,
+  IPvpItemRow,
   IPvpOption,
   IPvpOverviewResponse,
   IPvpTotals,
@@ -31,6 +32,24 @@ function filterValues(filter: IPvpFilter): ParamValues {
   };
 }
 
+/** Paging as the same PascalCase keys as GetMergedPlanning. Only GetOverview is paged. */
+function pagingValues(query: ServerQueryRequest): ParamValues {
+  return {
+    PageIndex: query.page,
+    PageSize: query.pageSize,
+  };
+}
+
+/** Search / sort as the same PascalCase keys as GetMergedPlanning. */
+function searchSortValues(query: ServerQueryRequest): ParamValues {
+  return {
+    GlobalSearch: query.globalSearch?.trim(),
+    // 'Label' is the tree's name column; at the top level that's the delivery order no.
+    SortBy: query.sortBy === 'Label' ? 'DeliveryOrderNo' : query.sortBy,
+    SortOrder: query.sortBy ? query.sortOrder : null,
+  };
+}
+
 /** Empty values are left out so the API treats them as "all". */
 function toParams(values: ParamValues): HttpParams {
   let params = new HttpParams();
@@ -51,26 +70,60 @@ export class PlanningVsProductionService {
   /**
    * GET PlanningVsProduction/GetOverview?UnitId=&BusinessId=&CustomerId=&DeliveryOrderId=&ItemId=
    *   &FromDate=&ToDate=&Status=&PageIndex=&PageSize=&GlobalSearch=&SortBy=&SortOrder=
-   * Paged by customer: `query.page` / `query.pageSize` count customers (see IPvpOverviewResponse).
+   * Paged by delivery order: `query.page` / `query.pageSize` count delivery orders (see IPvpOverviewResponse).
    * `query` is the shared ServerQueryRequest, sent as the same PascalCase keys as GetMergedPlanning.
    */
   GetOverview(
     filter: IPvpFilter,
     query: ServerQueryRequest,
   ): Observable<IPvpOverviewResponse> {
-    const params = toParams({
-      ...filterValues(filter),
-      PageIndex: query.page,
-      PageSize: query.pageSize,
-      GlobalSearch: query.globalSearch?.trim(),
-      // 'Label' is the tree's name column; at customer level that's the customer name.
-      SortBy: query.sortBy === 'Label' ? 'CustomerName' : query.sortBy,
-      SortOrder: query.sortBy ? query.sortOrder : null,
-    });
     return this.http.get<IPvpOverviewResponse>(
       `${environment.API_URL}${GlobalConstant.API_END_POINTS.PlanningVsProductionOverview}`,
-      { params },
+      { params: toParams({ ...filterValues(filter), ...pagingValues(query), ...searchSortValues(query) }) },
     );
+  }
+
+  /**
+   * GET PlanningVsProduction/GetOverviewItems?DeliveryOrderId=&UnitId=&BusinessId=&CustomerId=
+   *   &ItemId=&FromDate=&ToDate=&Status=&GlobalSearch=
+   * Every item row of one delivery order (not paged: no PageIndex / PageSize), loaded when its
+   * row is expanded. Gets the same filter and search as GetOverview so the items shown match
+   * what the order row was counted from.
+   */
+  GetOverviewItems(
+    deliveryOrderId: number,
+    filter: IPvpFilter,
+    globalSearch?: string,
+  ): Observable<IPvpItemRow[]> {
+    return this.http
+      .get<IPvpItemRow[]>(
+        `${environment.API_URL}${GlobalConstant.API_END_POINTS.PlanningVsProductionOverviewItems}`,
+        {
+          params: toParams({
+            ...filterValues(filter),
+            DeliveryOrderId: deliveryOrderId,
+            GlobalSearch: globalSearch?.trim(),
+          }),
+        },
+      )
+      .pipe(map((rows) => rows ?? []));
+  }
+
+  /**
+   * GET PlanningVsProduction/GetOverviewExport?<filter>&GlobalSearch=&SortBy=&SortOrder=
+   * Every item row of every delivery order matching the filter + search, for the Excel export
+   * (not paged: no PageIndex / PageSize).
+   */
+  GetOverviewExport(
+    filter: IPvpFilter,
+    query: ServerQueryRequest,
+  ): Observable<IPvpItemRow[]> {
+    return this.http
+      .get<IPvpItemRow[]>(
+        `${environment.API_URL}${GlobalConstant.API_END_POINTS.PlanningVsProductionOverviewExport}`,
+        { params: toParams({ ...filterValues(filter), ...searchSortValues(query) }) },
+      )
+      .pipe(map((rows) => rows ?? []));
   }
 
   /**

@@ -48,6 +48,7 @@
           [class.is-invalid]="((submitted || !!machineNumber) && !endDate) || (submitted && isDateRangeInvalid)"
           formControlName="endDate"
           name="endDate-{{ step.Name }}"
+          [min]="startDate || null"
         />
 
         @if ((submitted || !!machineNumber) && !endDate) {

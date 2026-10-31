@@ -31,6 +31,7 @@ import { ItemPlanningFields } from '../../MergedPlanning/item-planning-fields/it
 import { PlanningProcessSteps } from '../planning-process-steps/planning-process-steps';
 import { ItemPlanningStateService } from 'src/app/core/services/MergedPlanning/item-planning-state-service';
 import { ProcessStepStateService } from 'src/app/core/services/MergedPlanning/process-step-state-service';
+import { DeskMachineJobsService } from 'src/app/core/services/MergedPlanning/desk-machine-jobs-service';
 import { IApiResponse } from 'src/app/core/model/Response/ApiResponse';
 
 // This component is the CONTENT of an NgbModal (opened via `modalService.open`
@@ -50,7 +51,7 @@ import { IApiResponse } from 'src/app/core/model/Response/ApiResponse';
   ],
   templateUrl: './planning-edit-view.html',
   styleUrl: './planning-edit-view.scss',
-  providers: [ItemPlanningStateService, ProcessStepStateService],
+  providers: [ItemPlanningStateService, ProcessStepStateService, DeskMachineJobsService],
 })
 export class PlanningEditView implements OnInit, OnChanges, OnDestroy {
   private destroy$ = new Subject<void>();
@@ -78,6 +79,7 @@ export class PlanningEditView implements OnInit, OnChanges, OnDestroy {
     private commonService: CommonService,
     private itemPlanningState: ItemPlanningStateService,
     private processStepState: ProcessStepStateService,
+    private deskMachineJobs: DeskMachineJobsService,
     private toastr: ToastrService,
   ) {}
 
@@ -125,6 +127,7 @@ export class PlanningEditView implements OnInit, OnChanges, OnDestroy {
           console.log(data);
           this.header.set(data.Header);
           this.lines.set(data.Lines);
+          this.deskMachineJobs.setLines(data.Lines);
           this.loadProductionSteps();
           this.loadMachinesForSavedSteps();
           this.loadRecipes();

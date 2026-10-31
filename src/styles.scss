@@ -845,6 +845,15 @@ ngb-typeahead-window .dropdown-item.active {
   background-color: #e9ecef !important;
 }
 
+/*==========================================RECIPE VERSION DROPDOWN================================
+  item-planning-fields appends its Recipe Version ng-select panel to <body> so the
+  modal's scroll container (planning-edit-view) no longer clips it; ng-select copies
+  the host class onto the panel. Keep it above Bootstrap modals (1055). */
+.ng-dropdown-panel.recipe-version-select {
+  z-index: 2000 !important;
+  font-size: 12px;
+}
+
 /*==========================================MERGED PLANNING — CDK DRAG PREVIEW=====================
   cdkDragPreviewContainer="global" does NOT append the preview into
   .cdk-overlay-container — CDK's own source (_getPreviewInsertionPoint)
