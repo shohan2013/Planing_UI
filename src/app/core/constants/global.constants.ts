@@ -37,6 +37,10 @@ export const GlobalConstant = {
     ACRLBulkFilters: 'Requisition/ACRLBulkFilters',
     bulkRequisitionItems: 'Requisition/BulkItems',
 
+ /*===========================REQUISITION APPROVAL===================================== */
+    RequisitionApproval: 'RequisitionApproval/GetData',
+    RequisitionApprovalDetails: 'RequisitionApproval/GetDetails',
+
   /*===========================COMMON===================================== */
     Common: 'Common',
     modules: 'Common/modules',
@@ -53,11 +57,13 @@ export const GlobalConstant = {
     Businesses: 'Common/BusinessList',
     warehousesList: 'Common/WarehouseList',
     ProductType: 'Common/ProductTypeList',
+    getFGTypes: 'Common/FGTypes',
     Item: 'Common/ItemList',
     StockQuantity: 'Common/StockQty',
     SalesQuantity: 'Common/GetSalesQty',
     RequisitionItemNames: 'Common/RequisitionItemNames',
     UOM: 'Common/UOMList',
+    PlannerUoM: 'Common/PlannerUoM',
     DocumentStatus: 'Common/DocumentStatusList',
     ProductionStepsForPlanning: 'Common/GetBusinessConfigure',
     Machine: 'Common/GetMachine',
@@ -72,6 +78,8 @@ export const GlobalConstant = {
     PlanningVsProductionOverviewItems: 'PlanningVsProduction/GetOverviewItems',
     PlanningVsProductionOverviewExport: 'PlanningVsProduction/GetOverviewExport',
     WorkType: 'Common/WorkType',
+
+
 
   /*===========================ROLE===================================== */
 
@@ -91,9 +99,15 @@ export const GlobalConstant = {
     MasterConfigurationFGs: 'MasterConfiguration/FGs',
 
     /*==============================BOM====================================*/
+    addBoM: 'BoM/save',
+    updateBoM: 'BoM/update',
+    saveBoMLine: 'BoM/SaveLine',
+
     getBoMHeaders: 'BoM/GetData',
     getBoMLines: 'BoM/GetLines',
+    
     deleteBoM: 'BoM/Delete',
+    deleteBoMLine: 'BoM/DeleteLine',
     
     getBoMItems: 'BoM/GetItems',
     getProductionMaterialUoM: 'BoM/GetProductionMaterialUoM',

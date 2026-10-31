@@ -1,0 +1,127 @@
+<div class="user-card">
+  <div class="page-header">
+    <h5>
+      <i class="fa-brands fa-instalod requisition-approval-icon"></i>
+      <b>REQUISITION APPROVAL</b>
+    </h5>
+  </div>
+  <hr />
+  <div class="card-body">
+    <div class="approval-filter-row mb-3">
+      <div class="approval-status-filter">
+        <select class="form-select" [ngModel]="selectedStatusId" (ngModelChange)="onStatusChange($event)" aria-label="Approval status">
+          <option [ngValue]="0">Select Status</option>
+          @for (status of approvalStatuses; track status.Id) {
+            <option [ngValue]="status.Id">{{ status.Name }}</option>
+          }
+        </select>
+      </div>
+      <div class="approval-right-filters">
+        <div class="approval-filter">
+          <div class="input-group">
+            <div class="input-group-text"><i class="fa-solid fa-filter"></i></div>
+            <select class="form-select" [ngModel]="selectedUnitFilterId" (ngModelChange)="onUnitFilterChange($event)" aria-label="Unit filter">
+              <option [ngValue]="null">My Unit</option>
+              <option [ngValue]="0">All Units</option>
+              @for (unit of units(); track unit.Id) {
+                <option [ngValue]="unit.Id">{{ unit.Name }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="approval-filter">
+          <select class="form-select" [ngModel]="selectedBusinessFilterId" (ngModelChange)="onBusinessFilterChange($event)" [disabled]="selectedUnitFilterId === null || selectedUnitFilterId === 0 || businessesLoading()" aria-label="Business filter">
+            <option [ngValue]="0">{{ businessesLoading() ? 'Loading Businesses...' : 'All Businesses' }}</option>
+            @for (business of businesses(); track business.Id) {
+              <option [ngValue]="business.Id">{{ business.Name }}</option>
+            }
+          </select>
+        </div>
+        <div class="approval-search">
+          <div class="input-group">
+            <div class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></div>
+            <input type="text" class="form-control" placeholder="Search Requisition Number..." [ngModel]="globalSearch()" (ngModelChange)="updateSearch($event)" [disabled]="!selectedStatusCode" />
+          </div>
+        </div>
+      </div>
+    </div>
+    @if (selectedStatusCode && error()) {
+      <div class="alert alert-danger d-flex justify-content-between align-items-center">
+        <span>{{ error() }}</span>
+        <button type="button" class="btn btn-danger btn-sm" (click)="retry()">Retry</button>
+      </div>
+    }
+    <div class="table-responsive">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>REQUISITION NUMBER</th>
+            <th>UNIT</th>
+            <th>BUSINESS</th>
+            <th>REQUISITION DATE</th>
+            <th>REMARKS</th>
+            <th>CREATED BY</th>
+            <th>CREATED DATE</th>
+            <th class="g-action-column">ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (!selectedStatusCode) {
+            <tr><td colspan="8" class="text-center py-4">Select a status to load requisitions.</td></tr>
+          } @else if (isLoading()) {
+            <tr>
+              <td colspan="8" class="text-center py-4">
+                <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                Loading requisitions...
+              </td>
+            </tr>
+          } @else if (paginatedItems().length === 0) {
+            <tr>
+              <td colspan="8" class="text-center py-4">
+                <i class="fas fa-folder-open fa-4x text-secondary mb-3"></i>
+                <br />
+                <h6>No Records Found.</h6>
+              </td>
+            </tr>
+          } @else {
+            @for (item of paginatedItems(); track item.ApprovalHistoryId) {
+              <tr>
+                <td>{{ item.RequisitionNumber || '-' }}</td>
+                <td>{{ item.UnitName || '-' }}</td>
+                <td>{{ item.BusinessName || '-' }}</td>
+                <td>{{ item.ReqDate | dateTime }}</td>
+                <td><div class="g-scrollable-text md" [title]="item.Remarks || ''">{{ item.Remarks || '-' }}</div></td>
+                <td>{{ item.CreatedByName || item.CREATEDBY || '-' }}</td>
+                <td>{{ item.CREATEDDATE ? (item.CREATEDDATE | dateTime) : '-' }}</td>
+                <td class="g-action-column">
+                  <div class="action-buttons">
+                    <button *menuPermission="PermissionAction.View" type="button" class="action-btn btn-view" title="View" aria-label="View requisition" (click)="openViewModal(item)">
+                      <i class="fa-solid fa-magnifying-glass-plus"></i>
+                    </button>
+                    <button type="button" class="action-btn btn-approve" title="Approve" aria-label="Approve requisition">
+                      <i class="fa-solid fa-circle-check"></i>
+                    </button>
+                    <button type="button" class="action-btn btn-reject" title="Reject" aria-label="Reject requisition">
+                      <i class="fa-solid fa-circle-xmark"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+  @if (selectedStatusCode) {
+    <div class="card-footer">
+      <app-pagination
+        [(currentPage)]="currentPage"
+        [(pageSize)]="pageSize"
+        [totalItems]="totalItems()"
+        (pageChanged)="onPageChange($event)"
+        (pageSizeChanged)="onPageSizeChange($event)">
+      </app-pagination>
+    </div>
+  }
+</div>

@@ -6,4 +6,5 @@ export interface IACRLBulkFilterOption {
 export interface IACRLBulkFilters {
   Sizes: IACRLBulkFilterOption[];
   SubCategories: IACRLBulkFilterOption[];
+  Grades: { ID: number; Name: string }[];
 }

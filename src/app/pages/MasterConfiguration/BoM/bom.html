@@ -40,17 +40,11 @@
 
         <tbody>
           @if (loading()) {
-            <tr>
-              <td colspan="8" class="text-center py-4">
-                <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
-                Loading BOMs...
-              </td>
-            </tr>
+            <tr><td colspan="8" class="text-center py-4"><span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Loading BOMs...</td></tr>
           } @else if (headers().length === 0) {
             <tr>
               <td colspan="8" class="text-center py-4">
-                <i class="fas fa-folder-open fa-4x text-secondary mb-3"></i>
-                <br />
+                <i class="fas fa-folder-open fa-4x text-secondary mb-3"></i><br />
                 <h6>No Records Found.</h6>
               </td>
             </tr>
@@ -96,11 +90,9 @@
     <div class="modal-header">
       <h5 class="modal-title d-flex align-items-center gap-2">
         @if (formMode() === 'edit') {
-          <img src="assets/icons/edit.svg" width="16" height="16" alt="" />
-          Edit BOM
+          <img src="assets/icons/edit.svg" width="16" height="16" alt="" /> Edit BOM
         } @else {
-          <img src="assets/icons/create.svg" width="17.5" height="17.5" alt="" />
-          Create BOM
+          <img src="assets/icons/create.svg" width="17.5" height="17.5" alt="" /> Create BOM
         }
       </h5>
       <button type="button" class="btn-close" aria-label="Close" (click)="closeModal()"></button>
@@ -111,32 +103,56 @@
         <div class="bom-form-section-header">
           <span class="bom-form-dot bom-form-dot-primary"></span>
           Finished Goods Formula/Recipe
-          @if (formMode() === 'edit') {
+
+          @if (formMode() === 'create') {
+            <span class="bom-form-number ms-auto" [title]="itemName()">{{ itemName() }}</span>
+          } @else {
             <span class="bom-form-number ms-auto">{{ selectedHeader()?.BoMCode || selectedHeader()?.BoMID }}</span>
           }
         </div>
 
         <div class="bom-form-section-body">
-          <div class="row g-3">
-            <div class="col-lg-6 col-md-12">
-              <label class="bom-form-label" for="bomName">BOM Name</label>
-              <input id="bomName" type="text" class="form-control" formControlName="bomName" placeholder="Enter BOM name" autocomplete="off" />
-            </div>
+          <div class="row g-3 align-items-end">
+
 
             <div class="col-lg-3 col-md-6">
               <label class="bom-form-label" for="itemType">FG Type</label>
               <select id="itemType" class="form-select" formControlName="itemType">
-                @if (formMode() === 'edit') {
+                <option [ngValue]="null">{{ fgTypesLoading() ? 'Loading...' : 'Select FG Type' }}</option>
+                @for (type of fgTypes(); track type.Id) {
+                  <option [ngValue]="type.Id">{{ type.Name }}</option>
+                }
+                @if (formMode() === 'edit' && selectedHeader()?.FGTypeId && !fgTypes().length) {
                   <option [ngValue]="selectedHeader()?.FGTypeId">{{ selectedHeader()?.FGTypeName || selectedHeader()?.FGTypeId }}</option>
                 }
               </select>
             </div>
 
-            <div class="col-lg-3 col-md-6">
-              <label class="bom-form-label" for="itemName">SFG/FG Name</label>
-              <input id="itemName" type="text" class="form-control" formControlName="itemName" placeholder="Enter SFG / FG name" autocomplete="off" readonly />
+            <div class="col-lg-6 col-md-12">
+              <label class="bom-form-label" for="bomName">BOM Name</label>
+              <input id="bomName" type="text" class="form-control" formControlName="bomName" maxlength="500" placeholder="Enter BOM name" autocomplete="off" />
             </div>
+
+
+
+
+            @if (formMode() === 'edit') {
+              <div class="col-lg-3 col-md-6 d-flex justify-content-end">
+                <button type="button" class="btn bom-form-btn-submit" [disabled]="!headerChanged() || formGroup.controls.bomName.invalid || formGroup.controls.itemType.invalid || savingHeader()" (click)="updateHeader()">
+                  @if (savingHeader()) {
+                    <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
+                  } @else {
+                    <i class="fa-solid fa-check me-1"></i>
+                  }
+                  Update Header
+                </button>
+              </div>
+            }
           </div>
+
+          @if (fgTypesError()) {
+            <div class="small text-danger mt-2">{{ fgTypesError() }}</div>
+          }
         </div>
       </section>
 
@@ -153,22 +169,19 @@
 
       <section class="bom-form-section mb-3">
         <div class="bom-form-section-header">
-          <span class="bom-form-dot bom-form-dot-success"></span>
-          Raw Material
+          <span class="bom-form-dot bom-form-dot-success"></span>Raw Material
         </div>
 
         <div class="bom-form-section-body">
           <div formGroupName="rawMaterial">
             <div class="row g-3">
-              <!-- First row -->
               <div class="col-lg-2 col-md-6">
                 <label class="bom-form-label" for="materialWarehouse">Warehouse</label>
-                <ng-select id="materialWarehouse" [items]="warehouseOptions()" bindLabel="Name" bindValue="Id" formControlName="warehouseId" [clearable]="false" dropdownPosition="bottom"></ng-select>
-              </div>
+                <ng-select id="materialWarehouse" [items]="warehouseOptions()" bindLabel="WareHouse" bindValue="WareHouseID" formControlName="warehouseId" placeholder="Select Warehouse" [clearable]="false" dropdownPosition="bottom"></ng-select>              </div>
 
               <div class="col-lg-2 col-md-6">
                 <label class="bom-form-label" for="rawMaterialName">Raw Material</label>
-                <input id="rawMaterialName" type="text" class="form-control" formControlName="name" placeholder="Search item" autocomplete="off" [ngbTypeahead]="searchMaterialItems" [resultTemplate]="bomItemResult" [placement]="['bottom-start', 'top-start']" container="body" popupClass="bom-item-dropdown" [resultFormatter]="itemFormatter" [inputFormatter]="itemFormatter" (selectItem)="onMaterialItemSelect($event)" (keydown.arrowdown)="scrollActiveItem()" (keydown.arrowup)="scrollActiveItem()" />
+                <input id="rawMaterialName" type="text" class="form-control" formControlName="name" placeholder="Search item" autocomplete="off" [ngbTypeahead]="searchMaterialItems" [resultTemplate]="bomItemResult" [placement]="['bottom-start', 'top-start']" container="body" popupClass="bom-item-dropdown" [resultFormatter]="itemFormatter" [inputFormatter]="itemFormatter" [readonly]="formGroup.controls.rawMaterial.controls.warehouseId.value === null" (selectItem)="onMaterialItemSelect($event)" (keydown.arrowdown)="scrollActiveItem()" (keydown.arrowup)="scrollActiveItem()" />
                 @if (materialSearching()) {
                   <div class="small text-primary mt-1"><span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>Searching...</div>
                 }
@@ -176,36 +189,40 @@
 
               <div class="col-lg-2 col-md-6">
                 <label class="bom-form-label" for="rmQty">Quantity</label>
-                <input id="rmQty" type="number" class="form-control" formControlName="quantity" min="0" />
+                <input id="rmQty" type="text" inputmode="decimal" class="form-control" formControlName="quantity" bomDecimalInput [bomWholeDigits]="8" [bomDecimalDigits]="4" [bomMultiplier]="selectedCValue()" />
               </div>
 
               <div class="col-lg-2 col-md-6">
                 <label class="bom-form-label" for="wastagePercent">Wastage</label>
                 <div class="input-group">
-                  <input id="wastagePercent" type="number" class="form-control" formControlName="wastagePercent" min="0" max="100" />
+                  <input id="wastagePercent" type="text" inputmode="decimal" class="form-control" formControlName="wastagePercent" bomDecimalInput [bomWholeDigits]="12" [bomDecimalDigits]="2" />
                   <span class="input-group-text bom-percent-symbol">%</span>
                 </div>
               </div>
 
               <div class="col-lg-2 col-md-6">
                 <label class="bom-form-label" for="processLoss">Process Loss</label>
-                <input id="processLoss" type="number" class="form-control" formControlName="processLoss" min="0" />
+                <input id="processLoss" type="text" inputmode="decimal" class="form-control" formControlName="processLoss" bomDecimalInput [bomWholeDigits]="8" [bomDecimalDigits]="2" />
               </div>
 
               <div class="col-lg-2 col-md-6">
                 <label class="bom-form-label" for="materialRate">Rate</label>
-                <input id="materialRate" type="number" class="form-control" formControlName="rate" min="0" />
+                <input id="materialRate" type="text" inputmode="decimal" class="form-control" formControlName="rate" bomDecimalInput [bomWholeDigits]="16" [bomDecimalDigits]="2" />
               </div>
 
-              <!-- Second row -->
               <div class="col-lg-2 col-md-6">
                 <label class="bom-form-label" for="uom">UoM</label>
                 <input id="uom" type="text" class="form-control" formControlName="uom" readonly />
               </div>
 
               <div class="col-lg-2 col-md-6">
-                <label class="bom-form-label" for="bomUom">CUoM</label>
-                <input id="bomUom" type="text" class="form-control" formControlName="bomUom" readonly />
+              <label class="bom-form-label" for="bomUom">CUoM</label>
+              <select id="bomUom" class="form-select" formControlName="bomUom">
+                <option value="">Select CUoM</option>
+                @for (conversion of materialConversions(); track conversion.CUoM) {
+                  <option [value]="conversion.CUoM">{{ conversion.CUoM }}</option>
+                }
+              </select>
               </div>
 
               <div class="col-lg-2 col-md-6">
@@ -215,83 +232,91 @@
 
               <div class="col-lg-4 col-md-8">
                 <label class="bom-form-label" for="remarks">Remarks</label>
-                <input id="remarks" type="text" class="form-control" formControlName="remarks" placeholder="Remarks" autocomplete="off" />
+                <input id="remarks" type="text" class="form-control" formControlName="remarks" maxlength="500" placeholder="Remarks" autocomplete="off" />
               </div>
 
               <div class="col-lg-2 col-md-4 d-flex align-items-end justify-content-end">
-                <button type="button" class="btn bom-form-btn-add" (click)="addRawMaterial()"><i class="fa-solid fa-plus me-1"></i> Add</button>
+                <button type="button" class="btn bom-form-btn-add" [disabled]="!!savingLine() || linesLoading()" (click)="addRawMaterial()"><i class="fa-solid fa-plus me-1"></i>Add</button>
               </div>
             </div>
 
             @if (conversionsLoading()) {
-              <div class="small text-primary mt-2"><span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>Loading UoM conversions...</div>
+              <div class="small text-primary mt-2"><span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>Loading UoM conversion...</div>
             }
+
             @if (conversionsError()) {
               <div class="small text-danger mt-2">{{ conversionsError() }}</div>
             }
           </div>
 
-          @if (formMode() === 'edit') {
-            <div class="mt-3">
-              <ng-container [ngTemplateOutlet]="materialList"></ng-container>
-            </div>
+          @if (materialLines().length || linesLoading()) {
+            <div class="mt-3"><ng-container [ngTemplateOutlet]="materialList"></ng-container></div>
           }
         </div>
       </section>
 
-
       <section class="bom-form-section mb-3">
         <div class="bom-form-section-header">
-          <span class="bom-form-dot bom-form-dot-warning"></span>
-          Resources/Overhead Cost
+          <span class="bom-form-dot bom-form-dot-warning"></span>Resources/Overhead Cost
         </div>
 
         <div class="bom-form-section-body">
           <div formGroupName="resource">
             <div class="row g-3">
-              
               <div class="col-lg-2 col-md-6">
                 <label class="bom-form-label" for="resourceWarehouse">Warehouse</label>
-                <ng-select id="resourceWarehouse" [items]="warehouseOptions()" bindLabel="Name" bindValue="Id" formControlName="warehouseId" [clearable]="false" dropdownPosition="bottom"></ng-select>
+                <ng-select id="resourceWarehouse" [items]="warehouseOptions()" bindLabel="WareHouse" bindValue="WareHouseID" formControlName="warehouseId" placeholder="Select Warehouse" [clearable]="false" dropdownPosition="bottom"></ng-select>
               </div>
 
-              <div class="col-lg-3 col-md-6">
+              <div class="col-lg-2 col-md-6">
                 <label class="bom-form-label" for="resourceName">Resource Name</label>
-                <input id="resourceName" type="text" class="form-control" formControlName="name" placeholder="Search item" autocomplete="off" [ngbTypeahead]="searchResourceItems" [resultTemplate]="bomItemResult" [placement]="['bottom-start', 'top-start']" container="body" popupClass="bom-item-dropdown" [resultFormatter]="itemFormatter" [inputFormatter]="itemFormatter" (selectItem)="onResourceItemSelect($event)" (keydown.arrowdown)="scrollActiveItem()" (keydown.arrowup)="scrollActiveItem()" />
+                <input id="resourceName" type="text" class="form-control" formControlName="name" placeholder="Search item" autocomplete="off" [ngbTypeahead]="searchResourceItems" [resultTemplate]="bomItemResult" [placement]="['bottom-start', 'top-start']" container="body" popupClass="bom-item-dropdown" [resultFormatter]="itemFormatter" [inputFormatter]="itemFormatter" [readonly]="formGroup.controls.resource.controls.warehouseId.value === null" (selectItem)="onResourceItemSelect($event)" (keydown.arrowdown)="scrollActiveItem()" (keydown.arrowup)="scrollActiveItem()" />
                 @if (resourceSearching()) {
                   <div class="small text-primary mt-1"><span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>Searching...</div>
                 }
               </div>
 
-
               <div class="col-lg-2 col-md-6">
                 <label class="bom-form-label" for="resourceQty">Quantity</label>
-                <input id="resourceQty" type="number" class="form-control" formControlName="quantity" min="0" />
+                <input id="resourceQty" type="text" inputmode="decimal" class="form-control" formControlName="quantity" bomDecimalInput [bomWholeDigits]="8" [bomDecimalDigits]="2" />
               </div>
 
-              <div class="col-lg-3 col-md-8">
+              <div class="col-lg-2 col-md-6">
+                <label class="bom-form-label" for="resourceRate">Rate</label>
+                <input id="resourceRate" type="text" inputmode="decimal" class="form-control" formControlName="rate" bomDecimalInput [bomWholeDigits]="16" [bomDecimalDigits]="2" />
+              </div>
+
+              <div class="col-lg-2 col-md-6">
                 <label class="bom-form-label" for="resourceRemarks">Remarks</label>
-                <input id="resourceRemarks" type="text" class="form-control" formControlName="remarks" placeholder="Remarks" autocomplete="off" />
+                <input id="resourceRemarks" type="text" class="form-control" formControlName="remarks" maxlength="500" placeholder="Remarks" autocomplete="off" />
               </div>
 
               <div class="col-lg-2 col-md-4 d-flex align-items-end justify-content-end">
-                <button type="button" class="btn bom-form-btn-add" (click)="addResource()"><i class="fa-solid fa-plus me-1"></i> Add</button>
+                <button type="button" class="btn bom-form-btn-add" [disabled]="!!savingLine() || linesLoading()" (click)="addResource()"><i class="fa-solid fa-plus me-1"></i>Add</button>
               </div>
             </div>
           </div>
 
-          @if (formMode() === 'edit') {
-            <div class="mt-3">
-              <ng-container [ngTemplateOutlet]="resourceList"></ng-container>
-            </div>
+          @if (resourceLines().length || linesLoading()) {
+            <div class="mt-3"><ng-container [ngTemplateOutlet]="resourceList"></ng-container></div>
           }
         </div>
       </section>
     </div>
 
     <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" (click)="closeModal()"><i class="fa-solid fa-fw fa-xmark"></i> Close</button>
-      <button type="submit" class="btn bom-form-btn-submit" [disabled]="formGroup.invalid || linesLoading() || !!linesError()"><i class="fa-solid fa-fw fa-check"></i> {{ formMode() === 'edit' ? 'Update' : 'Submit' }}</button>
+      <button type="button" class="btn btn-secondary" (click)="closeModal()"><i class="fa-solid fa-fw fa-xmark"></i>Close</button>
+
+      @if (formMode() === 'create') {
+        <button type="submit" class="btn bom-form-btn-submit" [disabled]="formGroup.controls.bomName.invalid || formGroup.controls.itemType.invalid || savingHeader()">
+          @if (savingHeader()) {
+            <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
+          } @else {
+            <i class="fa-solid fa-fw fa-check"></i>
+          }
+          Submit
+        </button>
+      }
     </div>
   </form>
 </ng-template>
@@ -316,26 +341,9 @@
     } @else {
       @if (selectedHeader(); as header) {
         <div class="row g-2 mb-3">
-          <div class="col-md-4">
-            <div class="border rounded-3 bg-white px-3 py-2">
-              <small class="text-muted d-block">BOM Number</small>
-              <strong>{{ header.BoMCode || '—' }}</strong>
-            </div>
-          </div>
-
-          <div class="col-md-4">
-            <div class="border rounded-3 bg-white px-3 py-2">
-              <small class="text-muted d-block">Created By</small>
-              <strong>{{ header.CreatedByName || '—' }}</strong>
-            </div>
-          </div>
-
-          <div class="col-md-4">
-            <div class="border rounded-3 bg-white px-3 py-2">
-              <small class="text-muted d-block">Created Date</small>
-              <strong>{{ header.CreateDate ? (header.CreateDate | date:'dd-MMM-yyyy') : '—' }}</strong>
-            </div>
-          </div>
+          <div class="col-md-4"><div class="border rounded-3 bg-white px-3 py-2"><small class="text-muted d-block">BOM Number</small><strong>{{ header.BoMCode || '—' }}</strong></div></div>
+          <div class="col-md-4"><div class="border rounded-3 bg-white px-3 py-2"><small class="text-muted d-block">Created By</small><strong>{{ header.CreatedByName || '—' }}</strong></div></div>
+          <div class="col-md-4"><div class="border rounded-3 bg-white px-3 py-2"><small class="text-muted d-block">Created Date</small><strong>{{ header.CreateDate ? (header.CreateDate | date:'dd-MMM-yyyy') : '—' }}</strong></div></div>
         </div>
       }
 
@@ -356,7 +364,7 @@
   </div>
 
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" (click)="closeModal()"><i class="fa-solid fa-fw fa-xmark"></i> Close</button>
+    <button type="button" class="btn btn-secondary" (click)="closeModal()"><i class="fa-solid fa-fw fa-xmark"></i>Close</button>
   </div>
 </ng-template>
 
@@ -367,6 +375,7 @@
         <tr>
           <th>ITEM ID</th>
           <th>ITEM NAME</th>
+          <th>WAREHOUSE</th>
           <th>QUANTITY</th>
           <th>WASTAGE %</th>
           <th>RATE</th>
@@ -375,28 +384,62 @@
           <th>CONVERTED QTY</th>
           <th>PROCESS LOSS</th>
           <th>REMARKS</th>
+          <th class="g-action-column">ACTION</th>
         </tr>
       </thead>
 
       <tbody>
-        @if (linesLoading()) {
-          <tr><td colspan="10" class="text-center py-4">Loading materials...</td></tr>
+        @if (linesLoading() && materialLines().length === 0) {
+          <tr><td colspan="12" class="text-center py-4">Loading materials...</td></tr>
         } @else {
-          @for (line of materialLines(); track line.ID) {
-            <tr>
+          @for (line of materialLines(); track formMode() === 'create' ? $index : line.ID; let index = $index) {
+            <tr (focusin)="activateLine('M', line.ID, $event)">
               <td>{{ line.ItemID ?? '-' }}</td>
-              <td>{{ line.ItemName || '-' }}</td>
-              <td>{{ line.Quantity ?? '-' }}</td>
-              <td>{{ line.WastagePercent ?? '-' }}</td>
-              <td>{{ line.Rate ?? '-' }}</td>
-              <td>{{ line.UoM || '-' }}</td>
-              <td>{{ line.CUoM || '-' }}</td>
-              <td>{{ line.ConvertedQty ?? '-' }}</td>
-              <td>{{ line.ProcessLoss ?? '-' }}</td>
-              <td><div class="g-scrollable-text md" [title]="line.Remarks || ''">{{ line.Remarks || '-' }}</div></td>
+              <td [title]="line.ItemName || ''">{{ line.ItemName || '-' }}</td>
+              <td>{{ line.WarehouseName || 'Any Warehouse' }}</td>
+
+              @if (!viewing() && formMode() === 'edit' && line.ID > 0) {
+                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm" bomDecimalInput [bomWholeDigits]="8" [bomDecimalDigits]="4" [bomMultiplier]="line.CValue" [value]="materialEdit(line).Quantity ?? ''" (bomValue)="changeMaterialNumber(line, 'Quantity', $event === null ? '' : $event.toString())" /></td>
+                <td><input type="text" inputmode="decimal" class="form-control form-control-sm" bomDecimalInput [bomWholeDigits]="12" [bomDecimalDigits]="2" [value]="materialEdit(line).WastagePercent ?? ''" (bomValue)="changeMaterialNumber(line, 'WastagePercent', $event === null ? '' : $event.toString())" /></td>
+                <td><input type="text" inputmode="decimal" class="form-control form-control-sm" bomDecimalInput [bomWholeDigits]="16" [bomDecimalDigits]="2" [value]="materialEdit(line).Rate ?? ''" (bomValue)="changeMaterialNumber(line, 'Rate', $event === null ? '' : $event.toString())" /></td>
+                <td>{{ line.UoM || '-' }}</td>
+                <td>
+                  <select class="form-select form-select-sm" [value]="materialEdit(line).CUoM ?? ''" (focus)="loadMaterialLineConversions(line)" (change)="changeMaterialCUoM(line, $any($event.target).value)">
+                    <option [value]="line.CUoM ?? ''">{{ line.CUoM || 'Select CUoM' }}</option>
+                    @for (conversion of materialLineConversions()[line.ID] ?? []; track conversion.CUoM) {
+                      @if (conversion.CUoM !== line.CUoM) {
+                        <option [value]="conversion.CUoM">{{ conversion.CUoM }}</option>
+                      }
+                    }
+                  </select>
+                </td>
+                <td>{{ materialEdit(line).ConvertedQty ?? '-' }}</td>
+                <td><input type="text" inputmode="decimal" class="form-control form-control-sm" bomDecimalInput [bomWholeDigits]="8" [bomDecimalDigits]="2" [value]="materialEdit(line).ProcessLoss ?? ''" (bomValue)="changeMaterialNumber(line, 'ProcessLoss', $event === null ? '' : $event.toString())" /></td>
+                <td><input type="text" class="form-control form-control-sm" maxlength="500" [value]="materialEdit(line).Remarks ?? ''" (input)="changeMaterialRemarks(line, $any($event.target).value)" /></td>
+                <td class="g-action-column">
+                  <div class="action-buttons">
+                    <button type="button" class="action-btn btn-edit" title="Save changes" [disabled]="!materialChanged(line) || !!savingLine() || linesLoading()" (click)="saveMaterialEdit(line)"><i class="fa-solid fa-floppy-disk"></i></button>
+                    <button type="button" class="action-btn btn-delete" title="Delete line" [disabled]="!!deletingLine() || !!savingLine()" (click)="deleteMaterialLine(line)"><i class="fa-solid fa-trash-can"></i></button>
+                  </div>
+                </td>
+              } @else {
+                <td>{{ line.Quantity ?? '-' }}</td>
+                <td>{{ line.WastagePercent ?? '-' }}</td>
+                <td>{{ line.Rate ?? '-' }}</td>
+                <td>{{ line.UoM || '-' }}</td>
+                <td>{{ line.CUoM || '-' }}</td>
+                <td>{{ line.ConvertedQty ?? '-' }}</td>
+                <td>{{ line.ProcessLoss ?? '-' }}</td>
+                <td><div class="g-scrollable-text md" [title]="line.Remarks || ''">{{ line.Remarks || '-' }}</div></td>
+                <td class="g-action-column">
+                  @if (formMode() === 'create') {
+                    <button type="button" class="action-btn btn-delete" title="Remove staged line" (click)="removeStagedLine('M', index)"><i class="fa-solid fa-trash-can"></i></button>
+                  }
+                </td>
+              }
             </tr>
           } @empty {
-            <tr><td colspan="10" class="text-center py-4">No material lines found.</td></tr>
+            <tr><td colspan="12" class="text-center py-4">No material lines found.</td></tr>
           }
         }
       </tbody>
@@ -411,28 +454,50 @@
         <tr>
           <th>ITEM ID</th>
           <th>ITEM NAME</th>
+          <th>WAREHOUSE</th>
           <th>QUANTITY</th>
           <th>RATE</th>
           <th>UOM</th>
           <th>REMARKS</th>
+          <th class="g-action-column">ACTION</th>
         </tr>
       </thead>
 
       <tbody>
-        @if (linesLoading()) {
-          <tr><td colspan="6" class="text-center py-4">Loading resources...</td></tr>
+        @if (linesLoading() && resourceLines().length === 0) {
+          <tr><td colspan="8" class="text-center py-4">Loading resources...</td></tr>
         } @else {
-          @for (line of resourceLines(); track line.ID) {
-            <tr>
+          @for (line of resourceLines(); track formMode() === 'create' ? $index : line.ID; let index = $index) {
+            <tr (focusin)="activateLine('R', line.ID, $event)">
               <td>{{ line.ItemID ?? '-' }}</td>
-              <td>{{ line.ItemName || '-' }}</td>
-              <td>{{ line.Quantity ?? '-' }}</td>
-              <td>{{ line.Rate ?? '-' }}</td>
-              <td>{{ line.UoM || '-' }}</td>
-              <td><div class="g-scrollable-text md" [title]="line.Remarks || ''">{{ line.Remarks || '-' }}</div></td>
+              <td [title]="line.ItemName || ''">{{ line.ItemName || '-' }}</td>
+              <td>{{ line.WarehouseName || 'Any Warehouse' }}</td>
+
+              @if (!viewing() && formMode() === 'edit' && line.ID > 0) {
+                <td><input type="text" inputmode="decimal" class="form-control form-control-sm" bomDecimalInput [bomWholeDigits]="8" [bomDecimalDigits]="2" [value]="resourceEdit(line).Quantity ?? ''" (bomValue)="changeResourceNumber(line, 'Quantity', $event === null ? '' : $event.toString())" /></td>
+                <td><input type="text" inputmode="decimal" class="form-control form-control-sm" bomDecimalInput [bomWholeDigits]="16" [bomDecimalDigits]="2" [value]="resourceEdit(line).Rate ?? ''" (bomValue)="changeResourceNumber(line, 'Rate', $event === null ? '' : $event.toString())" /></td>
+                <td>{{ line.UoM || '-' }}</td>
+                <td><input type="text" class="form-control form-control-sm" maxlength="500" [value]="resourceEdit(line).Remarks ?? ''" (input)="changeResourceRemarks(line, $any($event.target).value)" /></td>
+                <td class="g-action-column">
+                  <div class="action-buttons">
+                    <button type="button" class="action-btn btn-edit" title="Save changes" [disabled]="!resourceChanged(line) || !!savingLine() || linesLoading()" (click)="saveResourceEdit(line)"><i class="fa-solid fa-floppy-disk"></i></button>
+                    <button type="button" class="action-btn btn-delete" title="Delete line" [disabled]="!!deletingLine() || !!savingLine()" (click)="deleteResourceLine(line)"><i class="fa-solid fa-trash-can"></i></button>
+                  </div>
+                </td>
+              } @else {
+                <td>{{ line.Quantity ?? '-' }}</td>
+                <td>{{ line.Rate ?? '-' }}</td>
+                <td>{{ line.UoM || '-' }}</td>
+                <td><div class="g-scrollable-text md" [title]="line.Remarks || ''">{{ line.Remarks || '-' }}</div></td>
+                <td class="g-action-column">
+                  @if (formMode() === 'create') {
+                    <button type="button" class="action-btn btn-delete" title="Remove staged line" (click)="removeStagedLine('R', index)"><i class="fa-solid fa-trash-can"></i></button>
+                  }
+                </td>
+              }
             </tr>
           } @empty {
-            <tr><td colspan="6" class="text-center py-4">No resource lines found.</td></tr>
+            <tr><td colspan="8" class="text-center py-4">No resource lines found.</td></tr>
           }
         }
       </tbody>

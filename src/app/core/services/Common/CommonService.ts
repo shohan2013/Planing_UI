@@ -30,6 +30,8 @@ import {
 import { IRecipe } from '../../model/Common/Recipe/Recipe';
 import { IActiveRole } from '../../model/Role/Role';
 import { IWorkType } from '../../model/WorkType/WorkType';
+import { IWareHouse } from '../../model/Common/WareHouse/WareHouse';
+import { IPlannerUoM } from '../../model/Common/UOM/PlannerUoM';
 
 @Injectable({
   providedIn: 'root',
@@ -97,9 +99,9 @@ export class CommonService {
     );
   }
 
-  getWarehousesList(unitId: number): Observable<IDropdownBind[]> {
-    return this.http.get<IDropdownBind[]>(
-      `${environment.API_URL}${GlobalConstant.API_END_POINTS.warehousesList}?unitId=${unitId}`,
+  getWarehousesList(enroll: number): Observable<IWareHouse[]> {
+    return this.http.get<IWareHouse[]>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.warehousesList}?unitId=${enroll}`,
     );
   }
   GetProductTypeList(): Observable<IProductType[]> {
@@ -107,6 +109,7 @@ export class CommonService {
       `${environment.API_URL}${GlobalConstant.API_END_POINTS.ProductType}`,
     );
   }
+  
 
   GetItemList(unitId: number, searchText: string): Observable<IItem[]> {
     return this.http.get<IItem[]>(
@@ -173,6 +176,14 @@ export class CommonService {
       `${environment.API_URL}${GlobalConstant.API_END_POINTS.UOM}?unitId=${unitId}`,
     );
   }
+
+
+  GetPlannerUoM(UnitId: number, BusinessId: number): Observable<IPlannerUoM[]> {
+  return this.http.get<IPlannerUoM[]>(
+    `${environment.API_URL}${GlobalConstant.API_END_POINTS.PlannerUoM}?UnitId=${UnitId}&BusinessId=${BusinessId}`,
+  );
+}
+
 
   GetDocumentStatusList(): Observable<IDropdownBind[]> {
     return this.http.get<IDropdownBind[]>(
@@ -244,4 +255,10 @@ export class CommonService {
       `${environment.API_URL}${GlobalConstant.API_END_POINTS.WorkType}`
     );
   }
+
+  getFGTypes(): Observable<IDropdownBind[]> {
+  return this.http.get<IDropdownBind[]>(
+    `${environment.API_URL}${GlobalConstant.API_END_POINTS.getFGTypes}`
+  );
+}
 }

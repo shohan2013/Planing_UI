@@ -401,6 +401,32 @@ td:has(> .g-scrollable-text.md) {
   transform: translateY(-2px);
 }
 
+/* Approve */
+.btn-approve {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.btn-approve:hover {
+  background: #1d4ed8;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+/* Reject */
+.btn-reject {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.btn-reject:hover {
+  background: #dc2626;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+
+
 .action-btn:active {
   transform: scale(0.95);
 }

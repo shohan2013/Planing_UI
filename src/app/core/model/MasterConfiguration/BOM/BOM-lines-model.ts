@@ -9,7 +9,10 @@ export interface ProductionBOMMaterialLine {
   UoM: string | null;
   CUoM: string | null;
   ConvertedQty: number | null;
+  CValue: number;
   ProcessLoss: number | null;
+  WarehouseID: number | null;
+  WarehouseName: string | null;
   Remarks: string | null;
 }
 
@@ -21,6 +24,8 @@ export interface ProductionBOMResourceLine {
   Quantity: number | null;
   Rate: number | null;
   UoM: string | null;
+  WarehouseID: number | null;
+  WarehouseName: string | null;
   Remarks: string | null;
 }
 

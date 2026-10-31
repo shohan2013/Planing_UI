@@ -123,6 +123,7 @@
                   <tr>
                     <th>PRODUCT TYPE</th>
                     <th>ITEM</th>
+                    <th>UOM</th>
                     <th>QUANTITY</th>
                     <th>STOCK QUANTITY</th>
                     <th>SALES QUANTITY</th>
@@ -196,6 +197,19 @@
                     </td>
 
                     <td>
+                      <select class="form-select" formControlName="UOMId"
+                        [class.is-invalid]="lineSubmitted && lf['UOMId'].invalid">
+                        @if (plannerUoMs().length !== 1) {
+                          <option value="" disabled>Select UoM</option>
+                        }
+                        @for (uom of plannerUoMs(); track uom.UoMId) {
+                          <option [value]="uom.UoMId">{{ uom.UoMName }}</option>
+                        }
+                      </select>
+                      <div class="invalid-feedback">Please select UoM.</div>
+                    </td>
+
+                    <td>
                       <input type="number" class="form-control"
                         formControlName="Quantity" placeholder="Quantity" min="1"
                         [class.is-invalid]="lineSubmitted && lf['Quantity'].errors" />
@@ -252,7 +266,7 @@
                 <th>PRODUCT TYPE</th>
                 <th>PRODUCT ID</th>
                 <th>ITEM</th>
-                <!-- <th>UOM</th> -->
+                <th>UOM</th>
                 <th>QUANTITY</th>
                 @if (isEditMode) {
                   <th>REMAINING QUANTITY</th>
@@ -273,9 +287,7 @@
                   </td>
                   <td>{{ +line.get('ProductTypeId')?.value === 2 ? line.get('ItemId')?.value : '-' }}</td>                  
                   <td>{{ line.get('ItemName')?.value || '-' }}</td>
-                  <!-- <td>
-                    {{ +line.get('UOMId')?.value === 0 ? 'N/A' : (line.get('UOMName')?.value || '-') }}
-                  </td> -->
+                  <td>{{ line.get('UOMName')?.value || 'Unspecified' }}</td>
                   <td>{{ line.get('Quantity')?.value }}</td>
 
                   @if (isEditMode) {
@@ -330,7 +342,7 @@
         *menuPermission="isEditMode ? PermissionAction.Update : PermissionAction.Insert"
         type="submit"
         class="btn btn-success"
-        [disabled]="isSubmitting || unitDataLoading() || (isEditMode && header?.DocStatusId === 4)">
+        [disabled]="isSubmitting || unitDataLoading() || (isEditMode && header?.DocStatusId === DocumentStatusId.Completed)">
         @if (isSubmitting) {
           <span class="spinner-border spinner-border-sm me-2"
             aria-hidden="true"></span>
@@ -347,7 +359,7 @@
 
     @if (isEditMode && state() !== 'initializing') {
       <button type="button" class="btn btn-complete me-3"
-        [disabled]="isSubmitting || header?.DocStatusId === 4"
+        [disabled]="isSubmitting || header?.DocStatusId === DocumentStatusId.Completed"
         (click)="complete()">
         Complete
       </button>
@@ -371,7 +383,7 @@
 
   <div class="modal-body bulk-body">
     <div class="row g-3 align-items-end" [formGroup]="bulkFilters">
-      <div class="col-md-3">
+      <div class="col-md-2">
         <label class="form-label" for="bulkSize">Size</label>
         <select id="bulkSize" class="form-select" formControlName="SizeId">
           <option [ngValue]="0">All sizes</option>
@@ -381,11 +393,21 @@
         </select>
       </div>
 
-      <div class="col-md-3">
+      <div class="col-md-2">
         <label class="form-label" for="bulkSubCategory">Subcategory</label>
         <select id="bulkSubCategory" class="form-select" formControlName="SubCategoryId">
           <option [ngValue]="0">All subcategories</option>
           @for (option of bulkSubCategories(); track option.ID) {
+            <option [ngValue]="option.ID">{{ option.Name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label" for="bulkGrade">Grade</label>
+        <select id="bulkGrade" class="form-select" formControlName="GradeId">
+          <option [ngValue]="0">All grades</option>
+          @for (option of bulkGrades(); track option.ID) {
             <option [ngValue]="option.ID">{{ option.Name }}</option>
           }
         </select>
@@ -417,7 +439,7 @@
           <tr>
             <th>ITEM ID</th>
             <th>ITEM NAME</th>
-            <!-- <th>UOM</th> -->
+            <th>UOM</th>
             <th>QUANTITY</th>
             <th>STOCK QUANTITY</th>
             <th>SALES QUANTITY</th>
@@ -428,7 +450,7 @@
         <tbody>
           @if (bulkItemsLoading()) {
             <tr>
-              <td colspan="6" class="text-center py-5">
+              <td colspan="7" class="text-center py-5">
                 <span class="spinner-border text-success" role="status" aria-label="Loading items"></span>
               </td>
             </tr>
@@ -438,6 +460,22 @@
               <tr [class.bulk-already-added]="!!addedLine">
                 <td>{{ row.itemId }}</td>
                 <td>{{ row.itemName }}</td>
+                <td>
+                  @if (addedLine) {
+                    {{ addedLine.get('UOMName')?.value || 'Unspecified' }}
+                  } @else {
+                    <select class="form-select form-select-sm"
+                      [value]="row.uomId ?? ''"
+                      (change)="setBulkUoM(row, $any($event.target).value)">
+                      @if (plannerUoMs().length !== 1) {
+                        <option value="" disabled>Select UoM</option>
+                      }
+                      @for (uom of plannerUoMs(); track uom.UoMId) {
+                        <option [value]="uom.UoMId">{{ uom.UoMName }}</option>
+                      }
+                    </select>
+                  }
+                </td>
                 <td>
                   @if (addedLine) {
                     {{ addedLine.get('Quantity')?.value }}
@@ -457,7 +495,7 @@
               </tr>
             } @empty {
               @if (bulkViewed()) {
-                <tr><td colspan="6" class="text-center text-muted py-4">No matching items.</td></tr>
+                <tr><td colspan="7" class="text-center text-muted py-4">No matching items.</td></tr>
               }
             }
           }

@@ -27,6 +27,7 @@ import { RequisitionFormModalComponent } from './RequisitionComponents/requisiti
 
 import { MenuPermissionDirective } from 'src/app/core/directives/menu-permission.directive';/////
 import { PermissionAction } from 'src/app/core/services/Authorization/authorization.service';/////
+import { DocumentStatusId, getDocumentStatusClass } from 'src/app/core/model/document-status';
 
 @Component({
   selector: 'app-requisition',
@@ -42,7 +43,7 @@ export class Requisition
 
 
   readonly PermissionAction = PermissionAction;  /////
-
+  readonly DocumentStatusId = DocumentStatusId;
 
   selectedUnitFilterId = 0;
   selectedBusinessFilterId = 0;
@@ -251,8 +252,7 @@ completeRequisition(reqId: number): void {
   }
 
   getDocStatusClass(docStatusId: number): string {
-    const name = this.getDocStatusName(docStatusId).trim().toLowerCase();
-    return ['pending', 'approve', 'reject', 'complete'].includes(name) ? name : '';
+    return getDocumentStatusClass(docStatusId);
   }
 
   private loadDocumentStatuses(): void {

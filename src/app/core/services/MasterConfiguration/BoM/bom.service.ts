@@ -4,12 +4,55 @@ import { Observable } from 'rxjs';
 import { GlobalConstant } from '../../../constants/global.constants';
 import { ProductionBOMHeader } from '../../../model/MasterConfiguration/BOM/BOM-model';
 import { environment } from 'src/environments/environment';
-import { ProductionBOMLinesResponse } from 'src/app/core/model/MasterConfiguration/BOM/BOM-lines-model';
+import { ProductionBOMLinesResponse, ProductionBOMMaterialLine, ProductionBOMResourceLine,} from 'src/app/core/model/MasterConfiguration/BOM/BOM-lines-model';
 import { BoMItem } from 'src/app/core/model/MasterConfiguration/BOM/BOM-item-model';
 import { ProductionMaterialUoM } from 'src/app/core/model/MasterConfiguration/BOM/ProductionMaterial-UoM-model';
 
 @Injectable({ providedIn: 'root' })
 export class BomService {constructor(private readonly http: HttpClient) {}
+
+
+addData(request: {
+  Header: {
+    BoMName: string;
+    FGItemID: number;
+    FGTypeId: number;
+    UnitId: number;
+    BusinessId: number;
+    CreatedBy: number;
+  };
+  MaterialLines: ProductionBOMMaterialLine[];
+  ResourceLines: ProductionBOMResourceLine[];
+}): Observable<unknown> {
+  return this.http.post<unknown>(
+    `${environment.API_URL}${GlobalConstant.API_END_POINTS.addBoM}`,
+    request
+  );
+}
+
+updateData(request: {
+  BoMID: number;
+  BoMName: string;
+  FGTypeId: number;
+  UpdatedBy: number;
+}): Observable<unknown> {
+  return this.http.put<unknown>(
+    `${environment.API_URL}${GlobalConstant.API_END_POINTS.updateBoM}`,
+    request
+  );
+}
+
+saveLine(request: {
+  BoMId: number;
+  Code: 'M' | 'R';
+  MaterialLine?: ProductionBOMMaterialLine | null;
+  ResourceLine?: ProductionBOMResourceLine | null;
+}): Observable<unknown> {
+  return this.http.put<unknown>(
+    `${environment.API_URL}${GlobalConstant.API_END_POINTS.saveBoMLine}`,
+    request
+  );
+}
 
   getHeaders(fgItemId: number, unitId: number, businessId: number): Observable<ProductionBOMHeader[]> {
     const params = new HttpParams()
@@ -35,15 +78,19 @@ export class BomService {constructor(private readonly http: HttpClient) {}
     );
     }
 
-  deleteData(boMId: number): Observable<unknown> {
-      const enroll = Number(localStorage.getItem('Enroll'));
+deleteData(boMId: number, enroll: number): Observable<unknown> {
+  return this.http.put<unknown>(
+    `${environment.API_URL}${GlobalConstant.API_END_POINTS.deleteBoM}`,
+    { BoMId: boMId, Enroll: enroll }
+  );
+}
 
-      if (!Number.isInteger(enroll) || enroll <= 0) {
-          throw new Error('Valid employee Enroll not found in localStorage.');
-      }
-
-      return this.http.put<unknown>(`${environment.API_URL}${GlobalConstant.API_END_POINTS.deleteBoM}`, {BoMId: boMId,Enroll: enroll,});
-  }
+  deleteLine(code: 'M' | 'R', id: number): Observable<unknown> {
+  return this.http.put<unknown>(
+    `${environment.API_URL}${GlobalConstant.API_END_POINTS.deleteBoMLine}`,
+    { Code: code, ID: id }
+  );
+}
 
 
   getItems(unitId: number, warehouseId: number, search: string): Observable<BoMItem[]> {
@@ -58,16 +105,14 @@ export class BomService {constructor(private readonly http: HttpClient) {}
     );
   }
 
-  getProductionMaterialUoM(itemId: number, warehouseId: number, unitId: number): Observable<ProductionMaterialUoM[]> {
+  getProductionMaterialUoM(itemId: number, UoM: string, warehouseId: number, unitId: number): Observable<ProductionMaterialUoM[]> {
     const params = new HttpParams()
-      .set('ItemID', itemId)
-      .set('WarehouseID', warehouseId)
-      .set('UnitID', unitId);
+    .set('ItemID', itemId)
+    .set('UoM', UoM)
+    .set('WarehouseID', warehouseId)
+    .set('UnitID', unitId);
 
-    return this.http.get<ProductionMaterialUoM[]>(
-      `${environment.API_URL}${GlobalConstant.API_END_POINTS.getProductionMaterialUoM}`,
-      { params }
-    );
+    return this.http.get<ProductionMaterialUoM[]>(`${environment.API_URL}${GlobalConstant.API_END_POINTS.getProductionMaterialUoM}`,{ params });
   }
 
 

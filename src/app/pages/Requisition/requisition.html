@@ -221,7 +221,7 @@
                   title="Complete"
                   [disabled]="
                     !documentStatuses().length ||
-                    getDocStatusClass(item.DocStatusId) === 'complete' ||
+                    item.DocStatusId === DocumentStatusId.Completed ||
                     deletingReqId() !== null ||
                     completingReqId() !== null
                   "

@@ -1,0 +1,151 @@
+<div class="modal-header">
+  <img src="assets/icons/view.svg" width="18" height="18" class="me-2" alt="" />
+  <h5 class="modal-title">Requisition Details</h5>
+  <button type="button" class="btn-close" aria-label="Close" (click)="dismiss()"></button>
+</div>
+<div class="modal-body requisition-modal-body">
+  @if (state() === 'loading') {
+    <div class="d-flex justify-content-center align-items-center py-5">
+      <div class="spinner-border text-success" role="status">
+        <span class="visually-hidden">Loading requisition details...</span>
+      </div>
+    </div>
+  } @else if (state() === 'failed') {
+    <div class="alert alert-danger d-flex justify-content-between align-items-center">
+      <span>{{ errorMessage }}</span>
+      <button type="button" class="btn btn-danger btn-sm" (click)="loadLines()">Retry</button>
+    </div>
+  } @else {
+    <section class="requisition-card requisition-summary">
+      <div class="summary-grid">
+        <div class="summary-field">
+          <span class="summary-label">Requisition Number</span>
+          <span class="summary-value detail-highlight">{{ header.RequisitionNumber || '-' }}</span>
+        </div>
+        <div class="summary-field">
+          <span class="summary-label">Unit</span>
+          <span class="summary-value">{{ header.UnitName || '-' }}</span>
+        </div>
+        <div class="summary-field">
+          <span class="summary-label">Business</span>
+          <span class="summary-value">{{ header.BusinessName || '-' }}</span>
+        </div>
+        <div class="summary-field">
+          <span class="summary-label">Requisition Date</span>
+          <span class="summary-value">{{ header.ReqDate | date: 'dd-MMM-yyyy' }}</span>
+        </div>
+        <div class="summary-field">
+          <span class="summary-label">Start Date</span>
+          <span class="summary-value">{{ header.StartDate | date: 'dd-MMM-yyyy' }}</span>
+        </div>
+        <div class="summary-field">
+          <span class="summary-label">End Date</span>
+          <span class="summary-value">{{ header.EndDate | date: 'dd-MMM-yyyy' }}</span>
+        </div>
+        <div class="summary-field">
+          <span class="summary-label">Status</span>
+          <span class="g-status g-status-lg" [ngClass]="getDocStatusClass(header.DocStatusId)">{{ getDocStatusName(header.DocStatusId) }}</span>
+        </div>
+      </div>
+      <div class="summary-remarks">
+        <span class="summary-label">Remarks</span>
+        <div class="g-scrollable-text full" [title]="header.Remarks || ''">{{ header.Remarks || '-' }}</div>
+      </div>
+    </section>
+
+    <section class="requisition-card personnel-section">
+      <h6>Approval Personnel</h6>
+      <div class="personnel-initiator">
+        <span class="summary-label">Initiator</span>
+        <span class="summary-value">{{ initiator()?.InitiatorName || '-' }}</span>
+      </div>
+      <div class="personnel-approvers">
+        <span class="summary-label">Action Takers</span>
+        @if (actionTakers().length === 0) {
+          <span class="summary-value">-</span>
+        } @else {
+          <ul>
+            @for (person of actionTakers(); track person.ApprovalHistoryId) {
+              <li>{{ person.ApproverName || '-' }}</li>
+            }
+          </ul>
+        }
+      </div>
+    </section>
+
+    <section class="requisition-card product-section">
+      <div class="section-heading">
+        <span class="section-icon" aria-hidden="true">
+          <i class="fa-solid fa-list"></i>
+        </span>
+        <div>
+          <h6>Product Requisition</h6>
+          <p>Items included in this requisition</p>
+        </div>
+      </div>
+      <div class="table-responsive product-table-wrapper">
+        <table class="custom-table product-table">
+          <colgroup>
+            <col style="width: 11%" />
+            <col style="width: 21%" />
+            <col style="width: 12%" />
+            <col style="width: 8%" />
+            <col style="width: 12%" />
+            <col style="width: 10%" />
+            <col style="width: 10%" />
+            <col style="width: 16%" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th>Product Type</th>
+              <th>Item</th>
+              <th>UOM</th>
+              <th class="number-column">Quantity</th>
+              <th class="number-column">Remaining Stock Quantity</th>
+              <th class="number-column">Stock Quantity</th>
+              <th class="number-column">Sales Quantity</th>
+              <th>Remarks</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (lines().length === 0) {
+              <tr>
+                <td colspan="8" class="empty-table-message">No active Requisition Lines found.</td>
+              </tr>
+            } @else {
+              @for (line of lines(); track line.ID) {
+                <tr>
+                  <td>{{ line.ProductTypeName || '-' }}</td>
+                  <td class="item-name">{{ line.ItemName || '-' }}</td>
+                  <td>{{ line.UOMName || '-' }}</td>
+                  <td class="number-column">{{ line.Quantity }}</td>
+                  <td class="number-column">
+                    <span [class.negative-quantity]="line.RemainingQuantity !== null && line.RemainingQuantity < 0">
+                      {{
+                        line.RemainingQuantity === null
+                          ? '-'
+                          : line.RemainingQuantity < 0
+                            ? -line.RemainingQuantity
+                            : line.RemainingQuantity
+                      }}
+                    </span>
+                  </td>
+                  <td class="number-column">{{ line.StockQuantity ?? 0 }}</td>
+                  <td class="number-column">{{ line.SalesQuantity ?? 0 }}</td>
+                  <td>
+                    <div class="g-scrollable-text sm" [title]="line.Remarks || ''">{{ line.Remarks || '-' }}</div>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="close()">
+    <i class="fa-solid fa-fw fa-xmark"></i> Close
+  </button>
+</div>

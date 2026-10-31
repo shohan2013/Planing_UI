@@ -5,6 +5,7 @@ export interface IBulkRequisitionItemsRequest {
   ToDate: string;
   SizeID: number;
   SubCategoryID: number;
+  GradeID?: number;
 }
 
 export interface IBulkRequisitionItem {

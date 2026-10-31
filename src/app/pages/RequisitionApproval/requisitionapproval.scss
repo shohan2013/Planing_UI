@@ -1,0 +1,55 @@
+.user-card .card-body {
+  padding: 20px;
+}
+
+.requisition-approval-icon {
+  color: rgb(79, 171, 89);
+  font-size: 17px;
+}
+
+.approval-filter-row,
+.approval-right-filters {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.approval-filter-row {
+  justify-content: space-between;
+}
+
+.approval-status-filter,
+.approval-filter {
+  flex: 0 0 230px;
+}
+
+.approval-right-filters {
+  flex: 1;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.approval-search {
+  flex: 1;
+  max-width: 420px;
+  min-width: 220px;
+}
+
+@media (max-width: 991.98px) {
+  .approval-filter-row,
+  .approval-right-filters {
+    flex-wrap: wrap;
+  }
+
+  .approval-right-filters {
+    flex-basis: 100%;
+  }
+
+  .approval-status-filter,
+  .approval-filter,
+  .approval-search {
+    flex: 1 1 220px;
+    max-width: none;
+    min-width: 0;
+  }
+}

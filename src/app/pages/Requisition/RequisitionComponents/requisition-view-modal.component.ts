@@ -19,6 +19,7 @@ import {
 import { IDropdownBind } from 'src/app/core/model/Common/dropdown-bind';
 import { CommonService } from 'src/app/core/services/Common/CommonService';
 import { RequisitionService } from 'src/app/core/services/Requisition/requisition.service';
+import { getDocumentStatusClass } from 'src/app/core/model/document-status';
 
 type ViewModalState = 'loading' | 'ready' | 'failed';
 
@@ -81,8 +82,7 @@ export class RequisitionViewModalComponent implements OnInit {
   }
 
   getDocStatusClass(docStatusId: number): string {
-    const name = this.getDocStatusName(docStatusId).trim().toLowerCase();
-    return ['pending', 'approve', 'reject', 'complete'].includes(name) ? name : '';
+    return getDocumentStatusClass(docStatusId);
   }
 
   private loadDocumentStatuses(): void {

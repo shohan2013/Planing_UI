@@ -1,4 +1,3 @@
-
 :host {
   display: block;
 }
@@ -41,20 +40,6 @@
   color: #173d30;
 }
 
-
-// .bom-primary-btn {
-//   border: 1px solid rgba(47, 179, 128);
-//   background: rgba(47, 179, 128, 0.9);
-//   color: #173d30;
-//   font-weight: 600;
-
-//   &:hover:not(:disabled) {
-//     border-color: rgba(47, 179, 128, 0.6);
-//     background: rgba(47, 179, 128, 0.6);
-//     color: #173d30;
-//   }
-// }
-
 .bom-primary-btn {
   border-color: rgb(47, 179, 128);
   background: rgb(47, 179, 128);
@@ -77,14 +62,6 @@
   z-index: 1;
 }
 
-@media (max-width: 640px) {
-  .bom-toolbar {
-    align-items: flex-start;
-    flex-direction: column-reverse;
-  }
-}
-
-/* BOM Create/Edit form sections */
 .bom-form-section {
   background: #fff;
   border: 1px solid #e2e8f0;
@@ -140,17 +117,25 @@
 }
 
 .bom-form-btn-add {
-  background: #4a5568;
-  border-color: #4a5568;
-  color: #fff;
+  background: #dcfce7;
+  border-color: #dcfce7;
+  color: #16a34a;
   font-weight: 600;
   border-radius: 8px;
 }
 
-.bom-form-btn-add:hover {
-  background: #2d3748;
-  border-color: #2d3748;
+.bom-form-btn-add:hover:not(:disabled) {
+  background: #16a34a;
+  border-color: #16a34a;
   color: #fff;
+}
+
+
+.bom-lines-scroll .action-btn.btn-edit:disabled {
+  opacity: 0.4;
+  filter: grayscale(1);
+  cursor: not-allowed;
+  transform: none;
 }
 
 .bom-form-btn-submit {
@@ -185,10 +170,6 @@
   color: #fff;
 }
 
-/*
-  ngbTypeahead uses container="body", so Angular places this dropdown
-  outside the component host. ::ng-deep lets this component SCSS reach it.
-*/
 ::ng-deep .bom-item-dropdown {
   z-index: 2000 !important;
   width: min(100vw - 32px, 600px);
@@ -218,4 +199,11 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .bom-toolbar {
+    align-items: flex-start;
+    flex-direction: column-reverse;
+  }
 }
