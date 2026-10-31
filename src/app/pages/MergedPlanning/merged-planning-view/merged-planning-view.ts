@@ -8,13 +8,14 @@ import {
   signal,
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { DateTimePipe } from 'src/app/shared/pipes/date-time-pipe';
 import { MergedPlanningServices } from 'src/app/core/services/MergedPlanning/merged-planning-services';
 import { ProductionSteps } from '../production-steps/production-steps';
 import { ItemPlanningFields } from '../item-planning-fields/item-planning-fields';
+import { DeskStepCard, DeskStepPatch } from '../desk-step-card/desk-step-card';
+import { MachineAvailabilityState } from '../process-step-from/machine-availability';
 import { CommonService } from 'src/app/core/services/Common/CommonService';
 import { IPriority } from 'src/app/core/model/Common/Priority/Priority';
 import {
@@ -27,6 +28,7 @@ import { IMachine } from 'src/app/core/model/Common/Machine/machine';
 import { IRecipe } from 'src/app/core/model/Common/Recipe/Recipe';
 import { ItemPlanningStateService } from 'src/app/core/services/MergedPlanning/item-planning-state-service';
 import { ProcessStepStateService } from 'src/app/core/services/MergedPlanning/process-step-state-service';
+import { DeskMachineJobsService } from 'src/app/core/services/MergedPlanning/desk-machine-jobs-service';
 import {
   IItemPlanningInput,
   IProcessStepInput,
@@ -47,13 +49,13 @@ import { IApiResponse } from 'src/app/core/model/Response/ApiResponse';
     DateTimePipe,
     DecimalPipe,
     DragDropModule,
-    FormsModule,
     ProductionSteps,
     ItemPlanningFields,
+    DeskStepCard,
   ],
   templateUrl: './merged-planning-view.html',
   styleUrl: './merged-planning-view.scss',
-  providers: [ItemPlanningStateService, ProcessStepStateService],
+  providers: [ItemPlanningStateService, ProcessStepStateService, DeskMachineJobsService],
 })
 export class MergedPlanningView implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
@@ -82,6 +84,7 @@ export class MergedPlanningView implements OnInit, OnDestroy {
     private commonService: CommonService,
     private itemPlanningState: ItemPlanningStateService,
     private processStepState: ProcessStepStateService,
+    private deskMachineJobs: DeskMachineJobsService,
     private toastr: ToastrService,
   ) {}
 
@@ -117,6 +120,7 @@ export class MergedPlanningView implements OnInit, OnDestroy {
           //console.log(data);
           this.header.set(data.Header);
           this.lines.set(data.Lines);
+          this.deskMachineJobs.setLines(data.Lines);
           this.loadProductionSteps();
           this.loadRecipe();
           this.isLoading.set(false);
@@ -267,6 +271,18 @@ export class MergedPlanningView implements OnInit, OnDestroy {
   }
 
   onSaveAll(): void {
+    const steps = this.processStepState.processSteps();
+    if (steps.some((step) => this.isDeskStepBusy(step))) {
+      this.toastr.error(
+        'A machine is busy in a planned slot. Change its time or machine before saving.',
+      );
+      return;
+    }
+    if (steps.some((step) => this.deskStepAvailability()[this.deskStepKey(step)] === 'checking')) {
+      this.toastr.info('Still checking machine availability. Please try again in a moment.');
+      return;
+    }
+
     const header = this.buildProductionPlanHeaderToSave();
     const lines = this.buildProductionPlanLinesToSave();
 
@@ -357,15 +373,29 @@ export class MergedPlanningView implements OnInit, OnDestroy {
     this.processStepState.removeProcessStep(lineId, stepId);
   }
 
-  updateDeskStepField(
+  updateDeskStep(step: IProcessStepInput, patch: DeskStepPatch): void {
+    this.processStepState.updateProcessStep({ ...step, ...patch });
+  }
+
+  /** Machine availability reported by each desk card, keyed by deskStepKey. */
+  deskStepAvailability = signal<Record<string, MachineAvailabilityState>>({});
+
+  private deskStepKey(step: IProcessStepInput): string {
+    return `${step.lineId}|${step.stepId}`;
+  }
+
+  onDeskStepAvailability(
     step: IProcessStepInput,
-    field: 'startDate' | 'endDate' | 'machineId',
-    value: string | number,
+    state: MachineAvailabilityState,
   ): void {
-    this.processStepState.updateProcessStep({
-      ...step,
-      [field]: field === 'machineId' ? Number(value) : value,
-    });
+    this.deskStepAvailability.update((map) => ({
+      ...map,
+      [this.deskStepKey(step)]: state,
+    }));
+  }
+
+  isDeskStepBusy(step: IProcessStepInput): boolean {
+    return this.deskStepAvailability()[this.deskStepKey(step)] === 'busy';
   }
 
   isDeskStepDateRangeInvalid(step: IProcessStepInput): boolean {
@@ -394,33 +424,5 @@ export class MergedPlanningView implements OnInit, OnDestroy {
       this.machinesForStep(stepId).find((m) => m.Id === machineId)?.Name ??
       `#${machineId}`
     );
-  }
-
-  getAllocatedTimeBreakdown(step: IProcessStepInput): {
-    days: number;
-    hours: number;
-    minutes: number;
-    seconds: number;
-  } | null {
-    if (!step.startDate || !step.endDate) return null;
-
-    const start = new Date(step.startDate);
-    const end = new Date(step.endDate);
-
-    let totalSeconds = Math.floor((end.getTime() - start.getTime()) / 1000);
-    if (totalSeconds < 0) return null;
-
-    const days = Math.floor(totalSeconds / 86400);
-    totalSeconds -= days * 86400;
-
-    const hours = Math.floor(totalSeconds / 3600);
-    totalSeconds -= hours * 3600;
-
-    const minutes = Math.floor(totalSeconds / 60);
-    totalSeconds -= minutes * 60;
-
-    const seconds = totalSeconds;
-
-    return { days, hours, minutes, seconds };
   }
 }

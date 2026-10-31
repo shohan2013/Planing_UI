@@ -82,11 +82,16 @@ export class MachineScheduleDialog {
         finalize(() => this.loading.set(false)),
       )
       .subscribe({
-        // The plan's own job (when editing) is never shown as booked or as a clash.
-        next: (jobs) =>
-          this.jobs.set(ctx.excludeJobId ? jobs.filter((j) => j.JobId !== ctx.excludeJobId) : jobs),
+        // The plan's own job (when editing) is never shown as booked or as a clash; its
+        // other saved jobs are replaced by their desk version.
+        next: (jobs) => {
+          const hidden = new Set(ctx.hiddenJobIds ?? []);
+          if (ctx.excludeJobId) hidden.add(ctx.excludeJobId);
+          this.jobs.set([...jobs.filter((j) => !hidden.has(j.JobId)), ...(ctx.deskJobs ?? [])]);
+        },
         error: () => {
-          this.jobs.set([]);
+          // Unsaved desk jobs are still known.
+          this.jobs.set(ctx.deskJobs ?? []);
           this.error.set(true);
         },
       });

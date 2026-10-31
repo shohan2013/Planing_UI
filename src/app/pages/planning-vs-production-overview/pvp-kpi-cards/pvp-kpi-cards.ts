@@ -1,5 +1,15 @@
 import { DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, signal, untracked } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
+  untracked,
+} from '@angular/core';
 
 import { IPvpTotals } from 'src/app/core/model/PlanningVsProduction/planning-vs-production.model';
 import { EMPTY_PVP_TOTALS } from 'src/app/core/model/PlanningVsProduction/planning-vs-production.util';
@@ -24,6 +34,12 @@ interface IKpiCard {
 export class PvpKpiCards {
   readonly totals = input<IPvpTotals>(EMPTY_PVP_TOTALS);
   readonly loading = input(false);
+  /** The totals came from a live update: cards whose value changed glow briefly. */
+  readonly live = input(false);
+
+  /** Cards currently glowing after a live change, and in which direction. */
+  readonly bumped = signal<Partial<Record<keyof IPvpTotals, 'up' | 'down'>>>({});
+  private previousTotals: IPvpTotals | null = null;
 
   /** Values shown on screen; tweened toward `totals()` for a count-up effect. */
   readonly display = signal<IPvpTotals>(EMPTY_PVP_TOTALS);
@@ -45,6 +61,25 @@ export class PvpKpiCards {
   constructor() {
     inject(DestroyRef).onDestroy(() => cancelAnimationFrame(this.frame));
     effect(() => this.animateTo(this.totals()));
+
+    effect(() => {
+      const next = this.totals();
+      untracked(() => {
+        const prev = this.previousTotals;
+        this.previousTotals = next;
+        if (!prev || !this.live()) return;
+        const bumped: Partial<Record<keyof IPvpTotals, 'up' | 'down'>> = {};
+        (Object.keys(next) as (keyof IPvpTotals)[]).forEach((k) => {
+          if (next[k] !== prev[k]) bumped[k] = next[k] > prev[k] ? 'up' : 'down';
+        });
+        if (Object.keys(bumped).length) this.bumped.set(bumped);
+      });
+    });
+  }
+
+  onBumpEnd(key: keyof IPvpTotals, event: AnimationEvent): void {
+    if (!event.animationName.startsWith('pvp-kpi-bump')) return;
+    this.bumped.update(({ [key]: _, ...rest }) => rest);
   }
 
   private animateTo(target: IPvpTotals): void {

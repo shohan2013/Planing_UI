@@ -55,6 +55,70 @@ $pvp-line: #eef2f7;
   font-weight: 600;
 }
 
+/* Live badge: SignalR connection state */
+.pvp-live {
+  --live: #94a3b8;
+  --live-soft: #f1f5f9;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: 0.35rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background: var(--live-soft);
+  color: var(--live);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: default;
+
+  &__dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--live);
+  }
+
+  &--live {
+    --live: #16a34a;
+    --live-soft: #dcfce7;
+
+    .pvp-live__dot {
+      animation: pvp-live-pulse 1.8s ease-out infinite;
+    }
+  }
+
+  &--connecting,
+  &--reconnecting {
+    --live: #d97706;
+    --live-soft: #fef3c7;
+
+    .pvp-live__dot {
+      animation: pvp-live-blink 1s ease-in-out infinite;
+    }
+  }
+
+  &--offline {
+    --live: #64748b;
+    --live-soft: #f1f5f9;
+  }
+}
+
+@keyframes pvp-live-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.55);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 6px rgba(22, 163, 74, 0);
+  }
+}
+
+@keyframes pvp-live-blink {
+  50% {
+    opacity: 0.3;
+  }
+}
+
 .pvp-search {
   position: relative;
   width: 230px;
@@ -558,5 +622,64 @@ th.pvp-num .pvp-th {
   }
   to {
     opacity: 1;
+  }
+}
+
+/* ---------- Live update flash (PvpFlash directive) ---------- */
+// Nested under .pvp-table to beat `.pvp-row > td { background: inherit }`.
+.pvp-table td.pvp-flash {
+  &--up {
+    animation: pvp-flash-up 1.6s ease-out;
+
+    &.pvp-num {
+      color: #15803d;
+    }
+  }
+
+  &--down {
+    animation: pvp-flash-down 1.6s ease-out;
+
+    &.pvp-num {
+      color: #b91c1c;
+    }
+  }
+}
+
+@keyframes pvp-flash-up {
+  0% {
+    background-color: rgba(34, 197, 94, 0.32);
+    box-shadow: inset 3px 0 0 #22c55e;
+  }
+  60% {
+    background-color: rgba(34, 197, 94, 0.12);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: inset 3px 0 0 transparent;
+  }
+}
+
+@keyframes pvp-flash-down {
+  0% {
+    background-color: rgba(239, 68, 68, 0.28);
+    box-shadow: inset 3px 0 0 #ef4444;
+  }
+  60% {
+    background-color: rgba(239, 68, 68, 0.1);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: inset 3px 0 0 transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pvp-table td.pvp-flash--up,
+  .pvp-table td.pvp-flash--down {
+    animation-duration: 0.01ms;
+  }
+
+  .pvp-live__dot {
+    animation: none !important;
   }
 }

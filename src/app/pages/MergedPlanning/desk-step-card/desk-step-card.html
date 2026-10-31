@@ -1,0 +1,111 @@
+<div class="desk-card-body">
+  <div class="desk-card-field">
+    <label>Start Date &amp; Time</label>
+    <input
+      #startDateInput
+      type="datetime-local"
+      class="form-control form-control-sm"
+      [class.is-invalid]="isDateRangeInvalid"
+      [ngModel]="step.startDate"
+      (ngModelChange)="setStartDate($event)"
+      name="deskStartDate-{{ step.stepId }}"
+    />
+  </div>
+
+  <div class="desk-card-field">
+    <label>End Date &amp; Time</label>
+    <input
+      type="datetime-local"
+      class="form-control form-control-sm"
+      [class.is-invalid]="isDateRangeInvalid"
+      [ngModel]="step.endDate"
+      (ngModelChange)="setEndDate($event)"
+      name="deskEndDate-{{ step.stepId }}"
+      [min]="step.startDate || null"
+    />
+    @if (isDateRangeInvalid) {
+    <div class="desk-card-error">End date cannot be before start date.</div>
+    }
+  </div>
+
+  <div class="desk-card-field">
+    <div class="label-row">
+      <label>Machine No</label>
+      <button
+        type="button"
+        class="btn btn-link p-0 schedule-link"
+        [disabled]="!step.machineId"
+        [title]="step.machineId ? 'View ' + machineName + ' schedule' : 'Select a machine first'"
+        (click)="openScheduleDialog()"
+      >
+        <i class="fa-regular fa-calendar-days"></i>
+        Schedule
+      </button>
+    </div>
+    <select
+      #machineSelect
+      class="form-select form-select-sm"
+      [class.is-invalid]="isMachineBusy"
+      [ngModel]="step.machineId"
+      (ngModelChange)="setMachine($event)"
+      name="deskMachine-{{ step.stepId }}"
+    >
+      <option [ngValue]="0">Select machine</option>
+
+      @for (machine of machineOptions; track machine.Id) {
+      <option [ngValue]="machine.Id">{{ machine.Name }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="desk-card-field">
+    <label>Allocated Time</label>
+    @if (allocatedTimeBreakdown; as t) {
+    <div class="desk-card-time">
+      <span><b>{{ t.days }}</b>d</span>
+      <span><b>{{ t.hours }}</b>h</span>
+      <span><b>{{ t.minutes }}</b>m</span>
+      <span><b>{{ t.seconds }}</b>s</span>
+    </div>
+    } @else {
+    <div class="desk-card-time empty">—</div>
+    }
+  </div>
+
+  @if (needsDatesForMachine) {
+  <div class="availability-status muted">
+    <i class="fa-regular fa-calendar"></i>
+    Set start &amp; end date/time to check availability.
+  </div>
+  } @else {
+    @switch (availability()) {
+      @case ('checking') {
+      <div class="availability-status checking">
+        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+        Checking availability...
+      </div>
+      }
+      @case ('free') {
+      <div class="availability-status free">
+        <i class="fa-solid fa-circle-check"></i>
+        Available in this slot
+      </div>
+      }
+      @case ('busy') {
+      <div class="availability-status busy">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        Busy: {{ busyJobs().length }} {{ busyJobs().length === 1 ? 'job' : 'jobs' }} in this slot
+        <button type="button" class="btn btn-link p-0 availability-link" (click)="openBusyDialog()">
+          View
+        </button>
+      </div>
+      }
+      @case ('error') {
+      <div class="availability-status muted">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        Couldn't check availability.
+      </div>
+      }
+    }
+  }
+</div>

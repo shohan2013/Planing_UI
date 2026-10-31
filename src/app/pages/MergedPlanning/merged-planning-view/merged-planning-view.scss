@@ -403,6 +403,11 @@
   background: #8a94a6;
 }
 
+/* Machine is busy in the planned slot (checked by DeskStepCard) — not saveable. */
+.desk-card-header.desk-card-header-busy {
+  background: #e8590c;
+}
+
 .drag-handle {
   flex: 0 0 auto;
   font-size: 10px;
@@ -430,58 +435,6 @@
 .desk-card-remove:hover {
   color: #f8d7da;
   opacity: 1;
-}
-
-.desk-card-body {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px 8px;
-  padding: 8px;
-}
-
-.desk-card-field {
-  min-width: 0;
-}
-
-.desk-card-field label {
-  display: block;
-  margin-bottom: 3px;
-  color: #6c757d;
-  font-size: 10px;
-  font-weight: 600;
-}
-
-.desk-card-field .form-control,
-.desk-card-field .form-select {
-  min-width: 0;
-  font-size: 11px;
-}
-
-.desk-card-error {
-  margin-top: 3px;
-  color: #dc3545;
-  font-size: 9.5px;
-}
-
-.desk-card-time {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 25px;
-  padding: 0 8px;
-  border-radius: 4px;
-  background: #f1f3f5;
-  color: #155724;
-  font-size: 11px;
-  white-space: nowrap;
-}
-
-.desk-card-time.empty {
-  color: #8a94a6;
-}
-
-.desk-card-time b {
-  font-weight: 700;
 }
 
 .cdk-drag-animating {

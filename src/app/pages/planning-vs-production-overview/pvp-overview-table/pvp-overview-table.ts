@@ -32,6 +32,9 @@ import {
 import { buildPvpTree, deriveStatus } from 'src/app/core/model/PlanningVsProduction/planning-vs-production.util';
 import { ServerQueryRequest } from 'src/app/core/model/Common/Pagination/ServerQueryRequest';
 import { PaginationComponent } from 'src/app/shared/pagination/pagination.component';
+import { PvpLiveStatus } from 'src/app/core/services/PlanningVsProduction/planning-vs-production-live.service';
+import { PvpCount } from '../pvp-live/pvp-count';
+import { PvpFlash } from '../pvp-live/pvp-flash.directive';
 import { PvpProgressBar } from '../pvp-progress-bar/pvp-progress-bar';
 
 /** Copy of a set without one value (signals need a new instance to notice the change). */
@@ -52,6 +55,20 @@ interface IFlatRow {
   expanded: boolean;
 }
 
+const LIVE_LABELS: Record<PvpLiveStatus, string> = {
+  connecting: 'Connecting…',
+  live: 'Live',
+  reconnecting: 'Reconnecting…',
+  offline: 'Offline',
+};
+
+const LIVE_TITLES: Record<PvpLiveStatus, string> = {
+  connecting: 'Connecting to live updates…',
+  live: 'Live: planning and production changes appear here automatically',
+  reconnecting: 'Connection lost, reconnecting. The table refreshes once it is back.',
+  offline: 'Live updates unavailable, retrying. Use Apply to reload the data.',
+};
+
 /** Wait this long after the last keystroke before searching on the server. */
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -71,7 +88,19 @@ const DEFAULT_COLUMNS: IPvpColumn[] = [
 @Component({
   selector: 'app-pvp-overview-table',
   standalone: true,
-  imports: [CdkDropList, CdkDrag, CdkDragHandle, CdkScrollable, DatePipe, DecimalPipe, FormsModule, PaginationComponent, PvpProgressBar],
+  imports: [
+    CdkDropList,
+    CdkDrag,
+    CdkDragHandle,
+    CdkScrollable,
+    DatePipe,
+    DecimalPipe,
+    FormsModule,
+    PaginationComponent,
+    PvpCount,
+    PvpFlash,
+    PvpProgressBar,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './pvp-overview-table.html',
   styleUrl: './pvp-overview-table.scss',
@@ -88,6 +117,20 @@ export class PvpOverviewTable {
   readonly fetchAllRows = input<(() => Observable<IPvpItemRow[]>) | null>(null);
   /** Loads the item rows of one delivery order, called the first time it is expanded. */
   readonly fetchOrderItems = input<((deliveryOrderId: number) => Observable<IPvpItemRow[]>) | null>(null);
+  /**
+   * Bumped by the parent on every real reload (Apply / Reset / Refresh / page / search / sort):
+   * clears loaded items and collapses all orders. Live updates change `rows` without bumping it,
+   * so expanded orders stay open.
+   */
+  readonly resetKey = input(0);
+  /** SignalR connection state, shown as the Live badge in the toolbar. */
+  readonly liveStatus = input<PvpLiveStatus>('offline');
+
+  /** True after a live update until the next real reload: changed cells flash and count up. */
+  readonly liveFlash = signal(false);
+
+  readonly liveLabel = computed(() => LIVE_LABELS[this.liveStatus()]);
+  readonly liveTitle = computed(() => LIVE_TITLES[this.liveStatus()]);
 
   /** Page, page size, search or sort changed: the parent re-queries the API. */
   readonly pageQueryChange = output<Partial<ServerQueryRequest>>();
@@ -102,7 +145,7 @@ export class PvpOverviewTable {
   readonly visibleColumns = computed(() => this.columns().filter((c) => c.Visible));
   readonly visibleKeys = computed(() => new Set(this.visibleColumns().map((c) => c.Key)));
 
-  /** Items loaded so far, per DeliveryOrderId; cleared whenever a new page of orders arrives. */
+  /** Items loaded so far, per DeliveryOrderId; cleared on every real reload (see resetKey). */
   readonly itemsByOrder = signal<ReadonlyMap<number, IPvpItemRow[]>>(new Map());
   readonly itemsLoading = signal<ReadonlySet<number>>(new Set());
   readonly itemsFailed = signal<ReadonlySet<number>>(new Set());
@@ -187,11 +230,13 @@ export class PvpOverviewTable {
         if (term !== (this.pageQuery().globalSearch ?? '')) this.pageQueryChange.emit({ globalSearch: term });
       });
 
-    // New page from the API: drop the old items and start with every order collapsed;
-    // items are fetched only when the user expands an order (or uses Expand All).
+    // Real reload from the parent: drop the old items and start with every order collapsed;
+    // items are fetched only when the user expands an order (or uses Expand All). Values that
+    // differ from the previous page are not "changes", so the live flash is switched off.
     effect(() => {
-      this.rows();
+      this.resetKey();
       untracked(() => {
+        this.liveFlash.set(false);
         this.clearItems();
         this.expanded.set(new Set());
       });
@@ -236,6 +281,51 @@ export class PvpOverviewTable {
     this.itemsByOrder.set(new Map());
     this.itemsLoading.set(new Set());
     this.itemsFailed.set(new Set());
+  }
+
+  /**
+   * Live update: the parent has just set fresh `rows` for the same page. Turns the change
+   * animation on and quietly re-fetches the items of every expanded order on this page (old
+   * items stay visible until the new ones arrive). Items of collapsed orders, or of orders no
+   * longer on the page, are dropped and load again on the next expand.
+   */
+  applyLiveUpdate(rows: IPvpOrderRow[]): void {
+    this.liveFlash.set(true);
+    const open = this.expanded();
+    const keep = new Set(rows.map((r) => r.DeliveryOrderId).filter((id) => open.has(`o-${id}`)));
+
+    this.itemSubs.forEach((sub, id) => {
+      if (!keep.has(id)) sub.unsubscribe();
+    });
+    this.itemsByOrder.update((m) => new Map([...m].filter(([id]) => keep.has(id))));
+    this.itemsFailed.update((s) => new Set([...s].filter((id) => keep.has(id))));
+
+    keep.forEach((id) => this.reloadItems(id));
+  }
+
+  /** Re-fetches one order's items in place, without the "Loading items…" row. */
+  private reloadItems(orderId: number): void {
+    // Not loaded yet (or failed / still loading): the normal load shows its own status row.
+    if (!this.itemsByOrder().has(orderId) || this.itemsLoading().has(orderId)) {
+      this.loadItems(orderId);
+      return;
+    }
+    const fetch = this.fetchOrderItems();
+    if (!fetch) return;
+
+    this.itemSubs.get(orderId)?.unsubscribe();
+    const sub: Subscription = fetch(orderId)
+      .pipe(
+        finalize(() => {
+          if (this.itemSubs.get(orderId) === sub) this.itemSubs.delete(orderId);
+        }),
+      )
+      .subscribe({
+        next: (items) => this.itemsByOrder.update((m) => new Map(m).set(orderId, items)),
+        // Keep showing the previous items; the next live update tries again.
+        error: () => undefined,
+      });
+    this.itemSubs.set(orderId, sub);
   }
 
   /** "Retry" on an order whose items failed to load. */

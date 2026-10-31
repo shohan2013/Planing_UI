@@ -19,7 +19,7 @@
     (reset)="onReset()"
   />
 
-  <app-pvp-kpi-cards [totals]="totals()" [loading]="totalsLoading()" />
+  <app-pvp-kpi-cards [totals]="totals()" [loading]="totalsLoading()" [live]="totalsLive()" />
   <app-pvp-overview-table
     [rows]="rows()"
     [loading]="loading()"
@@ -27,6 +27,8 @@
     [pageQuery]="pageQuery()"
     [fetchAllRows]="fetchAllRows"
     [fetchOrderItems]="fetchOrderItems"
+    [resetKey]="resetKey()"
+    [liveStatus]="liveStatus()"
     (pageQueryChange)="onPageQueryChange($event)"
   />
 </div>

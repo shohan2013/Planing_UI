@@ -1,6 +1,13 @@
 <div class="pvp-kpis">
   @for (card of cards(); track card.key; let i = $index) {
-    <div class="pvp-kpi" [class]="'pvp-kpi pvp-kpi--' + card.tone" [style.animation-delay.ms]="i * 60">
+    <div
+      class="pvp-kpi"
+      [class]="'pvp-kpi pvp-kpi--' + card.tone"
+      [class.pvp-kpi--bump-up]="bumped()[card.key] === 'up'"
+      [class.pvp-kpi--bump-down]="bumped()[card.key] === 'down'"
+      [style.animation-delay.ms]="bumped()[card.key] ? 0 : i * 60"
+      (animationend)="onBumpEnd(card.key, $event)"
+    >
       <div class="pvp-kpi__icon">
         <i class="fas" [class]="'fas ' + card.icon"></i>
       </div>

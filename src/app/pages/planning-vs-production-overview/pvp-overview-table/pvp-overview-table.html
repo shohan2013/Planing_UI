@@ -5,6 +5,10 @@
       Showing
       <strong>{{ pageOrderCount() | number }}</strong> Delivery Orders
       <span class="pvp-chip">{{ totalOrders() | number }} Total Orders</span>
+      <span class="pvp-live" [class]="'pvp-live pvp-live--' + liveStatus()" [title]="liveTitle()">
+        <span class="pvp-live__dot"></span>
+        {{ liveLabel() }}
+      </span>
     </div>
 
     <div class="pvp-toolbar__actions">
@@ -169,26 +173,46 @@
                   @case ('OrderDate') {
                     <td class="pvp-date">{{ row.node.OrderDate ? (row.node.OrderDate | date: 'dd MMM yyyy') : '' }}</td>
                   }
+                  <!-- Live updates: [pvpFlash] flashes the cell green/red, app-pvp-count counts to the new value. -->
                   @case ('OrderQty') {
-                    <td class="pvp-num">{{ row.node.OrderQty | number }}</td>
+                    <td class="pvp-num" [pvpFlash]="row.node.OrderQty" [pvpFlashLive]="liveFlash()">
+                      <app-pvp-count [value]="row.node.OrderQty" [animate]="liveFlash()" />
+                    </td>
                   }
                   @case ('PlannedQty') {
-                    <td class="pvp-num">{{ row.node.PlannedQty | number }}</td>
+                    <td class="pvp-num" [pvpFlash]="row.node.PlannedQty" [pvpFlashLive]="liveFlash()">
+                      <app-pvp-count [value]="row.node.PlannedQty" [animate]="liveFlash()" />
+                    </td>
                   }
                   @case ('ProducedQty') {
-                    <td class="pvp-num">{{ row.node.ProducedQty | number }}</td>
+                    <td class="pvp-num" [pvpFlash]="row.node.ProducedQty" [pvpFlashLive]="liveFlash()">
+                      <app-pvp-count [value]="row.node.ProducedQty" [animate]="liveFlash()" />
+                    </td>
                   }
                   @case ('PendingProduction') {
-                    <td class="pvp-num">{{ row.node.PendingProduction | number }}</td>
+                    <td class="pvp-num" [pvpFlash]="row.node.PendingProduction" [pvpFlashLive]="liveFlash()">
+                      <app-pvp-count [value]="row.node.PendingProduction" [animate]="liveFlash()" />
+                    </td>
                   }
                   @case ('RemainToPlan') {
-                    <td class="pvp-num" [class.pvp-zero]="row.node.RemainToPlan === 0">{{ row.node.RemainToPlan | number }}</td>
+                    <td
+                      class="pvp-num"
+                      [class.pvp-zero]="row.node.RemainToPlan === 0"
+                      [pvpFlash]="row.node.RemainToPlan"
+                      [pvpFlashLive]="liveFlash()"
+                    >
+                      <app-pvp-count [value]="row.node.RemainToPlan" [animate]="liveFlash()" />
+                    </td>
                   }
                   @case ('PlanningProgress') {
-                    <td><app-pvp-progress-bar [value]="row.node.PlanningPercent" variant="planning" /></td>
+                    <td [pvpFlash]="row.node.PlanningPercent" [pvpFlashLive]="liveFlash()">
+                      <app-pvp-progress-bar [value]="row.node.PlanningPercent" variant="planning" [animate]="liveFlash()" />
+                    </td>
                   }
                   @case ('ProductionProgress') {
-                    <td><app-pvp-progress-bar [value]="row.node.ProductionPercent" variant="production" /></td>
+                    <td [pvpFlash]="row.node.ProductionPercent" [pvpFlashLive]="liveFlash()">
+                      <app-pvp-progress-bar [value]="row.node.ProductionPercent" variant="production" [animate]="liveFlash()" />
+                    </td>
                   }
                   @case ('Status') {
                     <td>

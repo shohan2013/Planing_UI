@@ -112,5 +112,9 @@ export const GlobalConstant = {
     MachineSchedule: 'MergedPlanning/GetMachineSchedule',
   },
 
+  /** SignalR hubs, relative to the API host (not under /api/). */
+  HUBS: {
+    PlanningVsProductionOverviewLive: 'hubs/planningVsProduction-overview-live',
+  },
   URL: { API_URL: 'https://localhost:7111/api/' },
 };

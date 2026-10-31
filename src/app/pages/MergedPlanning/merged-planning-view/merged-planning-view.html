@@ -118,7 +118,7 @@
             <div>
               <div class="mpv-product-name">{{ line.ProductName }}</div>
               <div class="mpv-product-meta">
-                &nbsp;•&nbsp; UOM : {{ line.UOM }} &nbsp;•&nbsp; Rate: {{
+                Product ID: {{ line.ProductId }} &nbsp;•&nbsp; UOM : {{ line.UOM }} &nbsp;•&nbsp; Rate: {{
                 line.Rate | number: '1.2-2' }}
               </div>
             </div>
@@ -211,6 +211,7 @@
                   <div
                     class="desk-card-header"
                     [class.desk-card-header-incomplete]="!isDeskStepValid(step)"
+                    [class.desk-card-header-busy]="isDeskStepBusy(step)"
                     cdkDragHandle
                   >
                     <i class="fa-solid fa-grip-vertical drag-handle"></i>
@@ -227,74 +228,12 @@
                     </button>
                   </div>
 
-                  <div class="desk-card-body">
-                    <div class="desk-card-field">
-                      <label>Start Date &amp; Time</label>
-                      <input
-                        type="datetime-local"
-                        class="form-control form-control-sm"
-                        [class.is-invalid]="isDeskStepDateRangeInvalid(step)"
-                        [ngModel]="step.startDate"
-                        (ngModelChange)="
-                          updateDeskStepField(step, 'startDate', $event)
-                        "
-                        name="deskStartDate-{{ step.stepId }}"
-                      />
-                    </div>
-
-                    <div class="desk-card-field">
-                      <label>End Date &amp; Time</label>
-                      <input
-                        type="datetime-local"
-                        class="form-control form-control-sm"
-                        [class.is-invalid]="isDeskStepDateRangeInvalid(step)"
-                        [ngModel]="step.endDate"
-                        (ngModelChange)="
-                          updateDeskStepField(step, 'endDate', $event)
-                        "
-                        name="deskEndDate-{{ step.stepId }}"
-                      />
-                      @if (isDeskStepDateRangeInvalid(step)) {
-                      <div class="desk-card-error">
-                        End date cannot be before start date.
-                      </div>
-                      }
-                    </div>
-
-                    <div class="desk-card-field">
-                      <label>Machine No</label>
-                      <select
-                        class="form-select form-select-sm"
-                        [ngModel]="step.machineId"
-                        (ngModelChange)="
-                          updateDeskStepField(step, 'machineId', $event)
-                        "
-                        name="deskMachine-{{ step.stepId }}"
-                      >
-                        <option [ngValue]="0">Select machine</option>
-
-                        @for (machine of machinesForStep(step.stepId); track machine.Id) {
-                        <option [ngValue]="machine.Id">
-                          {{ machine.Name }}
-                        </option>
-                        }
-                      </select>
-                    </div>
-
-                    <div class="desk-card-field">
-                      <label>Allocated Time</label>
-                      @if (getAllocatedTimeBreakdown(step); as t) {
-                      <div class="desk-card-time">
-                        <span><b>{{ t.days }}</b>d</span>
-                        <span><b>{{ t.hours }}</b>h</span>
-                        <span><b>{{ t.minutes }}</b>m</span>
-                        <span><b>{{ t.seconds }}</b>s</span>
-                      </div>
-                      } @else {
-                      <div class="desk-card-time empty">—</div>
-                      }
-                    </div>
-                  </div>
+                  <app-desk-step-card
+                    [step]="step"
+                    [machineOptions]="machinesForStep(step.stepId)"
+                    (stepChange)="updateDeskStep(step, $event)"
+                    (availabilityChange)="onDeskStepAvailability(step, $event)"
+                  ></app-desk-step-card>
                 </div>
                 }
               </div>
