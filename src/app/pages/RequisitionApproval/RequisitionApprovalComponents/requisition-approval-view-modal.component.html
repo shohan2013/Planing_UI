@@ -53,26 +53,6 @@
       </div>
     </section>
 
-    <section class="requisition-card personnel-section">
-      <h6>Approval Personnel</h6>
-      <div class="personnel-initiator">
-        <span class="summary-label">Initiator</span>
-        <span class="summary-value">{{ initiator()?.InitiatorName || '-' }}</span>
-      </div>
-      <div class="personnel-approvers">
-        <span class="summary-label">Action Takers</span>
-        @if (actionTakers().length === 0) {
-          <span class="summary-value">-</span>
-        } @else {
-          <ul>
-            @for (person of actionTakers(); track person.ApprovalHistoryId) {
-              <li>{{ person.ApproverName || '-' }}</li>
-            }
-          </ul>
-        }
-      </div>
-    </section>
-
     <section class="requisition-card product-section">
       <div class="section-heading">
         <span class="section-icon" aria-hidden="true">
@@ -135,6 +115,72 @@
                   <td>
                     <div class="g-scrollable-text sm" [title]="line.Remarks || ''">{{ line.Remarks || '-' }}</div>
                   </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="requisition-card personnel-section personnel-wide">
+      <h6>Initiator</h6>
+      <div class="summary-grid">
+        <div class="summary-field">
+          <span class="summary-label">Name</span>
+          <span class="summary-value">{{ initiator()?.InitiatorName || header.InitiatorName || '-' }}</span>
+        </div>
+        <div class="summary-field">
+          <span class="summary-label">Enroll</span>
+          <span class="summary-value">{{ initiator()?.InitiatorId ?? header.InitiatorId }}</span>
+        </div>
+        <div class="summary-field">
+          <span class="summary-label">Updated By</span>
+          <span class="summary-value">{{ header.UpdatedByName || header.UPDATEDBY || '-' }}</span>
+        </div>
+        <div class="summary-field">
+          <span class="summary-label">Updated Date</span>
+          <span class="summary-value">{{ header.UPDATEDDATE ? (header.UPDATEDDATE | date: 'dd-MMM-yyyy, hh:mm a') : '-' }}</span>
+        </div>
+      </div>
+
+      <h6 class="mt-3">Action Taken By — Current Level</h6>
+      <div class="summary-grid">
+        <div class="summary-field">
+          <span class="summary-label">Name</span>
+          <span class="summary-value">{{ header.ActionTakenByName || '-' }}</span>
+        </div>
+        <div class="summary-field">
+          <span class="summary-label">Enroll</span>
+          <span class="summary-value">{{ header.ActionTakenById ?? '-' }}</span>
+        </div>
+      </div>
+      <div class="summary-remarks">
+        <span class="summary-label">Details</span>
+        <div class="g-scrollable-text full" [title]="currentLevelAssignment()?.Descriptions || ''">{{ currentLevelAssignment()?.Descriptions || '-' }}</div>
+      </div>
+
+      <h6 class="mt-3">Approval Personnel</h6>
+      <div class="table-responsive">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Enroll</th>
+              <th>Level</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (actionTakers().length === 0) {
+              <tr>
+                <td colspan="3" class="text-center">No approval personnel found.</td>
+              </tr>
+            } @else {
+              @for (person of actionTakers(); track person.ApprovalHistoryId) {
+                <tr>
+                  <td>{{ person.ApproverName || '-' }}</td>
+                  <td>{{ person.ApproverId }}</td>
+                  <td>{{ person.ApprovalSequence ?? '-' }}</td>
                 </tr>
               }
             }

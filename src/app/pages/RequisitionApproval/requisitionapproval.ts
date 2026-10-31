@@ -34,6 +34,7 @@ export class RequisitionApproval extends ServerSideFilteredPaginatedComponent<IR
   readonly businesses = signal<IBusiness[]>([]);
   readonly documentStatuses = signal<IDropdownBind[]>([]);
   readonly businessesLoading = signal(false);
+  readonly actionInProgress = signal(false);
   private viewModalRef: NgbModalRef | null = null;
   private readonly destroy$ = new Subject<void>();
   private readonly cancelBusinesses$ = new Subject<void>();
@@ -48,12 +49,13 @@ export class RequisitionApproval extends ServerSideFilteredPaginatedComponent<IR
   }
 
   get approvalStatuses(): IDropdownBind[] {
-    return this.documentStatuses().filter(status => Number(status.Id) === 2 || Number(status.Id) === 4);
+        return this.documentStatuses().filter(status => [2, 4, 5].includes(Number(status.Id)));
   }
 
   get selectedStatusCode(): string {
     if (this.selectedStatusId === 2) return 'PEND';
     if (this.selectedStatusId === 4) return 'APPR';
+    if (this.selectedStatusId === 5) return 'REJC';
     return '';
   }
 
@@ -110,6 +112,58 @@ export class RequisitionApproval extends ServerSideFilteredPaginatedComponent<IR
       this.viewModalRef = null;
       this.toastr.error('Unable to open the requisition details.');
     }
+  }
+
+
+
+    approveRequisition(header: IRequisitionApprovalHeader): void {
+    this.submitApprovalAction(header, false);
+  }
+
+  rejectRequisition(header: IRequisitionApprovalHeader): void {
+    this.submitApprovalAction(header, true);
+  }
+
+  private submitApprovalAction(header: IRequisitionApprovalHeader, reject: boolean): void {
+    if (this.actionInProgress() || header.ApprovalStatusCode !== 'PEND') return;
+
+    const enroll = Number(localStorage.getItem('Enroll'));
+    if (!Number.isInteger(enroll) || enroll <= 0) {
+      this.toastr.error('Unable to identify the current user.');
+      return;
+    }
+
+    this.actionInProgress.set(true);
+
+    const request$ = reject
+      ? this.approvalService.RejectProcess(header.ApprovalHistoryId, enroll)
+      : this.approvalService.AcceptProcess(header.ApprovalHistoryId, enroll);
+
+    request$
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.actionInProgress.set(false)),
+      )
+      .subscribe({
+        next: response => {
+          if (!response.Status) {
+            this.toastr.error(response.Message || 'Unable to process this requisition.');
+            return;
+          }
+
+          this.toastr.success(response.Message || (reject ? 'Rejected successfully.' : 'Approved successfully.'));
+          this.currentPage.set(1);
+          this.retry();
+        },
+        error: error => {
+          const message = error.error?.detail
+            || error.error?.Detail
+            || error.error?.Message
+            || error.error?.message
+            || 'Unable to process this requisition.';
+          this.toastr.error(message);
+        },
+      });
   }
 
   private loadUnits(): void {

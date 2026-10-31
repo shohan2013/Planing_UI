@@ -27,6 +27,7 @@ export class RequisitionApprovalViewModalComponent implements OnInit {
   readonly approvers = signal<IProcessApprover[]>([]);
   readonly initiator = computed(() => this.approvers().find(person => person.ApproverId === 0));
   readonly actionTakers = computed(() => this.approvers().filter(person => person.ApproverId !== 0));
+    readonly currentLevelAssignment = computed(() => this.approvers().find(person => person.ApprovalHistoryId === this.header.ApprovalHistoryId));
   readonly documentStatuses = signal<IDropdownBind[]>([]);
   errorMessage = '';
   private readonly destroyRef = inject(DestroyRef);

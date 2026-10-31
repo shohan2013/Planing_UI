@@ -6,6 +6,8 @@ import { ServerQueryRequest, ServerQueryResponse, } from '../../model/Common/Pag
 
 import { environment } from 'src/environments/environment';
 import { IRequisitionApprovalDetails, IRequisitionApprovalHeader } from '../../model/RequisitionApproval/requisition-approval.model';
+import { IApiResponse } from '../../model/Response/ApiResponse';
+
 
 @Injectable({
   providedIn: 'root',
@@ -35,4 +37,37 @@ export class RequisitionApprovalService {constructor(private http: HttpClient) {
 
     return this.http.post<IRequisitionApprovalDetails>(`${environment.API_URL}${GlobalConstant.API_END_POINTS.RequisitionApprovalDetails}`, params,);
   }
+
+
+
+    AcceptProcess(historyId: number, enroll: number, remarks: string | null = null): Observable<IApiResponse> {
+    const params = {
+      processCode: 'RQL',
+      historyId,
+      enroll,
+      remarks,
+    };
+
+    return this.http.post<IApiResponse>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.AcceptProcess}`, params,
+    );
+  }
+
+  RejectProcess(historyId: number, enroll: number, remarks: string | null = null): Observable<IApiResponse> {
+    const params = {
+      processCode: 'RQL',
+      historyId,
+      enroll,
+      remarks,
+    };
+
+    return this.http.post<IApiResponse>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.RejectProcess}`, params,
+    );
+  }
+
+
+
+
+
 }

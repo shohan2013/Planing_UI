@@ -30,12 +30,15 @@
           </div>
         </div>
         <div class="approval-filter">
-          <select class="form-select" [ngModel]="selectedBusinessFilterId" (ngModelChange)="onBusinessFilterChange($event)" [disabled]="selectedUnitFilterId === null || selectedUnitFilterId === 0 || businessesLoading()" aria-label="Business filter">
-            <option [ngValue]="0">{{ businessesLoading() ? 'Loading Businesses...' : 'All Businesses' }}</option>
-            @for (business of businesses(); track business.Id) {
-              <option [ngValue]="business.Id">{{ business.Name }}</option>
-            }
-          </select>
+          <div class="input-group">
+            <div class="input-group-text"><i class="fa-solid fa-filter"></i></div>
+            <select class="form-select" [ngModel]="selectedBusinessFilterId" (ngModelChange)="onBusinessFilterChange($event)" [disabled]="selectedUnitFilterId === null || selectedUnitFilterId === 0 || businessesLoading()" aria-label="Business filter">
+              <option [ngValue]="0">{{ businessesLoading() ? 'Loading Businesses...' : 'All Businesses' }}</option>
+              @for (business of businesses(); track business.Id) {
+                <option [ngValue]="business.Id">{{ business.Name }}</option>
+              }
+            </select>
+          </div>
         </div>
         <div class="approval-search">
           <div class="input-group">
@@ -98,12 +101,14 @@
                     <button *menuPermission="PermissionAction.View" type="button" class="action-btn btn-view" title="View" aria-label="View requisition" (click)="openViewModal(item)">
                       <i class="fa-solid fa-magnifying-glass-plus"></i>
                     </button>
-                    <button type="button" class="action-btn btn-approve" title="Approve" aria-label="Approve requisition">
-                      <i class="fa-solid fa-circle-check"></i>
-                    </button>
-                    <button type="button" class="action-btn btn-reject" title="Reject" aria-label="Reject requisition">
-                      <i class="fa-solid fa-circle-xmark"></i>
-                    </button>
+                    @if (item.ApprovalStatusCode === 'PEND') {
+                      <button type="button" class="action-btn btn-approve" title="Approve" aria-label="Approve requisition" [disabled]="actionInProgress()" (click)="approveRequisition(item)">
+                        <i class="fa-solid fa-circle-check"></i>
+                      </button>
+                      <button type="button" class="action-btn btn-reject" title="Reject" aria-label="Reject requisition" [disabled]="actionInProgress()" (click)="rejectRequisition(item)">
+                        <i class="fa-solid fa-circle-xmark"></i>
+                      </button>
+                    }
                   </div>
                 </td>
               </tr>

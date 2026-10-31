@@ -79,7 +79,8 @@ export const GlobalConstant = {
     PlanningVsProductionOverviewExport: 'PlanningVsProduction/GetOverviewExport',
     WorkType: 'Common/WorkType',
 
-
+    AcceptProcess: 'Common/AcceptProcess',
+    RejectProcess: 'Common/RejectProcess',
 
   /*===========================ROLE===================================== */
 
