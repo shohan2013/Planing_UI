@@ -125,27 +125,17 @@ export class CommonService {
     );
   }
 
-  GetStockQty(
-    fromDate: string,
-    toDate: string,
-    unitId: number,
-    businessId: number,
-    whId: number | null,
-    productId: number,
-  ): Observable<number> {
-    const params = {
-      fromDate,
-      toDate,
-      unitId,
-      businessId,
-      whId: whId ?? 0,
-      productId,
-    };
 
-    return this.http.get<number>(
-      `${environment.API_URL}${GlobalConstant.API_END_POINTS.StockQuantity}`,
-      { params },
-    );
+
+  
+  GetLatestStockQty(toDate: string, unitId: number, businessId: number, whId: number | null, productId: number): Observable<number> {
+    const params = { toDate, unitId, businessId, whId: whId ?? 0, productId };
+    return this.http.get<number>(`${environment.API_URL}${GlobalConstant.API_END_POINTS.LatestStockQty}`, { params });
+  }
+
+  GetStockQty(fromDate: string, toDate: string, unitId: number, businessId: number, whId: number | null, productId: number,): Observable<number> {
+    const params = { fromDate, toDate, unitId, businessId, whId: whId ?? 0, productId,};
+    return this.http.get<number>(`${environment.API_URL}${GlobalConstant.API_END_POINTS.StockQuantity}`,{ params },);
   }
 
   GetSalesQty(

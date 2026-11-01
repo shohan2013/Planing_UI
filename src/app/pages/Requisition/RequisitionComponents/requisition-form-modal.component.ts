@@ -1009,12 +1009,11 @@ onBusinessChange(): void {
   }
 
   private loadStockQuantity(productId: number, target: AbstractControl): void {
-    const startDate = this.formGroup.get('StartDate')?.value;
     const endDate = this.formGroup.get('EndDate')?.value;
     const businessId = Number(this.formGroup.get('BusinessId')?.value);
 
-    this.commonService.GetStockQty(
-      startDate, endDate, this.selectedUnitId, businessId, null, productId,
+    this.commonService.GetLatestStockQty(
+      endDate, this.selectedUnitId, businessId, null, productId,
     )
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
