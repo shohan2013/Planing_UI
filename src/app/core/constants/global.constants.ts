@@ -59,7 +59,7 @@ export const GlobalConstant = {
     ProductType: 'Common/ProductTypeList',
     getFGTypes: 'Common/FGTypes',
     Item: 'Common/ItemList',
-    LatestStockQty: 'api/Common/LatestStockQty',
+    LatestStockQty: 'Common/LatestStockQty',
     StockQuantity: 'Common/StockQty',
     SalesQuantity: 'Common/GetSalesQty',
     RequisitionItemNames: 'Common/RequisitionItemNames',
