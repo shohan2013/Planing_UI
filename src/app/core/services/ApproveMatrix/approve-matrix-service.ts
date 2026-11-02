@@ -6,6 +6,7 @@ import { IViewApproveMatrixEntity } from '../../model/ApproveMatrix/ViewApproveM
 import { ApproveMatrixSave } from '../../model/ApproveMatrix/ApproveMatrixSave';
 import { IApiResponse } from '../../model/Response/ApiResponse';
 import { ApproveMatrixPermissionUpdate } from '../../model/ApproveMatrix/ApproveMatrixPermissionUpdate';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -15,7 +16,7 @@ export class ApproveMatrixService {
 
   GetApproveMatrix(enroll: string): Observable<IViewApproveMatrixEntity[]> {
     return this.http.get<IViewApproveMatrixEntity[]>(
-      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.ApproveMatrix}/${enroll}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.ApproveMatrix}/${enroll}`,
     );
   }
 
@@ -23,13 +24,13 @@ export class ApproveMatrixService {
     id: number,
     data: ApproveMatrixPermissionUpdate,
   ): Observable<IApiResponse> {
-    const url = `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.ProvideApproveMatrix}/${id}`;
+    const url = `${environment.API_URL}${GlobalConstant.API_END_POINTS.ProvideApproveMatrix}/${id}`;
     return this.http.patch<IApiResponse>(url, data);
   }
 
   addData(data: ApproveMatrixSave): Observable<IApiResponse> {
     return this.http.post<IApiResponse>(
-      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.ApproveMatrix}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.ApproveMatrix}`,
       data,
     );
   }

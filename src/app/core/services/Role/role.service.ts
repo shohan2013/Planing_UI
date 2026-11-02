@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { GlobalConstant } from '../../constants/global.constants';
-
+import { environment } from 'src/environments/environment';
 
 import {
   IRoleAssignment,
@@ -21,21 +21,21 @@ export class RoleService {
 
   assignRole(obj: IRoleAssignment): Observable<IApiResponse> {
     return this.http.post<IApiResponse>(
-      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.assignRole}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.assignRole}`,
       obj,
     );
   }
 
   terminateView(obj: ITerminateRole): Observable<IApiResponse> {
     return this.http.put<IApiResponse>(
-      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.terminateRoleView}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.terminateRoleView}`,
       obj,
     );
   }
 
   terminate(obj: ITerminateRole): Observable<IApiResponse> {
     return this.http.put<IApiResponse>(
-      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.terminateRole}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.terminateRole}`,
       obj,
     );
   }
