@@ -1,15 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { Component,OnInit,signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgSelectModule } from '@ng-select/ng-select';
 import {
-debounceTime,
-distinctUntilChanged,of,Subject,
-switchMap,
-takeUntil
+  debounceTime,
+  distinctUntilChanged,
+  of,
+  Subject,
+  switchMap,
+  takeUntil,
 } from 'rxjs';
-
 
 import { IPermission } from 'src/app/core/model/Permission/Permission';
 import { AccessService } from 'src/app/core/services/Access/access-service';
@@ -53,18 +54,15 @@ export class AccessPermission implements OnInit {
     return index;
   }
 
-  //selectedCustomer: number | null = null;
-
-  // search$ is bound to ng-select [typeahead], which disables ng-select's local
-  // filtering by bindLabel (Name) so enroll-number results are not hidden
-  // terms shorter than 2 chars clear the list instead of calling the API
   GetEmpInfo() {
     this.search$
       .pipe(
         debounceTime(200),
         distinctUntilChanged(),
         switchMap((term) =>
-          term && term.length >= 2 ? this.commonservice.GetEmpData(term) : of([]),
+          term && term.length >= 2
+            ? this.commonservice.GetEmpData(term)
+            : of([]),
         ),
         takeUntil(this.destroy$),
       )

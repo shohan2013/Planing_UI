@@ -13,7 +13,7 @@ import { NgSelectModule } from '@ng-select/ng-select';
 import { ToastrService } from 'ngx-toastr';
 import {
 debounceTime,
-distinctUntilChanged,Subject,
+distinctUntilChanged,of,Subject,
 switchMap,
 takeUntil
 } from 'rxjs';
@@ -60,6 +60,7 @@ export class Approvematrix implements OnInit, OnDestroy {
   ApproveGroupTypeListDropdown: IApproveMatrixGroupList[] = [];
   paginatedItems = signal<IViewApproveMatrixEntity[]>([]);
   EmpList: IEnroll[] = []; //EmpList: any[] = [];
+  SearchEmpList = signal<any[]>([]); // employee search dropdown source
   MenuDropdown: MenuModel[] = [];
   SubMenuDropdown = signal<SubMenuModel[]>([]); // dropdown source
   ApproveGroupListDropdown: IApproveMatrixGroup[] = [];
@@ -86,6 +87,7 @@ export class Approvematrix implements OnInit, OnDestroy {
     this.loadUnit();
     this.loadGroupType();
     this.loadEnroll();
+    this.GetEmpInfo();
     this.loadApproveMatrix();
   }
 
@@ -295,10 +297,15 @@ export class Approvematrix implements OnInit, OnDestroy {
       .pipe(
         debounceTime(200),
         distinctUntilChanged(),
-        switchMap((term) => this.commonservice.GetEmpData(term)),
+        switchMap((term) =>
+          term && term.length >= 2
+            ? this.commonservice.GetEmpData(term)
+            : of([]),
+        ),
+        takeUntil(this.destroy$),
       )
       .subscribe((data) => {
-        this.EmpList = data;
+        this.SearchEmpList.set(data);
       });
   }
 
@@ -364,8 +371,24 @@ export class Approvematrix implements OnInit, OnDestroy {
     return this.formGroup.controls;
   }
 
-  onSelect() {
-    this.GetApproveMatrix(this.selectedUser.toString());
+  onSelect(selectedId: number | null) {
+    if (!selectedId) {
+      this.clearEmpList();
+      return;
+    }
+    this.GetApproveMatrix(selectedId.toString());
+  }
+
+  // dropdown closed without a selection: drop the stale suggestions
+  onClose() {
+    if (!this.selectedUser) this.clearEmpList();
+  }
+
+  // pushing '' through search$ also resets distinctUntilChanged,
+  // so retyping the same term fetches again
+  clearEmpList() {
+    this.SearchEmpList.set([]);
+    this.search$.next('');
   }
 
   GetApproveMatrix(enroll: string) {
@@ -381,16 +404,6 @@ export class Approvematrix implements OnInit, OnDestroy {
           console.log('Error :', error);
         },
       });
-  }
-
-  onSearch(event: any) {
-    const term = event.term;
-
-    if (!term || term.length < 2) {
-      this.EmpList = [];
-      return;
-    }
-    this.search$.next(term);
   }
 
   saveModal(content: any) {
