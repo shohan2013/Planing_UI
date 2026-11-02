@@ -5,6 +5,8 @@ import { GlobalConstant } from '../../constants/global.constants';
 import { IApiResponseWithData } from '../../model/Response/ApiResponse';
 import { ServerQueryRequest, ServerQueryResponse } from '../../model/Common/Pagination/ServerQueryRequest';
 
+import { environment } from 'src/environments/environment';
+
 import {
   IRolePermissionLanding,
   ICreateRolePermission,
@@ -23,7 +25,7 @@ export class RolePermissionService {
   getAllData(request: ServerQueryRequest,): Observable<ServerQueryResponse<IRolePermissionLanding>> {
     return this.http.get<ServerQueryResponse<IRolePermissionLanding>>
     (
-      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.getRolePermissions}` +
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.getRolePermissions}` +
         `?GlobalSearch=${encodeURIComponent(request.globalSearch ?? '')}` +
         `&PageIndex=${request.page}` +
         `&PageSize=${request.pageSize}`,
@@ -32,33 +34,33 @@ export class RolePermissionService {
 
   getPermissionMatrix(): Observable<IRolePermissionMatrix[]> {
     return this.http.get<IRolePermissionMatrix[]>(
-      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.rolePermissionMatrix}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.rolePermissionMatrix}`,
     );
   }
 
   viewData(roleId: number): Observable<IViewRolePermission> {
     return this.http.get<IViewRolePermission>(
-      `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.viewRolePermission}/${roleId}`,
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.viewRolePermission}/${roleId}`,
     );
   }
 
   addData(
     data: ICreateRolePermission,): Observable<IApiResponseWithData<number>> {
-    return this.http.post<IApiResponseWithData<number>>(`${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.addRolePermission}`,
+    return this.http.post<IApiResponseWithData<number>>(`${environment.API_URL}${GlobalConstant.API_END_POINTS.addRolePermission}`,
       data,
     );
   }
 
   updateData(
     data: IUpdateRolePermission,): Observable<IApiResponseWithData<boolean>> {
-    return this.http.put<IApiResponseWithData<boolean>>(`${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.updateRolePermission}`,
+    return this.http.put<IApiResponseWithData<boolean>>(`${environment.API_URL}${GlobalConstant.API_END_POINTS.updateRolePermission}`,
       data,
     );
   }
 
   deleteData(
     data: IDeleteRolePermission,): Observable<IApiResponseWithData<boolean>> {
-    return this.http.put<IApiResponseWithData<boolean>>(`${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.deleteRolePermission}`,
+    return this.http.put<IApiResponseWithData<boolean>>(`${environment.API_URL}${GlobalConstant.API_END_POINTS.deleteRolePermission}`,
       data,
     );
   }
