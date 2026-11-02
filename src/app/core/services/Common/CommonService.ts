@@ -109,7 +109,6 @@ export class CommonService {
       `${environment.API_URL}${GlobalConstant.API_END_POINTS.ProductType}`,
     );
   }
-  
 
   GetItemList(unitId: number, searchText: string): Observable<IItem[]> {
     return this.http.get<IItem[]>(
@@ -125,17 +124,40 @@ export class CommonService {
     );
   }
 
-
-
-  
-  GetLatestStockQty(toDate: string, unitId: number, businessId: number, whId: number | null, productId: number): Observable<number> {
+  GetLatestStockQty(
+    toDate: string,
+    unitId: number,
+    businessId: number,
+    whId: number | null,
+    productId: number,
+  ): Observable<number> {
     const params = { toDate, unitId, businessId, whId: whId ?? 0, productId };
-    return this.http.get<number>(`${environment.API_URL}${GlobalConstant.API_END_POINTS.LatestStockQty}`, { params });
+    return this.http.get<number>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.LatestStockQty}`,
+      { params },
+    );
   }
 
-  GetStockQty(fromDate: string, toDate: string, unitId: number, businessId: number, whId: number | null, productId: number,): Observable<number> {
-    const params = { fromDate, toDate, unitId, businessId, whId: whId ?? 0, productId,};
-    return this.http.get<number>(`${environment.API_URL}${GlobalConstant.API_END_POINTS.StockQuantity}`,{ params },);
+  GetStockQty(
+    fromDate: string,
+    toDate: string,
+    unitId: number,
+    businessId: number,
+    whId: number | null,
+    productId: number,
+  ): Observable<number> {
+    const params = {
+      fromDate,
+      toDate,
+      unitId,
+      businessId,
+      whId: whId ?? 0,
+      productId,
+    };
+    return this.http.get<number>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.StockQuantity}`,
+      { params },
+    );
   }
 
   GetSalesQty(
@@ -167,13 +189,11 @@ export class CommonService {
     );
   }
 
-
   GetPlannerUoM(UnitId: number, BusinessId: number): Observable<IPlannerUoM[]> {
-  return this.http.get<IPlannerUoM[]>(
-    `${environment.API_URL}${GlobalConstant.API_END_POINTS.PlannerUoM}?UnitId=${UnitId}&BusinessId=${BusinessId}`,
-  );
-}
-
+    return this.http.get<IPlannerUoM[]>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.PlannerUoM}?UnitId=${UnitId}&BusinessId=${BusinessId}`,
+    );
+  }
 
   GetDocumentStatusList(): Observable<IDropdownBind[]> {
     return this.http.get<IDropdownBind[]>(
@@ -201,8 +221,6 @@ export class CommonService {
       `${environment.API_URL}${GlobalConstant.API_END_POINTS.ProductionStepsForPlanning}?UnitId=${unitId}&BusinessId=${BusinessesId}`,
     );
   }
-
-
 
   GetMachine(
     unitId: number,
@@ -235,20 +253,20 @@ export class CommonService {
   getActiveRoles(): Observable<IActiveRole[]> {
     return this.http.get<IActiveRole[]>(
       // `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.activeRoles}`,
-      `${environment.API_URL}${GlobalConstant.API_END_POINTS.activeRoles}`
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.activeRoles}`,
     );
   }
 
   getWorkTypes(): Observable<IWorkType[]> {
     return this.http.get<IWorkType[]>(
       // `${GlobalConstant.URL.API_URL}${GlobalConstant.API_END_POINTS.WorkType}`,
-      `${environment.API_URL}${GlobalConstant.API_END_POINTS.WorkType}`
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.WorkType}`,
     );
   }
 
   getFGTypes(): Observable<IDropdownBind[]> {
-  return this.http.get<IDropdownBind[]>(
-    `${environment.API_URL}${GlobalConstant.API_END_POINTS.getFGTypes}`
-  );
-}
+    return this.http.get<IDropdownBind[]>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.getFGTypes}`,
+    );
+  }
 }

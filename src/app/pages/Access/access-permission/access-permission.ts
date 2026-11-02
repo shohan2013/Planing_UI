@@ -5,7 +5,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgSelectModule } from '@ng-select/ng-select';
 import {
 debounceTime,
-distinctUntilChanged,Subject,
+distinctUntilChanged,filter,Subject,
 switchMap,
 takeUntil
 } from 'rxjs';
@@ -26,7 +26,7 @@ export class AccessPermission implements OnInit {
   //searchText = '';
   selectedId: number;
   paginatedItems = signal<IPermission[]>([]);
-  EmpList: any[] = []; // dropdown source
+  EmpList = signal<any[]>([]); // dropdown source
   selectedUser: number;
   search$ = new Subject<string>();
   private destroy$ = new Subject<void>();
@@ -55,25 +55,18 @@ export class AccessPermission implements OnInit {
 
   //selectedCustomer: number | null = null;
 
-  onSearch(event: any) {
-    const term = event.term;
-
-    if (!term || term.length < 2) {
-      return;
-    }
-
-    this.search$.next(term);
-  }
-
+  // search$ is bound to ng-select [typeahead], which disables ng-select's local
+  // filtering by bindLabel (Name) so enroll-number results are not hidden
   GetEmpInfo() {
     this.search$
       .pipe(
+        filter((term) => !!term && term.length >= 2),
         debounceTime(200),
         distinctUntilChanged(),
         switchMap((term) => this.commonservice.GetEmpData(term)),
       )
       .subscribe((data) => {
-        this.EmpList = data;
+        this.EmpList.set(data);
       });
   }
 
