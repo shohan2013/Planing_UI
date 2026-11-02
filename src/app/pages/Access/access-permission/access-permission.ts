@@ -5,7 +5,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgSelectModule } from '@ng-select/ng-select';
 import {
 debounceTime,
-distinctUntilChanged,filter,Subject,
+distinctUntilChanged,of,Subject,
 switchMap,
 takeUntil
 } from 'rxjs';
@@ -57,13 +57,16 @@ export class AccessPermission implements OnInit {
 
   // search$ is bound to ng-select [typeahead], which disables ng-select's local
   // filtering by bindLabel (Name) so enroll-number results are not hidden
+  // terms shorter than 2 chars clear the list instead of calling the API
   GetEmpInfo() {
     this.search$
       .pipe(
-        filter((term) => !!term && term.length >= 2),
         debounceTime(200),
         distinctUntilChanged(),
-        switchMap((term) => this.commonservice.GetEmpData(term)),
+        switchMap((term) =>
+          term && term.length >= 2 ? this.commonservice.GetEmpData(term) : of([]),
+        ),
+        takeUntil(this.destroy$),
       )
       .subscribe((data) => {
         this.EmpList.set(data);
@@ -71,8 +74,23 @@ export class AccessPermission implements OnInit {
   }
 
   onSelect(selectedId: string | null) {
-    if (!selectedId) return null;
+    if (!selectedId) {
+      this.clearEmpList();
+      return;
+    }
     this.GetPermissionData(selectedId);
+  }
+
+  // dropdown closed without a selection: drop the stale suggestions
+  onClose() {
+    if (!this.selectedUser) this.clearEmpList();
+  }
+
+  // pushing '' through search$ also resets distinctUntilChanged,
+  // so retyping the same term fetches again
+  clearEmpList() {
+    this.EmpList.set([]);
+    this.search$.next('');
   }
 
   GetPermissionData(name: string) {

@@ -36,6 +36,7 @@
             dropdownPosition="bottom"
             style="margin-right: 5px"
             [typeahead]="search$"
+            (close)="onClose()"
             (ngModelChange)="onSelect($event)"
           >
             <ng-template ng-option-tmp let-item="item">
