@@ -387,18 +387,18 @@
         <label class="form-label" for="bulkSize">Size</label>
         <select id="bulkSize" class="form-select" formControlName="SizeId">
           <option [ngValue]="0">All sizes</option>
-          @for (option of bulkSizes(); track option.ID) {
-            <option [ngValue]="option.ID">{{ option.Name }}</option>
+          @for (option of bulkSizes(); track option.Id) {
+            <option [ngValue]="option.Id">{{ option.Name }}</option>
           }
         </select>
       </div>
 
       <div class="col-md-2">
         <label class="form-label" for="bulkSubCategory">Subcategory</label>
-        <select id="bulkSubCategory" class="form-select" formControlName="SubCategoryId">
+        <select id="bulkSubCategory" class="form-select" formControlName="SubCategoryId" [attr.disabled]="bulkFilters.controls.SizeId.value === 0 || bulkSubCategoriesLoading() ? true : null">
           <option [ngValue]="0">All subcategories</option>
-          @for (option of bulkSubCategories(); track option.ID) {
-            <option [ngValue]="option.ID">{{ option.Name }}</option>
+          @for (option of bulkSubCategories(); track option.Id) {
+            <option [ngValue]="option.Id">{{ option.Name }}</option>
           }
         </select>
       </div>
@@ -407,8 +407,8 @@
         <label class="form-label" for="bulkGrade">Grade</label>
         <select id="bulkGrade" class="form-select" formControlName="GradeId">
           <option [ngValue]="0">All grades</option>
-          @for (option of bulkGrades(); track option.ID) {
-            <option [ngValue]="option.ID">{{ option.Name }}</option>
+          @for (option of bulkGrades(); track option.Id) {
+            <option [ngValue]="option.Id">{{ option.Name }}</option>
           }
         </select>
       </div>
@@ -428,7 +428,7 @@
     @if (bulkFiltersLoading()) {
       <div class="small text-success mt-2">
         <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
-        Loading Size and Subcategory...
+        Loading Size and Grade...
       </div>
     }
 

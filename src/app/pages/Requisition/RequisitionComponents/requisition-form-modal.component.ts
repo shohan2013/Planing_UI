@@ -15,7 +15,7 @@ import {
 import { ToastrService } from 'ngx-toastr';
 import {
   catchError, debounceTime, distinctUntilChanged, finalize,
-  forkJoin, Observable, of, Subject, Subscription, switchMap, tap,
+  forkJoin, Observable, of, startWith, Subject, Subscription, switchMap, tap,
 } from 'rxjs';
 
 import { MenuPermissionDirective } from 'src/app/core/directives/menu-permission.directive';
@@ -80,10 +80,11 @@ export class RequisitionFormModalComponent implements OnInit {
   readonly itemSearchHasResults = signal(true);
   readonly itemSearchFailed = signal(false);
 
-  readonly bulkSizes = signal<{ ID: number; Name: string }[]>([]);
-  readonly bulkSubCategories = signal<{ ID: number; Name: string }[]>([]);
-  readonly bulkGrades = signal<{ ID: number; Name: string }[]>([]);
+  readonly bulkSizes = signal<IDropdownBind[]>([]);
+  readonly bulkSubCategories = signal<IDropdownBind[]>([]);
+  readonly bulkGrades = signal<IDropdownBind[]>([]);
   readonly bulkFiltersLoading = signal(false);
+  readonly bulkSubCategoriesLoading = signal(false);
   readonly bulkFiltersReady = signal(false);
   readonly bulkRows = signal<BulkRow[]>([]);
   readonly bulkItemsLoading = signal(false);
@@ -133,6 +134,7 @@ export class RequisitionFormModalComponent implements OnInit {
   private bulkModalRef?: NgbModalRef;
   private bulkRequestId = 0;
   private filterRequestId = 0;
+  private bulkSizeSubscription?: Subscription;
   private plannerUoMRequestId = 0;
   private bulkResultContext = '';
   private readonly bulkDrafts = new Map<number, BulkRow>();
@@ -227,6 +229,7 @@ export class RequisitionFormModalComponent implements OnInit {
       this.canShowAddProduct &&
       this.bulkFiltersReady() &&
       !this.bulkFiltersLoading() &&
+      !this.bulkSubCategoriesLoading() &&
       !this.bulkItemsLoading();
   }
 
@@ -530,39 +533,78 @@ onBusinessChange(): void {
     const unitId = this.selectedUnitId;
     const businessId = Number(this.formGroup.get('BusinessId')?.value);
     const requestId = ++this.filterRequestId;
+    const retainedSizeId = this.bulkFilters.controls.SizeId.value;
+    let firstSizeEmission = true;
+
+    this.bulkSizeSubscription = this.bulkFilters.controls.SizeId.valueChanges
+      .pipe(
+        startWith(retainedSizeId),
+        tap(() => {
+          if (!firstSizeEmission) {
+            this.bulkFilters.controls.SubCategoryId.setValue(0, { emitEvent: false });
+            this.bulkSubCategories.set([]);
+          }
+          firstSizeEmission = false;
+        }),
+        switchMap(sizeId => {
+          if (sizeId <= 0) {
+            this.bulkSubCategories.set([]);
+            this.bulkSubCategoriesLoading.set(false);
+            return of([]);
+          }
+
+          this.bulkSubCategoriesLoading.set(true);
+          return this.requisitionService.GetACRLtilesSubCategory(unitId, businessId, sizeId)
+            .pipe(
+              catchError((error: HttpErrorResponse) => {
+                this.toastr.error(
+                  this.getErrorMessage(error, 'Unable to load ACRL Subcategories.'),
+                );
+                return of([]);
+              }),
+            );
+        }),
+      )
+      .subscribe(subCategories => {
+        this.bulkSubCategories.set(subCategories);
+        this.bulkSubCategoriesLoading.set(false);
+      });
 
     this.bulkFiltersLoading.set(true);
     this.bulkFiltersReady.set(false);
 
-    this.requisitionService.GetACRLBulkFilters(unitId, businessId)
+    forkJoin({
+      sizes: this.requisitionService.GetACRLtilesSize(unitId, businessId),
+      grades: this.requisitionService.GetItemDimentionGrade(unitId, businessId),
+    })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: filters => {
-          if (requestId !== this.filterRequestId) return;
+        next: ({ sizes, grades }) => {
+          if (requestId !== this.filterRequestId || !this.bulkModalRef) return;
+          if (unitId !== this.selectedUnitId ||
+              businessId !== Number(this.formGroup.get('BusinessId')?.value)) return;
 
-          if (
-            unitId !== this.selectedUnitId ||
-            businessId !== Number(this.formGroup.get('BusinessId')?.value)
-          ) return;
-
-          this.bulkSizes.set(filters.Sizes);
-          this.bulkSubCategories.set(filters.SubCategories);
-          this.bulkGrades.set(filters.Grades);
+          this.bulkSizes.set(sizes);
+          this.bulkGrades.set(grades);
           this.bulkFiltersLoading.set(false);
           this.bulkFiltersReady.set(true);
         },
         error: (error: HttpErrorResponse) => {
-          if (requestId !== this.filterRequestId) return;
+          if (requestId !== this.filterRequestId || !this.bulkModalRef) return;
 
           this.bulkFiltersLoading.set(false);
           this.toastr.error(
-            this.getErrorMessage(error, 'Unable to load ACRL bulk filters.'),
+            this.getErrorMessage(error, 'Unable to load ACRL Size or Grade.'),
           );
         },
       });
   }
 
   closeBulkModal(): void {
+    ++this.filterRequestId;
+    this.bulkSizeSubscription?.unsubscribe();
+    this.bulkSizeSubscription = undefined;
+    this.bulkSubCategoriesLoading.set(false);
     ++this.bulkRequestId;
     this.bulkItemsSubscription?.unsubscribe();
     this.bulkItemsLoading.set(false);

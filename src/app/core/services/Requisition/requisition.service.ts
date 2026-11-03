@@ -10,7 +10,8 @@ import { ServerQueryRequest, ServerQueryResponse } from 'src/app/core/model/Comm
 
 import { IViewRequisitionHeader, IViewRequisitionLine } from 'src/app/core/model/Requisition/ViewRequisition';
 import { IBulkRequisitionItem, IBulkRequisitionItemsRequest } from '../../model/Requisition/BulkRequisitionItems';
-import { IACRLBulkFilters } from '../../model/Requisition/ACRLBulkFilters';
+import { IDropdownBind } from '../../model/Common/dropdown-bind';
+// import { IACRLBulkFilters } from '../../model/Requisition/ACRLBulkFilters';
 
 @Injectable({
   providedIn: 'root'
@@ -79,12 +80,34 @@ return this.http.get<IViewRequisitionLine[]>(
 
 
 
-GetACRLBulkFilters(unitId: number, businessId: number): Observable<IACRLBulkFilters> {
-  return this.http.get<IACRLBulkFilters>(
-    `${environment.API_URL}${GlobalConstant.API_END_POINTS.ACRLBulkFilters}`,
-    { params: { UnitId: unitId, BusinessId: businessId } },
+// GetACRLBulkFilters(unitId: number, businessId: number): Observable<IACRLBulkFilters> {
+//   return this.http.get<IACRLBulkFilters>(
+//     `${environment.API_URL}${GlobalConstant.API_END_POINTS.ACRLBulkFilters}`,
+//     { params: { UnitId: unitId, BusinessId: businessId } },
+//   );
+// }
+
+GetACRLtilesSize(unitId: number, businessId: number): Observable<IDropdownBind[]> {
+  return this.http.get<IDropdownBind[]>(
+    `${environment.API_URL}${GlobalConstant.API_END_POINTS.ACRLtilesSize}`,
+    { params: { unitId, businessId } },
   );
 }
+
+GetACRLtilesSubCategory(unitId: number, businessId: number, sizeId: number): Observable<IDropdownBind[]> {
+  return this.http.get<IDropdownBind[]>(
+    `${environment.API_URL}${GlobalConstant.API_END_POINTS.ACRLtilesSubCategory}`,
+    { params: { unitId, businessId, sizeId } },
+  );
+}
+
+GetItemDimentionGrade(unitId: number, businessId: number): Observable<IDropdownBind[]> {
+  return this.http.get<IDropdownBind[]>(
+    `${environment.API_URL}${GlobalConstant.API_END_POINTS.ItemDimentionGrade}`,
+    { params: { unitId, businessId } },
+  );
+}
+
 
 GetBulkItems(request: IBulkRequisitionItemsRequest, pagination: ServerQueryRequest,): Observable<ServerQueryResponse<IBulkRequisitionItem>> {
   return this.http.get<ServerQueryResponse<IBulkRequisitionItem>>(

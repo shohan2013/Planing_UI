@@ -34,7 +34,10 @@ export const GlobalConstant = {
     deleteRequisition: 'Requisition/Delete',
     completeRequisition: 'Requisition/complete',
 
-    ACRLBulkFilters: 'Requisition/ACRLBulkFilters',
+    // ACRLBulkFilters: 'Requisition/ACRLBulkFilters',
+    ACRLtilesSize: 'Requisition/ACRLtilesSize',
+    ACRLtilesSubCategory: 'Requisition/ACRLtilesSubCategory',
+    ItemDimentionGrade: 'Requisition/ItemDimentionGrade',
     bulkRequisitionItems: 'Requisition/BulkItems',
 
  /*===========================REQUISITION APPROVAL===================================== */
