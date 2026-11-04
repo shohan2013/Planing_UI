@@ -65,6 +65,25 @@ return this.http.get<IViewRequisitionLine[]>(
 
   }
 
+  GetRequisitionCount(fromDate: string, toDate: string, unitId: number, businessId: number, itemId: number, productTypeId: number, excludeReqId: number = 0): Observable<number> {
+    return this.http.get<number>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.requisitionItemCount}`,
+      {
+        params: {
+          FromDate: fromDate,
+          ToDate: toDate,
+          UnitId: unitId,
+          BusinessId: businessId,
+          ItemId: itemId,
+          ProductTypeId: productTypeId,
+          ExcludeReqId: excludeReqId,
+        },
+      },
+    );
+  }
+
+
+
 
 
 
@@ -109,7 +128,7 @@ GetItemDimentionGrade(unitId: number, businessId: number): Observable<IDropdownB
 }
 
 
-GetBulkItems(request: IBulkRequisitionItemsRequest, pagination: ServerQueryRequest,): Observable<ServerQueryResponse<IBulkRequisitionItem>> {
+GetBulkItems(request: IBulkRequisitionItemsRequest, pagination: ServerQueryRequest): Observable<ServerQueryResponse<IBulkRequisitionItem>> {
   return this.http.get<ServerQueryResponse<IBulkRequisitionItem>>(
     `${environment.API_URL}${GlobalConstant.API_END_POINTS.bulkRequisitionItems}`,
     {
@@ -118,6 +137,8 @@ GetBulkItems(request: IBulkRequisitionItemsRequest, pagination: ServerQueryReque
         BusinessId: request.BusinessID,
         FromDate: String(request.FromDate),
         ToDate: String(request.ToDate),
+        ProductTypeId: request.ProductTypeId,
+        ExcludeReqId: request.ExcludeReqId,
         SizeId: request.SizeID ?? 0,
         SubCategoryId: request.SubCategoryID ?? 0,
         GradeId: request.GradeID ?? 0,

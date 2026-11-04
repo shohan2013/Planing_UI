@@ -33,6 +33,7 @@ export const GlobalConstant = {
     updateRequisition: 'Requisition/update',
     deleteRequisition: 'Requisition/Delete',
     completeRequisition: 'Requisition/complete',
+    requisitionItemCount: 'Requisition/ItemCount',
 
     // ACRLBulkFilters: 'Requisition/ACRLBulkFilters',
     ACRLtilesSize: 'Requisition/ACRLtilesSize',

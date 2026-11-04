@@ -6,6 +6,8 @@ export interface IBulkRequisitionItemsRequest {
   SizeID: number;
   SubCategoryID: number;
   GradeID?: number;
+  ProductTypeId: number;
+  ExcludeReqId: number;
 }
 
 export interface IBulkRequisitionItem {
@@ -14,4 +16,5 @@ export interface IBulkRequisitionItem {
   UOMID: number;
   StockQuantity: number;
   SalesQuantity: number;
+  Count: number;
 }

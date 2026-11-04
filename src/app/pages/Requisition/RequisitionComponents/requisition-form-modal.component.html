@@ -8,10 +8,7 @@
           <img src="assets/icons/create.svg" width="17.5" height="17.5" alt="" /> Create Requisition
         }
       </h5>
-
-
     </div>
-
     <button type="button" class="btn-close" aria-label="Close"
       [disabled]="isSubmitting" (click)="dismiss()"></button>
   </div>
@@ -29,7 +26,6 @@
           <span class="fw-semibold me-2">Requisition Date :</span>
           <span>{{ formGroup.get('ReqDate')?.value | date: 'dd-MMM-yyyy' }}</span>
         </div>
-
         <div class="row g-3">
           <div class="col-lg-3 col-md-6">
             <label class="form-label" for="reqUnit">Unit :</label>
@@ -44,12 +40,10 @@
               <div class="invalid-feedback">Please select Unit.</div>
             }
           </div>
-
           <div class="col-lg-3 col-md-6">
             <label class="form-label" for="reqBusiness">Business :</label>
             <select id="reqBusiness" class="form-select" formControlName="BusinessId"
-              (change)="onBusinessChange()"
-              [class.is-invalid]="submitted && f['BusinessId'].invalid">
+              (change)="onBusinessChange()" [class.is-invalid]="submitted && f['BusinessId'].invalid">
               <option value="" disabled>
                 {{ unitDataLoading() ? 'Loading Businesses...' : 'Select Business' }}
               </option>
@@ -61,35 +55,26 @@
               <div class="invalid-feedback">Please select Business.</div>
             }
           </div>
-
           <div class="col-lg-3 col-md-6">
             <label class="form-label" for="reqStart">Start Date :</label>
-            <input id="reqStart" type="date" class="form-control"
-              formControlName="StartDate"
+            <input id="reqStart" type="date" class="form-control" formControlName="StartDate"
               [class.is-invalid]="(f['StartDate'].touched || submitted) && (f['StartDate'].invalid || dateRangeInvalid)" />
             @if ((f['StartDate'].touched || submitted) && f['StartDate'].invalid) {
               <div class="invalid-feedback">Start Date is required.</div>
             } @else if (dateRangeInvalid) {
-              <div class="invalid-feedback d-block">
-                Start Date must not be after End Date.
-              </div>
+              <div class="invalid-feedback d-block">Start Date must not be after End Date.</div>
             }
           </div>
-
           <div class="col-lg-3 col-md-6">
             <label class="form-label" for="reqEnd">End Date :</label>
-            <input id="reqEnd" type="date" class="form-control"
-              formControlName="EndDate"
+            <input id="reqEnd" type="date" class="form-control" formControlName="EndDate"
               [class.is-invalid]="(f['EndDate'].touched || submitted) && (f['EndDate'].invalid || dateRangeInvalid)" />
             @if ((f['EndDate'].touched || submitted) && f['EndDate'].invalid) {
               <div class="invalid-feedback">End Date is required.</div>
             } @else if (dateRangeInvalid) {
-              <div class="invalid-feedback d-block">
-                End Date must not be before Start Date.
-              </div>
+              <div class="invalid-feedback d-block">End Date must not be before Start Date.</div>
             }
           </div>
-
           <div class="col-12">
             <textarea class="form-control" formControlName="Remarks"
               rows="2" maxlength="500" placeholder="Enter remarks..."></textarea>
@@ -106,7 +91,6 @@
       @if (canShowAddProduct) {
         <fieldset class="border rounded-3 p-3 mt-3">
           <legend class="float-none w-auto px-2 mb-0">Add Product</legend>
-
           @if (isACRL) {
             <div class="d-flex justify-content-end mb-3">
               <button type="button" class="btn btn-success"
@@ -127,75 +111,52 @@
                     <th>QUANTITY</th>
                     <th>STOCK QUANTITY</th>
                     <th>SALES QUANTITY</th>
+                    <th class="text-center">COUNT</th>
                     <th>REMARKS</th>
                     <th>ADD</th>
                   </tr>
                 </thead>
-
                 <tbody>
                   <tr>
                     <td>
                       <select class="form-select" formControlName="ProductTypeId"
-                        [class.is-invalid]="lineSubmitted && lf['ProductTypeId'].errors">
-                        <option value="" disabled>Select Product Type</option>
+                        [class.is-invalid]="lineSubmitted && lf['ProductTypeId'].invalid">
+                        <option [ngValue]="null" disabled>Select Product Type</option>
                         @for (productType of productTypes(); track productType.Id) {
-                          <option [value]="productType.Id">{{ productType.Name }}</option>
+                          <option [ngValue]="+productType.Id">{{ productType.Name }}</option>
                         }
                       </select>
                       <div class="invalid-feedback">Please select Product Type.</div>
                     </td>
-
                     <td>
-                      @if (selectedLineProductTypeId === 1) {
-                        <input type="text" class="form-control"
-                          formControlName="ItemName" maxlength="200"
-                          placeholder="Enter Sample Product name"
-                          [class.is-invalid]="lineSubmitted && lf['ItemName'].errors" />
-                        <div class="invalid-feedback">
-                          Please enter a Sample Product name.
+                      <input type="text" class="form-control" formControlName="ItemSearch"
+                        [placeholder]="hasSelectedLineProductType ? 'Type at least 2 characters' : 'Select Product Type first'"
+                        autocomplete="off" [ngbTypeahead]="searchItems"
+                        placement="bottom-start" container="body"
+                        popupClass="requisition-item-dropdown"
+                        [resultFormatter]="itemFormatter" [inputFormatter]="itemFormatter"
+                        (selectItem)="onItemSelect($event)"
+                        (keydown.arrowdown)="scrollActiveItem()"
+                        (keydown.arrowup)="scrollActiveItem()"
+                        [class.is-invalid]="lineSubmitted && (lf['ItemSearch'].invalid || lf['ItemId'].invalid)" />
+                      <div class="invalid-feedback">Please search and select a valid Item.</div>
+                      @if (isItemSearching()) {
+                        <div class="small text-primary mt-1">
+                          <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
+                          Searching...
                         </div>
-                      } @else if (selectedLineProductTypeId === 2) {
-                        <input type="text" class="form-control"
-                          formControlName="ItemSearch"
-                          placeholder="Type at least 2 characters"
-                          autocomplete="off"
-                          [ngbTypeahead]="searchItems"
-                          placement="bottom-start"
-                          container="body"
-                          popupClass="requisition-item-dropdown"
-                          [resultFormatter]="itemFormatter"
-                          [inputFormatter]="itemFormatter"
-                          (selectItem)="onItemSelect($event)"
-                          (keydown.arrowdown)="scrollActiveItem()"
-                          (keydown.arrowup)="scrollActiveItem()"
-                          [class.is-invalid]="lineSubmitted && (lf['ItemSearch'].errors || lf['ItemId'].errors)" />
-                        <div class="invalid-feedback">
-                          Please search and select a valid Item.
-                        </div>
-
-                        @if (isItemSearching()) {
-                          <div class="small text-primary mt-1">
-                            <span class="spinner-border spinner-border-sm me-1"
-                              aria-hidden="true"></span>
-                            Searching...
-                          </div>
-                        }
-                        @if (itemSearchCompleted() && !itemSearchHasResults() && !itemSearchFailed()) {
-                          <div class="small text-muted mt-1">
-                            No matching Items found.
-                          </div>
-                        }
-                        @if (itemSearchFailed()) {
-                          <div class="small text-danger mt-1">
-                            Item search failed. Please try again.
-                          </div>
-                        }
-                      } @else {
-                        <input type="text" class="form-control"
-                          placeholder="Select Product Type first" disabled />
+                      }
+                      @if (itemSearchCompleted() && !itemSearchHasResults() && !itemSearchFailed()) {
+                        <div class="small text-muted mt-1">No matching Items found.</div>
+                      }
+                      @if (itemSearchFailed()) {
+                        <div class="small text-danger mt-1">Item search failed. Please try again.</div>
+                      }
+                      @if (hasSelectedLineProductType && +lf['ItemId'].value > 0 &&
+                           isAlreadyAdded(+lf['ItemId'].value, selectedLineProductTypeId)) {
+                        <div class="small text-warning mt-1">Already added for this Product Type.</div>
                       }
                     </td>
-
                     <td>
                       <select class="form-select" formControlName="UOMId"
                         [class.is-invalid]="lineSubmitted && lf['UOMId'].invalid">
@@ -208,37 +169,38 @@
                       </select>
                       <div class="invalid-feedback">Please select UoM.</div>
                     </td>
-
                     <td>
-                      <input type="number" class="form-control"
-                        formControlName="Quantity" placeholder="Quantity" min="1"
-                        [class.is-invalid]="lineSubmitted && lf['Quantity'].errors" />
-                      <div class="invalid-feedback">
-                        Please enter a valid Quantity.
-                      </div>
+                      <input type="number" class="form-control" formControlName="Quantity"
+                        placeholder="Quantity" min="1"
+                        [class.is-invalid]="lineSubmitted && lf['Quantity'].invalid" />
+                      <div class="invalid-feedback">Please enter a valid Quantity.</div>
                     </td>
-
                     <td>
-                      <input type="number" class="form-control"
-                        formControlName="StockQuantity" readonly />
+                      <input type="number" class="form-control" formControlName="StockQuantity" readonly />
                     </td>
-
                     <td>
-                      <input type="number" class="form-control"
-                        formControlName="SalesQuantity" readonly />
+                      <input type="number" class="form-control" formControlName="SalesQuantity" readonly />
                     </td>
-
                     <td>
-                      <input type="text" class="form-control"
-                        formControlName="Remarks" maxlength="500"
-                        placeholder="Remarks" />
+                      @if (itemCountLoading()) {
+                        <span class="spinner-border spinner-border-sm text-success" role="status" aria-label="Loading Count"></span>
+                      } @else {
+                        <input type="number" class="form-control" formControlName="Count" placeholder="-" readonly />
+                      }
                     </td>
-
+                    <td>
+                      <input type="text" class="form-control" formControlName="Remarks"
+                        maxlength="500" placeholder="Remarks" />
+                    </td>
                     <td>
                       <button type="button" class="btn btn-success text-nowrap"
-                        title="Add Line" [disabled]="!canAddLine || isSubmitting"
-                        (click)="addLine()">
-                        <i class="fa-solid fa-plus me-1"></i> Add
+                        title="Add Line" [disabled]="!canAddLine || isSubmitting" (click)="addLine()">
+                        @if (itemQuantitiesLoading()) {
+                          <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
+                        } @else {
+                          <i class="fa-solid fa-plus me-1"></i>
+                        }
+                        Add
                       </button>
                     </td>
                   </tr>
@@ -250,13 +212,9 @@
       }
 
       <hr class="my-4" />
-
       @if (submitted && lines.length === 0) {
-        <div class="alert alert-danger py-2 mt-3">
-          At least one Requisition Line is required.
-        </div>
+        <div class="alert alert-danger py-2 mt-3">At least one Requisition Line is required.</div>
       }
-
       @if (lines.length > 0) {
         <div class="table-responsive mt-3">
           <table class="custom-table">
@@ -272,24 +230,21 @@
                   <th>REMAINING QUANTITY</th>
                 }
                 <th>STOCK QUANTITY</th>
-                <th>SALES QUANTITY</th>
+                <th class="text-center">COUNT</th>
+                <th>COUNT</th>
                 <th>REMARKS</th>
                 <th>ACTION</th>
               </tr>
             </thead>
-
             <tbody>
               @for (line of lines.controls; track line; let index = $index) {
                 <tr>
                   <td class="text-center">{{ index + 1 }}</td>
-                  <td>
-                    {{ getProductTypeName(+line.get('ProductTypeId')?.value) }}
-                  </td>
-                  <td>{{ +line.get('ProductTypeId')?.value === 2 ? line.get('ItemId')?.value : '-' }}</td>                  
+                  <td>{{ getProductTypeName(+line.get('ProductTypeId')?.value) }}</td>
+                  <td>{{ line.get('ItemId')?.value }}</td>
                   <td>{{ line.get('ItemName')?.value || '-' }}</td>
                   <td>{{ line.get('UOMName')?.value || 'Unspecified' }}</td>
                   <td>{{ line.get('Quantity')?.value }}</td>
-
                   @if (isEditMode) {
                     <td [style.background-color]="line.get('RemainingQuantity')?.value < 0 ? '#fff1f2' : null">
                       {{
@@ -301,19 +256,21 @@
                       }}
                     </td>
                   }
-
                   <td>{{ line.get('StockQuantity')?.value }}</td>
                   <td>{{ line.get('SalesQuantity')?.value }}</td>
+                  <td class="text-center">
+                    <span class="requisition-count" [attr.aria-label]="'Matching requisitions: ' + (line.get('Count')?.value ?? 'unavailable')">
+                      {{ line.get('Count')?.value ?? '-' }}
+                    </span>
+                  </td>
                   <td>
-                    <div class="g-scrollable-text sm"
-                      [title]="line.get('Remarks')?.value || ''">
+                    <div class="g-scrollable-text sm" [title]="line.get('Remarks')?.value || ''">
                       {{ line.get('Remarks')?.value || '-' }}
                     </div>
                   </td>
                   <td class="text-end">
-                    <button type="button" class="action-btn btn-delete"
-                      title="Delete Line" [disabled]="isSubmitting"
-                      (click)="removeLine(index)">
+                    <button type="button" class="action-btn btn-delete" title="Delete Line"
+                      [disabled]="isSubmitting" (click)="removeLine(index)">
                       <i class="fa-solid fa-trash-can"></i>
                     </button>
                   </td>
@@ -323,7 +280,6 @@
           </table>
         </div>
       }
-
       @if (lines.length < 2) {
         <div class="empty-requisition-lines"
           [style.min-height]="lines.length === 0 ? '80px' : '40px'"></div>
@@ -332,58 +288,50 @@
   </div>
 
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary"
-      [disabled]="isSubmitting" (click)="close()">
+    <button type="button" class="btn btn-secondary" [disabled]="isSubmitting" (click)="close()">
       <i class="fa-solid fa-fw fa-xmark"></i> Close
     </button>
-
     @if (state() !== 'initializing') {
-      <button
-        *menuPermission="isEditMode ? PermissionAction.Update : PermissionAction.Insert"
-        type="submit"
-        class="btn btn-success"
+      <button *menuPermission="isEditMode ? PermissionAction.Update : PermissionAction.Insert"
+        type="submit" class="btn btn-success"
         [disabled]="isSubmitting || unitDataLoading() || (isEditMode && header?.DocStatusId === DocumentStatusId.Completed)">
         @if (isSubmitting) {
-          <span class="spinner-border spinner-border-sm me-2"
-            aria-hidden="true"></span>
+          <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
         } @else {
           <i class="fa-solid fa-fw fa-check"></i>
         }
-        {{
-          isSubmitting
-            ? (isEditMode ? 'Updating...' : 'Saving...')
-            : (isEditMode ? 'Update' : 'Save')
-        }}
+        {{ isSubmitting ? (isEditMode ? 'Updating...' : 'Saving...') : (isEditMode ? 'Update' : 'Save') }}
       </button>
     }
-
     @if (isEditMode && state() !== 'initializing') {
       <button type="button" class="btn btn-complete me-3"
         [disabled]="isSubmitting || header?.DocStatusId === DocumentStatusId.Completed"
-        (click)="complete()">
-        Complete
-      </button>
+        (click)="complete()">Complete</button>
     }
   </div>
 </form>
 
-
-
-
-
-
-
-
-
 <ng-template #bulkModal>
   <div class="modal-header">
-    <h5 class="modal-title d-flex align-items-center gap-2"><i class="fa-solid fa-layer-group" style="color: rgb(95, 179, 104);" aria-hidden="true"></i>Add Bulk Products</h5>
+    <h5 class="modal-title d-flex align-items-center gap-2">
+      <i class="fa-solid fa-layer-group" style="color: rgb(95, 179, 104);" aria-hidden="true"></i>
+      Add Bulk Products
+    </h5>
     <button type="button" class="btn-close" aria-label="Close" (click)="closeBulkModal()"></button>
   </div>
 
   <div class="modal-body bulk-body">
     <div class="row g-3 align-items-end" [formGroup]="bulkFilters">
-      <div class="col-md-2">
+      <div class="col-lg-2 col-md-4">
+        <label class="form-label" for="bulkProductType">Product Type <span class="text-danger">*</span></label>
+        <select id="bulkProductType" class="form-select" formControlName="ProductTypeId">
+          <option [ngValue]="0" disabled>Select Product Type</option>
+          @for (productType of productTypes(); track productType.Id) {
+            <option [ngValue]="+productType.Id">{{ productType.Name }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-lg-2 col-md-4">
         <label class="form-label" for="bulkSize">Size</label>
         <select id="bulkSize" class="form-select" formControlName="SizeId">
           <option [ngValue]="0">All sizes</option>
@@ -392,18 +340,17 @@
           }
         </select>
       </div>
-
-      <div class="col-md-2">
+      <div class="col-lg-2 col-md-4">
         <label class="form-label" for="bulkSubCategory">Subcategory</label>
-        <select id="bulkSubCategory" class="form-select" formControlName="SubCategoryId" [attr.disabled]="bulkFilters.controls.SizeId.value === 0 || bulkSubCategoriesLoading() ? true : null">
+        <select id="bulkSubCategory" class="form-select" formControlName="SubCategoryId"
+          [attr.disabled]="bulkFilters.controls.SizeId.value === 0 || bulkSubCategoriesLoading() ? true : null">
           <option [ngValue]="0">All subcategories</option>
           @for (option of bulkSubCategories(); track option.Id) {
             <option [ngValue]="option.Id">{{ option.Name }}</option>
           }
         </select>
       </div>
-
-      <div class="col-md-2">
+      <div class="col-lg-2 col-md-4">
         <label class="form-label" for="bulkGrade">Grade</label>
         <select id="bulkGrade" class="form-select" formControlName="GradeId">
           <option [ngValue]="0">All grades</option>
@@ -412,15 +359,17 @@
           }
         </select>
       </div>
-
-      <div class="col-md-2">
+      <div class="col-lg-1 col-md-2">
         <button type="button" class="btn btn-success" [disabled]="!canViewBulk" (click)="viewBulkItems()">View</button>
       </div>
-
-      <div class="col-md-4">
+      <div class="col-lg-3 col-md-6">
         <div class="bulk-search-box">
-          <span class="bulk-search-icon"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></span>
-          <input type="search" class="form-control bulk-search" aria-label="Search items" placeholder="Search items by ID or name" [value]="bulkSearch()" [disabled]="!bulkViewed()" (input)="setBulkSearch($any($event.target).value)" />
+          <span class="bulk-search-icon">
+            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+          </span>
+          <input type="search" class="form-control bulk-search" aria-label="Search items"
+            placeholder="Search items by ID or name" [value]="bulkSearch()"
+            [disabled]="!bulkViewed()" (input)="setBulkSearch($any($event.target).value)" />
         </div>
       </div>
     </div>
@@ -434,91 +383,98 @@
 
     <div class="bulk-results">
       <div class="table-responsive bulk-table-wrap">
-      <table class="table table-hover align-middle bulk-table">
-        <thead>
-          <tr>
-            <th>ITEM ID</th>
-            <th>ITEM NAME</th>
-            <th>UOM</th>
-            <th>QUANTITY</th>
-            <th>STOCK QUANTITY</th>
-            <th>SALES QUANTITY</th>
-            <th>REMARKS</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          @if (bulkItemsLoading()) {
+        <table class="table table-hover align-middle bulk-table">
+          <thead>
             <tr>
-              <td colspan="7" class="text-center py-5">
-                <span class="spinner-border text-success" role="status" aria-label="Loading items"></span>
-              </td>
+              <th>ITEM ID</th>
+              <th>ITEM NAME</th>
+              <th>UOM</th>
+              <th>QUANTITY</th>
+              <th>STOCK QUANTITY</th>
+              <th>SALES QUANTITY</th>
+              <th class="text-center">COUNT</th>
+              <th>REMARKS</th>
             </tr>
-          } @else {
-            @for (row of bulkRows(); track row.itemId) {
-              @let addedLine = getAddedBulkLine(row.itemId);
-              <tr [class.bulk-already-added]="!!addedLine">
-                <td>{{ row.itemId }}</td>
-                <td>{{ row.itemName }}</td>
-                <td>
-                  @if (addedLine) {
-                    {{ addedLine.get('UOMName')?.value || 'Unspecified' }}
-                  } @else {
-                    <select class="form-select form-select-sm"
-                      [value]="row.uomId ?? ''"
-                      (change)="setBulkUoM(row, $any($event.target).value)">
-                      @if (plannerUoMs().length !== 1) {
-                        <option value="" disabled>Select UoM</option>
-                      }
-                      @for (uom of plannerUoMs(); track uom.UoMId) {
-                        <option [value]="uom.UoMId">{{ uom.UoMName }}</option>
-                      }
-                    </select>
-                  }
-                </td>
-                <td>
-                  @if (addedLine) {
-                    {{ addedLine.get('Quantity')?.value }}
-                  } @else {
-                    <input type="text" inputmode="decimal" class="form-control form-control-sm bulk-quantity" [value]="row.quantity ?? ''" (input)="setBulkQuantity(row, $any($event.target).value, $any($event.target))" />
-                  }
-                </td>
-                <td>{{ addedLine ? addedLine.get('StockQuantity')?.value : row.stockQuantity }}</td>
-                <td>{{ addedLine ? addedLine.get('SalesQuantity')?.value : row.salesQuantity }}</td>
-                <td>
-                  @if (addedLine) {
-                    <div class="g-scrollable-text sm" [title]="addedLine.get('Remarks')?.value || ''">{{ addedLine.get('Remarks')?.value || '-' }}</div>
-                  } @else {
-                    <input type="text" maxlength="500" class="form-control form-control-sm" [value]="row.remarks" (input)="setBulkRemarks(row, $any($event.target).value)" />
-                  }
+          </thead>
+          <tbody>
+            @if (bulkItemsLoading()) {
+              <tr>
+                <td colspan="8" class="text-center py-5">
+                  <span class="spinner-border text-success" role="status" aria-label="Loading items"></span>
                 </td>
               </tr>
-            } @empty {
-              @if (bulkViewed()) {
-                <tr><td colspan="7" class="text-center text-muted py-4">No matching items.</td></tr>
+            } @else {
+              @for (row of bulkRows(); track row.itemId) {
+                @let addedLine = getAddedBulkLine(row.itemId);
+                <tr [class.bulk-already-added]="!!addedLine">
+                  <td>{{ row.itemId }}</td>
+                  <td>{{ row.itemName }}</td>
+                  <td>
+                    @if (addedLine) {
+                      {{ addedLine.get('UOMName')?.value || 'Unspecified' }}
+                    } @else {
+                      <select class="form-select form-select-sm" [value]="row.uomId ?? ''"
+                        (change)="setBulkUoM(row, $any($event.target).value)">
+                        @if (plannerUoMs().length !== 1) {
+                          <option value="" disabled>Select UoM</option>
+                        }
+                        @for (uom of plannerUoMs(); track uom.UoMId) {
+                          <option [value]="uom.UoMId">{{ uom.UoMName }}</option>
+                        }
+                      </select>
+                    }
+                  </td>
+                  <td>
+                    @if (addedLine) {
+                      {{ addedLine.get('Quantity')?.value }}
+                    } @else {
+                      <input type="text" inputmode="decimal" class="form-control form-control-sm bulk-quantity"
+                        [value]="row.quantity ?? ''"
+                        (input)="setBulkQuantity(row, $any($event.target).value, $any($event.target))" />
+                    }
+                  </td>
+                  <td>{{ addedLine ? addedLine.get('StockQuantity')?.value : row.stockQuantity }}</td>
+                  <td>{{ addedLine ? addedLine.get('SalesQuantity')?.value : row.salesQuantity }}</td>
+                  <td class="text-center">
+                    <span class="requisition-count" [attr.aria-label]="'Matching requisitions: ' + row.count">
+                      {{ row.count }}
+                    </span>
+                  </td>
+                  <td>
+                    @if (addedLine) {
+                      <div class="g-scrollable-text sm" [title]="addedLine.get('Remarks')?.value || ''">
+                        {{ addedLine.get('Remarks')?.value || '-' }}
+                      </div>
+                    } @else {
+                      <input type="text" maxlength="500" class="form-control form-control-sm"
+                        [value]="row.remarks" (input)="setBulkRemarks(row, $any($event.target).value)" />
+                    }
+                  </td>
+                </tr>
+              } @empty {
+                @if (bulkViewed()) {
+                  <tr><td colspan="8" class="text-center text-muted py-4">No matching items.</td></tr>
+                }
               }
             }
-          }
-        </tbody>
-      </table>
-
-      
-    </div>
-
-    @if (bulkViewed()) {
-      <app-pagination [(currentPage)]="bulkCurrentPage" [(pageSize)]="bulkPageSize" [totalItems]="bulkTotalItems()" (pageChanged)="onBulkPageChange($event)" (pageSizeChanged)="onBulkPageSizeChange($event)"></app-pagination>
-    }
-
-    @if (bulkError()) {
-      <div class="alert alert-danger mt-3">{{ bulkError() }}</div>
-    }
+          </tbody>
+        </table>
+      </div>
+      @if (bulkViewed()) {
+        <app-pagination [(currentPage)]="bulkCurrentPage" [(pageSize)]="bulkPageSize"
+          [totalItems]="bulkTotalItems()" (pageChanged)="onBulkPageChange($event)"
+          (pageSizeChanged)="onBulkPageSizeChange($event)"></app-pagination>
+      }
+      @if (bulkError()) {
+        <div class="alert alert-danger mt-3">{{ bulkError() }}</div>
+      }
     </div>
   </div>
 
   <div class="modal-footer">
     <span class="me-auto text-muted">{{ bulkSelectedCount }} selected</span>
     <button type="button" class="btn btn-secondary" (click)="closeBulkModal()">Close</button>
-    <button type="button" class="btn btn-success" [disabled]="!bulkSelectedCount || bulkItemsLoading()" (click)="addBulkLines()">
+    <button type="button" class="btn btn-success" [disabled]="!canAddBulk" (click)="addBulkLines()">
       <i class="fa-solid fa-plus me-1"></i> Add
     </button>
   </div>

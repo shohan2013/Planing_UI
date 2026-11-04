@@ -30,6 +30,7 @@ export interface IViewRequisitionLine {
   RemainingQuantity: number | null;
   StockQuantity: number | null;
   SalesQuantity: number | null;
+  Count: number;
   Remarks: string | null;
   DocStatusId: number;
   IsActive: boolean;

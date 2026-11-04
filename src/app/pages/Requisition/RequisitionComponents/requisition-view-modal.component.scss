@@ -216,3 +216,22 @@
     min-width: 1050px;
   }
 }
+
+
+
+
+.requisition-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #000;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  vertical-align: middle;
+}

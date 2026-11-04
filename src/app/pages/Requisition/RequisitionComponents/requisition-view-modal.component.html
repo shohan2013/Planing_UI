@@ -80,13 +80,14 @@
         <table class="custom-table product-table">
           <colgroup>
             <col style="width: 11%" />
-            <col style="width: 21%" />
-            <col style="width: 12%" />
+            <col style="width: 20%" />
+            <col style="width: 8%" />
             <col style="width: 8%" />
             <col style="width: 12%" />
             <col style="width: 10%" />
             <col style="width: 10%" />
-            <col style="width: 16%" />
+            <col style="width: 6%" />
+            <col style="width: 15%" />
           </colgroup>
 
           <thead>
@@ -98,6 +99,7 @@
               <th class="number-column">Remaining Stock Quantity</th>
               <th class="number-column">Stock Quantity</th>
               <th class="number-column">Sales Quantity</th>
+              <th class="text-center">Count</th>
               <th>Remarks</th>
             </tr>
           </thead>
@@ -105,7 +107,7 @@
           <tbody>
             @if (lines.length === 0) {
               <tr>
-                <td colspan="8" class="empty-table-message">
+                <td colspan="9" class="empty-table-message">
                   No active Requisition Lines found.
                 </td>
               </tr>
@@ -131,6 +133,11 @@
 
                   <td class="number-column">{{ line.StockQuantity ?? 0 }}</td>
                   <td class="number-column">{{ line.SalesQuantity ?? 0 }}</td>
+                  <td class="text-center">
+                    <span class="requisition-count" [attr.aria-label]="'Matching requisitions: ' + (line.Count ?? 0)">
+                      {{ line.Count ?? 0 }}
+                    </span>
+                  </td>
                   <td><div class="g-scrollable-text sm" [title]="line.Remarks || ''">{{ line.Remarks || '-' }}</div></td>
                 </tr>
               }
