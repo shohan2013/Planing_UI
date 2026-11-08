@@ -30,7 +30,7 @@
           </div>
           <ng-select
             class="flex-grow-1"
-            [items]="EmpList"
+            [items]="SearchEmpList()"
             bindLabel="Name"
             bindValue="Id"
             [(ngModel)]="selectedUser"
@@ -38,8 +38,9 @@
             [searchable]="true"
             [clearable]="true"
             style="margin-right: 5px"
-            (search)="onSearch($event)"
-            (ngModelChange)="onSelect()"
+            [typeahead]="search$"
+            (close)="onClose()"
+            (ngModelChange)="onSelect($event)"
           >
             <ng-template ng-option-tmp let-item="item">
               <strong>{{ item.Name }}</strong>

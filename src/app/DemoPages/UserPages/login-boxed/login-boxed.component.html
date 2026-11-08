@@ -1,8 +1,14 @@
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css"
+/>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+/>
 
 <style>
-  .auth-wrapper{
+  .auth-wrapper {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   }
   * {
@@ -12,7 +18,6 @@
     font-family: Montserrat;
   }
 
-  
   .auth-wrapper {
     min-height: 100vh;
     display: flex;
@@ -184,7 +189,7 @@
 
   .divider::before,
   .divider::after {
-    content: '';
+    content: "";
     flex: 1;
     height: 1px;
     background-color: #e0e0e0;
@@ -253,66 +258,51 @@
 </style>
 
 <div class="auth-wrapper">
-
   <div class="login-card">
-
-    <div class="brand">BUDGET</div>
+    <div class="brand">PLANNER</div>
 
     <h2>WELCOME BACK!</h2>
 
-    <p class="subtitle">
-      Sign in to start managing your Plan.
-    </p>
+    <p class="subtitle">Sign in to start managing your Plan.</p>
 
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-
       <div class="mb-3">
         <input
           type="text"
           class="form-control custom-input"
           placeholder="User ID"
-          formControlName="UserName">
+          formControlName="UserName"
+        />
       </div>
 
       <div class="mb-3 position-relative">
-
         <input
           [type]="fieldTextType ? 'text' : 'password'"
           class="form-control custom-input"
           placeholder="Password"
-          formControlName="Password">
+          formControlName="Password"
+        />
 
         <button
           type="button"
           class="toggle-btn"
-          (click)="toggleFieldTextType()">
-
+          (click)="toggleFieldTextType()"
+        >
           <i class="ri-eye-line" *ngIf="!fieldTextType"></i>
           <i class="ri-eye-off-line" *ngIf="fieldTextType"></i>
-
         </button>
-
       </div>
 
       <div class="text-end mb-4">
-        <a href="#" class="forgot-link">
-          Forgot password?
-        </a>
+        <a href="#" class="forgot-link"> Forgot password? </a>
       </div>
 
-      <button
-      type="submit"
-      class="btn login-btn"
-      [disabled]="isLoading">
+      <button type="submit" class="btn login-btn" [disabled]="isLoading">
+        <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2">
+        </span>
 
-      <span
-        *ngIf="isLoading"
-        class="spinner-border spinner-border-sm me-2">
-      </span>
-
-      {{ isLoading ? 'Logging in...' : 'Login' }}
-    </button>
-
+        {{ isLoading ? "Logging in..." : "Login" }}
+      </button>
     </form>
 
     <div class="signup">
@@ -325,7 +315,6 @@
     </div>
 
     <div class="socials">
-
       <button type="button" class="social-btn">
         <i class="ri-google-fill"></i>
       </button>
@@ -337,9 +326,6 @@
       <button type="button" class="social-btn">
         <i class="ri-facebook-circle-fill"></i>
       </button>
-
     </div>
-
   </div>
-
 </div>

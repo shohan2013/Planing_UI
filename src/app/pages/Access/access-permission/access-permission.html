@@ -26,7 +26,7 @@
           </div>
           <ng-select
             class="flex-grow-1"
-            [items]="EmpList"
+            [items]="EmpList()"
             bindLabel="Name"
             bindValue="Id"
             [(ngModel)]="selectedUser"
@@ -35,7 +35,8 @@
             [clearable]="true"
             dropdownPosition="bottom"
             style="margin-right: 5px"
-            (search)="onSearch($event)"
+            [typeahead]="search$"
+            (close)="onClose()"
             (ngModelChange)="onSelect($event)"
           >
             <ng-template ng-option-tmp let-item="item">

@@ -1,15 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { Component,OnInit,signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgSelectModule } from '@ng-select/ng-select';
 import {
-debounceTime,
-distinctUntilChanged,Subject,
-switchMap,
-takeUntil
+  debounceTime,
+  distinctUntilChanged,
+  of,
+  Subject,
+  switchMap,
+  takeUntil,
 } from 'rxjs';
-
 
 import { IPermission } from 'src/app/core/model/Permission/Permission';
 import { AccessService } from 'src/app/core/services/Access/access-service';
@@ -26,7 +27,7 @@ export class AccessPermission implements OnInit {
   //searchText = '';
   selectedId: number;
   paginatedItems = signal<IPermission[]>([]);
-  EmpList: any[] = []; // dropdown source
+  EmpList = signal<any[]>([]); // dropdown source
   selectedUser: number;
   search$ = new Subject<string>();
   private destroy$ = new Subject<void>();
@@ -53,33 +54,41 @@ export class AccessPermission implements OnInit {
     return index;
   }
 
-  //selectedCustomer: number | null = null;
-
-  onSearch(event: any) {
-    const term = event.term;
-
-    if (!term || term.length < 2) {
-      return;
-    }
-
-    this.search$.next(term);
-  }
-
   GetEmpInfo() {
     this.search$
       .pipe(
         debounceTime(200),
         distinctUntilChanged(),
-        switchMap((term) => this.commonservice.GetEmpData(term)),
+        switchMap((term) =>
+          term && term.length >= 2
+            ? this.commonservice.GetEmpData(term)
+            : of([]),
+        ),
+        takeUntil(this.destroy$),
       )
       .subscribe((data) => {
-        this.EmpList = data;
+        this.EmpList.set(data);
       });
   }
 
   onSelect(selectedId: string | null) {
-    if (!selectedId) return null;
+    if (!selectedId) {
+      this.clearEmpList();
+      return;
+    }
     this.GetPermissionData(selectedId);
+  }
+
+  // dropdown closed without a selection: drop the stale suggestions
+  onClose() {
+    if (!this.selectedUser) this.clearEmpList();
+  }
+
+  // pushing '' through search$ also resets distinctUntilChanged,
+  // so retyping the same term fetches again
+  clearEmpList() {
+    this.EmpList.set([]);
+    this.search$.next('');
   }
 
   GetPermissionData(name: string) {
