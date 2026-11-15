@@ -109,6 +109,11 @@ export const routes: Routes = [
           import('./pages/RequisitionApproval/requisitionapproval').then((m) => m.RequisitionApproval),
       },
       {
+        path: 'requisitionrequests',
+        loadComponent: () => import('./pages/RequisitionApproval/RequisitionRequestComponents/requisition-requests.component')
+          .then(m => m.RequisitionRequestsComponent),
+      },
+      {
         path: 'masterconfiguration',
         loadComponent: () =>
           import('./pages/MasterConfiguration/master-configuration').then((m) => m.MasterConfiguration),

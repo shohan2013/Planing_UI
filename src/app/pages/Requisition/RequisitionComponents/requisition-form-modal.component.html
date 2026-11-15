@@ -2,11 +2,7 @@
   <div class="modal-header">
     <div class="d-flex flex-column align-items-start">
       <h5 class="modal-title d-flex align-items-center gap-2">
-        @if (isEditMode) {
-          <img src="assets/icons/edit.svg" width="16" height="16" alt="" /> Edit Requisition
-        } @else {
-          <img src="assets/icons/create.svg" width="17.5" height="17.5" alt="" /> Create Requisition
-        }
+        <img src="assets/icons/create.svg" width="17.5" height="17.5" alt="" /> Create Requisition
       </h5>
     </div>
     <button type="button" class="btn-close" aria-label="Close"
@@ -216,7 +212,22 @@
         <div class="alert alert-danger py-2 mt-3">At least one Requisition Line is required.</div>
       }
       @if (lines.length > 0) {
+
         <div class="table-responsive mt-3">
+          
+        <div class="text-start px-3 py-2">
+          <strong>Total Quantity</strong>
+          <span class="ms-2">{{ totalQuantity() | number:'1.0-4' }}</span>
+        </div>
+        <div class="px-3 mb-3">
+          <input type="search" class="form-control"
+            placeholder="Search product name or ID..."
+            aria-label="Search requisition lines by product name or ID"
+            [value]="lineSearch()"
+            (input)="lineSearch.set($any($event.target).value)" />
+        </div>
+
+
           <table class="custom-table">
             <thead>
               <tr>
@@ -226,36 +237,28 @@
                 <th>ITEM</th>
                 <th>UOM</th>
                 <th>QUANTITY</th>
-                @if (isEditMode) {
-                  <th>REMAINING QUANTITY</th>
-                }
+
                 <th>STOCK QUANTITY</th>
+                <th>SALES QUANTITY</th>
                 <th class="text-center">COUNT</th>
-                <th>COUNT</th>
                 <th>REMARKS</th>
                 <th>ACTION</th>
               </tr>
             </thead>
             <tbody>
-              @for (line of lines.controls; track line; let index = $index) {
+            @for (row of filteredLines(); track row.line) {
+                @let line = row.line;
+                @let index = row.index;
                 <tr>
                   <td class="text-center">{{ index + 1 }}</td>
                   <td>{{ getProductTypeName(+line.get('ProductTypeId')?.value) }}</td>
                   <td>{{ line.get('ItemId')?.value }}</td>
                   <td>{{ line.get('ItemName')?.value || '-' }}</td>
                   <td>{{ line.get('UOMName')?.value || 'Unspecified' }}</td>
-                  <td>{{ line.get('Quantity')?.value }}</td>
-                  @if (isEditMode) {
-                    <td [style.background-color]="line.get('RemainingQuantity')?.value < 0 ? '#fff1f2' : null">
-                      {{
-                        line.get('RemainingQuantity')?.value == null
-                          ? '-'
-                          : line.get('RemainingQuantity')?.value < 0
-                            ? -line.get('RemainingQuantity')?.value
-                            : line.get('RemainingQuantity')?.value
-                      }}
-                    </td>
-                  }
+                  <td>
+                    <input type="number" min="0.0001" step="0.0001" class="form-control form-control-sm" [attr.aria-label]="'Quantity for line ' + (index + 1)" [formControl]="$any(line.get('Quantity'))" [readonly]="isSubmitting" [class.is-invalid]="line.get('Quantity')?.invalid" />
+                  </td>
+
                   <td>{{ line.get('StockQuantity')?.value }}</td>
                   <td>{{ line.get('SalesQuantity')?.value }}</td>
                   <td class="text-center">
@@ -264,15 +267,19 @@
                     </span>
                   </td>
                   <td>
-                    <div class="g-scrollable-text sm" [title]="line.get('Remarks')?.value || ''">
-                      {{ line.get('Remarks')?.value || '-' }}
-                    </div>
+                    <input type="text" maxlength="500" class="form-control form-control-sm" [attr.aria-label]="'Remarks for line ' + (index + 1)" [formControl]="$any(line.get('Remarks'))" [title]="line.get('Remarks')?.value || ''" [readonly]="isSubmitting" />
                   </td>
                   <td class="text-end">
                     <button type="button" class="action-btn btn-delete" title="Delete Line"
                       [disabled]="isSubmitting" (click)="removeLine(index)">
                       <i class="fa-solid fa-trash-can"></i>
                     </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="11" class="text-center text-muted py-4">
+                    No matching products.
                   </td>
                 </tr>
               }
@@ -292,21 +299,16 @@
       <i class="fa-solid fa-fw fa-xmark"></i> Close
     </button>
     @if (state() !== 'initializing') {
-      <button *menuPermission="isEditMode ? PermissionAction.Update : PermissionAction.Insert"
+      <button *menuPermission="PermissionAction.Insert"
         type="submit" class="btn btn-success"
-        [disabled]="isSubmitting || unitDataLoading() || (isEditMode && header?.DocStatusId === DocumentStatusId.Completed)">
+        [disabled]="isSubmitting || unitDataLoading()">
         @if (isSubmitting) {
           <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
         } @else {
           <i class="fa-solid fa-fw fa-check"></i>
         }
-        {{ isSubmitting ? (isEditMode ? 'Updating...' : 'Saving...') : (isEditMode ? 'Update' : 'Save') }}
+        {{ isSubmitting ? 'Saving...' : 'Save' }}
       </button>
-    }
-    @if (isEditMode && state() !== 'initializing') {
-      <button type="button" class="btn btn-complete me-3"
-        [disabled]="isSubmitting || header?.DocStatusId === DocumentStatusId.Completed"
-        (click)="complete()">Complete</button>
     }
   </div>
 </form>
@@ -324,7 +326,11 @@
     <div class="row g-3 align-items-end" [formGroup]="bulkFilters">
       <div class="col-lg-2 col-md-4">
         <label class="form-label" for="bulkProductType">Product Type <span class="text-danger">*</span></label>
-        <select id="bulkProductType" class="form-select" formControlName="ProductTypeId">
+        <select id="bulkProductType" class="form-select"
+            [ngModel]="bulkFilters.controls.ProductTypeId.value"
+            [ngModelOptions]="{ standalone: true }"
+            #bulkProductTypeModel="ngModel"
+            (ngModelChange)="onBulkTypeChange($event, bulkProductTypeModel)">
           <option [ngValue]="0" disabled>Select Product Type</option>
           @for (productType of productTypes(); track productType.Id) {
             <option [ngValue]="+productType.Id">{{ productType.Name }}</option>
@@ -359,10 +365,8 @@
           }
         </select>
       </div>
-      <div class="col-lg-1 col-md-2">
-        <button type="button" class="btn btn-success" [disabled]="!canViewBulk" (click)="viewBulkItems()">View</button>
-      </div>
-      <div class="col-lg-3 col-md-6">
+
+      <div class="col-lg-4 col-md-6">
         <div class="bulk-search-box">
           <span class="bulk-search-icon">
             <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
@@ -403,8 +407,8 @@
                   <span class="spinner-border text-success" role="status" aria-label="Loading items"></span>
                 </td>
               </tr>
-            } @else {
-              @for (row of bulkRows(); track row.itemId) {
+              } @else if (!bulkError()) {
+                @for (row of bulkRows(); track row.itemId) {
                 @let addedLine = getAddedBulkLine(row.itemId);
                 <tr [class.bulk-already-added]="!!addedLine">
                   <td>{{ row.itemId }}</td>
@@ -466,7 +470,12 @@
           (pageSizeChanged)="onBulkPageSizeChange($event)"></app-pagination>
       }
       @if (bulkError()) {
-        <div class="alert alert-danger mt-3">{{ bulkError() }}</div>
+      <div class="alert alert-danger mt-3">
+        {{ bulkError() }}
+        <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="retryBulkLoad()">
+          Retry
+        </button>
+      </div>
       }
     </div>
   </div>

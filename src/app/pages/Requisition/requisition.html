@@ -180,15 +180,22 @@
                   *menuPermission="PermissionAction.Update"
                   type="button"
                   class="action-btn btn-edit"
-                  title="Edit"
-                  [disabled]="
-                        deletingReqId() !== null
-                      "
-                  (click)="
-                        openEditModal(item)
-                      "
+                  [attr.title]="item.IsEditable ? 'Edit' : 'Request Change'"
+                  [attr.aria-label]="item.IsEditable ? 'Edit requisition' : 'Request a requisition change'"
+                  [disabled]="deletingReqId() !== null || isClosedForEditing(item)"
+                  (click)="openEditModal(item)"
                 >
-                  <i class="fa-regular fa-pen-to-square"></i>
+
+                  @if (item.IsEditable) {
+                    <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
+                  } @else {
+                    <span class="d-inline-block align-middle" aria-hidden="true"
+                      style="width: 16px; height: 16px; background-color: currentColor;
+                            mask: url('assets/icons/requisition-pencil-clock.svg') center / contain no-repeat;">
+                    </span>
+                  }
+
+
                 </button>
 
                 <button

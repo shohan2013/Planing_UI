@@ -23,6 +23,7 @@ import { DateTimePipe } from '../../shared/pipes/date-time-pipe';
 
 import { RequisitionViewModalComponent } from './RequisitionComponents/requisition-view-modal.component';
 import { RequisitionFormModalComponent } from './RequisitionComponents/requisition-form-modal.component';
+import { RequisitionEditModalComponent } from './RequisitionComponents/requisition-edit-modal.component';
 
 
 import { MenuPermissionDirective } from 'src/app/core/directives/menu-permission.directive';/////
@@ -132,13 +133,18 @@ export class Requisition
       this.toastr.error('Unable to open the requisition details.');
     }
   }
-
   openCreateModal(): void {
     this.openFormModal('create');
   }
 
+  isClosedForEditing(header: IViewRequisitionHeader): boolean {
+    return !header.IsActive ||
+      header.DocStatusId === DocumentStatusId.Completed ||
+      header.DocStatusId === 5; // REJC
+  }
+
   openEditModal(header: IViewRequisitionHeader): void {
-    this.openFormModal('edit', header);
+    if (!this.isClosedForEditing(header)) this.openFormModal('edit', header);
   }
 
   deleteRequisition(reqId: number): void {
@@ -321,18 +327,18 @@ completeRequisition(reqId: number): void {
     }
 
     try {
-      const modalRef = this.modalService.open(RequisitionFormModalComponent, {
+      if (mode === 'edit' && !header) return;
+
+      const component = mode === 'create' ? RequisitionFormModalComponent : RequisitionEditModalComponent;
+      const modalRef = this.modalService.open(component, {
         fullscreen: true,
         backdrop: 'static',
         keyboard: false,
-        // ZwindowClass: 'requisition-fullscreen-modal',
       });
 
       this.formModalRef = modalRef;
 
-      modalRef.componentInstance.mode = mode;
-
-      modalRef.componentInstance.header = header;
+      if (mode === 'edit') modalRef.componentInstance.header = header;
 
       const clearReference = (): void => {
         if (this.formModalRef === modalRef) {

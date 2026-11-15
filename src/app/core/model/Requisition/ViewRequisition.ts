@@ -15,6 +15,8 @@ export interface IViewRequisitionHeader {
   UPDATEDDATE: Date | null;
   DocStatusId: number;
   IsActive: boolean;
+  IsEditable: boolean;
+  RequestCount: number;
 }
 
 export interface IViewRequisitionLine {
@@ -31,6 +33,8 @@ export interface IViewRequisitionLine {
   StockQuantity: number | null;
   SalesQuantity: number | null;
   Count: number;
+  UnresolvedRequestCount : number;
+  RequestCount: number;
   Remarks: string | null;
   DocStatusId: number;
   IsActive: boolean;
