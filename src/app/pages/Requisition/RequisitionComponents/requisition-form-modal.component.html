@@ -103,6 +103,8 @@
                   <tr>
                     <th>PRODUCT TYPE</th>
                     <th>ITEM</th>
+                    <th>SIZE</th>
+                    <th>PRIORITY</th>
                     <th>UOM</th>
                     <th>QUANTITY</th>
                     <th>STOCK QUANTITY</th>
@@ -152,6 +154,14 @@
                            isAlreadyAdded(+lf['ItemId'].value, selectedLineProductTypeId)) {
                         <div class="small text-warning mt-1">Already added for this Product Type.</div>
                       }
+                    </td>
+                    <td>{{ lineFormGroup.controls.Size.value ?? '–' }}</td>
+                    <td>
+                      <input type="number" class="form-control"
+                        formControlName="Priority"
+                        placeholder="Priority" step="1"
+                        aria-label="Priority"
+                        [readonly]="isSubmitting" />
                     </td>
                     <td>
                       <select class="form-select" formControlName="UOMId"
@@ -242,6 +252,7 @@
                 <th>SALES QUANTITY</th>
                 <th class="text-center">COUNT</th>
                 <th>REMARKS</th>
+                <th>PRIORITY</th>
                 <th>ACTION</th>
               </tr>
             </thead>
@@ -269,6 +280,13 @@
                   <td>
                     <input type="text" maxlength="500" class="form-control form-control-sm" [attr.aria-label]="'Remarks for line ' + (index + 1)" [formControl]="$any(line.get('Remarks'))" [title]="line.get('Remarks')?.value || ''" [readonly]="isSubmitting" />
                   </td>
+                  <td>
+                    <input type="number" step="1"
+                      class="form-control form-control-sm"
+                      [attr.aria-label]="'Priority for line ' + (index + 1)"
+                      [formControl]="$any(line.get('Priority'))"
+                      [readonly]="isSubmitting" />
+                  </td>
                   <td class="text-end">
                     <button type="button" class="action-btn btn-delete" title="Delete Line"
                       [disabled]="isSubmitting" (click)="removeLine(index)">
@@ -278,7 +296,7 @@
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="11" class="text-center text-muted py-4">
+                  <td colspan="12" class="text-center text-muted py-4">
                     No matching products.
                   </td>
                 </tr>
@@ -392,6 +410,8 @@
             <tr>
               <th>ITEM ID</th>
               <th>ITEM NAME</th>
+              <th>SIZE</th>
+              <th>PRIORITY</th>
               <th>UOM</th>
               <th>QUANTITY</th>
               <th>STOCK QUANTITY</th>
@@ -403,7 +423,7 @@
           <tbody>
             @if (bulkItemsLoading()) {
               <tr>
-                <td colspan="8" class="text-center py-5">
+                <td colspan="10" class="text-center py-5">
                   <span class="spinner-border text-success" role="status" aria-label="Loading items"></span>
                 </td>
               </tr>
@@ -413,6 +433,19 @@
                 <tr [class.bulk-already-added]="!!addedLine">
                   <td>{{ row.itemId }}</td>
                   <td>{{ row.itemName }}</td>
+                  <td>{{ row.size ?? '–' }}</td>
+                  <td>
+                    @if (addedLine) {
+                      {{ addedLine.get('Priority')?.value ?? '–' }}
+                    } @else {
+                      <input type="number" step="1"
+                        class="form-control form-control-sm"
+                        [ngModel]="row.priority"
+                        [ngModelOptions]="{ standalone: true }"
+                        (ngModelChange)="setBulkPriority(row, $event)"
+                        [attr.aria-label]="'Priority for item ' + row.itemId" />
+                    }
+                  </td>
                   <td>
                     @if (addedLine) {
                       {{ addedLine.get('UOMName')?.value || 'Unspecified' }}
@@ -457,7 +490,7 @@
                 </tr>
               } @empty {
                 @if (bulkViewed()) {
-                  <tr><td colspan="8" class="text-center text-muted py-4">No matching items.</td></tr>
+                  <tr><td colspan="10" class="text-center text-muted py-4">No matching items.</td></tr>
                 }
               }
             }

@@ -22,6 +22,7 @@ import { PaginationComponent } from 'src/app/shared/pagination/pagination.compon
 
 type LineDraft = {
   quantity: number | null;
+  priority: number | null;
   remarks: string;
   additionalQuantity: number | null;
 };
@@ -29,6 +30,8 @@ type LineDraft = {
 type BulkRow = {
   itemId: number;
   name: string;
+  sizeId: number | null;
+  size: string | null;
   stock: number;
   sales: number;
   count: number;
@@ -37,6 +40,7 @@ type BulkRow = {
 type BulkDraft = {
   row: BulkRow;
   quantity: number | null;
+  priority: number | null;
   uomId: number;
   remarks: string;
   quantityText?: string;
@@ -107,6 +111,7 @@ export class RequisitionEditModalComponent implements OnInit {
   productTypeId = 0;
   itemSearch: IItem | string = '';
   selectedItem: IItem | null = null;
+  priority: number | null = null;
   uomId = 0;
   quantity: number | null = null;
   remarks = '';
@@ -286,7 +291,7 @@ export class RequisitionEditModalComponent implements OnInit {
         }
         for (const row of active) {
           if (!this.drafts.has(row.ID)) {
-            this.drafts.set(row.ID, { quantity: row.Quantity, remarks: row.Remarks ?? '', additionalQuantity: null });
+            this.drafts.set(row.ID, { quantity: row.Quantity, priority: row.Priority ?? null, remarks: row.Remarks ?? '', additionalQuantity: null,});
           }
         }
 
@@ -321,7 +326,10 @@ export class RequisitionEditModalComponent implements OnInit {
 
   canSaveLine(line: IViewRequisitionLine, draft: LineDraft): boolean {
     return this.canWrite && !this.isRequestMode &&
-      this.validQuantity(draft.quantity, true) && draft.quantity !== line.Quantity;
+      this.validQuantity(draft.quantity, true) &&
+      (draft.quantity !== line.Quantity ||
+       draft.priority !== (line.Priority ?? null) ||
+       draft.remarks.trim() !== (line.Remarks ?? '').trim());
   }
 
   saveLine(line: IViewRequisitionLine, draft: LineDraft): void {
@@ -330,12 +338,16 @@ export class RequisitionEditModalComponent implements OnInit {
     if (enroll === null) return;
 
     const quantity = draft.quantity;
+    const priority = draft.priority ?? null;
     const remarks = draft.remarks.trim();
     this.write(this.requisitionService.updateLine({
-      ReqLineID: line.ID, Quantity: quantity, Remarks: remarks, Enroll: enroll,
+      ReqLineID: line.ID, Quantity: quantity, Priority: priority,
+      Remarks: remarks, Enroll: enroll,
     }), () => {
-      this.lines.update(rows => rows.map(row => row.ID === line.ID ? { ...row, Quantity: quantity, Remarks: remarks } : row));
-      this.drafts.set(line.ID, { quantity, remarks, additionalQuantity: null });
+      this.lines.update(rows => rows.map(row => row.ID === line.ID
+        ? { ...row, Quantity: quantity, Priority: priority, Remarks: remarks }
+        : row));
+      this.drafts.set(line.ID, { quantity, priority, remarks, additionalQuantity: null });
     });
   }
 
@@ -487,7 +499,9 @@ export class RequisitionEditModalComponent implements OnInit {
     );
 
   itemFormatter = (item: IItem | string): string =>
-    typeof item === 'string' ? item : (item?.Name ?? '');
+    typeof item === 'string'
+      ? item
+      : `${item?.Name ?? ''}${item?.Size ? ` — Size: ${item.Size}` : ''}`;
 
   scrollActiveItem(): void {
     setTimeout(() => {
@@ -559,11 +573,15 @@ export class RequisitionEditModalComponent implements OnInit {
 
     this.submitLines([{
       ProductTypeId: this.productTypeId, ItemId: Number(this.selectedItem.Id),
+      SizeID: this.selectedItem.SizeId ?? null,
+      Size: this.selectedItem.Size ?? null,
+      Priority: this.priority ?? null,
       UOMId: this.uomId, Quantity: this.quantity, StockQuantity: this.stock,
       SalesQuantity: this.sales, Remarks: this.remarks.trim() || null,
     }], () => {
       this.itemSearch = this.selectedItem ?? '';
       this.quantity = null;
+      this.priority = null;
       this.remarks = '';
       this.uomId = this.defaultUomId;
     });
@@ -714,6 +732,7 @@ export class RequisitionEditModalComponent implements OnInit {
         if (this.bulkSearchPending) return;
         const rows = response.Data.map(item => ({
           itemId: Number(item.ItemID), name: item.ItemName, stock: item.StockQuantity,
+          sizeId: item.SizeId ?? null, size: item.Size ?? null,
           sales: item.SalesQuantity, count: item.Count,
         }));
         for (const row of rows) {
@@ -741,11 +760,11 @@ export class RequisitionEditModalComponent implements OnInit {
     this.updateBulkDraft(row, { quantity, quantityText });
   }
 
-  updateBulkDraft(row: BulkRow, patch: Partial<Pick<BulkDraft, 'quantity' | 'quantityText' | 'uomId' | 'remarks'>>): void {
+  updateBulkDraft(row: BulkRow, patch: Partial<Pick<BulkDraft, 'quantity' | 'quantityText' | 'priority' | 'uomId' | 'remarks'>>): void {
     if (this.savedLine(row.itemId, this.bulkProductTypeId)) return;
 
     const draft = this.bulkDrafts.get(row.itemId) ?? {
-      row, quantity: null, uomId: this.defaultUomId, remarks: '',
+      row, quantity: null, priority: null, uomId: this.defaultUomId, remarks: '',
     };
     this.bulkDrafts.set(row.itemId, { ...draft, ...patch });
   }
@@ -755,6 +774,9 @@ export class RequisitionEditModalComponent implements OnInit {
 
     const lines = this.bulkSelection.map(draft => ({
       ProductTypeId: this.bulkProductTypeId, ItemId: draft.row.itemId,
+      SizeID: draft.row.sizeId ?? null,
+      Size: draft.row.size ?? null,
+      Priority: draft.priority ?? null,
       UOMId: draft.uomId, Quantity: draft.quantity!,
       StockQuantity: draft.row.stock, SalesQuantity: draft.row.sales,
       Remarks: draft.remarks.trim() || null,

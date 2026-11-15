@@ -3,5 +3,8 @@ export interface IItem {
   Name: string;
   UnitId: number | null;
   TypeId: number;
+  SizeId: number | null;
+  Size: string | null;
+
   LevelOneId: number;
 }

@@ -23,6 +23,11 @@ export interface IRequisitionLine {
   ProductTypeId: number;
   ItemId: number;
   ItemName: string | null;
+  
+  SizeID: number | null;
+  Size: string | null;
+  Priority: number | null;
+
   UOMId: number;
   Quantity: number;
 

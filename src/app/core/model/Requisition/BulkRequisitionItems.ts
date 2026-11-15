@@ -17,4 +17,6 @@ export interface IBulkRequisitionItem {
   StockQuantity: number;
   SalesQuantity: number;
   Count: number;
+  SizeId: number | null;
+  Size: string | null;
 }

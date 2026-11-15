@@ -26,6 +26,9 @@ export interface IViewRequisitionLine {
   ProductTypeName: string;
   ItemId: number;
   ItemName: string;
+  SizeID: number | null;
+  Size: string | null;
+  Priority: number | null;
   UOMId: number;
   UOMName: string;
   Quantity: number;

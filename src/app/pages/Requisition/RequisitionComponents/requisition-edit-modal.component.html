@@ -71,6 +71,8 @@
               <tr>
                 <th>PRODUCT TYPE</th>
                 <th>ITEM</th>
+                <th>SIZE</th>
+                <th>PRIORITY</th>
                 <th>UOM</th>
                 <th>QUANTITY</th>
                 <th>STOCK QUANTITY</th>
@@ -117,6 +119,12 @@
                   @if (selectedItem && savedLine(selectedItem.Id, productTypeId)) {
                     <div class="small text-warning mt-1">Already added for this Product Type.</div>
                   }
+                </td>
+                <td>{{ selectedItem?.Size ?? '–' }}</td>
+                <td>
+                  <input type="number" step="1" class="form-control"
+                    placeholder="Priority" aria-label="Priority"
+                    [(ngModel)]="priority" [disabled]="!canAdd" />
                 </td>
                 <td>
                   <select class="form-select" aria-label="UoM" [(ngModel)]="uomId" [disabled]="!canAdd">
@@ -202,6 +210,7 @@
             <th>SALES QUANTITY</th>
             <th class="text-center">COUNT</th>
             <th>REMARKS</th>
+            <th>PRIORITY</th>
             @if (isRequestMode) {
               <th class="text-center">UNRESOLVED</th>
             }
@@ -255,6 +264,17 @@
                   }
                 </td>
 
+                <td>
+                  @if (!isRequestMode && isOpen) {
+                    <input *menuPermission="PermissionAction.Update"
+                      type="number" step="1"
+                      class="form-control form-control-sm" aria-label="Priority"
+                      [(ngModel)]="draft.priority" [disabled]="!canWrite" />
+                  } @else {
+                    {{ line.Priority ?? '–' }}
+                  }
+                </td>
+
                 @if (isRequestMode) {
                   <td class="text-center">{{ line.UnresolvedRequestCount }}</td>
                   <td>
@@ -302,7 +322,7 @@
           } @empty {
             @if (linesReady() && !loadingLines()) {
               <tr>
-                <td [attr.colspan]="isRequestMode ? 14 : 12" class="text-muted">
+                <td [attr.colspan]="isRequestMode ? 15 : 13" class="text-muted">
                   {{ lines().length ? 'No matching products.' : 'No active lines.' }}
                 </td>
               </tr>
@@ -415,6 +435,8 @@
             <tr>
               <th>ITEM ID</th>
               <th>ITEM NAME</th>
+              <th>SIZE</th>
+              <th>PRIORITY</th>
               <th>UOM</th>
               <th>QUANTITY</th>
               <th>STOCK QUANTITY</th>
@@ -426,7 +448,7 @@
           <tbody>
             @if (loadingBulk()) {
               <tr>
-                <td colspan="8" class="text-center py-5">
+                <td colspan="10" class="text-center py-5">
                   <span class="spinner-border text-success" role="status" aria-label="Loading items"></span>
                 </td>
               </tr>
@@ -437,6 +459,18 @@
                 <tr [class.bulk-already-added]="!!addedLine">
                   <td>{{ row.itemId }}</td>
                   <td>{{ row.name }}</td>
+                  <td>{{ row.size ?? '–' }}</td>
+                  <td>
+                    @if (addedLine) {
+                      {{ addedLine.Priority ?? '–' }}
+                    } @else {
+                      <input type="number" step="1"
+                        class="form-control form-control-sm"
+                        aria-label="Bulk Priority" [disabled]="saving()"
+                        [ngModel]="draft?.priority ?? null"
+                        (ngModelChange)="updateBulkDraft(row, { priority: $event })" />
+                    }
+                  </td>
                   <td>
                     @if (addedLine) {
                       {{ addedLine.UOMName || 'Unspecified' }}
@@ -485,7 +519,7 @@
                 </tr>
               } @empty {
                 @if (bulkProductTypeId > 0) {
-                  <tr><td colspan="8" class="text-center text-muted py-4">No matching items.</td></tr>
+                  <tr><td colspan="10" class="text-center text-muted py-4">No matching items.</td></tr>
                 }
               }
             }

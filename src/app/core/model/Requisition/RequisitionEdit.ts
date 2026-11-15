@@ -7,6 +7,9 @@ export interface IUpdateRequisitionHeaderRequest {
 export interface IAddRequisitionLineInput {
   ProductTypeId: number;
   ItemId: number;
+  SizeID: number | null;
+  Size: string | null;
+  Priority: number | null;
   UOMId: number;
   Quantity: number;
   StockQuantity: number | null;
@@ -23,6 +26,7 @@ export interface IAddRequisitionLinesRequest {
 export interface IUpdateRequisitionLineRequest {
   ReqLineID: number;
   Quantity: number;
+  Priority: number | null;
   Remarks: string | null;
   Enroll: number;
 }

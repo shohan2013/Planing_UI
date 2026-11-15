@@ -24,6 +24,9 @@ type FormModalState = 'initializing' | 'ready' | 'submitting' | 'failed';
 type BulkRow = {
   itemId: number;
   itemName: string;
+  sizeId: number | null;
+  size: string | null;
+  priority: number | null;
   uomId: number | null;
   stockQuantity: number;
   salesQuantity: number;
@@ -127,6 +130,9 @@ export class RequisitionFormModalComponent implements OnInit {
     ItemSearch: new FormControl<IItem | string>({ value: '', disabled: true }, Validators.required),
     ItemId: new FormControl('', Validators.required),
     ItemName: new FormControl(''),
+    SizeID: new FormControl<number | null>(null),
+    Size: new FormControl<string | null>(null),
+    Priority: new FormControl<number | null>(null),
     UOMId: new FormControl('', Validators.required),
     Quantity: new FormControl('', [Validators.required, Validators.min(1)]),
     StockQuantity: new FormControl(0),
@@ -334,6 +340,9 @@ export class RequisitionFormModalComponent implements OnInit {
       ProductTypeId: new FormControl(productTypeId),
       ItemId: new FormControl(itemId),
       ItemName: new FormControl(value.ItemName ?? ''),
+      SizeID: new FormControl<number | null>(value.SizeID ?? null),
+      Size: new FormControl<string | null>(value.Size ?? null),
+      Priority: new FormControl<number | null>(value.Priority ?? null),
       UOMId: new FormControl(selectedUoM.UoMId),
       UOMName: new FormControl(selectedUoM.UoMName ?? ''),
       Quantity: new FormControl(Number(value.Quantity), [Validators.required, Validators.min(0.0001)]),
@@ -375,6 +384,8 @@ export class RequisitionFormModalComponent implements OnInit {
       ItemSearch: item,
       ItemId: String(itemId),
       ItemName: item.Name,
+      SizeID: item.SizeId ?? null,
+      Size: item.Size ?? null,
       StockQuantity: 0,
       SalesQuantity: 0,
     }, { emitEvent: false });
@@ -418,8 +429,12 @@ export class RequisitionFormModalComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef),
     );
 
+
+
   itemFormatter = (item: IItem | string): string =>
-    typeof item === 'string' ? item : (item?.Name ?? '');
+  typeof item === 'string'
+    ? item
+    : `${item?.Name ?? ''}${item?.Size ? ` — Size: ${item.Size}` : ''}`;
 
   scrollActiveItem(): void {
     setTimeout(() => {
@@ -609,6 +624,9 @@ export class RequisitionFormModalComponent implements OnInit {
           const draft = this.bulkDrafts.get(itemId);
           const row: BulkRow = {
             itemId, itemName: item.ItemName,
+            sizeId: item.SizeId ?? null,
+            size: item.Size ?? null,
+            priority: draft?.priority ?? null,
             uomId: draft?.uomId ?? (this.plannerUoMs().length === 1 ? this.plannerUoMs()[0].UoMId : null),
             stockQuantity: Number(item.StockQuantity), salesQuantity: Number(item.SalesQuantity),
             count: Number(item.Count) || 0,
@@ -664,6 +682,9 @@ export class RequisitionFormModalComponent implements OnInit {
     this.updateBulkDraft({ ...row, quantity });
   }
 
+  setBulkPriority(row: BulkRow, priority: number | null): void {
+    this.updateBulkDraft({ ...row, priority });
+  }
   setBulkRemarks(row: BulkRow, remarks: string): void {
     this.updateBulkDraft({ ...row, remarks });
   }
@@ -721,6 +742,9 @@ export class RequisitionFormModalComponent implements OnInit {
         ProductTypeId: new FormControl(productTypeId),
         ItemId: new FormControl(row.itemId),
         ItemName: new FormControl(row.itemName),
+        SizeID: new FormControl<number | null>(row.sizeId),
+        Size: new FormControl<string | null>(row.size),
+        Priority: new FormControl<number | null>(row.priority),
         UOMId: new FormControl(selectedUoM.UoMId),
         UOMName: new FormControl(selectedUoM.UoMName ?? ''),
         Quantity: new FormControl(row.quantity, [Validators.required, Validators.min(0.0001)]),
@@ -816,7 +840,8 @@ export class RequisitionFormModalComponent implements OnInit {
         this.cancelItemQuantities();
         this.clearItemCount();
         this.lineFormGroup.patchValue({
-          ItemId: '', ItemName: '', StockQuantity: 0, SalesQuantity: 0,
+          ItemId: '', ItemName: '', SizeID: null, Size: null,
+          StockQuantity: 0, SalesQuantity: 0,
         }, { emitEvent: false });
       });
   }
@@ -928,6 +953,7 @@ export class RequisitionFormModalComponent implements OnInit {
     this.clearItemCount();
     this.lineFormGroup.reset({
       ProductTypeId: productTypeId, ItemSearch: '', ItemId: '', ItemName: '',
+      SizeID: null, Size: null, Priority: null,
       UOMId: this.plannerUoMs().length === 1 ? String(this.plannerUoMs()[0].UoMId) : '',
       Quantity: '', StockQuantity: 0, SalesQuantity: 0, Count: null, Remarks: '',
     }, { emitEvent: false });
@@ -962,6 +988,9 @@ export class RequisitionFormModalComponent implements OnInit {
       Lines: this.lines.getRawValue().map((line: any) => ({
         ID: 0, ReqID: 0, ProductTypeId: Number(line.ProductTypeId), ItemId: Number(line.ItemId),
         ItemName: line.ItemName?.trim() ?? '', UOMId: Number(line.UOMId), Quantity: Number(line.Quantity),
+        SizeID: line.SizeID ?? null,
+        Size: line.Size ?? null,
+        Priority: line.Priority ?? null,
         StockQuantity: Number(line.StockQuantity) || 0, SalesQuantity: Number(line.SalesQuantity) || 0,
         Remarks: line.Remarks?.trim() ?? '', DocStatusId: DocumentStatusId.Pending, IsActive: true,
       })),
