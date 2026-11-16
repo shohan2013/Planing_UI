@@ -77,6 +77,19 @@
       </div>
 
       <div class="table-responsive product-table-wrapper">
+        <div class="text-start mb-2">
+        <strong>Total Quantity</strong>
+        <span class="ms-2">{{ totalQuantity() | number:'1.0-4' }}</span>
+      </div>
+
+        <div class="mb-3">
+          <input type="search" class="form-control"
+            placeholder="Search product name..."
+            aria-label="Search requisition lines by product name"
+            [value]="lineSearch()"
+            (input)="lineSearch.set($any($event.target).value)" />
+        </div>
+
         <table class="custom-table product-table">
           <colgroup>
             <col style="width: 11%" />
@@ -105,14 +118,14 @@
           </thead>
 
           <tbody>
-            @if (lines.length === 0) {
+            @if (filteredLines().length === 0) {
               <tr>
                 <td colspan="9" class="empty-table-message">
-                  No active Requisition Lines found.
+                    {{ lines.length ? 'No matching products.' : 'No active Requisition Lines found.' }}
                 </td>
               </tr>
             } @else {
-              @for (line of lines; track line.ID) {
+              @for (line of filteredLines(); track line.ID) {
                 <tr>
                   <td>{{ line.ProductTypeName || '-' }}</td>
                   <td class="item-name">{{ line.ItemName || '-' }}</td>
@@ -120,15 +133,15 @@
                   <td class="number-column">{{ line.Quantity }}</td>
 
                   <td class="number-column">
-                    <span [class.negative-quantity]="line.RemainingQuantity !== null && line.RemainingQuantity < 0">
-                      {{
-                        line.RemainingQuantity === null
-                          ? '-'
-                          : line.RemainingQuantity < 0
-                            ? -line.RemainingQuantity
-                            : line.RemainingQuantity
-                      }}
-                    </span>
+                    @if (line.RemainingQuantity != null) {
+                      <span class="remaining-quantity-badge"
+                        [class.remaining-quantity-green]="line.RemainingQuantity <= 0"
+                        [class.remaining-quantity-yellow]="line.RemainingQuantity > 0">
+                        {{ line.RemainingQuantity < 0 ? -line.RemainingQuantity : line.RemainingQuantity }}
+                      </span>
+                    } @else {
+                      –
+                    }
                   </td>
 
                   <td class="number-column">{{ line.StockQuantity ?? 0 }}</td>

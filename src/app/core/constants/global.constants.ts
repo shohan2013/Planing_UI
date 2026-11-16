@@ -30,9 +30,19 @@ export const GlobalConstant = {
     addRequisition: 'Requisition/save',
     getRequisition: 'Requisition',
     getRequisitionLines: 'Requisition/GetLinesByReqId',
-    updateRequisition: 'Requisition/update',
+    updateRequisition: 'Requisition/update', // edit header
     deleteRequisition: 'Requisition/Delete',
-    completeRequisition: 'Requisition/complete',
+
+    //Edit Lines
+    addRequisitionLines: 'Requisition/AddLines',
+    updateRequisitionLine: 'Requisition/UpdateLine',
+    deleteRequisitionLine: 'Requisition/DeleteLine',
+    withdrawRequisitionLineRequest: 'Requisition/WithdrawLineRequest',
+    // Change Request on line ( when header IsEditable = 0 )
+    addRequisitionLineRequest: 'Requisition/AddLineRequest',
+    changeRequisitionLineRequest: 'Requisition/ChangeLineRequest',
+    getRequisitionLineHistory: 'Requisition/LineHistory',
+
     requisitionItemCount: 'Requisition/ItemCount',
 
     // ACRLBulkFilters: 'Requisition/ACRLBulkFilters',
@@ -41,9 +51,17 @@ export const GlobalConstant = {
     ItemDimentionGrade: 'Requisition/ItemDimentionGrade',
     bulkRequisitionItems: 'Requisition/BulkItems',
 
+
+    completeRequisition: 'Requisition/complete', // Obsolite code
+
  /*===========================REQUISITION APPROVAL===================================== */
     RequisitionApproval: 'RequisitionApproval/GetData',
     RequisitionApprovalDetails: 'RequisitionApproval/GetDetails',
+
+    //Line Request Approval
+    acceptRequisitionLineRequest: 'RequisitionApproval/AcceptRequest',
+    rejectRequisitionLineRequest: 'RequisitionApproval/RejectRequest',
+    RequisitionRequestHeaders: 'RequisitionApproval/GetRequestHeaders',
 
   /*===========================COMMON===================================== */
     Common: 'Common',

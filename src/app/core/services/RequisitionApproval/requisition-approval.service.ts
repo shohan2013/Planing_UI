@@ -7,6 +7,7 @@ import { ServerQueryRequest, ServerQueryResponse, } from '../../model/Common/Pag
 import { environment } from 'src/environments/environment';
 import { IRequisitionApprovalDetails, IRequisitionApprovalHeader } from '../../model/RequisitionApproval/requisition-approval.model';
 import { IApiResponse } from '../../model/Response/ApiResponse';
+import { IRequisitionRequestHeader } from '../../model/RequisitionApproval/requisition-request-header.model';
 
 
 @Injectable({
@@ -65,6 +66,61 @@ export class RequisitionApprovalService {constructor(private http: HttpClient) {
       `${environment.API_URL}${GlobalConstant.API_END_POINTS.RejectProcess}`, params,
     );
   }
+
+
+
+
+
+
+//====================================================
+/*
+  AcceptRequest(historyId: number, enroll: number, remarks: string | null = null): Observable<IApiResponse> {
+    return this.http.post<IApiResponse>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.acceptRequisitionLineRequest}`,
+      { HistoryID: historyId, Remarks: remarks },
+      { headers: { 'X-Enroll': String(enroll) } },
+    );
+  }
+
+  RejectRequest(historyId: number, enroll: number, remarks: string | null = null): Observable<IApiResponse> {
+    return this.http.post<IApiResponse>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.rejectRequisitionLineRequest}`,
+      { HistoryID: historyId, Remarks: remarks },
+      { headers: { 'X-Enroll': String(enroll) } },
+    );
+  }
+  */
+
+
+  AcceptRequest(historyId: number, enroll: number, remarks: string | null = null): Observable<IApiResponse> {
+    return this.http.post<IApiResponse>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.acceptRequisitionLineRequest}`,
+      { HistoryID: historyId, Enroll: enroll, Remarks: remarks },
+    );
+  }
+
+  RejectRequest(historyId: number, enroll: number, remarks: string | null = null): Observable<IApiResponse> {
+    return this.http.post<IApiResponse>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.rejectRequisitionLineRequest}`,
+      { HistoryID: historyId, Enroll: enroll, Remarks: remarks },
+    );
+  }
+
+
+
+  GetRequestHeaders(request: ServerQueryRequest, enroll: number, unitId: number, businessId: number): Observable<ServerQueryResponse<IRequisitionRequestHeader>> {
+  return this.http.post<ServerQueryResponse<IRequisitionRequestHeader>>(
+    `${environment.API_URL}${GlobalConstant.API_END_POINTS.RequisitionRequestHeaders}`,
+    {
+      enroll,
+      unitId,
+      businessId,
+      globalSearch: request.globalSearch ?? '',
+      pageIndex: request.page,
+      pageSize: request.pageSize,
+    },
+  );
+}
 
 
 

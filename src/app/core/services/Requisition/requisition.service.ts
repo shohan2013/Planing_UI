@@ -11,6 +11,16 @@ import { ServerQueryRequest, ServerQueryResponse } from 'src/app/core/model/Comm
 import { IViewRequisitionHeader, IViewRequisitionLine } from 'src/app/core/model/Requisition/ViewRequisition';
 import { IBulkRequisitionItem, IBulkRequisitionItemsRequest } from '../../model/Requisition/BulkRequisitionItems';
 import { IDropdownBind } from '../../model/Common/dropdown-bind';
+import {
+  IAddRequisitionLineRequest,
+  IAddRequisitionLinesRequest,
+  IChangeRequisitionLineRequest,
+  IDeleteRequisitionLineRequest,
+  IRequisitionLineHistory,
+  IUpdateRequisitionHeaderRequest,
+  IUpdateRequisitionLineRequest,
+} from 'src/app/core/model/Requisition/RequisitionEdit';
+import { IApiResponse } from 'src/app/core/model/Response/ApiResponse';
 // import { IACRLBulkFilters } from '../../model/Requisition/ACRLBulkFilters';
 
 @Injectable({
@@ -40,11 +50,11 @@ return this.http.get<IViewRequisitionLine[]>(
     );
   }
 
-  updateData(model: IRequisition): Observable<any> {
-    console.log("REQ CREATE",model);
-    return this.http.put(environment.API_URL + GlobalConstant.API_END_POINTS.updateRequisition,model);
+  // updateData(model: IRequisition): Observable<any> {
+  //   console.log("REQ CREATE",model);
+  //   return this.http.put(environment.API_URL + GlobalConstant.API_END_POINTS.updateRequisition,model);
   
-  }
+  // }
 
 
 
@@ -64,6 +74,52 @@ return this.http.get<IViewRequisitionLine[]>(
         );
 
   }
+
+
+
+    updateHeaderRemarks(model: IUpdateRequisitionHeaderRequest): Observable<IApiResponse> {
+    return this.http.put<IApiResponse>(`${environment.API_URL}${GlobalConstant.API_END_POINTS.updateRequisition}`, model);
+  }
+
+  addLines(model: IAddRequisitionLinesRequest): Observable<IApiResponse> {
+    return this.http.post<IApiResponse>(`${environment.API_URL}${GlobalConstant.API_END_POINTS.addRequisitionLines}`, model);
+  }
+
+  updateLine(model: IUpdateRequisitionLineRequest): Observable<IApiResponse> {
+    return this.http.put<IApiResponse>(`${environment.API_URL}${GlobalConstant.API_END_POINTS.updateRequisitionLine}`, model);
+  }
+
+  deleteLine(model: IDeleteRequisitionLineRequest): Observable<IApiResponse> {
+    return this.http.put<IApiResponse>(`${environment.API_URL}${GlobalConstant.API_END_POINTS.deleteRequisitionLine}`, model);
+  }
+
+  addLineRequest(model: IAddRequisitionLineRequest): Observable<IApiResponse> {
+    return this.http.post<IApiResponse>(`${environment.API_URL}${GlobalConstant.API_END_POINTS.addRequisitionLineRequest}`, model);
+  }
+
+  changeLineRequest(model: IChangeRequisitionLineRequest): Observable<IApiResponse> {
+    return this.http.post<IApiResponse>(`${environment.API_URL}${GlobalConstant.API_END_POINTS.changeRequisitionLineRequest}`, model);
+  }
+
+  withdrawLineRequest(requestBatchId: string, enroll: number): Observable<IApiResponse> {
+    return this.http.put<IApiResponse>( `${environment.API_URL}${GlobalConstant.API_END_POINTS.withdrawRequisitionLineRequest}`, { RequestBatchId: requestBatchId, Enroll: enroll }, );
+  }
+
+  GetLineHistory(reqLineId: number): Observable<IRequisitionLineHistory[]> {
+    return this.http.get<IRequisitionLineHistory[]>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.getRequisitionLineHistory}`,
+      { params: { ReqLineID: reqLineId } },
+    );
+  }
+
+
+
+
+
+
+
+
+
 
   GetRequisitionCount(fromDate: string, toDate: string, unitId: number, businessId: number, itemId: number, productTypeId: number, excludeReqId: number = 0): Observable<number> {
     return this.http.get<number>(

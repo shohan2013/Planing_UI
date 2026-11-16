@@ -5,6 +5,7 @@ import {
   DestroyRef,
   Input,
   OnInit,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -41,6 +42,23 @@ export class RequisitionViewModalComponent implements OnInit {
   private readonly stateSignal = signal<ViewModalState>('loading');
 
   private readonly linesSignal = signal<IViewRequisitionLine[]>([]);
+
+
+  readonly lineSearch = signal('');
+
+  readonly filteredLines = computed(() => {
+    const lines = this.linesSignal();
+    const search = this.lineSearch().trim().toLowerCase();
+    if (!search) return lines;
+
+    return lines.filter(line =>
+      (line.ItemName ?? '').toLowerCase().includes(search));
+  });
+
+
+
+
+  readonly totalQuantity = computed(() => this.linesSignal().reduce((total, line) => total + line.Quantity, 0) );
 
   private readonly documentStatuses = signal<IDropdownBind[]>([]);
 
