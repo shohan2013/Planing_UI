@@ -18,6 +18,8 @@ import { MenuPermissionDirective } from 'src/app/core/directives/menu-permission
 import { PermissionAction } from 'src/app/core/services/Authorization/authorization.service';
 import { RequisitionApprovalViewModalComponent } from './RequisitionApprovalComponents/requisition-approval-view-modal.component';
 
+import { RequisitionRequestsComponent } from './RequisitionRequestComponents/requisition-requests.component';
+
 @Component({
   selector: 'app-requisition-approval',
   standalone: true,
@@ -36,6 +38,7 @@ export class RequisitionApproval extends ServerSideFilteredPaginatedComponent<IR
   readonly businessesLoading = signal(false);
   readonly actionInProgress = signal(false);
   private viewModalRef: NgbModalRef | null = null;
+  private requestHistoryModalRef: NgbModalRef | null = null;
   private readonly destroy$ = new Subject<void>();
   private readonly cancelBusinesses$ = new Subject<void>();
 
@@ -94,8 +97,35 @@ export class RequisitionApproval extends ServerSideFilteredPaginatedComponent<IR
     if (this.selectedStatusCode) this.retry();
   }
 
+  openRequestHistory(header: IRequisitionApprovalHeader): void {
+    if (this.selectedStatusCode !== 'APPR' || header.ApprovalStatusCode !== 'APPR' ||
+        this.viewModalRef || this.requestHistoryModalRef) return;
+
+    const ref = this.modalService.open(RequisitionRequestsComponent, {
+      fullscreen: true,
+      windowClass: 'fullscreen-modal',
+      scrollable: true,
+      backdrop: 'static',
+      keyboard: false,
+      ariaLabelledBy: 'resolve-requisition-title',
+    });
+
+    this.requestHistoryModalRef = ref;
+    const component: RequisitionRequestsComponent = ref.componentInstance;
+    component.header = header;
+    component.documentStatuses = this.documentStatuses();
+
+    const clearReference = (): void => {
+      if (this.requestHistoryModalRef === ref) this.requestHistoryModalRef = null;
+    };
+      void ref.result.then(changed => {
+      clearReference();
+      if (changed === true) this.retry();
+    }, clearReference);
+  }
+
   openViewModal(header: IRequisitionApprovalHeader): void {
-    if (this.viewModalRef || !this.selectedStatusCode) return;
+    if (this.viewModalRef || this.requestHistoryModalRef || !this.selectedStatusCode) return;
     try {
       const modalRef = this.modalService.open(RequisitionApprovalViewModalComponent, {
         fullscreen: true,
@@ -209,6 +239,7 @@ export class RequisitionApproval extends ServerSideFilteredPaginatedComponent<IR
 
   ngOnDestroy(): void {
     this.viewModalRef?.dismiss('approval-page-destroyed');
+    this.requestHistoryModalRef?.dismiss('approval-page-destroyed');
     this.viewModalRef = null;
     this.destroy$.next();
     this.destroy$.complete();

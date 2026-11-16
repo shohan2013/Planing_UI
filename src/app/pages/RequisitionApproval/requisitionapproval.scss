@@ -114,3 +114,8 @@
     min-width: 0;
   }
 }
+
+
+.custom-table > tbody > tr.has-unresolved-requests > td {
+  background-color: #fff3cd;
+}

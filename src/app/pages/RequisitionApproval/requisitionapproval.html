@@ -88,7 +88,7 @@
             </tr>
           } @else {
             @for (item of paginatedItems(); track item.ApprovalHistoryId) {
-              <tr>
+              <tr [class.has-unresolved-requests]="selectedStatusCode === 'APPR' && item.ApprovalStatusCode === 'APPR' && item.UnresolvedRequestCount > 0">
                 <td>{{ item.RequisitionNumber || '-' }}</td>
                 <td>{{ item.UnitName || '-' }}</td>
                 <td>{{ item.BusinessName || '-' }}</td>
@@ -101,6 +101,15 @@
                     <button *menuPermission="PermissionAction.View" type="button" class="action-btn btn-view" title="View" aria-label="View requisition" (click)="openViewModal(item)">
                       <i class="fa-solid fa-magnifying-glass-plus"></i>
                     </button>
+                    @if (selectedStatusCode === 'APPR' && item.ApprovalStatusCode === 'APPR') {
+                      <button *menuPermission="PermissionAction.View" type="button"
+                        class="btn btn-outline-secondary btn-sm text-nowrap"
+                        aria-haspopup="dialog"
+                        [attr.aria-label]="'Open request history for ' + item.RequisitionNumber + '. Your unresolved requests: ' + (item.UnresolvedRequestCount ?? 0)"
+                        (click)="openRequestHistory(item)">
+                        History ({{ item.UnresolvedRequestCount ?? 0 }})
+                      </button>
+                    }
                     @if (item.ApprovalStatusCode === 'PEND') {
                       <button type="button" class="action-btn btn-approve" title="Approve" aria-label="Approve requisition" [disabled]="actionInProgress()" (click)="approveRequisition(item)">
                         <i class="fa-solid fa-circle-check"></i>

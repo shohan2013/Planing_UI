@@ -90,13 +90,15 @@
           <tbody>
             @if (lines().length === 0) {
               <tr>
-                <td colspan="8" class="empty-table-message">No active Requisition Lines found.</td>
+                <td colspan="10" class="empty-table-message">No active Requisition Lines found.</td>
               </tr>
             } @else {
               @for (line of lines(); track line.ID) {
                 <tr>
                   <td>{{ line.ProductTypeName || '-' }}</td>
                   <td class="item-name">{{ line.ItemName || '-' }}</td>
+                  <td>{{ line.Size?.trim() || '–' }}</td>
+                  <td>{{ line.Priority ?? '–' }}</td>
                   <td>{{ line.UOMName || '-' }}</td>
                   <td class="number-column">{{ line.Quantity }}</td>
                   <td class="number-column">

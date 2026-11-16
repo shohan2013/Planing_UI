@@ -61,7 +61,7 @@ export const GlobalConstant = {
     //Line Request Approval
     acceptRequisitionLineRequest: 'RequisitionApproval/AcceptRequest',
     rejectRequisitionLineRequest: 'RequisitionApproval/RejectRequest',
-    RequisitionRequestHeaders: 'RequisitionApproval/GetRequestHeaders',
+    RequisitionRequestNotifications: 'RequisitionApproval/GetRequestNotifications',
 
   /*===========================COMMON===================================== */
     Common: 'Common',

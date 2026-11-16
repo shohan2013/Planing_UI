@@ -1,4 +1,4 @@
-export interface IRequisitionRequestHeader {
+export interface IRequisitionRequestNotification {
   ReqID: number;
   RequisitionNumber: string;
   UnitId: number;

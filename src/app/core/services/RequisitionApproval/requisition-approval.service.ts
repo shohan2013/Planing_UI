@@ -7,7 +7,7 @@ import { ServerQueryRequest, ServerQueryResponse, } from '../../model/Common/Pag
 import { environment } from 'src/environments/environment';
 import { IRequisitionApprovalDetails, IRequisitionApprovalHeader } from '../../model/RequisitionApproval/requisition-approval.model';
 import { IApiResponse } from '../../model/Response/ApiResponse';
-import { IRequisitionRequestHeader } from '../../model/RequisitionApproval/requisition-request-header.model';
+import { IRequisitionRequestNotification } from '../../model/RequisitionApproval/requisition-request-header.model';
 
 
 @Injectable({
@@ -108,17 +108,10 @@ export class RequisitionApprovalService {constructor(private http: HttpClient) {
 
 
 
-  GetRequestHeaders(request: ServerQueryRequest, enroll: number, unitId: number, businessId: number): Observable<ServerQueryResponse<IRequisitionRequestHeader>> {
-  return this.http.post<ServerQueryResponse<IRequisitionRequestHeader>>(
-    `${environment.API_URL}${GlobalConstant.API_END_POINTS.RequisitionRequestHeaders}`,
-    {
-      enroll,
-      unitId,
-      businessId,
-      globalSearch: request.globalSearch ?? '',
-      pageIndex: request.page,
-      pageSize: request.pageSize,
-    },
+GetRequestNotifications(): Observable<IRequisitionRequestNotification[]> {
+  return this.http.post<IRequisitionRequestNotification[]>(
+    `${environment.API_URL}${GlobalConstant.API_END_POINTS.RequisitionRequestNotifications}`,
+    {},
   );
 }
 

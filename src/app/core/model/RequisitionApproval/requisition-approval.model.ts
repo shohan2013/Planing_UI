@@ -24,6 +24,7 @@ export interface IRequisitionApprovalHeader {
   ReqDate: string;
   StartDate: string | null;
   EndDate: string | null;
+  UnresolvedRequestCount: number;
   Remarks: string | null;
   DocStatusId: number;
   FacDocStatusId: number | null;
