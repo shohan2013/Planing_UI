@@ -2,8 +2,7 @@
   <h5 id="resolve-requisition-title" class="modal-title">
     Requisition Request History · {{ header.RequisitionNumber }}
   </h5>
-  <button type="button" class="btn-close" aria-label="Close"
-    [disabled]="deciding()" (click)="close()"></button>
+  <button type="button" class="btn-close" aria-label="Close" [disabled]="deciding()" (click)="close()"></button>
 </div>
 
 <div class="modal-body">
@@ -28,18 +27,15 @@
       </div>
       <div class="col-md-4">
         <label class="form-label" for="resolve-creator">Created By</label>
-        <input id="resolve-creator" class="form-control"
-          [value]="header.CreatedByName || header.CREATEDBY || '–'" readonly />
+        <input id="resolve-creator" class="form-control" [value]="header.CreatedByName || header.CREATEDBY || '–'" readonly />
       </div>
       <div class="col-md-4">
         <label class="form-label" for="resolve-start-date">Start Date</label>
-        <input id="resolve-start-date" class="form-control"
-          [value]="(header.StartDate | date: 'dd-MMM-yyyy') ?? '–'" readonly />
+        <input id="resolve-start-date" class="form-control" [value]="(header.StartDate | date: 'dd-MMM-yyyy') ?? '–'" readonly />
       </div>
       <div class="col-md-4">
         <label class="form-label" for="resolve-end-date">End Date</label>
-        <input id="resolve-end-date" class="form-control"
-          [value]="(header.EndDate | date: 'dd-MMM-yyyy') ?? '–'" readonly />
+        <input id="resolve-end-date" class="form-control" [value]="(header.EndDate | date: 'dd-MMM-yyyy') ?? '–'" readonly />
       </div>
       <div class="col-md-4">
         <span class="form-label d-block">Requisition Status</span>
@@ -62,15 +58,17 @@
       <button type="button" class="btn btn-danger btn-sm" (click)="loadLines()">Retry</button>
     </div>
   } @else {
-    <div class="mb-2">
-      <strong>Total Quantity</strong>
-      <span class="ms-2">{{ totalQuantity() | number:'1.0-4' }}</span>
-    </div>
-    <div class="mb-3">
-      <input type="search" class="form-control"
-        placeholder="Search product name or ID..."
-        aria-label="Search requisition lines by product name or ID"
-        [value]="lineSearch()" (input)="lineSearch.set($any($event.target).value)" />
+    <div class="row g-2 align-items-center justify-content-between mx-0 mb-3">
+      <div class="col-auto">
+        <strong>Total Quantity</strong>
+        <span class="ms-2">{{ totalQuantity() | number:'1.0-4' }}</span>
+      </div>
+      <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+        <div class="input-group">
+          <span class="input-group-text"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></span>
+          <input type="search" class="form-control" placeholder="Search product name or ID..." aria-label="Search requisition lines by product name or ID" [value]="lineSearch()" (input)="lineSearch.set($any($event.target).value)" />
+        </div>
+      </div>
     </div>
 
     <div class="table-responsive">
@@ -82,12 +80,12 @@
             <th>PRODUCT ID</th>
             <th>ITEM</th>
             <th>SIZE</th>
-            <th>PRIORITY</th>
             <th>UOM</th>
             <th>QUANTITY</th>
             <th>REMAINING QUANTITY</th>
             <th>STOCK QUANTITY</th>
             <th>SALES QUANTITY</th>
+            <th>PRIORITY</th>
             <th>COUNT</th>
             <th>REMARKS</th>
             <th class="text-center">UNRESOLVED</th>
@@ -102,14 +100,11 @@
               <td>{{ line.ItemId }}</td>
               <td>{{ line.ItemName }}</td>
               <td>{{ line.Size?.trim() || '–' }}</td>
-              <td>{{ line.Priority ?? '–' }}</td>
               <td>{{ line.UOMName }}</td>
               <td>{{ line.Quantity }}</td>
               <td>
                 @if (line.RemainingQuantity != null) {
-                  <span class="remaining-quantity-badge"
-                    [class.remaining-quantity-green]="line.RemainingQuantity <= 0"
-                    [class.remaining-quantity-yellow]="line.RemainingQuantity > 0">
+                  <span class="remaining-quantity-badge" [class.remaining-quantity-green]="line.RemainingQuantity <= 0" [class.remaining-quantity-yellow]="line.RemainingQuantity > 0">
                     {{ line.RemainingQuantity < 0 ? -line.RemainingQuantity : line.RemainingQuantity }}
                   </span>
                 } @else {
@@ -118,14 +113,14 @@
               </td>
               <td>{{ line.StockQuantity ?? '–' }}</td>
               <td>{{ line.SalesQuantity ?? '–' }}</td>
+              <td [class.bg-warning-subtle]="(line.Priority ?? 0) > 0">{{ line.Priority ?? '–' }}</td>
               <td>{{ line.Count }}</td>
               <td>
                 <div class="g-scrollable-text sm" [title]="line.Remarks || ''">{{ line.Remarks || '–' }}</div>
               </td>
               <td class="text-center">{{ line.UnresolvedRequestCount ?? 0 }}</td>
               <td class="g-action-column">
-                <button type="button" class="btn btn-outline-secondary btn-sm text-nowrap"
-                  aria-haspopup="dialog" (click)="openHistory(line, historyModal)">
+                <button type="button" class="btn btn-outline-secondary btn-sm text-nowrap" aria-haspopup="dialog" (click)="openHistory(line, historyModal)">
                   History ({{ line.RequestCount ?? 0 }})
                 </button>
               </td>
@@ -150,8 +145,7 @@
 <ng-template #historyModal let-modal>
   <div class="modal-header">
     <h5 id="resolver-history-title" class="modal-title">Request History</h5>
-    <button type="button" class="btn-close" aria-label="Close"
-      [disabled]="deciding()" (click)="modal.close()"></button>
+    <button type="button" class="btn-close" aria-label="Close" [disabled]="deciding()" (click)="modal.close()"></button>
   </div>
 
   <div class="modal-body">
@@ -214,8 +208,7 @@
                 <td>{{ request.AdditionalRequestedQuantity }}</td>
                 <td>{{ request.QtyAfterAction ?? '–' }}</td>
                 <td>
-                  @if (request.StatusCode === 'PEND' && request.IsActive === false &&
-                    request.ActionTakenBy != null && request.ActionTakenBy === request.RequestBy) {
+                  @if (request.StatusCode === 'PEND' && request.IsActive === false && request.ActionTakenBy != null && request.ActionTakenBy === request.RequestBy) {
                     <span class="badge bg-secondary">Withdrawn</span>
                   } @else if (request.StatusCode === 'ACKDLG') {
                     <span class="g-status approve">Acknowledged</span>
@@ -228,9 +221,7 @@
                   }
                 </td>
                 <td>
-                  <div class="g-scrollable-text sm" [title]="request.RequesterMessage || ''">
-                    {{ request.RequesterMessage || '–' }}
-                  </div>
+                  <div class="g-scrollable-text sm" [title]="request.RequesterMessage || ''">{{ request.RequesterMessage || '–' }}</div>
                 </td>
                 <td>
                   @if (request.ActionTakenBy != null) {
@@ -247,27 +238,18 @@
                   {{ request.ActionDate ? (request.ActionDate | date: 'dd-MMM-yyyy HH:mm') : '–' }}
                 </td>
                 <td>
-                  <div class="g-scrollable-text sm" [title]="request.ActionTakerRemarks || ''">
-                    {{ request.ActionTakerRemarks || '–' }}
-                  </div>
+                  <div class="g-scrollable-text sm" [title]="request.ActionTakerRemarks || ''">{{ request.ActionTakerRemarks || '–' }}</div>
                 </td>
                 <td class="g-action-column">
                   <div class="action-buttons">
-                    <button type="button" class="action-btn btn-view"
-                      title="View action takers" aria-label="View action takers"
-                      [attr.aria-expanded]="viewedActionTakersBatchId() === request.RequestBatchId"
-                      (click)="toggleActionTakers(request.RequestBatchId)">
+                    <button type="button" class="action-btn btn-view" title="View action takers" aria-label="View action takers" [attr.aria-expanded]="viewedActionTakersBatchId() === request.RequestBatchId" (click)="toggleActionTakers(request.RequestBatchId)">
                       <i class="fa-solid fa-magnifying-glass-plus" aria-hidden="true"></i>
                     </button>
                     @if (request.StatusCode === 'PEND' && request.IsActive && request.ActionTakenBy == null) {
-                      <button type="button" class="action-btn btn-approve"
-                        title="Accept request" aria-label="Accept request"
-                        [disabled]="!canDecide(batch)" (click)="decide(batch, true)">
+                      <button type="button" class="action-btn btn-approve" title="Accept request" aria-label="Accept request" [disabled]="!canDecide(batch)" (click)="decide(batch, true)">
                         <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
                       </button>
-                      <button type="button" class="action-btn btn-reject"
-                        title="Reject request" aria-label="Reject request"
-                        [disabled]="!canDecide(batch)" (click)="decide(batch, false)">
+                      <button type="button" class="action-btn btn-reject" title="Reject request" aria-label="Reject request" [disabled]="!canDecide(batch)" (click)="decide(batch, false)">
                         <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
                       </button>
                     }
@@ -301,7 +283,6 @@
   </div>
 
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary"
-      [disabled]="deciding()" (click)="modal.close()">Close</button>
+    <button type="button" class="btn btn-secondary" [disabled]="deciding()" (click)="modal.close()">Close</button>
   </div>
 </ng-template>

@@ -233,3 +233,14 @@ fieldset legend {
   color: #856404;
   background-color: rgba(245, 158, 11, 0.14);
 }
+
+td.priority-highlight {
+  background-color: #fff3cd;
+  --bs-table-bg-state: transparent;
+  --bs-table-bg-type: transparent;
+}
+
+td.priority-highlight > .form-control {
+  background-color: transparent;
+  border-color: #d8b763;
+}

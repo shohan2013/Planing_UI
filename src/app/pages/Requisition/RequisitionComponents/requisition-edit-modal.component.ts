@@ -255,24 +255,7 @@ export class RequisitionEditModalComponent implements OnInit {
     if (!this.saving()) this.activeModal.close({ changed: this.changed });
   }
 
-  complete(): void {
-    if (!this.isOpen || this.isRequestMode || this.saving()) return;
-    this.saving.set(true);
-    this.requisitionService.completeData(this.header.ReqID).pipe(
-      takeUntilDestroyed(this.destroyRef),
-      finalize(() => this.saving.set(false)),
-    ).subscribe({
-      next: response => {
-        if (response.Status) {
-          this.toastr.success(response.Message);
-          this.activeModal.close({ changed: true });
-        } else {
-          this.toastr.error(response.Message || 'Unable to complete requisition.');
-        }
-      },
-      error: error => this.toastr.error(this.errorMessage(error, 'Unable to complete requisition.')),
-    });
-  }
+
 
   reloadLines(): void {
     if (this.loadingLines()) return;

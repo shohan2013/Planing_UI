@@ -7,6 +7,7 @@ export interface IRequisitionHeader {
 
   StartDate: Date;
   EndDate: Date;
+  TotalQuantity?: number;
 
   Remarks: string;
   DocStatusId: number;

@@ -102,7 +102,7 @@
                       <i class="fa-solid fa-magnifying-glass-plus"></i>
                     </button>
                     @if (selectedStatusCode === 'APPR' && item.ApprovalStatusCode === 'APPR') {
-                      <button *menuPermission="PermissionAction.View" type="button"
+                      <button *menuPermission="PermissionAction.Update" type="button"
                         class="btn btn-outline-secondary btn-sm text-nowrap"
                         aria-haspopup="dialog"
                         [attr.aria-label]="'Open request history for ' + item.RequisitionNumber + '. Your unresolved requests: ' + (item.UnresolvedRequestCount ?? 0)"

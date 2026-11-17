@@ -52,8 +52,6 @@ export const GlobalConstant = {
     bulkRequisitionItems: 'Requisition/BulkItems',
 
 
-    completeRequisition: 'Requisition/complete', // Obsolite code
-
  /*===========================REQUISITION APPROVAL===================================== */
     RequisitionApproval: 'RequisitionApproval/GetData',
     RequisitionApprovalDetails: 'RequisitionApproval/GetDetails',

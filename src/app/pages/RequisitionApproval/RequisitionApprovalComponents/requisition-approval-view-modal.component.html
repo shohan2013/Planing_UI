@@ -3,6 +3,7 @@
   <h5 class="modal-title">Requisition Details</h5>
   <button type="button" class="btn-close" aria-label="Close" (click)="dismiss()"></button>
 </div>
+
 <div class="modal-body requisition-modal-body">
   @if (state() === 'loading') {
     <div class="d-flex justify-content-center align-items-center py-5">
@@ -55,70 +56,68 @@
 
     <section class="requisition-card product-section">
       <div class="section-heading">
-        <span class="section-icon" aria-hidden="true">
-          <i class="fa-solid fa-list"></i>
-        </span>
+        <span class="section-icon" aria-hidden="true"><i class="fa-solid fa-list"></i></span>
         <div>
           <h6>Product Requisition</h6>
           <p>Items included in this requisition</p>
         </div>
       </div>
+
+      <div class="row g-2 align-items-center justify-content-between mx-0 mb-3">
+        <div class="col-auto">
+          <strong>Total Quantity</strong>
+          <span class="ms-2">{{ totalQuantity() | number:'1.0-4' }}</span>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+          <div class="input-group">
+            <span class="input-group-text"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></span>
+            <input type="search" class="form-control" placeholder="Search product name or ID..." aria-label="Search requisition lines by product name or ID" [value]="lineSearch()" (input)="lineSearch.set($any($event.target).value)" />
+          </div>
+        </div>
+      </div>
+
       <div class="table-responsive product-table-wrapper">
         <table class="custom-table product-table">
-          <colgroup>
-            <col style="width: 11%" />
-            <col style="width: 21%" />
-            <col style="width: 12%" />
-            <col style="width: 8%" />
-            <col style="width: 12%" />
-            <col style="width: 10%" />
-            <col style="width: 10%" />
-            <col style="width: 16%" />
-          </colgroup>
           <thead>
             <tr>
               <th>Product Type</th>
               <th>Item</th>
+              <th>Size</th>
               <th>UOM</th>
               <th class="number-column">Quantity</th>
               <th class="number-column">Remaining Stock Quantity</th>
               <th class="number-column">Stock Quantity</th>
               <th class="number-column">Sales Quantity</th>
+              <th class="number-column">Priority</th>
               <th>Remarks</th>
             </tr>
           </thead>
           <tbody>
-            @if (lines().length === 0) {
+            @for (line of filteredLines(); track line.ID) {
               <tr>
-                <td colspan="10" class="empty-table-message">No active Requisition Lines found.</td>
-              </tr>
-            } @else {
-              @for (line of lines(); track line.ID) {
-                <tr>
-                  <td>{{ line.ProductTypeName || '-' }}</td>
-                  <td class="item-name">{{ line.ItemName || '-' }}</td>
-                  <td>{{ line.Size?.trim() || '–' }}</td>
-                  <td>{{ line.Priority ?? '–' }}</td>
-                  <td>{{ line.UOMName || '-' }}</td>
-                  <td class="number-column">{{ line.Quantity }}</td>
-                  <td class="number-column">
-                    <span [class.negative-quantity]="line.RemainingQuantity !== null && line.RemainingQuantity < 0">
-                      {{
-                        line.RemainingQuantity === null
-                          ? '-'
-                          : line.RemainingQuantity < 0
-                            ? -line.RemainingQuantity
-                            : line.RemainingQuantity
-                      }}
+                <td>{{ line.ProductTypeName || '-' }}</td>
+                <td class="item-name">{{ line.ItemName || '-' }}</td>
+                <td>{{ line.Size?.trim() || '–' }}</td>
+                <td>{{ line.UOMName || '-' }}</td>
+                <td class="number-column">{{ line.Quantity }}</td>
+                <td class="number-column">
+                  @if (line.RemainingQuantity != null) {
+                    <span [class.negative-quantity]="line.RemainingQuantity < 0">
+                      {{ line.RemainingQuantity < 0 ? -line.RemainingQuantity : line.RemainingQuantity }}
                     </span>
-                  </td>
-                  <td class="number-column">{{ line.StockQuantity ?? 0 }}</td>
-                  <td class="number-column">{{ line.SalesQuantity ?? 0 }}</td>
-                  <td>
-                    <div class="g-scrollable-text sm" [title]="line.Remarks || ''">{{ line.Remarks || '-' }}</div>
-                  </td>
-                </tr>
-              }
+                  } @else {
+                    –
+                  }
+                </td>
+                <td class="number-column">{{ line.StockQuantity ?? 0 }}</td>
+                <td class="number-column">{{ line.SalesQuantity ?? 0 }}</td>
+                <td class="number-column" [class.bg-warning-subtle]="(line.Priority ?? 0) > 0">{{ line.Priority ?? '–' }}</td>
+                <td><div class="g-scrollable-text sm" [title]="line.Remarks || ''">{{ line.Remarks || '-' }}</div></td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="10" class="empty-table-message">{{ lines().length ? 'No matching products.' : 'No active Requisition Lines found.' }}</td>
+              </tr>
             }
           </tbody>
         </table>
@@ -192,6 +191,7 @@
     </section>
   }
 </div>
+
 <div class="modal-footer">
   <button type="button" class="btn btn-secondary" (click)="close()">
     <i class="fa-solid fa-fw fa-xmark"></i> Close

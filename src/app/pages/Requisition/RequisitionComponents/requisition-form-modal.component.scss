@@ -194,10 +194,16 @@ fieldset legend {
 }
 
 
+td.priority-highlight {
+  background-color: #fff3cd;
+  --bs-table-bg-state: transparent;
+  --bs-table-bg-type: transparent;
+}
 
-
-
-
+td.priority-highlight > .form-control {
+  background-color: transparent;
+  border-color: #d8b763;
+}
 
 
 @media (max-width: 767.98px) {

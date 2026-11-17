@@ -2,7 +2,7 @@
   <div class="d-flex flex-column align-items-start">
     <h5 class="modal-title d-flex align-items-center gap-2">
       @if (isRequestMode) {
-        <span class="d-inline-block" aria-hidden="true" style="width: 16px; height: 16px; background-color: currentColor; mask: url('assets/icons/requisition-pencil-arrow.svg') center / contain no-repeat;"> </span>
+        <span class="d-inline-block" aria-hidden="true" style="width: 16px; height: 16px; background-color: currentColor; mask: url('assets/icons/requisition-pencil-arrow.svg') center / contain no-repeat;"></span>
         Change Request
       } @else {
         <img src="assets/icons/edit.svg" width="16" height="16" alt="" />
@@ -48,8 +48,12 @@
           <input id="editReqEnd" type="date" class="form-control" [value]="toDate" disabled />
         </div>
         <div class="col-12">
-          <textarea class="form-control" rows="2" maxlength="500" placeholder="Enter remarks..."
-            aria-label="Header remarks" [(ngModel)]="headerRemarks" [readonly]="!isOpen || saving()"></textarea>
+          <textarea class="form-control" rows="2" maxlength="500" placeholder="Enter remarks..." aria-label="Header remarks" [(ngModel)]="headerRemarks" [readonly]="!isOpen || saving()"></textarea>
+          <div class="d-flex justify-content-end mt-2">
+            <button *menuPermission="PermissionAction.Update" type="button" class="btn btn-success" [disabled]="!canSaveHeader" (click)="saveHeaderRemarks()">
+              <i class="fa-solid fa-fw fa-check" aria-hidden="true"></i> Update
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -72,11 +76,11 @@
                 <th>PRODUCT TYPE</th>
                 <th>ITEM</th>
                 <th>SIZE</th>
-                <th>PRIORITY</th>
                 <th>UOM</th>
                 <th>QUANTITY</th>
                 <th>STOCK QUANTITY</th>
                 <th>SALES QUANTITY</th>
+                <th>PRIORITY</th>
                 <th class="text-center">COUNT</th>
                 <th>REMARKS</th>
                 <th>ADD</th>
@@ -85,8 +89,7 @@
             <tbody>
               <tr>
                 <td>
-                  <select class="form-select" aria-label="Product Type" [ngModel]="productTypeId"
-                    [disabled]="!canAdd" (ngModelChange)="onProductTypeChange($event)">
+                  <select class="form-select" aria-label="Product Type" [ngModel]="productTypeId" [disabled]="!canAdd" (ngModelChange)="onProductTypeChange($event)">
                     <option [ngValue]="0" disabled>Select Product Type</option>
                     @for (type of productTypes(); track type.Id) {
                       <option [ngValue]="+type.Id">{{ type.Name }}</option>
@@ -96,11 +99,9 @@
                 <td>
                   <input type="text" class="form-control" aria-label="Item" autocomplete="off"
                     [placeholder]="productTypeId ? 'Type at least 2 characters' : 'Select Product Type first'"
-                    [disabled]="!canAdd || !productTypeId"
-                    [ngModel]="itemSearch" (ngModelChange)="onItemTextChange($event)"
-                    [ngbTypeahead]="searchItems" placement="bottom-start" container="body"
-                    popupClass="requisition-item-dropdown" [inputFormatter]="itemFormatter"
-                    [resultFormatter]="itemFormatter" (selectItem)="onItemSelect($event)"
+                    [disabled]="!canAdd || !productTypeId" [ngModel]="itemSearch" (ngModelChange)="onItemTextChange($event)"
+                    [ngbTypeahead]="searchItems" placement="bottom-start" container="body" popupClass="requisition-item-dropdown"
+                    [inputFormatter]="itemFormatter" [resultFormatter]="itemFormatter" (selectItem)="onItemSelect($event)"
                     (keydown.arrowdown)="scrollActiveItem()" (keydown.arrowup)="scrollActiveItem()" />
                   @if (selectedItem && itemSearch !== selectedItem) {
                     <div class="small text-muted mt-1">Selected: {{ selectedItem.Name }}</div>
@@ -122,11 +123,6 @@
                 </td>
                 <td>{{ selectedItem?.Size ?? '–' }}</td>
                 <td>
-                  <input type="number" step="1" class="form-control"
-                    placeholder="Priority" aria-label="Priority"
-                    [(ngModel)]="priority" [disabled]="!canAdd" />
-                </td>
-                <td>
                   <select class="form-select" aria-label="UoM" [(ngModel)]="uomId" [disabled]="!canAdd">
                     <option [ngValue]="0" [disabled]="plannerUoMs().length > 0">
                       {{ plannerUoMs().length ? 'Select UoM' : 'N/A' }}
@@ -137,29 +133,25 @@
                   </select>
                 </td>
                 <td>
-                  <input type="number" step="0.0001" class="form-control" placeholder="Quantity"
-                    aria-label="Quantity" [(ngModel)]="quantity" [disabled]="!canAdd" />
+                  <input type="number" step="0.0001" class="form-control" placeholder="Quantity" aria-label="Quantity" [(ngModel)]="quantity" [disabled]="!canAdd" />
                 </td>
+                <td>{{ stock ?? '–' }}</td>
+                <td>{{ sales ?? '–' }}</td>
                 <td>
-                  <input type="number" class="form-control" aria-label="Stock Quantity" [value]="stock ?? 0" readonly />
-                </td>
-                <td>
-                  <input type="number" class="form-control" aria-label="Sales Quantity" [value]="sales ?? 0" readonly />
+                  <input type="number" step="1" class="form-control" placeholder="Priority" aria-label="Priority" [(ngModel)]="priority" [disabled]="!canAdd" />
                 </td>
                 <td>
                   @if (loadingItem()) {
                     <span class="spinner-border spinner-border-sm text-success" role="status" aria-label="Loading Count"></span>
                   } @else {
-                    <input type="number" class="form-control" placeholder="-" aria-label="Count" [value]="count ?? ''" readonly />
+                    {{ count ?? '–' }}
                   }
                 </td>
                 <td>
-                  <input type="text" class="form-control" maxlength="500" placeholder="Remarks"
-                    aria-label="Remarks" [(ngModel)]="remarks" [disabled]="!canAdd" />
+                  <input type="text" class="form-control" maxlength="500" placeholder="Remarks" aria-label="Remarks" [(ngModel)]="remarks" [disabled]="!canAdd" />
                 </td>
                 <td>
-                  <button type="button" class="btn text-nowrap" [class.btn-success]="!isRequestMode"
-                    [class.btn-request-add]="isRequestMode" [disabled]="!canAddSingle" (click)="addSingle()">
+                  <button type="button" class="btn text-nowrap" [class.btn-success]="!isRequestMode" [class.btn-request-add]="isRequestMode" [disabled]="!canAddSingle" (click)="addSingle()">
                     @if (loadingItem()) {
                       <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
                       {{ isRequestMode ? 'Request Add' : 'Add' }}
@@ -182,20 +174,20 @@
       <button type="button" class="btn btn-outline-secondary mb-2" (click)="reloadLines()">Retry loading lines</button>
     }
 
-    <div class="table-responsive mt-3">
-
-    <div class="text-start mb-2">
-      <strong>Total Quantity</strong>
-      <span class="ms-2">{{ totalQuantity() | number:'1.0-4' }}</span>
+    <div class="row g-2 align-items-center justify-content-between mx-0 mt-3 mb-3">
+      <div class="col-auto">
+        <strong>Total Quantity</strong>
+        <span class="ms-2">{{ totalQuantity() | number:'1.0-4' }}</span>
+      </div>
+      <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+        <div class="input-group">
+          <span class="input-group-text"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></span>
+          <input type="search" class="form-control" placeholder="Search product name or ID..." aria-label="Search requisition lines by product name or ID" [value]="lineSearch()" (input)="lineSearch.set($any($event.target).value)" />
+        </div>
+      </div>
     </div>
-    <div class="mb-3">
-      <input type="search" class="form-control"
-        placeholder="Search product name or ID..."
-        aria-label="Search requisition lines by product name or ID"
-        [value]="lineSearch()"
-        (input)="lineSearch.set($any($event.target).value)" />
-    </div>
 
+    <div class="table-responsive">
       <table class="custom-table">
         <thead>
           <tr>
@@ -203,21 +195,20 @@
             <th>PRODUCT TYPE</th>
             <th>PRODUCT ID</th>
             <th>ITEM</th>
+            <th>SIZE</th>
             <th>UOM</th>
             <th>QUANTITY</th>
             <th>REMAINING QUANTITY</th>
             <th>STOCK QUANTITY</th>
             <th>SALES QUANTITY</th>
+            <th>PRIORITY</th>
             <th class="text-center">COUNT</th>
             <th>REMARKS</th>
-            <th>PRIORITY</th>
             @if (isRequestMode) {
               <th class="text-center">UNRESOLVED</th>
+              <th>ADDITIONAL QTY</th>
             }
-            <th>{{ isRequestMode ? 'ADDITIONAL QTY' : 'ACTION' }}</th>
-            @if (isRequestMode) {
-              <th>ACTION</th>
-            }
+            <th>ACTION</th>
           </tr>
         </thead>
         <tbody>
@@ -228,21 +219,18 @@
                 <td>{{ line.ProductTypeName }}</td>
                 <td>{{ line.ItemId }}</td>
                 <td>{{ line.ItemName }}</td>
+                <td>{{ line.Size?.trim() || '–' }}</td>
                 <td>{{ line.UOMName || 'Unspecified' }}</td>
                 <td>
                   @if (!isRequestMode && isOpen) {
-                    <input *menuPermission="PermissionAction.Update" type="number" step="0.0001"
-                      class="form-control form-control-sm" aria-label="Quantity"
-                      [(ngModel)]="draft.quantity" [disabled]="!canWrite" />
+                    <input *menuPermission="PermissionAction.Update" type="number" step="0.0001" class="form-control form-control-sm" aria-label="Quantity" [(ngModel)]="draft.quantity" [disabled]="!canWrite" />
                   } @else {
                     {{ line.Quantity }}
                   }
                 </td>
                 <td>
                   @if (line.RemainingQuantity != null) {
-                    <span class="remaining-quantity-badge"
-                      [class.remaining-quantity-green]="line.RemainingQuantity <= 0"
-                      [class.remaining-quantity-yellow]="line.RemainingQuantity > 0">
+                    <span class="remaining-quantity-badge" [class.remaining-quantity-green]="line.RemainingQuantity <= 0" [class.remaining-quantity-yellow]="line.RemainingQuantity > 0">
                       {{ line.RemainingQuantity < 0 ? -line.RemainingQuantity : line.RemainingQuantity }}
                     </span>
                   } @else {
@@ -251,27 +239,21 @@
                 </td>
                 <td>{{ line.StockQuantity }}</td>
                 <td>{{ line.SalesQuantity }}</td>
+                <td [class.priority-highlight]="((!isRequestMode && isOpen ? draft.priority : line.Priority) ?? 0) > 0">
+                  @if (!isRequestMode && isOpen) {
+                    <input *menuPermission="PermissionAction.Update" type="number" step="1" class="form-control form-control-sm" aria-label="Priority" [(ngModel)]="draft.priority" [disabled]="!canWrite" />
+                  } @else {
+                    {{ line.Priority ?? '–' }}
+                  }
+                </td>
                 <td class="text-center">
                   <span class="requisition-count">{{ line.Count ?? '-' }}</span>
                 </td>
                 <td>
                   @if (!isRequestMode && isOpen) {
-                    <input *menuPermission="PermissionAction.Update" type="text" maxlength="500"
-                      class="form-control form-control-sm" aria-label="Line remarks"
-                      [(ngModel)]="draft.remarks" [disabled]="!canWrite" />
+                    <input *menuPermission="PermissionAction.Update" type="text" maxlength="500" class="form-control form-control-sm" aria-label="Line remarks" [(ngModel)]="draft.remarks" [disabled]="!canWrite" />
                   } @else {
                     <div class="g-scrollable-text sm" [title]="line.Remarks || ''">{{ line.Remarks || '-' }}</div>
-                  }
-                </td>
-
-                <td>
-                  @if (!isRequestMode && isOpen) {
-                    <input *menuPermission="PermissionAction.Update"
-                      type="number" step="1"
-                      class="form-control form-control-sm" aria-label="Priority"
-                      [(ngModel)]="draft.priority" [disabled]="!canWrite" />
-                  } @else {
-                    {{ line.Priority ?? '–' }}
                   }
                 </td>
 
@@ -279,22 +261,17 @@
                   <td class="text-center">{{ line.UnresolvedRequestCount }}</td>
                   <td>
                     @if (isOpen) {
-                      <input *menuPermission="PermissionAction.Update" type="number" step="0.0001"
-                        class="form-control form-control-sm" aria-label="Additional quantity"
-                        [(ngModel)]="draft.additionalQuantity" [disabled]="!canWrite" />
+                      <input *menuPermission="PermissionAction.Update" type="number" step="0.0001" class="form-control form-control-sm" aria-label="Additional quantity" [(ngModel)]="draft.additionalQuantity" [disabled]="!canWrite" />
                     }
                   </td>
                   <td class="text-end">
                     <div class="d-inline-flex gap-1 align-items-center text-nowrap">
                       @if (isOpen) {
-                        <button *menuPermission="PermissionAction.Update" type="button" class="action-btn btn-edit"
-                          title="Request Change" aria-label="Request Change"
-                          [disabled]="!canRequestChange(draft)" (click)="requestChange(line, draft)">
+                        <button *menuPermission="PermissionAction.Update" type="button" class="action-btn btn-edit" title="Request Change" aria-label="Request Change" [disabled]="!canRequestChange(draft)" (click)="requestChange(line, draft)">
                           <span class="d-inline-block align-middle" aria-hidden="true" style="width: 16px; height: 16px; background-color: currentColor; mask: url('assets/icons/requisition-pencil-arrow.svg') center / contain no-repeat;"></span>
                         </button>
                       }
-                      <button type="button" class="btn btn-sm btn-outline-secondary"
-                        aria-haspopup="dialog" (click)="openHistory(line)">
+                      <button type="button" class="btn btn-sm btn-outline-secondary" aria-haspopup="dialog" (click)="openHistory(line)">
                         History ({{ line.RequestCount ?? 0 }})
                       </button>
                     </div>
@@ -302,27 +279,21 @@
                 } @else {
                   <td class="text-end">
                     <div class="d-inline-flex gap-1 align-items-center text-nowrap">
-                      <button *menuPermission="PermissionAction.Update" type="button" class="action-btn btn-edit"
-                        title="Save Line" aria-label="Save Line" [disabled]="!canSaveLine(line, draft)"
-                        (click)="saveLine(line, draft)">
+                      <button *menuPermission="PermissionAction.Update" type="button" class="action-btn btn-edit" title="Save Line" aria-label="Save Line" [disabled]="!canSaveLine(line, draft)" (click)="saveLine(line, draft)">
                         <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
                       </button>
-                      <button *menuPermission="PermissionAction.Delete" type="button" class="action-btn btn-delete"
-                        title="Delete Line" aria-label="Delete Line" [disabled]="!canWrite || lines().length <= 1"
-                        (click)="deleteLine(line)">
+                      <button *menuPermission="PermissionAction.Delete" type="button" class="action-btn btn-delete" title="Delete Line" aria-label="Delete Line" [disabled]="!canWrite || lines().length <= 1" (click)="deleteLine(line)">
                         <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
                       </button>
                     </div>
                   </td>
                 }
               </tr>
-
-
             }
           } @empty {
             @if (linesReady() && !loadingLines()) {
               <tr>
-                <td [attr.colspan]="isRequestMode ? 15 : 13" class="text-muted">
+                <td [attr.colspan]="isRequestMode ? 16 : 14" class="text-muted">
                   {{ lines().length ? 'No matching products.' : 'No active lines.' }}
                 </td>
               </tr>
@@ -342,25 +313,14 @@
   <button type="button" class="btn btn-secondary" [disabled]="saving()" (click)="close()">
     <i class="fa-solid fa-fw fa-xmark" aria-hidden="true"></i> Close
   </button>
-  @if (!loadingOptions() && !loadingLines()) {
-    <button *menuPermission="PermissionAction.Update" type="button" class="btn btn-success"
-      [disabled]="!canSaveHeader" (click)="saveHeaderRemarks()">
-      <i class="fa-solid fa-fw fa-check" aria-hidden="true"></i> Update
-    </button>
-    @if (!isRequestMode) {
-      <button type="button" class="btn btn-complete me-3" [disabled]="saving() || !isOpen" (click)="complete()">
-        Complete
-      </button>
-    }
-  }
+
 </div>
 
 <ng-template #bulkModal>
   <div class="modal-header">
     <h5 class="modal-title d-flex align-items-center gap-2">
-        <i [class]="isRequestMode ? 'fa-regular fa-paper-plane' : 'fa-solid fa-layer-group'"
-        style="color: rgb(95, 179, 104);" aria-hidden="true"></i>
-        {{ isRequestMode ? 'Request Bulk Add' : 'Add Bulk Products' }}
+      <i [class]="isRequestMode ? 'fa-regular fa-paper-plane' : 'fa-solid fa-layer-group'" style="color: rgb(95, 179, 104);" aria-hidden="true"></i>
+      {{ isRequestMode ? 'Request Bulk Add' : 'Add Bulk Products' }}
     </h5>
     <button type="button" class="btn-close" aria-label="Close" [disabled]="saving()" (click)="closeBulk()"></button>
   </div>
@@ -369,9 +329,7 @@
     <div class="row g-3 align-items-end">
       <div class="col-lg-2 col-md-4">
         <label class="form-label" for="bulkProductType">Product Type <span class="text-danger">*</span></label>
-        <select id="bulkProductType" class="form-select" [ngModel]="bulkProductTypeId"
-          #bulkProductTypeModel="ngModel"
-          (ngModelChange)="onBulkTypeChange($event, bulkProductTypeModel)" [disabled]="saving()">
+        <select id="bulkProductType" class="form-select" [ngModel]="bulkProductTypeId" #bulkProductTypeModel="ngModel" (ngModelChange)="onBulkTypeChange($event, bulkProductTypeModel)" [disabled]="saving()">
           <option [ngValue]="0" disabled>Select Product Type</option>
           @for (productType of productTypes(); track productType.Id) {
             <option [ngValue]="+productType.Id">{{ productType.Name }}</option>
@@ -380,8 +338,7 @@
       </div>
       <div class="col-lg-2 col-md-4">
         <label class="form-label" for="bulkSize">Size</label>
-        <select id="bulkSize" class="form-select" [ngModel]="bulkSizeId"
-          (ngModelChange)="onBulkSizeChange($event)" [disabled]="saving() || loadingBulkOptions()">
+        <select id="bulkSize" class="form-select" [ngModel]="bulkSizeId" (ngModelChange)="onBulkSizeChange($event)" [disabled]="saving() || loadingBulkOptions()">
           <option [ngValue]="0">All sizes</option>
           @for (option of bulkSizes(); track option.Id) {
             <option [ngValue]="+option.Id">{{ option.Name }}</option>
@@ -390,9 +347,7 @@
       </div>
       <div class="col-lg-2 col-md-4">
         <label class="form-label" for="bulkSubCategory">Subcategory</label>
-        <select id="bulkSubCategory" class="form-select" [ngModel]="bulkSubCategoryId"
-          (ngModelChange)="bulkSubCategoryId = $event; onBulkFilterChange()"
-          [disabled]="saving() || !bulkSizeId || loadingSubCategories()">
+        <select id="bulkSubCategory" class="form-select" [ngModel]="bulkSubCategoryId" (ngModelChange)="bulkSubCategoryId = $event; onBulkFilterChange()" [disabled]="saving() || !bulkSizeId || loadingSubCategories()">
           <option [ngValue]="0">All subcategories</option>
           @for (option of bulkSubCategories(); track option.Id) {
             <option [ngValue]="+option.Id">{{ option.Name }}</option>
@@ -401,22 +356,17 @@
       </div>
       <div class="col-lg-2 col-md-4">
         <label class="form-label" for="bulkGrade">Grade</label>
-        <select id="bulkGrade" class="form-select" [ngModel]="bulkGradeId"
-          (ngModelChange)="bulkGradeId = $event; onBulkFilterChange()" [disabled]="saving() || loadingBulkOptions()">
+        <select id="bulkGrade" class="form-select" [ngModel]="bulkGradeId" (ngModelChange)="bulkGradeId = $event; onBulkFilterChange()" [disabled]="saving() || loadingBulkOptions()">
           <option [ngValue]="0">All grades</option>
           @for (option of bulkGrades(); track option.Id) {
             <option [ngValue]="+option.Id">{{ option.Name }}</option>
           }
         </select>
       </div>
-      <div class="col-lg-3 col-md-6">
-        <div class="bulk-search-box">
-          <span class="bulk-search-icon">
-            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-          </span>
-          <input type="search" class="form-control bulk-search" aria-label="Search items"
-            placeholder="Search items by ID or name" [value]="bulkSearch"
-            [disabled]="!bulkProductTypeId || saving()" (input)="onBulkSearch($any($event.target).value)" />
+      <div class="col-12 col-md-6 col-lg-4 col-xl-3 ms-auto">
+        <div class="input-group">
+          <span class="input-group-text"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></span>
+          <input type="search" class="form-control" aria-label="Search items" placeholder="Search items by ID or name" [value]="bulkSearch" [disabled]="!bulkProductTypeId || saving()" (input)="onBulkSearch($any($event.target).value)" />
         </div>
       </div>
     </div>
@@ -436,11 +386,11 @@
               <th>ITEM ID</th>
               <th>ITEM NAME</th>
               <th>SIZE</th>
-              <th>PRIORITY</th>
               <th>UOM</th>
               <th>QUANTITY</th>
               <th>STOCK QUANTITY</th>
               <th>SALES QUANTITY</th>
+              <th>PRIORITY</th>
               <th class="text-center">COUNT</th>
               <th>REMARKS</th>
             </tr>
@@ -452,8 +402,8 @@
                   <span class="spinner-border text-success" role="status" aria-label="Loading items"></span>
                 </td>
               </tr>
-              } @else if (!bulkError()) {
-                @for (row of bulkRows(); track row.itemId) {
+            } @else if (!bulkError()) {
+              @for (row of bulkRows(); track row.itemId) {
                 @let addedLine = savedLine(row.itemId, bulkProductTypeId);
                 @let draft = bulkDrafts.get(row.itemId);
                 <tr [class.bulk-already-added]="!!addedLine">
@@ -462,22 +412,9 @@
                   <td>{{ row.size ?? '–' }}</td>
                   <td>
                     @if (addedLine) {
-                      {{ addedLine.Priority ?? '–' }}
-                    } @else {
-                      <input type="number" step="1"
-                        class="form-control form-control-sm"
-                        aria-label="Bulk Priority" [disabled]="saving()"
-                        [ngModel]="draft?.priority ?? null"
-                        (ngModelChange)="updateBulkDraft(row, { priority: $event })" />
-                    }
-                  </td>
-                  <td>
-                    @if (addedLine) {
                       {{ addedLine.UOMName || 'Unspecified' }}
                     } @else {
-                      <select class="form-select form-select-sm" aria-label="Bulk UoM" [disabled]="saving()"
-                        [ngModel]="draft?.uomId ?? defaultUomId"
-                        (ngModelChange)="updateBulkDraft(row, { uomId: $event })">
+                      <select class="form-select form-select-sm" aria-label="Bulk UoM" [disabled]="saving()" [ngModel]="draft?.uomId ?? defaultUomId" (ngModelChange)="updateBulkDraft(row, { uomId: $event })">
                         @if (plannerUoMs().length !== 1) {
                           <option [ngValue]="0" [disabled]="plannerUoMs().length > 0">
                             {{ plannerUoMs().length ? 'Select UoM' : 'N/A' }}
@@ -493,27 +430,26 @@
                     @if (addedLine) {
                       {{ addedLine.Quantity }}
                     } @else {
-                      <input type="text" inputmode="decimal" class="form-control form-control-sm bulk-quantity"
-                        [disabled]="saving()" aria-label="Bulk Quantity" [value]="draft?.quantityText ?? ''"
-                        (input)="setBulkQuantity(row, $any($event.target))" />
+                      <input type="text" inputmode="decimal" class="form-control form-control-sm bulk-quantity" [disabled]="saving()" aria-label="Bulk Quantity" [value]="draft?.quantityText ?? ''" (input)="setBulkQuantity(row, $any($event.target))" />
                     }
                   </td>
                   <td>{{ addedLine ? addedLine.StockQuantity : row.stock }}</td>
                   <td>{{ addedLine ? addedLine.SalesQuantity : row.sales }}</td>
+                  <td>
+                    @if (addedLine) {
+                      {{ addedLine.Priority ?? '–' }}
+                    } @else {
+                      <input type="number" step="1" class="form-control form-control-sm" aria-label="Bulk Priority" [disabled]="saving()" [ngModel]="draft?.priority ?? null" (ngModelChange)="updateBulkDraft(row, { priority: $event })" />
+                    }
+                  </td>
                   <td class="text-center">
-                    <span class="requisition-count" [attr.aria-label]="'Matching requisitions: ' + row.count">
-                      {{ row.count }}
-                    </span>
+                    <span class="requisition-count" [attr.aria-label]="'Matching requisitions: ' + row.count">{{ row.count }}</span>
                   </td>
                   <td>
                     @if (addedLine) {
-                      <div class="g-scrollable-text sm" [title]="addedLine.Remarks || ''">
-                        {{ addedLine.Remarks || '-' }}
-                      </div>
+                      <div class="g-scrollable-text sm" [title]="addedLine.Remarks || ''">{{ addedLine.Remarks || '-' }}</div>
                     } @else {
-                      <input type="text" maxlength="500" class="form-control form-control-sm"
-                        [disabled]="saving()" aria-label="Bulk Remarks" [value]="draft?.remarks ?? ''"
-                        (input)="updateBulkDraft(row, { remarks: $any($event.target).value })" />
+                      <input type="text" maxlength="500" class="form-control form-control-sm" [disabled]="saving()" aria-label="Bulk Remarks" [value]="draft?.remarks ?? ''" (input)="updateBulkDraft(row, { remarks: $any($event.target).value })" />
                     }
                   </td>
                 </tr>
@@ -526,16 +462,14 @@
           </tbody>
         </table>
       </div>
+
       @if (bulkProductTypeId > 0) {
-        <app-pagination [currentPage]="bulkPage()" [pageSize]="bulkPageSize()" [totalItems]="bulkTotal()"
-          (pageChanged)="onBulkPageChange($event)" (pageSizeChanged)="onBulkPageSizeChange($event)"></app-pagination>
+        <app-pagination [currentPage]="bulkPage()" [pageSize]="bulkPageSize()" [totalItems]="bulkTotal()" (pageChanged)="onBulkPageChange($event)" (pageSizeChanged)="onBulkPageSizeChange($event)"></app-pagination>
       }
       @if (bulkError()) {
         <div class="alert alert-danger mt-3">
           {{ bulkError() }}
-          <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="retryBulkLoad()">
-            Retry
-          </button>
+          <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="retryBulkLoad()">Retry</button>
         </div>
       }
     </div>
@@ -544,8 +478,7 @@
   <div class="modal-footer">
     <span class="me-auto text-muted">{{ bulkSelection.length }} selected</span>
     <button type="button" class="btn btn-secondary" [disabled]="saving()" (click)="closeBulk()">Close</button>
-    <button type="button" class="btn" [class.btn-success]="!isRequestMode" [class.btn-request-add]="isRequestMode"
-      [disabled]="!canAddBulk" (click)="addBulk()">
+    <button type="button" class="btn" [class.btn-success]="!isRequestMode" [class.btn-request-add]="isRequestMode" [disabled]="!canAddBulk" (click)="addBulk()">
       @if (isRequestMode) {
         <i class="fa-regular fa-paper-plane me-1" aria-hidden="true"></i> Request Add
       } @else {
@@ -555,13 +488,11 @@
   </div>
 </ng-template>
 
-
 <ng-template #historyModal let-modal>
   <div class="modal-header">
     <h5 id="requisition-line-history-title" class="modal-title">Request History</h5>
     <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
   </div>
-
 
   @if (historyLine; as line) {
     <p class="mb-2">
@@ -571,10 +502,8 @@
       <span>Current Acknowledged Quantity <strong class="text-black">{{ line.Quantity }}</strong></span>
       <span class="text-muted" aria-hidden="true">|</span>
       <span>
-        <strong [style.color]="line.RemainingQuantity == null || line.RemainingQuantity === 0
-          ? null : (line.RemainingQuantity < 0.5 ? '#047857' : '#856404')">
-          {{ line.RemainingQuantity == null ? '–' :
-            (line.RemainingQuantity < 0 ? -line.RemainingQuantity : line.RemainingQuantity) }}
+        <strong [style.color]="line.RemainingQuantity == null || line.RemainingQuantity === 0 ? null : (line.RemainingQuantity < 0.5 ? '#047857' : '#856404')">
+          {{ line.RemainingQuantity == null ? '–' : (line.RemainingQuantity < 0 ? -line.RemainingQuantity : line.RemainingQuantity) }}
         </strong>
         Production Remaining (Packing Stock)
       </span>
@@ -615,18 +544,17 @@
                 <td>{{ request.AdditionalRequestedQuantity }}</td>
                 <td>{{ request.QtyAfterAction ?? '–' }}</td>
                 <td>
-                  
-                @if (!request.IsActive && request.StatusCode === 'PEND') {
-                  <span class="badge bg-secondary">Withdrawn</span>
-                } @else if (request.StatusCode === 'ACKDLG') {
-                  <span class="g-status approve">Acknowledged</span>
-                } @else if (request.StatusCode === 'REJC') {
-                  <span class="g-status reject">Rejected</span>
-                } @else if (request.StatusCode === 'PEND') {
-                  <span class="g-status pending">Pending</span>
-                } @else {
-                  {{ request.StatusName || request.StatusCode }}
-                }
+                  @if (!request.IsActive && request.StatusCode === 'PEND') {
+                    <span class="badge bg-secondary">Withdrawn</span>
+                  } @else if (request.StatusCode === 'ACKDLG') {
+                    <span class="g-status approve">Acknowledged</span>
+                  } @else if (request.StatusCode === 'REJC') {
+                    <span class="g-status reject">Rejected</span>
+                  } @else if (request.StatusCode === 'PEND') {
+                    <span class="g-status pending">Pending</span>
+                  } @else {
+                    {{ request.StatusName || request.StatusCode }}
+                  }
                 </td>
                 <td><div class="g-scrollable-text sm" [title]="request.RequesterMessage || ''">{{ request.RequesterMessage || '–' }}</div></td>
                 <td>
@@ -642,13 +570,11 @@
                 </td>
                 <td>{{ request.ActionDate ? (request.ActionDate | date: 'dd-MMM-yyyy HH:mm') : '–' }}</td>
                 <td><div class="g-scrollable-text sm" [title]="request.ActionTakerRemarks || ''">{{ request.ActionTakerRemarks || '–' }}</div></td>
-
                 <td class="g-action-column">
                   <div class="action-buttons">
                     <button type="button" class="action-btn btn-view" title="View action takers" aria-label="View action takers" [attr.aria-expanded]="viewedActionTakersBatchId() === request.RequestBatchId" (click)="toggleHistoryActionTakers(request.RequestBatchId)">
                       <i class="fa-solid fa-magnifying-glass-plus" aria-hidden="true"></i>
                     </button>
-
                     @if (request.IsActive && request.StatusCode === 'PEND') {
                       <button *menuPermission="PermissionAction.Update" type="button" class="action-btn btn-delete" title="Withdraw request" aria-label="Withdraw request" [disabled]="saving()" (click)="withdrawHistoryRequest(request)">
                         <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
@@ -656,10 +582,7 @@
                     }
                   </div>
                 </td>
-
-
               </tr>
-
 
               @if (viewedActionTakersBatchId() === request.RequestBatchId) {
                 <tr>
@@ -673,9 +596,6 @@
                   </td>
                 </tr>
               }
-
-
-
             }
           </tbody>
         </table>
@@ -687,7 +607,6 @@
     <button type="button" class="btn btn-secondary" (click)="modal.close()">Close</button>
   </div>
 </ng-template>
-
 
 <ng-template #requestModal>
   @if (confirmation; as request) {

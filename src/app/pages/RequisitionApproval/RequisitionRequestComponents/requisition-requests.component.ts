@@ -177,6 +177,7 @@ export class RequisitionRequestsComponent implements OnInit {
   canDecide(batch: HistoryBatch): boolean {
     return this.header.DocStatusId !== DocumentStatusId.Completed &&
       this.header.DocStatusId !== 5 &&
+      !this.loadingLines() &&
       !this.loadingHistory() &&
       !this.historyError() &&
       !this.deciding() &&

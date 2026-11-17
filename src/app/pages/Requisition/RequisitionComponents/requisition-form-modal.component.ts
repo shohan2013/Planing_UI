@@ -982,6 +982,7 @@ export class RequisitionFormModalComponent implements OnInit {
         ReqID: 0, RequisitionNumber: '',
         UnitId: Number(value.UnitId), BusinessId: Number(value.BusinessId),
         ReqDate: now, StartDate: new Date(value.StartDate!), EndDate: new Date(value.EndDate!),
+        TotalQuantity: Number(this.totalQuantity().toFixed(4)),
         Remarks: value.Remarks?.trim() ?? '', DocStatusId: DocumentStatusId.Pending,
         IsActive: true, CREATEDBY: enroll, UPDATEDBY: enroll, CREATEDDATE: now, UPDATEDDATE: now,
       },

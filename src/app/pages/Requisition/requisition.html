@@ -221,29 +221,7 @@
                   <i class="fa-solid fa-trash-can"></i>
                   }
                 </button>
-@if (false) {
-                <button
-                  type="button"
-                  class="action-btn btn-complete"
-                  title="Complete"
-                  [disabled]="
-                    !documentStatuses().length ||
-                    item.DocStatusId === DocumentStatusId.Completed ||
-                    deletingReqId() !== null ||
-                    completingReqId() !== null
-                  "
-                  (click)="completeRequisition(item.ReqID)"
-                >
-                  @if (completingReqId() === item.ReqID) {
-                    <span
-                      class="spinner-border spinner-border-sm"
-                      aria-hidden="true"
-                    ></span>
-                  } @else {
-                    <i class="fa-solid fa-circle-check"></i>
-                  }
-                </button>
-}
+
                 
               </div>
             </td>
