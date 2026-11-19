@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import {
   ServerQueryRequest,
@@ -9,6 +9,8 @@ import {
   IDeliveryOrder,
   IDeliveryOrderLine,
   IMergeDeliveryOrderRequest,
+  IMergePolicy,
+  IMergePreview,
 } from '../../model/SalesOrder/sales-order-model';
 import { environment } from 'src/environments/environment';
 import { GlobalConstant } from '../../constants/global.constants';
@@ -34,6 +36,33 @@ export class DeliveryOrderService {
   GetDeliveryOrdersDetails(SOID: Number, workTypeCode: string): Observable<IDeliveryOrderLine[]> {
     return this.http.get<IDeliveryOrderLine[]>(
       `${environment.API_URL}${GlobalConstant.API_END_POINTS.DeliveryOrderLine}/${SOID}?WorkTypeCode=${workTypeCode}`,
+    );
+  }
+
+  /** GET MergeDeliveryOrder/GetMergePolicies?UnitId=&BusinessId=&WorkTypeCode= */
+  GetMergePolicies(
+    unitId: number,
+    businessId: number,
+    workTypeCode: string,
+  ): Observable<IMergePolicy[]> {
+    const params = new HttpParams()
+      .set('UnitId', unitId)
+      .set('BusinessId', businessId)
+      .set('WorkTypeCode', workTypeCode);
+
+    return this.http.get<IMergePolicy[]>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.MergePolicies}`,
+      { params },
+    );
+  }
+
+  /** POST MergeDeliveryOrder/PreviewMerge, same body as MergeDOs, nothing is saved. */
+  PreviewMerge(
+    request: IMergeDeliveryOrderRequest,
+  ): Observable<IMergePreview> {
+    return this.http.post<IMergePreview>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.MergePreview}`,
+      request,
     );
   }
 

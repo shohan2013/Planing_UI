@@ -104,8 +104,8 @@
         <thead>
           <tr>
             <th>REQUISITION NUMBER</th>
-            <th>UNIT</th>
-            <th>BUSINESS</th>
+            <th class="g-fit-column" style="--g-col-min: 110px">UNIT</th>
+            <th class="g-fit-column" style="--g-col-min: 110px">BUSINESS</th>
             <th>REQUISITION DATE</th>
             <th>REMARKS</th>
             <th>CREATED BY</th>
@@ -141,9 +141,9 @@
           <tr>
             <td>{{ item.RequisitionNumber || '-' }}</td>
 
-            <td>{{ item.UnitName || '-' }}</td>
+            <td><div class="g-truncate" [title]="item.UnitName || '-'">{{ item.UnitName || '-' }}</div></td>
 
-            <td>{{ item.BusinessName || '-' }}</td>
+            <td><div class="g-truncate" [title]="item.BusinessName || '-'">{{ item.BusinessName || '-' }}</div></td>
 
             <td>{{ item.ReqDate | dateTime }}</td>
 

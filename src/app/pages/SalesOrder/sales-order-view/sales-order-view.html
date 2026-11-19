@@ -23,7 +23,8 @@
 
       <div>
         <h5 id="do-view-title">
-          {{ workTypeCode === 'REQ' ? 'Requisition Details' : 'Delivery Order Details' }}
+          {{ workTypeCode === 'REQ' ? 'Requisition Details' : 'Delivery Order
+          Details' }}
         </h5>
 
         <div class="do-code">{{ order.Code }}</div>
@@ -55,21 +56,20 @@
         </div>
 
         <div>
-          <h6>Order Information</h6>
+          <h6>
+            {{ workTypeCode === 'REQ' ? 'Requisition' : 'Order'}} Information
+          </h6>
 
           <span>
-            {{ workTypeCode === 'REQ'
-              ? 'Basic requisition information'
-              : 'Basic delivery order information' }}
+            {{ workTypeCode === 'REQ' ? 'Basic requisition information' : 'Basic
+            delivery order information' }}
           </span>
-
         </div>
       </div>
 
       <div class="info-grid">
         <!-- DO Code -->
         <div class="info-item">
-      
           <span class="info-label">
             {{ workTypeCode === 'REQ' ? 'Requisition No.' : 'Delivery Order' }}
           </span>
@@ -102,10 +102,12 @@
 
         <!-- Customer -->
         <div class="info-item">
-          <span class="info-label"> Customer </span>
+          <span class="info-label"
+            >{{workTypeCode === 'REQ' ? 'Requester' : 'Customer'}}
+          </span>
 
-          <strong class="info-value">
-            {{ workTypeCode === 'REQ' ? 'N/A' : (order.CustomerName || 'Not specified') }}
+          <strong class="info-value"
+            >{{(order.CustomerName || 'Not specified') }}
           </strong>
         </div>
 
@@ -143,25 +145,19 @@
         </div>
       </div>
 
-
-      @if (workTypeCode == 'DO') {
       <div class="summary-divider"></div>
 
       <div class="summary-item">
         <div class="summary-icon amount-icon">
-          <i class="fa-solid fa-money-bill-wave"></i>
+          <i class="fa-solid fa-scale-balanced"></i>
         </div>
 
         <div>
-          <span>Total Amount</span>
+          <span>Total Quantity</span>
 
-          <strong> {{ order.TotalAmount.toString() | number:'1.2-2' }} </strong>
+          <strong> {{ order.TotalQuantity | number: '1.0-2' }} </strong>
         </div>
       </div>
-      }
-
-
-
     </section>
 
     <!-- ===================================================
@@ -176,13 +172,19 @@
         <div>
           <h6>Order Items</h6>
 
-          <span> Products included in this delivery order </span>
+          <span>
+            {{workTypeCode === 'DO' ? 'Products included in this delivery order'
+            : 'Products included in this requisition'}}
+          </span>
         </div>
       </div>
       @if (isLoading()) {
       <div class="loading-container">
         <span class="spinner-border me-2" aria-hidden="true"></span>
-        <span class="loading-text">Loading Delivery Order Items...</span>
+        <span class="loading-text"
+          >Loading {{ workTypeCode === 'REQ' ? 'Requisition' : 'Delivery Order'
+          }} Items...</span
+        >
       </div>
       } @else if (lines().length > 0) {
 
@@ -192,13 +194,12 @@
             <thead>
               <tr>
                 <th class="serial-column">#</th>
+                <th class="type-column">PRODUCT TYPE</th>
                 <th>PRODUCT</th>
-                <th class="presentStock-column">PRESENT STOCK</th>
+                <th class="size-column">SIZE</th>
+                <th class="uom-column">UOM</th>
                 <th class="quantity-column">QUANTITY</th>
-                @if (workTypeCode !== 'REQ') {
-                  <th class="price-column">UNIT PRICE</th>
-                  <th class="amount-column">AMOUNT</th>
-                }
+                <th class="priority-column">PRIORITY</th>
               </tr>
             </thead>
 
@@ -208,32 +209,34 @@
               <tr>
                 <td class="serial-column">{{ i + 1 }}</td>
 
+                <td class="type-column">{{ line.ProductType || '-' }}</td>
+
                 <td>
                   <div class="product-info">
                     <div class="product-icon">
                       <i class="fa-solid fa-box"></i>
                     </div>
 
-                    <span> {{ line.ProductName }} </span>
+                    <div class="product-text">
+                      <span> {{ line.ProductName }} </span>
+                      @if (line.ProductId) {
+                      <small class="product-id"
+                        >Product ID : {{ line.ProductId }}</small
+                      >
+                      }
+                    </div>
                   </div>
                 </td>
-                <td class="presentStock-column">{{line.PresentStock}}</td>
-                <td class="quantity-column">{{ line.Quantity }}</td>
 
-                @if (workTypeCode !== 'REQ') {
-                <td class="price-column">
-                  {{ line.LastPrice.toString()| number:'1.2-2' }}
+                <td class="size-column">{{ line.Size || '-' }}</td>
+
+                <td class="uom-column">{{ line.Uom || '-' }}</td>
+
+                <td class="quantity-column">
+                  <strong>{{ line.Quantity | number: '1.0-2' }}</strong>
                 </td>
 
-                <td class="amount-column">
-                  <strong>
-                    {{ (line.Quantity * line.LastPrice).toString()|
-                    number:'1.2-2' }}
-                  </strong>
-                </td>
-                }
-
-
+                <td class="priority-column">{{ line.PriorityName || '-' }}</td>
               </tr>
 
               }
@@ -251,7 +254,10 @@
 
         <h6>No Order Items</h6>
 
-        <p>No product details are available for this delivery order.</p>
+        <p>
+          No product details are available for this {{ workTypeCode === 'REQ' ?
+          'requisition' : 'delivery order' }}.
+        </p>
       </div>
 
       }
@@ -266,10 +272,9 @@
       <i class="fa-solid fa-circle-info"></i>
 
       <span>
-        {{ workTypeCode === 'REQ' ? 'Requisition No.' : 'Delivery Order' }}:
-        {{ order.Code }}
+        {{ workTypeCode === 'REQ' ? 'Requisition No.' : 'Delivery Order' }}: {{
+        order.Code }}
       </span>
-
     </div>
 
     <button

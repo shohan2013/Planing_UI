@@ -4,7 +4,6 @@
     <span> Select DO or Requisition to merge </span>
   </div>
   <div class="card-body">
-
     <div class="d-flex justify-content-end align-items-center gap-3 mb-3">
       <div style="width: 20%">
         <div class="input-group">
@@ -26,7 +25,6 @@
       </div>
 
       <div style="width: 20%">
-
         <div class="input-group">
           <div class="input-group-text">
             <i class="fa-solid fa-filter"></i>
@@ -98,27 +96,31 @@
       <table class="custom-table">
         <thead>
           <tr>
-            <th style="width: 40px">
+            <th class="g-sl-column">
               <input
                 type="checkbox"
                 [checked]="isAllSelected()"
                 (change)="toggleAll($event)"
               />
             </th>
-              <th style="width: 19%">
-                {{ selectedWorkTypeCode === 'REQ' ? 'REQUISITION CODE' : 'DO CODE' }}
-              </th>
-              <th>CREATED DATE</th>
-              <th style="width: 22%">
-                {{ selectedWorkTypeCode === 'REQ' ? 'REQUEST REQUISITION DATE' : 'REQUEST DELIVERY DATE' }}
-              </th>              
-              <th>UNIT</th>
-              <th>BUSINESS</th>
-              @if (selectedWorkTypeCode !== 'REQ') {
-                <th>CUSTOMER NAME</th>
-                <th>TOTAL AMOUNT</th>
-              }
-              <th class="g-action-column">ACTION</th>
+            <th class="text-nowrap">
+              {{ selectedWorkTypeCode === 'REQ' ? 'REQUISITION CODE' : 'DO CODE'
+              }}
+            </th>
+            <th>CREATED DATE</th>
+            <th class="g-fit-column" style="--g-col-min: 110px">UNIT</th>
+            <th class="g-fit-column" style="--g-col-min: 110px">BUSINESS</th>
+            @if (selectedWorkTypeCode !== 'REQ') {
+            <th>CUSTOMER NAME</th>
+            }
+            <th>
+              TOTAL QUANTITY
+            </th>
+            <th class="text-nowrap">
+              {{ selectedWorkTypeCode === 'REQ' ? 'REQUEST REQUISITION DATE' :
+              'REQUEST DELIVERY DATE' }}
+            </th>
+            <th class="g-action-column">ACTION</th>
           </tr>
         </thead>
 
@@ -127,22 +129,27 @@
 
           <tr>
             <!-- <td colspan="10" class="text-center py-4"> -->
-            <td [attr.colspan]="selectedWorkTypeCode === 'REQ' ? 7 : 9" class="text-center py-4">
+            <td
+              [attr.colspan]="selectedWorkTypeCode === 'REQ' ? 7 : 9"
+              class="text-center py-4"
+            >
               <span
                 class="spinner-border spinner-border-sm me-2"
                 aria-hidden="true"
               >
               </span>
-              {{ selectedWorkTypeCode === 'REQ'
-                              ? 'Loading Requisitions...'
-                              : 'Loading Delivery Orders...' }}
+              {{ selectedWorkTypeCode === 'REQ' ? 'Loading Requisitions...' :
+              'Loading Delivery Orders...' }}
             </td>
           </tr>
 
           } @else if (paginatedItems().length === 0) {
           <tr>
             <!-- <td colspan="10" class="text-center py-4"> -->
-            <td [attr.colspan]="selectedWorkTypeCode === 'REQ' ? 7 : 9" class="text-center py-4">
+            <td
+              [attr.colspan]="selectedWorkTypeCode === 'REQ' ? 7 : 9"
+              class="text-center py-4"
+            >
               <i class="fas fa-folder-open fa-4x text-secondary mb-3"></i>
               <br />
               <h6>No Records Found.</h6>
@@ -151,7 +158,7 @@
           } @else { @for (item of paginatedItems(); track item?.SOID; let i =
           $index) {
           <tr>
-            <td>
+            <td class="g-sl-column">
               <input
                 type="checkbox"
                 [checked]="isSelected(item.SOID)"
@@ -159,14 +166,27 @@
               />
             </td>
             <td>{{item.Code}}</td>
-            <td>{{item.CreatedDate | dateTime}}</td>
-            <td>{{item.ReqDeliveryDate | dateTime}}</td>
-            <td>{{item.Unit}}</td>
-            <td>{{item.Business}}</td>
+            <td>
+              <div class="g-truncate" [title]="item.CreatedDate | dateTime">
+                {{item.CreatedDate | dateTime}}
+              </div>
+            </td>
+
+            <td>{{ item.Unit }}</td>
+            <td>{{ item.Business }}</td>
             @if (selectedWorkTypeCode !== 'REQ') {
-              <td>{{item.CustomerName}}</td>
-              <td>{{item.TotalAmount}}</td>
+            <td>
+              <div class="g-truncate" [title]="item.CustomerName">
+                {{ item.CustomerName }}
+              </div>
+            </td>
             }
+            <td>{{ item.TotalQuantity }}</td>
+            <td>
+              <div class="g-truncate" [title]="item.ReqDeliveryDate | dateTime">
+                {{item.ReqDeliveryDate | dateTime}}
+              </div>
+            </td>
 
             <!-- <td>
                       {{ item.Header.UPDATEDBY }}
@@ -249,10 +269,28 @@
 <app-delivery-orders-cart
   [isOpen]="cartOpen()"
   [selectedOrders]="selectedDeliveryOrders()"
+  [workTypeCode]="selectedWorkTypeCode"
+  [policies]="mergePolicies()"
+  [policiesLoading]="mergePoliciesLoading()"
+  [policiesError]="mergePoliciesError()"
+  [isMerging]="isMerging()"
   (closeCart)="closeCart()"
   (removeOrder)="removeSelection($event)"
-  (nextStep)="nextProcess()"
+  (reloadPolicies)="loadMergePolicies(true)"
+  (nextStep)="openMergePreview($event)"
 ></app-delivery-orders-cart>
+
+@if (mergePreviewRequest()) {
+<app-merge-preview
+  [request]="mergePreviewRequest()"
+  [orders]="selectedDeliveryOrders()"
+  [policyName]="mergePreviewPolicyName()"
+  [workTypeCode]="selectedWorkTypeCode"
+  [isMerging]="isMerging()"
+  (confirm)="confirmMerge($event)"
+  (closePreview)="closeMergePreview()"
+></app-merge-preview>
+}
 
 @if(viewOpen() && OrderForView()){
 <app-delivery-order-view

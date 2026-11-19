@@ -25,7 +25,7 @@
       <table class="custom-table">
         <thead>
           <tr>
-            <th style="width: 50px">#</th>
+            <th class="g-sl-column">#</th>
 
             <th>PP NO</th>
 
@@ -35,9 +35,9 @@
 
             <th>CREATED BY</th>
 
-            <th>UNIT</th>
+            <th class="g-fit-column" style="--g-col-min: 110px">UNIT</th>
 
-            <th>BUSINESS</th>
+            <th class="g-fit-column" style="--g-col-min: 110px">BUSINESS</th>
 
             <th>STATUS</th>
 
@@ -76,7 +76,7 @@
 
           <tr>
             <!-- Serial -->
-            <td>{{ (currentPage() - 1) * pageSize() + i + 1 }}</td>
+            <td class="g-sl-column">{{ (currentPage() - 1) * pageSize() + i + 1 }}</td>
 
             <!-- PP No -->
             <td>{{ item.PPNO }}</td>
@@ -93,10 +93,10 @@
             <td>{{ item.CreatedBy }}</td>
 
             <!-- Unit -->
-            <td>{{ item.Unit }}</td>
+            <td><div class="g-truncate" [title]="item.Unit">{{ item.Unit }}</div></td>
 
             <!-- Business -->
-            <td>{{ item.Business }}</td>
+            <td><div class="g-truncate" [title]="item.Business">{{ item.Business }}</div></td>
 
             <!-- Document Status -->
             <td>

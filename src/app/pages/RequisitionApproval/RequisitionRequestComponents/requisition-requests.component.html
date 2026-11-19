@@ -67,8 +67,8 @@
         <thead>
           <tr>
             <th>REQUISITION NUMBER</th>
-            <th>UNIT</th>
-            <th>BUSINESS</th>
+            <th class="g-fit-column" style="--g-col-min: 110px">UNIT</th>
+            <th class="g-fit-column" style="--g-col-min: 110px">BUSINESS</th>
             <th>REQUISITION DATE</th>
             <th>REMARKS</th>
             <th>CREATED BY</th>
@@ -87,8 +87,8 @@
             @for (item of paginatedItems(); track item.ReqID) {
               <tr>
                 <td>{{ item.RequisitionNumber }}</td>
-                <td>{{ item.UnitName }}</td>
-                <td>{{ item.BusinessName }}</td>
+                <td><div class="g-truncate" [title]="item.UnitName">{{ item.UnitName }}</div></td>
+                <td><div class="g-truncate" [title]="item.BusinessName">{{ item.BusinessName }}</div></td>
                 <td>{{ item.ReqDate | date: 'dd-MMM-yyyy' }}</td>
                 <td><div class="g-scrollable-text md" [title]="item.Remarks || ''">{{ item.Remarks || '–' }}</div></td>
                 <td>{{ item.CreatedByName }} ({{ item.CREATEDBY }})</td>

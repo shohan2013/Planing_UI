@@ -320,10 +320,41 @@ td:has(> .g-scrollable-text.md) {
 /* Full: Standalone Remarks */
 .g-scrollable-text.full {
   width: 100%;
-}  
+}
 
+/* Global Truncated Text: single line with "...", full value shown on hover via [title] */
+/* The text does not affect column sizing (width: 0 + min-width: 100%), so the column */
+/* width is driven by its header; long values are cut to fit the column. */
+/* Usage: <td><div class="g-truncate" [title]="item.CustomerName">{{ item.CustomerName }}</div></td> */
+.g-truncate {
+  display: block;
+  width: 0;
+  min-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: default;
+}
 
+/* Header-fit Column: shrink the column to its header text (put on the <th>) */
+/* Optional minimum: <th class="g-fit-column" style="--g-col-min: 120px">UNIT</th> */
+.custom-table thead th.g-fit-column {
+  width: 8%;
+  min-width: var(--g-col-min, 0);
+  white-space: nowrap;
+}
 
+/*==================================================================TABLE COLUMNS=====================================================================*/
+/* Global Serial (#) / Checkbox Column: shrinks to its content */
+/* Usage: <th class="g-sl-column">#</th> ... <td class="g-sl-column">{{ i + 1 }}</td> */
+.g-sl-column {
+  width: 4%;
+  min-width: 40px;
+  padding: 5px 8px !important;
+  text-align: center !important;
+  white-space: nowrap;
+  vertical-align: middle;
+}
 
 /*==================================================================BUTTON=====================================================================*/
 /* Global Dynamic Action Column */
@@ -335,7 +366,6 @@ td:has(> .g-scrollable-text.md) {
   white-space: nowrap;
   vertical-align: middle;
 }
-
 
 // .action-buttons {
 //   display: flex;
@@ -350,7 +380,6 @@ td:has(> .g-scrollable-text.md) {
   white-space: nowrap;
   vertical-align: middle;
 }
-
 
 .action-btn {
   width: 36px;
@@ -425,8 +454,6 @@ td:has(> .g-scrollable-text.md) {
   transform: translateY(-2px);
 }
 
-
-
 .action-btn:active {
   transform: scale(0.95);
 }
@@ -485,31 +512,28 @@ label {
 //   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 // }
 
-
-
 .g-status {
-  display: inline-flex;          /* Flexbox ensures perfect centering */
+  display: inline-flex; /* Flexbox ensures perfect centering */
   align-items: center;
   justify-content: center;
 
   // width: 70px;                   /* Fixed width to fit "Completed" uniformly across all pills */
-  min-width: 75px;               /* Allow pill to grow for longer text while maintaining a base size */
-  width: fit-content;            /* Expand capsule dynamically based on content */
-  white-space: nowrap;           /* Prevent text wrapping (e.g. "Compl\nete") in grid cells/modal tiles */
-  
-  
-  height: 25px;                  /* Increased height for a fuller pill */
-  font-size: 13px;               /* Increased font size for better legibility */
-  font-weight: 549;              /* Semi-bold weight */
+  min-width: 75px; /* Allow pill to grow for longer text while maintaining a base size */
+  width: fit-content; /* Expand capsule dynamically based on content */
+  white-space: nowrap; /* Prevent text wrapping (e.g. "Compl\nete") in grid cells/modal tiles */
+
+  height: 25px; /* Increased height for a fuller pill */
+  font-size: 13px; /* Increased font size for better legibility */
+  font-weight: 549; /* Semi-bold weight */
 
   letter-spacing: 0.3px;
 
-  gap: 8px;            //place 8px between Dot and Text
+  gap: 8px; //place 8px between Dot and Text
   padding: 4px 12px;
 
-  border-radius: 13px;           /* Half of height for perfectly rounded ends */
+  border-radius: 13px; /* Half of height for perfectly rounded ends */
   text-align: center;
-  box-sizing: border-box;        /* Ensures fixed width/height include padding */
+  box-sizing: border-box; /* Ensures fixed width/height include padding */
   /* Adds space OUTSIDE the capsule */
   margin: 4px 8px; /* 4px top/bottom, 8px left/right */
 
@@ -522,8 +546,7 @@ label {
 /* Automatically expand width ONLY when a .g-dot exists inside */
 .g-status:has(.g-dot) {
   // width: 80px; /* Or min-width / fit-content */
-  min-width: 85px;              /* Expand minimum width to accommodate dot + gap + text */
- 
+  min-width: 85px; /* Expand minimum width to accommodate dot + gap + text */
 }
 /* DOT */
 .g-dot {
@@ -533,11 +556,7 @@ label {
   border-radius: 50%;
   flex-shrink: 0;
   position: relative;
-  
 }
-
-
-
 
 /* ACTIVE */
 .g-status.active {
@@ -564,8 +583,6 @@ label {
   box-shadow: 0 0 8px #ef4444;
   animation: pulseRed 1.5s infinite;
 }
-
-
 
 /* HOVER EFFECT */
 .g-status:hover {
@@ -629,10 +646,6 @@ label {
   box-shadow: 0 0 8px #ef4444;
   animation: pulseRed 1.5s infinite;
 }
-
-
-
-
 
 /* ANIMATIONS */
 @keyframes pulseYellow {
