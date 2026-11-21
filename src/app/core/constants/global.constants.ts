@@ -59,8 +59,10 @@ export const GlobalConstant = {
     //Line Request Approval
     acceptRequisitionLineRequest: 'RequisitionApproval/AcceptRequest',
     rejectRequisitionLineRequest: 'RequisitionApproval/RejectRequest',
-    RequisitionRequestNotifications: 'RequisitionApproval/GetRequestNotifications',
 
+    RequisitionNotificationEligibility: 'RequisitionApproval/NotificationEligibility',
+    RequisitionRequestNotifications: 'RequisitionApproval/GetRequestNotifications',
+    
   /*===========================COMMON===================================== */
     Common: 'Common',
     modules: 'Common/modules',
@@ -151,6 +153,7 @@ export const GlobalConstant = {
   /** SignalR hubs, relative to the API host (not under /api/). */
   HUBS: {
     PlanningVsProductionOverviewLive: 'hubs/planningVsProduction-overview-live',
+    RequisitionNotifications: 'hubs/requisition-notifications',
   },
   URL: { API_URL: 'https://localhost:7111/api/' },
 };

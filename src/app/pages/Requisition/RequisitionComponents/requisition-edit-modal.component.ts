@@ -10,6 +10,7 @@ import { MenuPermissionDirective } from 'src/app/core/directives/menu-permission
 import { IDropdownBind } from 'src/app/core/model/Common/dropdown-bind';
 import { IItem } from 'src/app/core/model/Common/Items/Item';
 import { IProductType } from 'src/app/core/model/Common/ProductType/ProductType';
+import { IPriority } from 'src/app/core/model/Common/Priority/Priority';
 import { IPlannerUoM } from 'src/app/core/model/Common/UOM/PlannerUoM';
 import { DocumentStatusId } from 'src/app/core/model/document-status';
 import { IAddRequisitionLineInput, IRequisitionLineHistory } from 'src/app/core/model/Requisition/RequisitionEdit';
@@ -18,7 +19,9 @@ import { IApiResponse } from 'src/app/core/model/Response/ApiResponse';
 import { PermissionAction } from 'src/app/core/services/Authorization/authorization.service';
 import { CommonService } from 'src/app/core/services/Common/CommonService';
 import { RequisitionService } from 'src/app/core/services/Requisition/requisition.service';
+import { PriorityInputComponent } from 'src/app/shared/priority-input/priority-input.component';
 import { PaginationComponent } from 'src/app/shared/pagination/pagination.component';
+
 
 type LineDraft = {
   quantity: number | null;
@@ -56,7 +59,7 @@ type RequestConfirmation = {
 @Component({
   selector: 'app-requisition-edit-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgbTypeaheadModule, MenuPermissionDirective, PaginationComponent],
+  imports: [CommonModule, FormsModule, NgbTypeaheadModule, MenuPermissionDirective, PaginationComponent, PriorityInputComponent],
   templateUrl: './requisition-edit-modal.component.html',
   styleUrl: './requisition-edit-modal.component.scss',
 })
@@ -101,6 +104,7 @@ export class RequisitionEditModalComponent implements OnInit {
   readonly linesReady = signal(false);
   readonly loadingOptions = signal(true);
   readonly productTypes = signal<IProductType[]>([]);
+  readonly priorities = signal<IPriority[]>([]);
   readonly plannerUoMs = signal<IPlannerUoM[]>([]);
   readonly drafts = new Map<number, LineDraft>();
 
@@ -111,7 +115,7 @@ export class RequisitionEditModalComponent implements OnInit {
   productTypeId = 0;
   itemSearch: IItem | string = '';
   selectedItem: IItem | null = null;
-  priority: number | null = null;
+  priority: number | null = 0;
   uomId = 0;
   quantity: number | null = null;
   remarks = '';
@@ -183,13 +187,15 @@ export class RequisitionEditModalComponent implements OnInit {
 
     forkJoin({
       types: this.commonService.GetProductTypeList(),
+      priorities: this.commonService.GetPriorityList(),
       uoms: this.commonService.GetPlannerUoM(this.header.UnitId, this.header.BusinessId),
     }).pipe(
       takeUntilDestroyed(this.destroyRef),
       finalize(() => this.loadingOptions.set(false)),
     ).subscribe({
-      next: ({ types, uoms }) => {
+      next: ({ types, uoms, priorities }) => {
         this.productTypes.set(types);
+        this.priorities.set(priorities);
         this.plannerUoMs.set(uoms);
         this.uomId = this.defaultUomId;
       },
@@ -235,7 +241,7 @@ export class RequisitionEditModalComponent implements OnInit {
   get canAddSingle(): boolean {
     return this.canAdd && !this.loadingItem() && !!this.selectedItem &&
       this.productTypeId > 0 && this.validUom(this.uomId) &&
-      this.validQuantity(this.quantity, true) &&
+      this.validQuantity(this.quantity, true) && this.validPriority(this.priority) &&
       !this.savedLine(this.selectedItem.Id, this.productTypeId);
   }
 
@@ -247,7 +253,7 @@ export class RequisitionEditModalComponent implements OnInit {
     const selected = this.bulkSelection;
     return this.canAdd && this.bulkProductTypeId > 0 && !this.loadingBulk() && !this.bulkError() && selected.length > 0 &&
       selected.every(draft =>
-        this.validQuantity(draft.quantity, true) && this.validUom(draft.uomId) &&
+        this.validQuantity(draft.quantity, true) && this.validUom(draft.uomId) && this.validPriority(draft.priority) &&
         !this.savedLine(draft.row.itemId, this.bulkProductTypeId));
   }
 
@@ -274,7 +280,7 @@ export class RequisitionEditModalComponent implements OnInit {
         }
         for (const row of active) {
           if (!this.drafts.has(row.ID)) {
-            this.drafts.set(row.ID, { quantity: row.Quantity, priority: row.Priority ?? null, remarks: row.Remarks ?? '', additionalQuantity: null,});
+            this.drafts.set(row.ID, { quantity: row.Quantity, priority: row.Priority ?? 0, remarks: row.Remarks ?? '', additionalQuantity: null,});
           }
         }
 
@@ -307,11 +313,19 @@ export class RequisitionEditModalComponent implements OnInit {
     });
   }
 
+  priorityName(id: number | null): string {
+    return this.priorities().find(p => p.Id === (id ?? 0))?.PriorityName ?? 'N/A';
+  }
+
+  validPriority(id: number | null): boolean {
+    return Number.isSafeInteger(id) && this.priorities().some(p => p.Id === id && p.IsActive !== false);
+  }
+
   canSaveLine(line: IViewRequisitionLine, draft: LineDraft): boolean {
     return this.canWrite && !this.isRequestMode &&
-      this.validQuantity(draft.quantity, true) &&
+      this.validQuantity(draft.quantity, true) && this.validPriority(draft.priority) &&
       (draft.quantity !== line.Quantity ||
-       draft.priority !== (line.Priority ?? null) ||
+       draft.priority !== (line.Priority ?? 0) ||
        draft.remarks.trim() !== (line.Remarks ?? '').trim());
   }
 
@@ -321,7 +335,7 @@ export class RequisitionEditModalComponent implements OnInit {
     if (enroll === null) return;
 
     const quantity = draft.quantity;
-    const priority = draft.priority ?? null;
+    const priority = draft.priority ?? 0;
     const remarks = draft.remarks.trim();
     this.write(this.requisitionService.updateLine({
       ReqLineID: line.ID, Quantity: quantity, Priority: priority,
@@ -558,13 +572,13 @@ export class RequisitionEditModalComponent implements OnInit {
       ProductTypeId: this.productTypeId, ItemId: Number(this.selectedItem.Id),
       SizeID: this.selectedItem.SizeId ?? null,
       Size: this.selectedItem.Size ?? null,
-      Priority: this.priority ?? null,
+      Priority: this.priority ?? 0,
       UOMId: this.uomId, Quantity: this.quantity, StockQuantity: this.stock,
       SalesQuantity: this.sales, Remarks: this.remarks.trim() || null,
     }], () => {
       this.itemSearch = this.selectedItem ?? '';
       this.quantity = null;
-      this.priority = null;
+      this.priority = 0;
       this.remarks = '';
       this.uomId = this.defaultUomId;
     });
@@ -747,7 +761,7 @@ export class RequisitionEditModalComponent implements OnInit {
     if (this.savedLine(row.itemId, this.bulkProductTypeId)) return;
 
     const draft = this.bulkDrafts.get(row.itemId) ?? {
-      row, quantity: null, priority: null, uomId: this.defaultUomId, remarks: '',
+      row, quantity: null, priority: 0, uomId: this.defaultUomId, remarks: '',
     };
     this.bulkDrafts.set(row.itemId, { ...draft, ...patch });
   }
@@ -759,7 +773,7 @@ export class RequisitionEditModalComponent implements OnInit {
       ProductTypeId: this.bulkProductTypeId, ItemId: draft.row.itemId,
       SizeID: draft.row.sizeId ?? null,
       Size: draft.row.size ?? null,
-      Priority: draft.priority ?? null,
+      Priority: draft.priority ?? 0,
       UOMId: draft.uomId, Quantity: draft.quantity!,
       StockQuantity: draft.row.stock, SalesQuantity: draft.row.sales,
       Remarks: draft.remarks.trim() || null,

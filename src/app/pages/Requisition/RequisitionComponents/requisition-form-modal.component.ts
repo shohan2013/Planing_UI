@@ -10,6 +10,7 @@ import { MenuPermissionDirective } from 'src/app/core/directives/menu-permission
 import { IBusiness } from 'src/app/core/model/Common/BusinessType/BusinessType';
 import { IDropdownBind } from 'src/app/core/model/Common/dropdown-bind';
 import { IItem } from 'src/app/core/model/Common/Items/Item';
+import { IPriority } from 'src/app/core/model/Common/Priority/Priority';
 import { IProductType } from 'src/app/core/model/Common/ProductType/ProductType';
 import { IUnit } from 'src/app/core/model/Common/Unit/Unit';
 import { IPlannerUoM } from 'src/app/core/model/Common/UOM/PlannerUoM';
@@ -19,6 +20,7 @@ import { PermissionAction } from 'src/app/core/services/Authorization/authorizat
 import { CommonService } from 'src/app/core/services/Common/CommonService';
 import { RequisitionService } from 'src/app/core/services/Requisition/requisition.service';
 import { PaginationComponent } from 'src/app/shared/pagination/pagination.component';
+import { PriorityInputComponent } from 'src/app/shared/priority-input/priority-input.component';
 
 type FormModalState = 'initializing' | 'ready' | 'submitting' | 'failed';
 type BulkRow = {
@@ -38,7 +40,7 @@ type BulkRow = {
 @Component({
   selector: 'app-requisition-form-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, NgbTypeaheadModule, MenuPermissionDirective, PaginationComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, NgbTypeaheadModule, MenuPermissionDirective, PaginationComponent, PriorityInputComponent],
   templateUrl: './requisition-form-modal.component.html',
   styleUrl: './requisition-form-modal.component.scss',
 })
@@ -54,6 +56,7 @@ export class RequisitionFormModalComponent implements OnInit {
   readonly plannerUoMs = signal<IPlannerUoM[]>([]);
   readonly plannerUoMsLoading = signal(false);
   readonly productTypes = signal<IProductType[]>([]);
+  readonly priorities = signal<IPriority[]>([]);
   readonly documentStatuses = signal<IDropdownBind[]>([]);
   readonly unitDataLoading = signal(false);
   readonly isItemSearching = signal(false);
@@ -124,6 +127,10 @@ export class RequisitionFormModalComponent implements OnInit {
     ),
     { initialValue: 0 },
   );
+
+  priorityName(id: number | null): string {
+    return this.priorities().find(p => p.Id === (id ?? 0))?.PriorityName ?? 'N/A';
+  }
 
   readonly lineFormGroup = new FormGroup({
     ProductTypeId: new FormControl<number | null>(null, Validators.required),
@@ -770,11 +777,13 @@ export class RequisitionFormModalComponent implements OnInit {
     forkJoin({
       units: this.commonService.GetUnitList(),
       productTypes: this.commonService.GetProductTypeList(),
+      priorities: this.commonService.GetPriorityList(),
       documentStatuses: this.commonService.GetDocumentStatusList(),
     }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: ({ units, productTypes, documentStatuses }) => {
+      next: ({ units, productTypes, documentStatuses, priorities }) => {
         this.units.set(units);
         this.productTypes.set(productTypes);
+        this.priorities.set(priorities);
         this.documentStatuses.set(documentStatuses);
         this.syncItemSearchEnabled();
 

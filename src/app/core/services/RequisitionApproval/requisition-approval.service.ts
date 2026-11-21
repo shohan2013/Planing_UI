@@ -72,24 +72,7 @@ export class RequisitionApprovalService {constructor(private http: HttpClient) {
 
 
 
-//====================================================
-/*
-  AcceptRequest(historyId: number, enroll: number, remarks: string | null = null): Observable<IApiResponse> {
-    return this.http.post<IApiResponse>(
-      `${environment.API_URL}${GlobalConstant.API_END_POINTS.acceptRequisitionLineRequest}`,
-      { HistoryID: historyId, Remarks: remarks },
-      { headers: { 'X-Enroll': String(enroll) } },
-    );
-  }
 
-  RejectRequest(historyId: number, enroll: number, remarks: string | null = null): Observable<IApiResponse> {
-    return this.http.post<IApiResponse>(
-      `${environment.API_URL}${GlobalConstant.API_END_POINTS.rejectRequisitionLineRequest}`,
-      { HistoryID: historyId, Remarks: remarks },
-      { headers: { 'X-Enroll': String(enroll) } },
-    );
-  }
-  */
 
 
   AcceptRequest(historyId: number, enroll: number, remarks: string | null = null): Observable<IApiResponse> {
@@ -108,10 +91,16 @@ export class RequisitionApprovalService {constructor(private http: HttpClient) {
 
 
 
-GetRequestNotifications(): Observable<IRequisitionRequestNotification[]> {
+GetRequestNotifications(enroll: number = Number(localStorage.getItem('Enroll'))): Observable<IRequisitionRequestNotification[]> {
   return this.http.post<IRequisitionRequestNotification[]>(
     `${environment.API_URL}${GlobalConstant.API_END_POINTS.RequisitionRequestNotifications}`,
-    {},
+    { Enroll: enroll },
+  );
+}
+
+GetNotificationEligibility(): Observable<{ CanConnect: boolean }> {
+  return this.http.get<{ CanConnect: boolean }>(
+    `${environment.API_URL}${GlobalConstant.API_END_POINTS.RequisitionNotificationEligibility}`,
   );
 }
 

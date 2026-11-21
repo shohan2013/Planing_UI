@@ -106,7 +106,7 @@
             <th>REQUISITION NUMBER</th>
             <th>UNIT</th>
             <th>BUSINESS</th>
-            <th>REQUISITION DATE</th>
+            
             <th>REMARKS</th>
             <th>CREATED BY</th>
             <th>CREATED DATE</th>
@@ -118,7 +118,7 @@
         <tbody>
           @if (isLoading()) {
           <tr>
-            <td colspan="9" class="text-center py-4">
+            <td colspan="8" class="text-center py-4">
               <span
                 class="spinner-border spinner-border-sm me-2"
                 aria-hidden="true"
@@ -145,11 +145,11 @@
 
             <td>{{ item.BusinessName || '-' }}</td>
 
-            <td>{{ item.ReqDate | dateTime }}</td>
+           
 
             <td><div class="g-scrollable-text md" [title]="item.Remarks || ''">{{ item.Remarks || '-' }}</div></td>
             
-            <td>{{ item.CREATEDBY ?? '-' }}</td>
+            <td>{{ item.CreatedByName ?? '-' }}</td>
 
             <td>
               {{ item.CREATEDDATE ? ( item.CREATEDDATE | dateTime ) : '-' }}

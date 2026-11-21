@@ -47,6 +47,7 @@ export class RequisitionApproval extends ServerSideFilteredPaginatedComponent<IR
   }
 
   ngOnInit(): void {
+    // this.pageSize.set(2);
     this.loadUnits();
     this.loadDocumentStatuses();
   }
@@ -162,6 +163,10 @@ export class RequisitionApproval extends ServerSideFilteredPaginatedComponent<IR
       this.toastr.error('Unable to identify the current user.');
       return;
     }
+
+    if (!window.confirm(
+      reject ? 'Reject this requisition?' : 'Approve this requisition?',
+    )) return;
 
     this.actionInProgress.set(true);
 

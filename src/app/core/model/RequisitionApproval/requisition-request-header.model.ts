@@ -13,4 +13,6 @@ export interface IRequisitionRequestNotification {
   CREATEDBY: number;
   CreatedByName: string | null;
   UnresolvedRequestCount: number;
+
+  LatestRequestDate: string | null; // for time stamp
 }

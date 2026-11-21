@@ -162,7 +162,7 @@
                     <td>{{ lineFormGroup.controls.StockQuantity.value ?? '–' }}</td>
                     <td>{{ lineFormGroup.controls.SalesQuantity.value ?? '–' }}</td>
                     <td [class.bg-warning-subtle]="(lineFormGroup.controls.Priority.value ?? 0) > 0">
-                      <input type="number" class="form-control" formControlName="Priority" placeholder="Priority" step="1" aria-label="Priority" [readonly]="isSubmitting" />
+                      <app-priority-input formControlName="Priority" [priorities]="priorities()" [readonly]="isSubmitting" />
                     </td>
                     <td>
                       @if (itemCountLoading()) {
@@ -246,7 +246,7 @@
                   <td>{{ line.get('StockQuantity')?.value }}</td>
                   <td>{{ line.get('SalesQuantity')?.value }}</td>
                   <td [class.priority-highlight]="(line.get('Priority')?.value ?? 0) > 0">
-                    <input type="number" step="1" class="form-control form-control-sm" [attr.aria-label]="'Priority for line ' + (index + 1)" [formControl]="$any(line.get('Priority'))" [readonly]="isSubmitting" />
+                    <app-priority-input [formControl]="$any(line.get('Priority'))" [priorities]="priorities()" [small]="true" [readonly]="isSubmitting" [ariaLabel]="'Priority for line ' + (index + 1)" />
                   </td>
                   <td class="text-center">
                     <span class="requisition-count" [attr.aria-label]="'Matching requisitions: ' + (line.get('Count')?.value ?? 'unavailable')">
@@ -414,9 +414,9 @@
                   <td>{{ addedLine ? addedLine.get('SalesQuantity')?.value : row.salesQuantity }}</td>
                   <td [class.bg-warning-subtle]="(addedLine ? (addedLine.get('Priority')?.value ?? 0) : (row.priority ?? 0)) > 0">
                     @if (addedLine) {
-                      {{ addedLine.get('Priority')?.value ?? '–' }}
+                      {{ priorityName(addedLine.get('Priority')?.value) }}
                     } @else {
-                      <input type="number" step="1" class="form-control form-control-sm" [ngModel]="row.priority" [ngModelOptions]="{ standalone: true }" (ngModelChange)="setBulkPriority(row, $event)" [attr.aria-label]="'Priority for item ' + row.itemId" />
+                      <app-priority-input [priorities]="priorities()" [small]="true" [ngModel]="row.priority ?? 0" [ngModelOptions]="{ standalone: true }" (ngModelChange)="setBulkPriority(row, $event)" [ariaLabel]="'Priority for item ' + row.itemId" />
                     }
                   </td>
                   <td class="text-center">

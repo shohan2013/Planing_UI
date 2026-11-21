@@ -10,6 +10,7 @@ export interface IViewRequisitionHeader {
   EndDate: Date | null;
   Remarks: string | null;
   CREATEDBY: number | null;
+  CreatedByName: string | null;
   UPDATEDBY: number | null;
   CREATEDDATE: Date | null;
   UPDATEDDATE: Date | null;

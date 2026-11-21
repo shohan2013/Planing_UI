@@ -61,7 +61,7 @@
             <th>REQUISITION NUMBER</th>
             <th>UNIT</th>
             <th>BUSINESS</th>
-            <th>REQUISITION DATE</th>
+            
             <th>REMARKS</th>
             <th>CREATED BY</th>
             <th>CREATED DATE</th>
@@ -70,10 +70,10 @@
         </thead>
         <tbody>
           @if (!selectedStatusCode) {
-            <tr><td colspan="8" class="text-center py-4">Select a status to load requisitions.</td></tr>
+            <tr><td colspan="7" class="text-center py-4">Select a status to load requisitions.</td></tr>
           } @else if (isLoading()) {
             <tr>
-              <td colspan="8" class="text-center py-4">
+              <td colspan="7" class="text-center py-4">
                 <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
                 Loading requisitions...
               </td>
@@ -92,7 +92,7 @@
                 <td>{{ item.RequisitionNumber || '-' }}</td>
                 <td>{{ item.UnitName || '-' }}</td>
                 <td>{{ item.BusinessName || '-' }}</td>
-                <td>{{ item.ReqDate | dateTime }}</td>
+                
                 <td><div class="g-scrollable-text md" [title]="item.Remarks || ''">{{ item.Remarks || '-' }}</div></td>
                 <td>{{ item.CreatedByName || item.CREATEDBY || '-' }}</td>
                 <td>{{ item.CREATEDDATE ? (item.CREATEDDATE | dateTime) : '-' }}</td>

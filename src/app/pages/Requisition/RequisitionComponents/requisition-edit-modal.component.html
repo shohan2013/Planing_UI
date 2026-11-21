@@ -3,11 +3,14 @@
     <h5 class="modal-title d-flex align-items-center gap-2">
       @if (isRequestMode) {
         <span class="d-inline-block" aria-hidden="true" style="width: 16px; height: 16px; background-color: currentColor; mask: url('assets/icons/requisition-pencil-arrow.svg') center / contain no-repeat;"></span>
-        Change Request
+        Change Request:
       } @else {
         <img src="assets/icons/edit.svg" width="16" height="16" alt="" />
-        Edit Requisition
+        Edit Requisition:
       }
+      <span class="ms-2 text-success fw-bold">
+        {{ header.RequisitionNumber }}
+      </span>
     </h5>
   </div>
   <button type="button" class="btn-close" aria-label="Close" [disabled]="saving()" (click)="close()"></button>
@@ -138,7 +141,7 @@
                 <td>{{ stock ?? '–' }}</td>
                 <td>{{ sales ?? '–' }}</td>
                 <td>
-                  <input type="number" step="1" class="form-control" placeholder="Priority" aria-label="Priority" [(ngModel)]="priority" [disabled]="!canAdd" />
+                  <app-priority-input [priorities]="priorities()" [(ngModel)]="priority" [disabled]="!canAdd" />
                 </td>
                 <td>
                   @if (loadingItem()) {
@@ -241,9 +244,9 @@
                 <td>{{ line.SalesQuantity }}</td>
                 <td [class.priority-highlight]="((!isRequestMode && isOpen ? draft.priority : line.Priority) ?? 0) > 0">
                   @if (!isRequestMode && isOpen) {
-                    <input *menuPermission="PermissionAction.Update" type="number" step="1" class="form-control form-control-sm" aria-label="Priority" [(ngModel)]="draft.priority" [disabled]="!canWrite" />
+                    <app-priority-input *menuPermission="PermissionAction.Update" [priorities]="priorities()" [small]="true" [(ngModel)]="draft.priority" [disabled]="!canWrite" />
                   } @else {
-                    {{ line.Priority ?? '–' }}
+                    {{ priorityName(line.Priority) }}
                   }
                 </td>
                 <td class="text-center">
@@ -435,11 +438,11 @@
                   </td>
                   <td>{{ addedLine ? addedLine.StockQuantity : row.stock }}</td>
                   <td>{{ addedLine ? addedLine.SalesQuantity : row.sales }}</td>
-                  <td>
+                  <td [class.bg-warning-subtle]="(addedLine?.Priority ?? draft?.priority ?? 0) > 0">
                     @if (addedLine) {
-                      {{ addedLine.Priority ?? '–' }}
+                      {{ priorityName(addedLine.Priority) }}
                     } @else {
-                      <input type="number" step="1" class="form-control form-control-sm" aria-label="Bulk Priority" [disabled]="saving()" [ngModel]="draft?.priority ?? null" (ngModelChange)="updateBulkDraft(row, { priority: $event })" />
+                      <app-priority-input [priorities]="priorities()" [small]="true" [disabled]="saving()" [ngModel]="draft?.priority ?? 0" (ngModelChange)="updateBulkDraft(row, { priority: $event })" ariaLabel="Bulk Priority" />
                     }
                   </td>
                   <td class="text-center">
