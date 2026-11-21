@@ -295,7 +295,7 @@
 @if(viewOpen() && OrderForView()){
 <app-delivery-order-view
   [isOpen]="viewOpen()"
-  [order]="OrderForView()"
+  [soid]="OrderForView()?.SOID"
   [workTypeCode]="selectedWorkTypeCode"
   (closeView)="closeView()"
 ></app-delivery-order-view>

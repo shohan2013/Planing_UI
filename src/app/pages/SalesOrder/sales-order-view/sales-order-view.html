@@ -1,4 +1,5 @@
-@if (isOpen && order) {
+@if (isOpen && soid) {
+@let order = header();
 
 <!-- Modal Backdrop -->
 
@@ -27,7 +28,7 @@
           Details' }}
         </h5>
 
-        <div class="do-code">{{ order.Code }}</div>
+        <div class="do-code">{{ order?.Code || '...' }}</div>
       </div>
     </div>
 
@@ -67,6 +68,31 @@
         </div>
       </div>
 
+      @if (headerLoading()) {
+      <div class="loading-container">
+        <span class="spinner-border me-2" aria-hidden="true"></span>
+        <span class="loading-text"
+          >Loading {{ workTypeCode === 'REQ' ? 'Requisition' : 'Delivery Order'
+          }} Information...</span
+        >
+      </div>
+      } @else if (headerError() || !order) {
+      <div class="no-lines">
+        <div class="no-lines-icon">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <h6>Information Not Available</h6>
+        <p>
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-secondary"
+            (click)="GetOrderHeader()"
+          >
+            Retry
+          </button>
+        </p>
+      </div>
+      } @else {
       <div class="info-grid">
         <!-- DO Code -->
         <div class="info-item">
@@ -82,8 +108,11 @@
           <span class="info-label"> Created Date </span>
 
           <strong class="info-value">
+            @if (order.CreatedDate) {
             <i class="fa-regular fa-calendar-days"></i>
-            {{ order.CreatedDate | dateTime }}
+            {{ order.CreatedDate | dateTime }} } @else {
+            <span class="text-muted"> Not specified </span>
+            }
           </strong>
         </div>
 
@@ -127,6 +156,7 @@
           </strong>
         </div>
       </div>
+      }
     </section>
 
     <!-- ===================================================
@@ -155,7 +185,7 @@
         <div>
           <span>Total Quantity</span>
 
-          <strong> {{ order.TotalQuantity | number: '1.0-2' }} </strong>
+          <strong> {{ totalQuantity | number: '1.0-2' }} </strong>
         </div>
       </div>
     </section>
@@ -273,7 +303,7 @@
 
       <span>
         {{ workTypeCode === 'REQ' ? 'Requisition No.' : 'Delivery Order' }}: {{
-        order.Code }}
+        order?.Code || '-' }}
       </span>
     </div>
 

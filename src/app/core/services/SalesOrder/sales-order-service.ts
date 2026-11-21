@@ -4,7 +4,7 @@ import {
   ServerQueryRequest,
   ServerQueryResponse,
 } from '../../model/Common/Pagination/ServerQueryRequest';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import {
   IDeliveryOrder,
   IDeliveryOrderLine,
@@ -32,6 +32,22 @@ export class DeliveryOrderService {
   }
 
 
+
+  /** GET SalesOrderLanding/GetDOHeaderData/{SOID}?WorkTypeCode= */
+  GetDeliveryOrderHeader(SOID: Number, workTypeCode: string): Observable<IDeliveryOrder | null> {
+    return this.http
+      .get<any>(
+        `${environment.API_URL}${GlobalConstant.API_END_POINTS.DeliveryOrderHeader}/${SOID}?WorkTypeCode=${workTypeCode}`,
+      )
+      .pipe(
+        // Backend may return the header as an object, a single-item list, or wrapped in Data.
+        map((res) => {
+          const body = res?.Data ?? res?.data ?? res;
+          const header = Array.isArray(body) ? body[0] : body;
+          return (header ?? null) as IDeliveryOrder | null;
+        }),
+      );
+  }
 
   GetDeliveryOrdersDetails(SOID: Number, workTypeCode: string): Observable<IDeliveryOrderLine[]> {
     return this.http.get<IDeliveryOrderLine[]>(
