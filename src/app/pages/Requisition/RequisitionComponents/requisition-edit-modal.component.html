@@ -217,7 +217,7 @@
         <tbody>
           @for (line of filteredLines(); track line.ID; let index = $index) {
             @if (drafts.get(line.ID); as draft) {
-              <tr>
+              <tr [style.background-color]="line.Quantity === 0 ? '#fff1f2' : null">
                 <td class="text-center">{{ index + 1 }}</td>
                 <td>{{ line.ProductTypeName }}</td>
                 <td>{{ line.ItemId }}</td>
