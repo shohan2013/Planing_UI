@@ -11,24 +11,23 @@ export interface IMergedPlanning {
   Unit: string;
   UnitId: number;
   IsActive: boolean;
+  WorkTypeCode: string;
+  MergePolicy: string;
 }
 
 export interface IMergedPlanningLine {
   Id: number;
   ProductId: number;
   ProductName: string | null;
-  /** UOM id, sent back as IProductionPlanLine.UOM when the plan is saved. */
   UOMId: number;
-  /** UOM display name (e.g. "Pcs"). */
   UOM: string | null;
   Quantity: number;
   PlannedQuantity: number;
-  Rate: number;
+  PriorityId?: number | null;
   Remarks: string | null;
   TakenQty?: number | null;
   AdvanceProductionQty?: number | null;
   RecipeVersionId?: number | null;
-  PriorityId?: number | null;
 }
 
 export interface IMergedPlanningDetails {

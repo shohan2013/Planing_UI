@@ -867,6 +867,40 @@ ngb-typeahead-window .dropdown-item.active {
   font-size: 12px;
 }
 
+/*==========================================PLANNING MACHINE MULTI-SELECT==========================
+  Machine No picker on the step form and the Planning Desk card (several machines can
+  share one slot). Its panel is appended to <body> like the Recipe Version one, so it
+  also has to sit above Bootstrap modals. Kept compact to match the form-select-sm fields. */
+.ng-dropdown-panel.machine-multi-select {
+  z-index: 2000 !important;
+  font-size: 12px;
+}
+
+ng-select.machine-multi-select {
+  font-size: 12px;
+
+  .ng-select-container {
+    min-height: 31px;
+  }
+
+  &.ng-select-multiple .ng-select-container .ng-value-container {
+    padding-top: 3px;
+
+    .ng-value {
+      margin-bottom: 3px;
+      font-size: 11px;
+    }
+
+    .ng-placeholder {
+      top: 6px;
+    }
+  }
+
+  &.is-invalid .ng-select-container {
+    border-color: #dc3545;
+  }
+}
+
 /*==========================================MERGED PLANNING — CDK DRAG PREVIEW=====================
   cdkDragPreviewContainer="global" does NOT append the preview into
   .cdk-overlay-container — CDK's own source (_getPreviewInsertionPoint)

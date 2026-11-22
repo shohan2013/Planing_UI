@@ -224,7 +224,11 @@ function clipToDay(i: IInterval, dayStart: number, dayEnd: number): { left: numb
   return { left: ((s - dayStart) / span) * 100, width: ((e - s) / span) * 100 };
 }
 
-export function buildTimeline(summary: IScheduleSummary): { rows: ITimelineRow[]; truncated: boolean } {
+/** `showMachine`: prefix each job with its machine (combined view of several machines). */
+export function buildTimeline(
+  summary: IScheduleSummary,
+  showMachine = false,
+): { rows: ITimelineRow[]; truncated: boolean } {
   const { now, lastEnd, jobs, slot, suggestion } = summary;
   const first = startOfDay(now);
   const lastPoint = Math.max(lastEnd, slot?.end ?? 0, suggestion?.end ?? 0);
@@ -254,7 +258,13 @@ export function buildTimeline(summary: IScheduleSummary): { rows: ITimelineRow[]
       if (j.end <= day || j.start >= dayEnd) continue;
       jobsToday++;
       const qty = `${(j.job.PlannedQty ?? 0).toLocaleString()}${j.job.UOM ? ' ' + j.job.UOM : ''}`;
-      push('job', j, `${j.job.JobNo} · ${j.job.ItemName} (${qty})`, `${j.job.JobNo} · ${j.job.ItemName} · Qty ${qty}`);
+      const machine = showMachine && j.job.MachineName ? `${j.job.MachineName} · ` : '';
+      push(
+        'job',
+        j,
+        `${machine}${j.job.JobNo} · ${j.job.ItemName} (${qty})`,
+        `${machine}${j.job.JobNo} · ${j.job.ItemName} · Qty ${qty}`,
+      );
       if (slot && j.conflictMs > 0) {
         push('conflict', { start: Math.max(slot.start, j.start), end: Math.min(slot.end, j.end) }, undefined, 'Conflict with your slot');
       }

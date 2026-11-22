@@ -1,4 +1,3 @@
-@let ctx = context();
 @let s = summary();
 
 <!-- Header -->
@@ -8,7 +7,12 @@
   </div>
   <div class="msd-header-text">
     <h5 class="msd-title" id="machineScheduleTitle">
-      {{ ctx?.machineName }} <span class="msd-title-sep">·</span> Schedule
+      @if (currentMachine(); as cm) {
+      {{ cm.Name }}
+      } @else {
+      {{ machines().length }} machines
+      }
+      <span class="msd-title-sep">·</span> Schedule
     </h5>
     <p class="msd-subtitle">
       Now <strong>{{ s.now | date: 'dd MMM yyyy, hh:mm a' }}</strong>
@@ -33,12 +37,47 @@
 } @else if (error()) {
 <div class="msd-state msd-state-error">
   <i class="fa-solid fa-circle-exclamation"></i>
-  <span>Couldn't load this machine's schedule.</span>
+  <span>Couldn't load the {{ isMulti() ? "machines'" : "machine's" }} schedule.</span>
   <button type="button" class="msd-btn msd-btn-outline" (click)="load()">
     <i class="fa-solid fa-rotate-right"></i> Retry
   </button>
 </div>
 } @else {
+
+<!-- Machine switcher (several machines share the step's slot) -->
+@if (isMulti()) {
+<div class="msd-machines" role="tablist" aria-label="Machines">
+  <button
+    type="button"
+    role="tab"
+    class="msd-machine"
+    [class.active]="isAllView()"
+    [attr.aria-selected]="isAllView()"
+    title="Free only when every selected machine is free"
+    (click)="showMachine('all')"
+  >
+    <i class="fa-solid fa-layer-group"></i>
+    All selected
+    <span class="msd-machine-count">{{ allJobs().length }}</span>
+  </button>
+  @for (p of pills(); track p.machine.Id) {
+  <button
+    type="button"
+    role="tab"
+    class="msd-machine"
+    [class.active]="view() === p.machine.Id"
+    [class.has-conflict]="p.conflictCount > 0"
+    [attr.aria-selected]="view() === p.machine.Id"
+    [title]="p.conflictCount ? p.conflictCount + ' job(s) overlap your slot' : p.jobCount + ' upcoming job(s)'"
+    (click)="showMachine(p.machine.Id)"
+  >
+    <i class="fa-solid" [class.fa-gears]="!p.conflictCount" [class.fa-triangle-exclamation]="p.conflictCount > 0"></i>
+    {{ p.machine.Name }}
+    <span class="msd-machine-count">{{ p.jobCount }}</span>
+  </button>
+  }
+</div>
+}
 
 <!-- Stat tiles -->
 <div class="msd-stats">
@@ -55,7 +94,7 @@
     <span class="msd-stat-value msd-green">{{ formatDuration(s.freeMs) }}</span>
   </div>
   <div class="msd-stat">
-    <span class="msd-stat-label">Machine load</span>
+    <span class="msd-stat-label">{{ isMulti() && isAllView() ? 'Combined load' : 'Machine load' }}</span>
     <div class="msd-load">
       <span class="msd-stat-value">{{ s.loadPct }}%</span>
       <div class="msd-load-bar" role="progressbar" [attr.aria-valuenow]="s.loadPct" aria-valuemin="0" aria-valuemax="100">
@@ -96,7 +135,7 @@
       <div class="msd-banner-text">
         <strong>
           Your slot {{ s.slot.start | date: 'dd MMM, hh:mm a' }} – {{ s.slot.end | date: 'dd MMM, hh:mm a' }}
-          is free on this machine.
+          is free on {{ isMulti() && isAllView() ? 'all selected machines' : 'this machine' }}.
         </strong>
       </div>
     </div>
@@ -177,6 +216,9 @@
         <thead>
           <tr>
             <th>Time</th>
+            @if (isMulti() && isAllView()) {
+            <th>Machine</th>
+            }
             <th>Production plan</th>
             <th>Item</th>
             <th>Duration</th>
@@ -195,6 +237,9 @@
               <div class="msd-cell-sub">{{ j.start | date: 'hh:mm a' }} – {{ j.end | date: 'hh:mm a' }}</div>
               }
             </td>
+            @if (isMulti() && isAllView()) {
+            <td class="msd-cell-strong">{{ j.job.MachineName || machineName(j.job.MachineId) }}</td>
+            }
             <td>
               <div class="msd-req">{{ j.job.JobNo }}</div>
             </td>
@@ -220,7 +265,7 @@
     } @else {
     <div class="msd-empty">
       <i class="fa-regular fa-calendar-check"></i>
-      No jobs planned on this machine from now on — it's free.
+      No jobs planned on {{ isMulti() && isAllView() ? 'the selected machines' : 'this machine' }} from now on — {{ isMulti() && isAllView() ? 'they are' : "it's" }} free.
     </div>
     }
   } @else {

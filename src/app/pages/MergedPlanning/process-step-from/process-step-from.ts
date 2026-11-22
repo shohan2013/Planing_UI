@@ -14,6 +14,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CdkDragHandle } from '@angular/cdk/drag-drop';
+import { NgSelectComponent, NgSelectModule } from '@ng-select/ng-select';
 
 import { IProcessStepInput } from 'src/app/core/model/MergedPlanning/planning-processes-model';
 import { IBusinessFlowForPlanning } from 'src/app/core/model/Common/BusinessFlow/production-steps-model';
@@ -28,7 +29,7 @@ import { IMachineAvailabilityHost, IMachineSlot, MachineAvailability } from './m
 @Component({
   selector: 'app-process-step-from',
   standalone: true,
-  imports: [ReactiveFormsModule, CdkDragHandle],
+  imports: [ReactiveFormsModule, CdkDragHandle, NgSelectModule],
   templateUrl: './process-step-from.html',
   styleUrl: './process-step-from.scss',
   providers: [MachineAvailability],
@@ -38,7 +39,7 @@ export class ProcessStepFrom implements OnInit, OnChanges, IMachineAvailabilityH
   private readonly destroyRef = inject(DestroyRef);
 
   @ViewChild('startDateInput') private startDateInput?: ElementRef<HTMLInputElement>;
-  @ViewChild('machineSelect') private machineSelect?: ElementRef<HTMLSelectElement>;
+  @ViewChild('machineSelect') private machineSelect?: NgSelectComponent;
 
   @Input() lineId!: number;
   @Input() step!: IBusinessFlowForPlanning;
@@ -55,7 +56,7 @@ export class ProcessStepFrom implements OnInit, OnChanges, IMachineAvailabilityH
   @Output() formValueChange = new EventEmitter<IProcessStepInput | null>();
 
   form = new FormGroup({
-    machineId: new FormControl<number | null>(0),
+    machineIds: new FormControl<number[]>([], { nonNullable: true }),
 
     startDate: new FormControl<string | null>(''),
 
@@ -84,7 +85,7 @@ export class ProcessStepFrom implements OnInit, OnChanges, IMachineAvailabilityH
 
       this.form.reset(
         {
-          machineId: seed?.machineId ?? 0,
+          machineIds: [...(seed?.machineIds ?? [])],
           startDate: seed?.startDate ?? '',
           endDate: seed?.endDate ?? '',
         },
@@ -103,19 +104,19 @@ export class ProcessStepFrom implements OnInit, OnChanges, IMachineAvailabilityH
 
   /** Machine chosen but a date missing: both dates are required for the check. */
   get needsDatesForMachine(): boolean {
-    return !!this.machineNumber && (!this.startDate || !this.endDate);
+    return this.hasMachines && (!this.startDate || !this.endDate);
   }
 
   get isMachineBusy(): boolean {
     return this.availability() === 'busy';
   }
 
-  /** Machine + a complete, valid slot, or null. */
+  /** Machines + a complete, valid slot, or null. */
   private get currentSlot(): IMachineSlot | null {
-    if (!this.machineNumber || !this.startDate || !this.endDate || this.isDateRangeInvalid) {
+    if (!this.hasMachines || !this.startDate || !this.endDate || this.isDateRangeInvalid) {
       return null;
     }
-    return { machineId: this.machineNumber, startDate: this.startDate, endDate: this.endDate };
+    return { machineIds: this.machineIds, startDate: this.startDate, endDate: this.endDate };
   }
 
   /** Shows the busy-machine dialog (blurred backdrop) for the current clash. */
@@ -124,12 +125,12 @@ export class ProcessStepFrom implements OnInit, OnChanges, IMachineAvailabilityH
   }
 
   /**
-   * "View schedule": the selected machine's jobs from now to its last planned job. The
-   * card's slot (if complete) is checked against it; picking a slot there fills the
-   * start / end inputs, which re-runs the availability check.
+   * "View schedule" of the selected machines: their jobs from now to their last planned
+   * job. The card's slot (if complete) is checked against them; picking a slot there fills
+   * the start / end inputs, which re-runs the availability check for every machine.
    */
   openScheduleDialog(): void {
-    this.machineAvailability.openScheduleDialog(this.machineNumber, this.currentSlot);
+    this.machineAvailability.openScheduleDialog(this.machineIds, this.currentSlot);
   }
 
   // ---------- IMachineAvailabilityHost ----------
@@ -142,17 +143,24 @@ export class ProcessStepFrom implements OnInit, OnChanges, IMachineAvailabilityH
     return this.step.Name;
   }
 
-  get machineName(): string {
-    return this.selectedMachineName;
+  machineNameOf(machineId: number): string {
+    return this.machineOptions.find((m) => m.Id === machineId)?.Name ?? `Machine #${machineId}`;
   }
 
   onBusyAction(action: MachineBusyAction): void {
     if (action === 'change-machine') {
-      this.form.controls.machineId.setValue(0);
-      this.machineSelect?.nativeElement.focus();
+      this.form.controls.machineIds.setValue(this.machinesWithoutBusy());
+      this.machineSelect?.focus();
     } else {
       this.startDateInput?.nativeElement.focus();
     }
+  }
+
+  /** Selected machines minus the busy ones (all of them if the busy ones aren't known). */
+  private machinesWithoutBusy(): number[] {
+    const busy = new Set(this.busyJobs().map((j) => j.MachineId));
+    const free = this.machineIds.filter((id) => !busy.has(id));
+    return free.length < this.machineIds.length ? free : [];
   }
 
   onSlotPicked(pick: IMachineSlotPick): void {
@@ -163,14 +171,16 @@ export class ProcessStepFrom implements OnInit, OnChanges, IMachineAvailabilityH
     this.emitValue();
   }
 
-  get selectedMachineName(): string {
-    return (
-      this.machineOptions.find((m) => m.Id === this.machineNumber)?.Name ?? `Machine #${this.machineNumber}`
-    );
+  get selectedMachineNames(): string {
+    return this.machineIds.map((id) => this.machineNameOf(id)).join(', ');
   }
 
-  get machineNumber(): number {
-    return this.form.controls.machineId.value ?? 0;
+  get machineIds(): number[] {
+    return this.form.controls.machineIds.value ?? [];
+  }
+
+  get hasMachines(): boolean {
+    return this.machineIds.length > 0;
   }
 
   get startDate(): string {
@@ -191,7 +201,7 @@ export class ProcessStepFrom implements OnInit, OnChanges, IMachineAvailabilityH
 
   get isReadyToDrop(): boolean {
     return (
-      !!this.machineNumber &&
+      this.hasMachines &&
       !!this.startDate &&
       !!this.endDate &&
       !this.isDateRangeInvalid &&
@@ -245,7 +255,7 @@ export class ProcessStepFrom implements OnInit, OnChanges, IMachineAvailabilityH
       lineId: this.lineId,
       stepId: this.step.Id,
       stepName: this.step.Name,
-      machineId: this.machineNumber,
+      machineIds: [...this.machineIds],
       startDate: this.startDate,
       endDate: this.endDate,
       // Placeholder — ProcessStepStateService.updateProcessStep assigns the

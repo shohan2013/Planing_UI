@@ -13,7 +13,8 @@ export interface IProcessStepInput {
   stepName: string;
   startDate: string | null;
   endDate: string | null;
-  machineId: number;
+  /** Machines that run this step in the same Start/End slot (one or more). */
+  machineIds: number[];
   /** 1-based position of this step within its line's Planning Desk order; persisted as OrderNo. */
   orderNo: number;
 }
@@ -32,7 +33,6 @@ export interface IProductionPlanLine {
   UOM: number;
   TakenQuantity: number;
   AdvanceProductionQuantity: number | null;
-  Rate: number;
   RecipeVersionId: number | null;
   PriorityId: number | null;
   Remarks?: string | null;
@@ -44,7 +44,7 @@ export interface IProductionPlanConfigures {
   ProductId: number;
   StartDate: string | null;
   EndDate: string | null;
-  MachineId: number | null;
+  MachineIds: number[];
   OrderNo: number;
 }
 

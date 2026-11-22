@@ -21,7 +21,8 @@ import { IMachine } from 'src/app/core/model/Common/Machine/machine';
 import { IProcessStepInput } from 'src/app/core/model/MergedPlanning/planning-processes-model';
 import { ProcessStepStateService } from 'src/app/core/services/MergedPlanning/process-step-state-service';
 import { CommonService } from 'src/app/core/services/Common/CommonService';
-import { IPrePlannedRoute } from 'src/app/core/model/Common/BusinessFlow/pre-planned-route-model';
+// TEMP: Pre-Planned Route disabled.
+// import { IPrePlannedRoute } from 'src/app/core/model/Common/BusinessFlow/pre-planned-route-model';
 import { ItemPlanningStateService } from 'src/app/core/services/MergedPlanning/item-planning-state-service';
 
 @Component({
@@ -64,8 +65,9 @@ export class ProductionSteps implements OnInit {
 
   private hoveredDropTarget: HTMLElement | null = null;
 
-  prePlannedRoutes = signal<IPrePlannedRoute[]>([]);
-  selectedRouteId = signal<number | null>(null);
+  // TEMP: Pre-Planned Route disabled.
+  // prePlannedRoutes = signal<IPrePlannedRoute[]>([]);
+  // selectedRouteId = signal<number | null>(null);
 
   constructor(
     private commonService: CommonService,
@@ -193,57 +195,59 @@ export class ProductionSteps implements OnInit {
   }
 
   ngOnInit(): void {
-    if (!this.line?.ProductId) return;
-
-    this.commonService.GetPrePlannedRoutes(this.line.ProductId).subscribe({
-      next: (routes) => this.prePlannedRoutes.set(routes ?? []),
-      error: () => this.prePlannedRoutes.set([]),
-    });
+    // TEMP: Pre-Planned Route disabled.
+    // if (!this.line?.ProductId) return;
+    //
+    // this.commonService.GetPrePlannedRoutes(this.line.ProductId).subscribe({
+    //   next: (routes) => this.prePlannedRoutes.set(routes ?? []),
+    //   error: () => this.prePlannedRoutes.set([]),
+    // });
   }
 
-  /**
-   * Adds every not-yet-planned step of the chosen route to the Planning Desk
-   * in route order, with empty dates/machine for the user to fill in there.
-   */
-  onRouteSelected(): void {
-    const routeId = this.selectedRouteId();
-    const line = this.line;
-    if (routeId == null || !line) return;
-
-    this.commonService.GetPrePlannedRouteSteps(routeId).subscribe({
-      next: (routeSteps) => {
-        const planned = new Set(this.droppedSteps.map((x) => x.stepId));
-        const ordered = [...(routeSteps ?? [])].sort((a, b) => a.Slno - b.Slno);
-
-        for (const rs of ordered) {
-          const stepId = rs.BusinessFlowConfiguration;
-          if (planned.has(stepId)) continue;
-
-          // Match against the Planning Process dropdown data (this.steps()),
-          // which may not have loaded yet or may not include this route's
-          // step ids (different business/unit) — skip rather than throw.
-          const step = this.steps().find((s) => s.Id === stepId);
-          if (!step) continue;
-
-          this.processStepStateService.updateProcessStep({
-            lineId: line.Id,
-            stepId: step.Id,
-            stepName: step.Name ?? '',
-            startDate: null,
-            endDate: null,
-            machineId: 0,
-            orderNo: step.Slno,
-          });
-          this.stepSelected.emit(step.Id);
-        }
-
-        this.selectedStepId.set(null);
-        this.pendingFormValue = null;
-        this.selectedRouteId.set(null);
-      },
-      error: () => this.selectedRouteId.set(null),
-    });
-  }
+  // TEMP: Pre-Planned Route disabled.
+  // /**
+  //  * Adds every not-yet-planned step of the chosen route to the Planning Desk
+  //  * in route order, with empty dates/machine for the user to fill in there.
+  //  */
+  // onRouteSelected(): void {
+  //   const routeId = this.selectedRouteId();
+  //   const line = this.line;
+  //   if (routeId == null || !line) return;
+  //
+  //   this.commonService.GetPrePlannedRouteSteps(routeId).subscribe({
+  //     next: (routeSteps) => {
+  //       const planned = new Set(this.droppedSteps.map((x) => x.stepId));
+  //       const ordered = [...(routeSteps ?? [])].sort((a, b) => a.Slno - b.Slno);
+  //
+  //       for (const rs of ordered) {
+  //         const stepId = rs.BusinessFlowConfiguration;
+  //         if (planned.has(stepId)) continue;
+  //
+  //         // Match against the Planning Process dropdown data (this.steps()),
+  //         // which may not have loaded yet or may not include this route's
+  //         // step ids (different business/unit) — skip rather than throw.
+  //         const step = this.steps().find((s) => s.Id === stepId);
+  //         if (!step) continue;
+  //
+  //         this.processStepStateService.updateProcessStep({
+  //           lineId: line.Id,
+  //           stepId: step.Id,
+  //           stepName: step.Name ?? '',
+  //           startDate: null,
+  //           endDate: null,
+  //           machineIds: [],
+  //           orderNo: step.Slno,
+  //         });
+  //         this.stepSelected.emit(step.Id);
+  //       }
+  //
+  //       this.selectedStepId.set(null);
+  //       this.pendingFormValue = null;
+  //       this.selectedRouteId.set(null);
+  //     },
+  //     error: () => this.selectedRouteId.set(null),
+  //   });
+  // }
 
   onStepSelected(): void {
     this.pendingFormValue = null;
@@ -288,7 +292,7 @@ export class ProductionSteps implements OnInit {
    * user fills them in on the Planning Desk.
    */
   isStepValid(step: IProcessStepInput): boolean {
-    if (!step.startDate || !step.endDate || !step.machineId) return false;
+    if (!step.startDate || !step.endDate || !step.machineIds?.length) return false;
     return step.endDate >= step.startDate;
   }
 
@@ -296,10 +300,10 @@ export class ProductionSteps implements OnInit {
     return this.machinesByStep[stepId] ?? [];
   }
 
-  getMachineName(stepId: number, machineId: number): string {
-    return (
-      this.machinesForStep(stepId).find((m) => m.Id === machineId)?.Name ??
-      `#${machineId}`
-    );
+  /** Names of a step's machines, comma separated. */
+  getMachineNames(stepId: number, machineIds: number[]): string {
+    return (machineIds ?? [])
+      .map((id) => this.machinesForStep(stepId).find((m) => m.Id === id)?.Name ?? `#${id}`)
+      .join(', ');
   }
 }

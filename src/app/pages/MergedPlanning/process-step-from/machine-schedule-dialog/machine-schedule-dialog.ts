@@ -6,6 +6,7 @@ import { finalize } from 'rxjs';
 
 import {
   IMachineJob,
+  IMachineRef,
   IMachineScheduleContext,
   IMachineSlotPick,
 } from 'src/app/core/model/MergedPlanning/machine-schedule-model';
@@ -17,16 +18,30 @@ import {
   buildTimeline,
   ceilMinute,
   formatDuration,
+  overlapMs,
+  parseLocal,
   toLocalInput,
 } from './machine-schedule.util';
 
 type ScheduleTab = 'jobs' | 'free';
+/** A single machine, or 'all' = the selected machines together. */
+type MachineView = number | 'all';
+
+/** A machine pill: its name and how many of its jobs clash with the card's slot. */
+interface IMachinePill {
+  machine: IMachineRef;
+  jobCount: number;
+  conflictCount: number;
+}
 
 /**
- * Content of the NgbModal opened by "View schedule": the machine's jobs from now to its
- * last planned job, as stats, a day-by-day timeline and tables. If the step card already
- * has a slot, it is checked against the schedule and the earliest free slot that fits is
- * suggested. Closes with an IMachineSlotPick when the user picks a slot.
+ * Content of the NgbModal opened by "View schedule": the selected machines' jobs from now
+ * to their last planned job (one request for all of them), as stats, a day-by-day
+ * timeline and tables. With several machines, "All selected" combines them: a slot is
+ * free there only when every machine is free, since they all share the step's slot. Each
+ * machine can also be viewed alone. If the step card already has a slot, it is checked
+ * against the schedule and the earliest free slot that fits is suggested. Closes with an
+ * IMachineSlotPick when the user picks a slot.
  */
 @Component({
   selector: 'app-machine-schedule-dialog',
@@ -43,7 +58,48 @@ export class MachineScheduleDialog {
   readonly context = signal<IMachineScheduleContext | null>(null);
   readonly loading = signal(false);
   readonly error = signal(false);
-  readonly jobs = signal<IMachineJob[]>([]);
+  /** Jobs of every selected machine. */
+  readonly allJobs = signal<IMachineJob[]>([]);
+  readonly view = signal<MachineView>('all');
+
+  readonly machines = computed(() => this.context()?.machines ?? []);
+  readonly isMulti = computed(() => this.machines().length > 1);
+  readonly isAllView = computed(() => this.view() === 'all');
+
+  /** Jobs of the current view: every machine, or just the chosen one. */
+  readonly jobs = computed(() => {
+    const view = this.view();
+    const jobs = this.allJobs();
+    return view === 'all' ? jobs : jobs.filter((j) => j.MachineId === view);
+  });
+
+  /** Machine shown in the title: the chosen one, or the only one. */
+  readonly currentMachine = computed<IMachineRef | null>(() => {
+    const view = this.view();
+    const machines = this.machines();
+    if (view !== 'all') return machines.find((m) => m.Id === view) ?? null;
+    return machines.length === 1 ? machines[0] : null;
+  });
+
+  /** One pill per machine, with its upcoming jobs and clashes with the card's slot. */
+  readonly pills = computed<IMachinePill[]>(() => {
+    const ctx = this.context();
+    const now = this.now();
+    const s = parseLocal(ctx?.slotStart);
+    const e = parseLocal(ctx?.slotEnd);
+    const slot = s !== null && e !== null && e > s ? { start: s, end: e } : null;
+    return this.machines().map((machine) => {
+      const jobs = this.allJobs()
+        .filter((j) => j.MachineId === machine.Id)
+        .map((j) => ({ start: parseLocal(j.StartDate), end: parseLocal(j.EndDate) }))
+        .filter((j) => j.start !== null && j.end !== null && j.end > now);
+      return {
+        machine,
+        jobCount: jobs.length,
+        conflictCount: slot ? jobs.filter((j) => overlapMs(slot, j) > 0).length : 0,
+      };
+    });
+  });
   /** "Now" is fixed when the schedule loads, so every figure uses the same instant. */
   readonly now = signal(Date.now());
   readonly tab = signal<ScheduleTab>('jobs');
@@ -55,12 +111,29 @@ export class MachineScheduleDialog {
     const ctx = this.context();
     return buildSummary(this.jobs(), this.now(), ctx?.slotStart ?? null, ctx?.slotEnd ?? null);
   });
-  readonly timeline = computed(() => buildTimeline(this.summary()));
+  readonly timeline = computed(() => buildTimeline(this.summary(), this.isMulti() && this.isAllView()));
 
-  /** Opener passes the card's machine / step / slot, then the schedule is fetched. */
+  /** Opener passes the card's machines / step / slot, then the schedule is fetched. */
   init(context: IMachineScheduleContext): void {
     this.context.set(context);
+    const focus = context.focusMachineId;
+    const machines = context.machines ?? [];
+    this.view.set(
+      focus && machines.some((m) => m.Id === focus)
+        ? focus
+        : machines.length === 1
+          ? machines[0].Id
+          : 'all',
+    );
     this.load();
+  }
+
+  showMachine(view: MachineView): void {
+    this.view.set(view);
+  }
+
+  machineName(machineId: number): string {
+    return this.machines().find((m) => m.Id === machineId)?.Name ?? `Machine #${machineId}`;
   }
 
   load(): void {
@@ -73,7 +146,7 @@ export class MachineScheduleDialog {
     this.service
       .GetMachineSchedule({
         BusinessFlowConfigureId: ctx.businessFlowConfigureId,
-        MachineId: ctx.machineId,
+        MachineIds: ctx.machines.map((m) => m.Id),
         FromDate: toLocalInput(now),
         ExcludeJobId: ctx.excludeJobId,
       })
@@ -87,14 +160,32 @@ export class MachineScheduleDialog {
         next: (jobs) => {
           const hidden = new Set(ctx.hiddenJobIds ?? []);
           if (ctx.excludeJobId) hidden.add(ctx.excludeJobId);
-          this.jobs.set([...jobs.filter((j) => !hidden.has(j.JobId)), ...(ctx.deskJobs ?? [])]);
+          this.allJobs.set(
+            this.withMachine([...jobs.filter((j) => !hidden.has(j.JobId)), ...(ctx.deskJobs ?? [])]),
+          );
         },
         error: () => {
           // Unsaved desk jobs are still known.
-          this.jobs.set(ctx.deskJobs ?? []);
+          this.allJobs.set(this.withMachine(ctx.deskJobs ?? []));
           this.error.set(true);
         },
       });
+  }
+
+  /**
+   * Fills each job's machine name; a job without MachineId (an API that doesn't send it
+   * yet) belongs to the only machine when just one was asked for.
+   */
+  private withMachine(jobs: IMachineJob[]): IMachineJob[] {
+    const machines = this.machines();
+    return jobs.map((job) => {
+      const machineId = job.MachineId || (machines.length === 1 ? machines[0].Id : 0);
+      return {
+        ...job,
+        MachineId: machineId,
+        MachineName: job.MachineName || (machineId ? this.machineName(machineId) : null),
+      };
+    });
   }
 
   /** Length of the card's slot, used to offer free gaps that fit it. */

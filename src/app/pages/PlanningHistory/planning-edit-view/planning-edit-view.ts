@@ -251,7 +251,7 @@ export class PlanningEditView implements OnInit, OnChanges, OnDestroy {
               ProductId: line.ProductId,
               StartDate: s.StartDate,
               EndDate: s.EndDate,
-              MachineId: s.MachineId,
+              MachineIds: [...(s.MachineIds ?? [])],
               OrderNo: s.OrderNo ?? 0,
               IsActive: false,
             }));
@@ -268,7 +268,7 @@ export class PlanningEditView implements OnInit, OnChanges, OnDestroy {
               ProductId: line.ProductId,
               StartDate: step.startDate,
               EndDate: step.endDate,
-              MachineId: step.machineId,
+              MachineIds: [...step.machineIds],
               OrderNo: step.orderNo,
               IsActive: true,
             };

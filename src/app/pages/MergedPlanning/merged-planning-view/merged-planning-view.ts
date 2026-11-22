@@ -7,7 +7,6 @@ import {
   Output,
   signal,
 } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { DateTimePipe } from 'src/app/shared/pipes/date-time-pipe';
@@ -47,7 +46,6 @@ import { IApiResponse } from 'src/app/core/model/Response/ApiResponse';
   standalone: true,
   imports: [
     DateTimePipe,
-    DecimalPipe,
     DragDropModule,
     ProductionSteps,
     ItemPlanningFields,
@@ -230,7 +228,6 @@ export class MergedPlanningView implements OnInit, OnDestroy {
           UOM: line.UOMId,
           TakenQuantity: item.TakenQty,
           AdvanceProductionQuantity: item.AdvanceProductionQty ?? 0,
-          Rate: line.Rate,
           RecipeVersionId: item.RecipeVersionId ?? 0,
           PriorityId: item.PriorityId ?? 0,
           //Remarks: null,
@@ -242,7 +239,7 @@ export class MergedPlanningView implements OnInit, OnDestroy {
                   ProductId: line.ProductId,
                   StartDate: step.startDate,
                   EndDate: step.endDate,
-                  MachineId: step.machineId,
+                  MachineIds: [...step.machineIds],
                   OrderNo: step.orderNo,
                 }))
               : null,
@@ -415,14 +412,14 @@ export class MergedPlanningView implements OnInit, OnDestroy {
       !!step.startDate &&
       !!step.endDate &&
       !this.isDeskStepDateRangeInvalid(step) &&
-      !!step.machineId
+      step.machineIds?.length > 0
     );
   }
 
-  getMachineName(stepId: number, machineId: number): string {
-    return (
-      this.machinesForStep(stepId).find((m) => m.Id === machineId)?.Name ??
-      `#${machineId}`
-    );
+  /** Names of a step's machines, comma separated. */
+  getMachineNames(stepId: number, machineIds: number[]): string {
+    return (machineIds ?? [])
+      .map((id) => this.machinesForStep(stepId).find((m) => m.Id === id)?.Name ?? `#${id}`)
+      .join(', ');
   }
 }

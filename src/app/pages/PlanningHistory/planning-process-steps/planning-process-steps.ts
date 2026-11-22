@@ -65,7 +65,7 @@ export class PlanningProcessSteps implements OnChanges {
           lineId: this.lineId,
           stepId: saved.StepId,
           stepName: saved.StepName,
-          machineId: saved.MachineId,
+          machineIds: [...(saved.MachineIds ?? [])],
           startDate: saved.StartDate,
           endDate: saved.EndDate,
           orderNo: saved.OrderNo ?? index + 1,

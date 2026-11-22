@@ -18,7 +18,8 @@ export interface IPlanningHistoryStep {
   StepName: string;
   StartDate: string | null;
   EndDate: string | null;
-  MachineId: number;
+  /** Machines the step runs on in this slot (one or more). */
+  MachineIds: number[];
   ProductionPlanLineId?: number;
   OrderNo?: number;
 }
@@ -52,7 +53,8 @@ export interface IPlanningHistoryUpdateConfigure {
   ProductId: number;
   StartDate: string | null;
   EndDate: string | null;
-  MachineId: number | null;
+  /** Machines the step runs on in this slot (one or more). */
+  MachineIds: number[];
   OrderNo: number;
   IsActive: boolean;
 }
