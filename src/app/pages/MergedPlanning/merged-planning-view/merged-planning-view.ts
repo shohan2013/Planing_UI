@@ -223,9 +223,12 @@ export class MergedPlanningView implements OnInit, OnDestroy {
           .sort((a, b) => a.orderNo - b.orderNo);
 
         return {
+          DoStatusLineId: line.Id,
           ProductId: line.ProductId,
           Quantity: line.Quantity,
-          UOM: line.UOMId,
+          UOMId: line.UOMId,
+          UOM: line.UOM ?? null,
+          Size: line.Size ?? null,
           TakenQuantity: item.TakenQty,
           AdvanceProductionQuantity: item.AdvanceProductionQty ?? 0,
           RecipeVersionId: item.RecipeVersionId ?? 0,
@@ -236,7 +239,6 @@ export class MergedPlanningView implements OnInit, OnDestroy {
             steps.length > 0
               ? steps.map((step) => ({
                   BusinessConfigureId: step.stepId,
-                  ProductId: line.ProductId,
                   StartDate: step.startDate,
                   EndDate: step.endDate,
                   MachineIds: [...step.machineIds],
@@ -256,6 +258,8 @@ export class MergedPlanningView implements OnInit, OnDestroy {
       DocCreatedBy: this.UserEnroll, // whatever your user ID source is
       BusinessId: header?.BusinessId ?? 0,
       UnitId: header?.UnitId ?? 0,
+      MergePolicyId: header?.MergePolicyId ?? 0,
+      WorkTypeId: header?.WorkTypeId ?? 0,
       //Remarks: null,
     };
   }

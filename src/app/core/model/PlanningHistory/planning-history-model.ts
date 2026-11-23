@@ -31,6 +31,7 @@ export interface IPlanningHistoryLine {
   /** UOM id; same line shape as IMergedPlanningLine (shared item-planning fields). */
   UOMId: number;
   UOM: string | null;
+  Size: string | null;
   Quantity: number;
   PlannedQuantity: number;
   Rate: number;

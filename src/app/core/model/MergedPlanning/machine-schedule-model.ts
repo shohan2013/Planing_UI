@@ -10,15 +10,10 @@ export interface IMachineRef {
  * them (yyyy-MM-ddTHH:mm).
  */
 export interface IMachineJobsRequest {
-  /** The planning step (IBusinessFlowForPlanning.Id), same id Common/GetMachine takes. */
   BusinessFlowConfigureId: number;
   MachineIds: number[];
   StartDate: string;
   EndDate: string;
-  /**
-   * The plan's own job (saved ProductionPlanConfigure Id) when editing a saved plan,
-   * so it isn't reported as clashing with itself. Omitted for new plans.
-   */
   ExcludeJobId?: number | null;
 }
 
@@ -32,7 +27,7 @@ export interface IMachineJob {
   JobNo: string;
   MachineId: number;
   MachineName?: string | null;
-  ItemName: string;
+  ProductName: string;
   UOM: string;
   PlannedQty: number;
   StartDate: string;

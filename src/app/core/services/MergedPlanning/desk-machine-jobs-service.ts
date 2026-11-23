@@ -82,7 +82,7 @@ export class DeskMachineJobsService {
       JobId: -(step.lineId * 100000000 + step.stepId * 10000 + machineId),
       JobNo: 'Unsaved',
       MachineId: machineId,
-      ItemName: `${line?.ProductName ?? 'This plan'} · ${step.stepName}`,
+      ProductName: `${line?.ProductName ?? 'This plan'} · ${step.stepName}`,
       UOM: line?.UOM ?? '',
       PlannedQty: item?.TakenQty ?? line?.Quantity ?? 0,
       StartDate: step.startDate!,

@@ -32,10 +32,9 @@ export class MachineScheduleService {
       ExcludeJobId: request.ExcludeJobId || null,
     };
     return this.http
-      .post<IMachineJob[] | null>(
-        `${environment.API_URL}${GlobalConstant.API_END_POINTS.MachineJobs}`,
-        body,
-      )
+      .post<
+        IMachineJob[] | null
+      >(`${environment.API_URL}${GlobalConstant.API_END_POINTS.MachineJobs}`, body)
       .pipe(map((jobs) => jobs ?? []));
   }
 
@@ -44,19 +43,13 @@ export class MachineScheduleService {
    * Every job on any of the machines (for that planning step) that ends after `fromDate`
    * (now), up to each machine's last planned job. Used by the "View schedule" dialog.
    */
-  GetMachineSchedule(request: IMachineScheduleRequest): Observable<IMachineJob[]> {
-    let params = new HttpParams()
-      .set('businessFlowConfigureId', request.BusinessFlowConfigureId)
-      .set('fromDate', request.FromDate);
-    for (const machineId of request.MachineIds) {
-      params = params.append('machineIds', machineId);
-    }
-    if (request.ExcludeJobId) params = params.set('excludeJobId', request.ExcludeJobId);
+  GetMachineSchedule(
+    request: IMachineScheduleRequest,
+  ): Observable<IMachineJob[]> {
     return this.http
-      .get<IMachineJob[] | null>(
-        `${environment.API_URL}${GlobalConstant.API_END_POINTS.MachineSchedule}`,
-        { params },
-      )
+      .post<
+        IMachineJob[] | null
+      >(`${environment.API_URL}${GlobalConstant.API_END_POINTS.MachineSchedule}`, request)
       .pipe(map((jobs) => jobs ?? []));
   }
 }

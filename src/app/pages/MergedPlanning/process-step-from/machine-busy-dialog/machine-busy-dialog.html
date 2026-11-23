@@ -62,8 +62,8 @@
         <li class="mbd-job">
           <div class="mbd-job-main">
             <span class="mbd-job-no">{{ job.JobNo }}</span>
-            <span class="mbd-job-item" [title]="job.ItemName + ' · Qty ' + (job.PlannedQty | number) + ' ' + (job.UOM ?? '')"
-              >{{ job.ItemName }}</span
+            <span class="mbd-job-item" [title]="job.ProductName + ' · Qty ' + (job.PlannedQty | number) + ' ' + (job.UOM ?? '')"
+              >{{ job.ProductName }}</span
             >
             <span class="mbd-job-qty">Qty {{ job.PlannedQty | number }} {{ job.UOM }}</span>
           </div>

@@ -24,13 +24,18 @@ export interface IProductionPlanHeader {
   DocCreatedBy: number;
   BusinessId: number;
   UnitId: number;
+  MergePolicyId: number;
+  WorkTypeId: number;
   Remarks?: string | null;
 }
 
 export interface IProductionPlanLine {
+  DoStatusLineId: number;
   ProductId: number;
+  UOMId: number;
+  UOM: string | null;
+  Size: string | null;
   Quantity: number;
-  UOM: number;
   TakenQuantity: number;
   AdvanceProductionQuantity: number | null;
   RecipeVersionId: number | null;
@@ -41,7 +46,6 @@ export interface IProductionPlanLine {
 
 export interface IProductionPlanConfigures {
   BusinessConfigureId: number;
-  ProductId: number;
   StartDate: string | null;
   EndDate: string | null;
   MachineIds: number[];

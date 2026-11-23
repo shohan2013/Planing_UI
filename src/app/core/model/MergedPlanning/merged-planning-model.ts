@@ -11,6 +11,8 @@ export interface IMergedPlanning {
   Unit: string;
   UnitId: number;
   IsActive: boolean;
+  MergePolicyId: number;
+  WorkTypeId: number;
   WorkTypeCode: string;
   MergePolicy: string;
 }
@@ -21,6 +23,7 @@ export interface IMergedPlanningLine {
   ProductName: string | null;
   UOMId: number;
   UOM: string | null;
+  Size: string | null;
   Quantity: number;
   PlannedQuantity: number;
   PriorityId?: number | null;
