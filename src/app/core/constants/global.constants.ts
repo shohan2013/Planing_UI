@@ -52,8 +52,6 @@ export const GlobalConstant = {
     bulkRequisitionItems: 'Requisition/BulkItems',
 
 
-    completeRequisition: 'Requisition/complete', // Obsolite code
-
  /*===========================REQUISITION APPROVAL===================================== */
     RequisitionApproval: 'RequisitionApproval/GetData',
     RequisitionApprovalDetails: 'RequisitionApproval/GetDetails',
@@ -61,8 +59,10 @@ export const GlobalConstant = {
     //Line Request Approval
     acceptRequisitionLineRequest: 'RequisitionApproval/AcceptRequest',
     rejectRequisitionLineRequest: 'RequisitionApproval/RejectRequest',
-    RequisitionRequestHeaders: 'RequisitionApproval/GetRequestHeaders',
 
+    RequisitionNotificationEligibility: 'RequisitionApproval/NotificationEligibility',
+    RequisitionRequestNotifications: 'RequisitionApproval/GetRequestNotifications',
+    
   /*===========================COMMON===================================== */
     Common: 'Common',
     modules: 'Common/modules',
@@ -156,6 +156,7 @@ export const GlobalConstant = {
   /** SignalR hubs, relative to the API host (not under /api/). */
   HUBS: {
     PlanningVsProductionOverviewLive: 'hubs/planningVsProduction-overview-live',
+    RequisitionNotifications: 'hubs/requisition-notifications',
   },
   URL: { API_URL: 'https://localhost:7111/api/' },
 };

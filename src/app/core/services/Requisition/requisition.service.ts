@@ -143,17 +143,6 @@ return this.http.get<IViewRequisitionLine[]>(
 
 
 
-  completeData(reqId: number): Observable<any> {
-    return this.http.put(environment.API_URL + GlobalConstant.API_END_POINTS.completeRequisition,
-      //request body
-      {
-        reqId,
-        enroll: Number(localStorage.getItem('Enroll')),
-      },
-    );
-  }
-
-
 
 // GetACRLBulkFilters(unitId: number, businessId: number): Observable<IACRLBulkFilters> {
 //   return this.http.get<IACRLBulkFilters>(

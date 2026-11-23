@@ -1,7 +1,14 @@
 <div class="user-card">
   <div class="page-header">
     <h5>
-      <i class= "fa-brands fa-instalod" style="color: rgb(79, 171, 89); font-size: 17px;  transform: translateY(0px);"></i>
+      <i
+        class="fa-brands fa-instalod"
+        style="
+          color: rgb(79, 171, 89);
+          font-size: 17px;
+          transform: translateY(0px);
+        "
+      ></i>
       <b>REQUISITION</b>
     </h5>
   </div>
@@ -104,9 +111,9 @@
         <thead>
           <tr>
             <th>REQUISITION NUMBER</th>
-            <th class="g-fit-column" style="--g-col-min: 110px">UNIT</th>
-            <th class="g-fit-column" style="--g-col-min: 110px">BUSINESS</th>
-            <th>REQUISITION DATE</th>
+            <th>UNIT</th>
+            <th>BUSINESS</th>
+
             <th>REMARKS</th>
             <th>CREATED BY</th>
             <th>CREATED DATE</th>
@@ -118,7 +125,7 @@
         <tbody>
           @if (isLoading()) {
           <tr>
-            <td colspan="9" class="text-center py-4">
+            <td colspan="8" class="text-center py-4">
               <span
                 class="spinner-border spinner-border-sm me-2"
                 aria-hidden="true"
@@ -141,22 +148,36 @@
           <tr>
             <td>{{ item.RequisitionNumber || '-' }}</td>
 
-            <td><div class="g-truncate" [title]="item.UnitName || '-'">{{ item.UnitName || '-' }}</div></td>
+            <td>
+              <div class="g-truncate" [title]="item.UnitName || '-'">
+                {{ item.UnitName || '-' }}
+              </div>
+            </td>
 
-            <td><div class="g-truncate" [title]="item.BusinessName || '-'">{{ item.BusinessName || '-' }}</div></td>
+            <td>
+              <div class="g-truncate" [title]="item.BusinessName || '-'">
+                {{ item.BusinessName || '-' }}
+              </div>
+            </td>
 
-            <td>{{ item.ReqDate | dateTime }}</td>
+            <td>
+              <div class="g-scrollable-text md" [title]="item.Remarks || ''">
+                {{ item.Remarks || '-' }}
+              </div>
+            </td>
 
-            <td><div class="g-scrollable-text md" [title]="item.Remarks || ''">{{ item.Remarks || '-' }}</div></td>
-            
-            <td>{{ item.CREATEDBY ?? '-' }}</td>
+            <td>{{ item.CreatedByName ?? '-' }}</td>
 
             <td>
               {{ item.CREATEDDATE ? ( item.CREATEDDATE | dateTime ) : '-' }}
             </td>
 
             <td>
-              <span class="g-status" [ngClass]="getDocStatusClass(item.DocStatusId)">{{ getDocStatusName(item.DocStatusId) }}</span>
+              <span
+                class="g-status"
+                [ngClass]="getDocStatusClass(item.DocStatusId)"
+                >{{ getDocStatusName(item.DocStatusId) }}</span
+              >
             </td>
 
             <td class="g-action-column">
@@ -185,17 +206,22 @@
                   [disabled]="deletingReqId() !== null || isClosedForEditing(item)"
                   (click)="openEditModal(item)"
                 >
-
                   @if (item.IsEditable) {
-                    <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
+                  <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
                   } @else {
-                    <span class="d-inline-block align-middle" aria-hidden="true"
-                      style="width: 16px; height: 16px; background-color: currentColor;
-                            mask: url('assets/icons/requisition-pencil-clock.svg') center / contain no-repeat;">
-                    </span>
+                  <span
+                    class="d-inline-block align-middle"
+                    aria-hidden="true"
+                    style="
+                      width: 16px;
+                      height: 16px;
+                      background-color: currentColor;
+                      mask: url(&quot;assets/icons/requisition-pencil-clock.svg&quot;)
+                        center / contain no-repeat;
+                    "
+                  >
+                  </span>
                   }
-
-
                 </button>
 
                 <button
@@ -221,35 +247,10 @@
                   <i class="fa-solid fa-trash-can"></i>
                   }
                 </button>
-@if (false) {
-                <button
-                  type="button"
-                  class="action-btn btn-complete"
-                  title="Complete"
-                  [disabled]="
-                    !documentStatuses().length ||
-                    item.DocStatusId === DocumentStatusId.Completed ||
-                    deletingReqId() !== null ||
-                    completingReqId() !== null
-                  "
-                  (click)="completeRequisition(item.ReqID)"
-                >
-                  @if (completingReqId() === item.ReqID) {
-                    <span
-                      class="spinner-border spinner-border-sm"
-                      aria-hidden="true"
-                    ></span>
-                  } @else {
-                    <i class="fa-solid fa-circle-check"></i>
-                  }
-                </button>
-}
-                
               </div>
             </td>
           </tr>
-          }
-        }
+          } }
         </tbody>
       </table>
     </div>

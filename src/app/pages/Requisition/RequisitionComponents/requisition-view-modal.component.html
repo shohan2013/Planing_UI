@@ -1,4 +1,3 @@
-
 <div class="modal-header">
   <img src="assets/icons/view.svg" width="18" height="18" class="me-2" alt="" />
   <h5 class="modal-title">Requisition Details</h5>
@@ -17,54 +16,44 @@
       Unable to display the requisition.
     </div>
   } @else {
-
-    <!-- Compact Requisition Summary -->
     <section class="requisition-card requisition-summary">
       <div class="summary-grid">
         <div class="summary-field">
           <span class="summary-label">Requisition Number</span>
           <span class="summary-value detail-highlight">{{ header.RequisitionNumber || '-' }}</span>
         </div>
-
         <div class="summary-field">
           <span class="summary-label">Unit</span>
           <span class="summary-value">{{ header.UnitName || '-' }}</span>
         </div>
-
         <div class="summary-field">
           <span class="summary-label">Business</span>
           <span class="summary-value">{{ header.BusinessName || '-' }}</span>
         </div>
-
         <div class="summary-field">
           <span class="summary-label">Requisition Date</span>
           <span class="summary-value">{{ header.ReqDate | date: 'dd-MMM-yyyy' }}</span>
         </div>
-
         <div class="summary-field">
           <span class="summary-label">Start Date</span>
           <span class="summary-value">{{ header.StartDate | date: 'dd-MMM-yyyy' }}</span>
         </div>
-
         <div class="summary-field">
           <span class="summary-label">End Date</span>
           <span class="summary-value">{{ header.EndDate | date: 'dd-MMM-yyyy' }}</span>
         </div>
-
         <div class="summary-field">
           <span class="summary-label">Status</span>
           <span class="g-status g-status-lg" [ngClass]="getDocStatusClass(header.DocStatusId)">{{ getDocStatusName(header.DocStatusId) }}</span>
         </div>
       </div>
 
-      <!-- Header Remarks -->
       <div class="summary-remarks">
         <span class="summary-label">Remarks</span>
         <div class="g-scrollable-text full" [title]="header.Remarks || ''">{{ header.Remarks || '-' }}</div>
       </div>
     </section>
 
-    <!-- Product Requisition -->
     <section class="requisition-card product-section">
       <div class="section-heading">
         <span class="section-icon" aria-hidden="true">
@@ -76,84 +65,71 @@
         </div>
       </div>
 
-      <div class="table-responsive product-table-wrapper">
-        <div class="text-start mb-2">
-        <strong>Total Quantity</strong>
-        <span class="ms-2">{{ totalQuantity() | number:'1.0-4' }}</span>
+      <div class="row g-2 align-items-center justify-content-between mx-0 mb-3">
+        <div class="col-auto">
+          <strong>Total Quantity</strong>
+          <span class="ms-2">{{ totalQuantity() | number:'1.0-4' }}</span>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+          <div class="input-group">
+            <span class="input-group-text"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></span>
+            <input type="search" class="form-control" placeholder="Search product name..." aria-label="Search requisition lines by product name" [value]="lineSearch()" (input)="lineSearch.set($any($event.target).value)" />
+          </div>
+        </div>
       </div>
 
-        <div class="mb-3">
-          <input type="search" class="form-control"
-            placeholder="Search product name..."
-            aria-label="Search requisition lines by product name"
-            [value]="lineSearch()"
-            (input)="lineSearch.set($any($event.target).value)" />
-        </div>
-
+      <div class="table-responsive product-table-wrapper">
         <table class="custom-table product-table">
-          <colgroup>
-            <col style="width: 11%" />
-            <col style="width: 20%" />
-            <col style="width: 8%" />
-            <col style="width: 8%" />
-            <col style="width: 12%" />
-            <col style="width: 10%" />
-            <col style="width: 10%" />
-            <col style="width: 6%" />
-            <col style="width: 15%" />
-          </colgroup>
-
           <thead>
             <tr>
               <th>Product Type</th>
               <th>Item</th>
+              <th>Size</th>
               <th>UOM</th>
               <th class="number-column">Quantity</th>
               <th class="number-column">Remaining Stock Quantity</th>
               <th class="number-column">Stock Quantity</th>
               <th class="number-column">Sales Quantity</th>
+              <th class="number-column">Priority</th>
               <th class="text-center">Count</th>
               <th>Remarks</th>
             </tr>
           </thead>
-
           <tbody>
-            @if (filteredLines().length === 0) {
+            @for (line of filteredLines(); track line.ID) {
               <tr>
-                <td colspan="9" class="empty-table-message">
-                    {{ lines.length ? 'No matching products.' : 'No active Requisition Lines found.' }}
+                <td>{{ line.ProductTypeName || '-' }}</td>
+                <td class="item-name">{{ line.ItemName || '-' }}</td>
+                <td>{{ line.Size?.trim() || '–' }}</td>
+                <td>{{ line.UOMName || '-' }}</td>
+                <td class="number-column">{{ line.Quantity }}</td>
+                <td class="number-column">
+                  @if (line.RemainingQuantity != null) {
+                    <span class="remaining-quantity-badge" [class.remaining-quantity-green]="line.RemainingQuantity <= 0" [class.remaining-quantity-yellow]="line.RemainingQuantity > 0">
+                      {{ line.RemainingQuantity < 0 ? -line.RemainingQuantity : line.RemainingQuantity }}
+                    </span>
+                  } @else {
+                    –
+                  }
+                </td>
+                <td class="number-column">{{ line.StockQuantity ?? 0 }}</td>
+                <td class="number-column">{{ line.SalesQuantity ?? 0 }}</td>
+                <td class="number-column" [class.bg-warning-subtle]="(line.Priority ?? 0) > 0">{{ line.Priority ?? '–' }}</td>
+                <td class="text-center">
+                  <span class="requisition-count" [attr.aria-label]="'Matching requisitions: ' + (line.Count ?? 0)">
+                    {{ line.Count ?? 0 }}
+                  </span>
+                </td>
+                <td>
+                  <div class="g-scrollable-text sm" [title]="line.Remarks || ''">{{ line.Remarks || '-' }}</div>
                 </td>
               </tr>
-            } @else {
-              @for (line of filteredLines(); track line.ID) {
-                <tr>
-                  <td>{{ line.ProductTypeName || '-' }}</td>
-                  <td class="item-name">{{ line.ItemName || '-' }}</td>
-                  <td>{{ line.UOMName || '-' }}</td>
-                  <td class="number-column">{{ line.Quantity }}</td>
-
-                  <td class="number-column">
-                    @if (line.RemainingQuantity != null) {
-                      <span class="remaining-quantity-badge"
-                        [class.remaining-quantity-green]="line.RemainingQuantity <= 0"
-                        [class.remaining-quantity-yellow]="line.RemainingQuantity > 0">
-                        {{ line.RemainingQuantity < 0 ? -line.RemainingQuantity : line.RemainingQuantity }}
-                      </span>
-                    } @else {
-                      –
-                    }
-                  </td>
-
-                  <td class="number-column">{{ line.StockQuantity ?? 0 }}</td>
-                  <td class="number-column">{{ line.SalesQuantity ?? 0 }}</td>
-                  <td class="text-center">
-                    <span class="requisition-count" [attr.aria-label]="'Matching requisitions: ' + (line.Count ?? 0)">
-                      {{ line.Count ?? 0 }}
-                    </span>
-                  </td>
-                  <td><div class="g-scrollable-text sm" [title]="line.Remarks || ''">{{ line.Remarks || '-' }}</div></td>
-                </tr>
-              }
+            } @empty {
+              <tr>
+                <td colspan="11" class="empty-table-message">
+                  {{ lines.length ? 'No matching products.' : 'No active Requisition Lines found.' }}
+                </td>
+              </tr>
             }
           </tbody>
         </table>

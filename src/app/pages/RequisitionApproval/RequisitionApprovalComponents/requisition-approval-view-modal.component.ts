@@ -24,6 +24,20 @@ export class RequisitionApprovalViewModalComponent implements OnInit {
   @Input({ required: true }) docStatus!: string;
   readonly state = signal<ViewModalState>('loading');
   readonly lines = signal<IViewRequisitionLine[]>([]);
+
+  readonly lineSearch = signal('');
+
+  readonly totalQuantity = computed(() =>
+    this.lines().reduce((total, line) => total + line.Quantity, 0));
+
+  readonly filteredLines = computed(() => {
+    const search = this.lineSearch().trim().toLowerCase();
+    return this.lines().filter(line =>
+      (line.ItemName ?? '').toLowerCase().includes(search) ||
+      String(line.ItemId).includes(search));
+  });
+
+
   readonly approvers = signal<IProcessApprover[]>([]);
   readonly initiator = computed(() => this.approvers().find(person => person.ApproverId === 0));
   readonly actionTakers = computed(() => this.approvers().filter(person => person.ApproverId !== 0));

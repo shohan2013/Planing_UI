@@ -1,4 +1,4 @@
-export interface IRequisitionRequestHeader {
+export interface IRequisitionRequestNotification {
   ReqID: number;
   RequisitionNumber: string;
   UnitId: number;
@@ -13,4 +13,6 @@ export interface IRequisitionRequestHeader {
   CREATEDBY: number;
   CreatedByName: string | null;
   UnresolvedRequestCount: number;
+
+  LatestRequestDate: string | null; // for time stamp
 }

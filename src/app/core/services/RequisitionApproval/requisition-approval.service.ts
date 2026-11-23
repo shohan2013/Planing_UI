@@ -7,7 +7,7 @@ import { ServerQueryRequest, ServerQueryResponse, } from '../../model/Common/Pag
 import { environment } from 'src/environments/environment';
 import { IRequisitionApprovalDetails, IRequisitionApprovalHeader } from '../../model/RequisitionApproval/requisition-approval.model';
 import { IApiResponse } from '../../model/Response/ApiResponse';
-import { IRequisitionRequestHeader } from '../../model/RequisitionApproval/requisition-request-header.model';
+import { IRequisitionRequestNotification } from '../../model/RequisitionApproval/requisition-request-header.model';
 
 
 @Injectable({
@@ -72,24 +72,7 @@ export class RequisitionApprovalService {constructor(private http: HttpClient) {
 
 
 
-//====================================================
-/*
-  AcceptRequest(historyId: number, enroll: number, remarks: string | null = null): Observable<IApiResponse> {
-    return this.http.post<IApiResponse>(
-      `${environment.API_URL}${GlobalConstant.API_END_POINTS.acceptRequisitionLineRequest}`,
-      { HistoryID: historyId, Remarks: remarks },
-      { headers: { 'X-Enroll': String(enroll) } },
-    );
-  }
 
-  RejectRequest(historyId: number, enroll: number, remarks: string | null = null): Observable<IApiResponse> {
-    return this.http.post<IApiResponse>(
-      `${environment.API_URL}${GlobalConstant.API_END_POINTS.rejectRequisitionLineRequest}`,
-      { HistoryID: historyId, Remarks: remarks },
-      { headers: { 'X-Enroll': String(enroll) } },
-    );
-  }
-  */
 
 
   AcceptRequest(historyId: number, enroll: number, remarks: string | null = null): Observable<IApiResponse> {
@@ -108,17 +91,16 @@ export class RequisitionApprovalService {constructor(private http: HttpClient) {
 
 
 
-  GetRequestHeaders(request: ServerQueryRequest, enroll: number, unitId: number, businessId: number): Observable<ServerQueryResponse<IRequisitionRequestHeader>> {
-  return this.http.post<ServerQueryResponse<IRequisitionRequestHeader>>(
-    `${environment.API_URL}${GlobalConstant.API_END_POINTS.RequisitionRequestHeaders}`,
-    {
-      enroll,
-      unitId,
-      businessId,
-      globalSearch: request.globalSearch ?? '',
-      pageIndex: request.page,
-      pageSize: request.pageSize,
-    },
+GetRequestNotifications(enroll: number = Number(localStorage.getItem('Enroll'))): Observable<IRequisitionRequestNotification[]> {
+  return this.http.post<IRequisitionRequestNotification[]>(
+    `${environment.API_URL}${GlobalConstant.API_END_POINTS.RequisitionRequestNotifications}`,
+    { Enroll: enroll },
+  );
+}
+
+GetNotificationEligibility(): Observable<{ CanConnect: boolean }> {
+  return this.http.get<{ CanConnect: boolean }>(
+    `${environment.API_URL}${GlobalConstant.API_END_POINTS.RequisitionNotificationEligibility}`,
   );
 }
 
