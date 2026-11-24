@@ -236,7 +236,7 @@ export class RequisitionFormModalComponent implements OnInit {
       row.quantity !== null && Number.isFinite(row.quantity) && row.quantity > 0).length;
   }
   get canAddBulk(): boolean {
-    return this.canShowAddProduct && this.hasSelectedBulkProductType && this.bulkViewed() &&
+    return this.canShowAddProduct && this.isValidProductType(this.appliedBulkFilters.ProductTypeId) && this.bulkViewed() &&
       !this.bulkItemsLoading() && !this.bulkError() && this.bulkSelectedCount > 0 &&
       this.bulkResultContext === this.currentBulkContext();
   }
@@ -251,7 +251,7 @@ export class RequisitionFormModalComponent implements OnInit {
   }
 
   getAddedBulkLine(itemId: number): AbstractControl | undefined {
-    return this.findAddedLine(itemId, this.selectedBulkProductTypeId);
+    return this.findAddedLine(itemId, this.appliedBulkFilters.ProductTypeId);
   }
 
   isAlreadyAdded(itemId: number, productTypeId: number): boolean {
@@ -286,8 +286,8 @@ export class RequisitionFormModalComponent implements OnInit {
     return [
       this.selectedUnitId, this.formGroup.controls.BusinessId.value,
       this.formGroup.controls.StartDate.value, this.formGroup.controls.EndDate.value,
-      this.selectedBulkProductTypeId, this.bulkFilters.controls.SizeId.value,
-      this.bulkFilters.controls.SubCategoryId.value, this.bulkFilters.controls.GradeId.value,
+      this.appliedBulkFilters.ProductTypeId, this.appliedBulkFilters.SizeId,
+      this.appliedBulkFilters.SubCategoryId, this.appliedBulkFilters.GradeId,
     ].join('|');
   }
 
@@ -507,7 +507,7 @@ export class RequisitionFormModalComponent implements OnInit {
     });
     if (this.bulkNeedsReload) {
       this.bulkNeedsReload = false;
-      this.onBulkFilterChange();
+      this.bulkViewed.set(false);
     }
     const unitId = this.selectedUnitId;
     const businessId = Number(this.formGroup.controls.BusinessId.value);
@@ -583,30 +583,20 @@ export class RequisitionFormModalComponent implements OnInit {
   }
 
   onBulkTypeChange(productTypeId: number, productTypeModel: NgModel): void {
-    const control = this.bulkFilters.controls.ProductTypeId;
-    if (productTypeId === control.value) return;
-
-    if (this.bulkDrafts.size > 0 &&
-        !window.confirm('Your saved draft will be lost upon changing this filter. Continue?')) {
-      productTypeModel.control.setValue(control.value, { emitViewToModelChange: false });
-      return;
-    }
-
-    control.setValue(productTypeId);
-    this.bulkDrafts.clear();
-    this.bulkRows.set([]);
-    this.bulkTotalItems.set(0);
-    this.onBulkFilterChange();
+    this.bulkFilters.controls.ProductTypeId.setValue(productTypeId);
   }
 
-  private onBulkFilterChange(): void {
-    this.bulkSearchPending = false;
-    this.bulkViewed.set(false);
-  }
+  private onBulkFilterChange(): void {}
 
   viewBulk(): void {
     if (!this.bulkModalRef || !this.canViewBulk) return;
+    if (this.bulkDrafts.size > 0 &&
+      !window.confirm('Your saved draft will be lost upon loading new results. Continue?')) return;
     this.bulkSearchPending = false;
+    this.appliedBulkFilters = this.bulkFilters.getRawValue();
+    this.bulkDrafts.clear();
+    this.bulkRows.set([]);
+    this.bulkTotalItems.set(0);
     this.bulkCurrentPage.set(1);
     this.bulkResultContext = this.currentBulkContext();
     this.bulkViewed.set(true);
@@ -630,7 +620,7 @@ export class RequisitionFormModalComponent implements OnInit {
   }
 
   private loadBulkPage(): void {
-    if (!this.canShowAddProduct || !this.hasSelectedBulkProductType ||
+      if (!this.canShowAddProduct || !this.isValidProductType(this.appliedBulkFilters.ProductTypeId) ||
         this.bulkResultContext !== this.currentBulkContext()) {
       this.bulkItemsLoading.set(false);
       this.bulkError.set('Header or filters changed. View the items again before continuing.');
@@ -644,13 +634,13 @@ export class RequisitionFormModalComponent implements OnInit {
     this.bulkItemsSubscription = this.requisitionService.GetBulkItems({
       UnitID: this.selectedUnitId,
       BusinessID: Number(this.formGroup.controls.BusinessId.value),
-      ProductTypeId: this.selectedBulkProductTypeId,
+      ProductTypeId: this.appliedBulkFilters.ProductTypeId,
       ExcludeReqId: 0,
       FromDate: this.formGroup.controls.StartDate.value!,
       ToDate: this.formGroup.controls.EndDate.value!,
-      SizeID: this.bulkFilters.controls.SizeId.value,
-      SubCategoryID: this.bulkFilters.controls.SubCategoryId.value,
-      GradeID: this.bulkFilters.controls.GradeId.value,
+      SizeID: this.appliedBulkFilters.SizeId,
+      SubCategoryID: this.appliedBulkFilters.SubCategoryId,
+      GradeID: this.appliedBulkFilters.GradeId,
     }, {
       page: this.bulkCurrentPage(), pageSize: this.bulkPageSize(), globalSearch: search.length >= 2 ? search : '',
     }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
@@ -714,7 +704,7 @@ export class RequisitionFormModalComponent implements OnInit {
     const validText = dot === -1 ? cleaned : cleaned.slice(0, dot + 1) + cleaned.slice(dot + 1).replace(/\./g, '');
     input.value = validText;
     const quantity = validText === '' || validText === '.' ? null : Number(validText);
-    if (quantity !== null && quantity > 0 && this.isAlreadyAdded(row.itemId, this.selectedBulkProductTypeId)) {
+    if (quantity !== null && quantity > 0 && this.isAlreadyAdded(row.itemId, this.appliedBulkFilters.ProductTypeId)) {
       input.value = row.quantity == null ? '' : String(row.quantity);
       this.toastr.warning(`${row.itemName} is already added for this Product Type.`);
       return;
@@ -743,7 +733,7 @@ export class RequisitionFormModalComponent implements OnInit {
 
   addBulkLines(): void {
     if (!this.canShowAddProduct || this.bulkItemsLoading()) return;
-    if (!this.hasSelectedBulkProductType) {
+    if (!this.isValidProductType(this.appliedBulkFilters.ProductTypeId)) {
       this.toastr.warning('Please select Product Type.');
       return;
     }
@@ -765,7 +755,7 @@ export class RequisitionFormModalComponent implements OnInit {
       this.toastr.warning('Please select UoM for every selected item.');
       return;
     }
-    const productTypeId = this.selectedBulkProductTypeId;
+    const productTypeId = this.appliedBulkFilters.ProductTypeId;
     if (selected.some(row => this.isAlreadyAdded(row.itemId, productTypeId))) {
       this.toastr.warning('Some selected items are already added for this Product Type.');
       return;

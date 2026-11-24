@@ -1,18 +1,6 @@
 <div class="header-btn-lg">
-  <div
-    ngbDropdown
-    #dropdown="ngbDropdown"
-    placement="bottom-end"
-    [autoClose]="true"
-    (openChange)="onDropdownChange($event)"
-  >
-    <button
-      #bellButton
-      type="button"
-      class="notification-bell"
-      ngbDropdownToggle
-      [attr.aria-label]="'Requisition requests: ' + unreadCount() + ' unresolved'"
-    >
+  <div ngbDropdown #dropdown="ngbDropdown" placement="bottom-end" [autoClose]="true" (openChange)="onDropdownChange($event)" >
+    <button #bellButton type="button" class="notification-bell" ngbDropdownToggle [attr.aria-label]="'Requisition requests: ' + unreadCount() + ' unresolved'">
       <i class="pe-7s-bell" aria-hidden="true"></i>
 
       @if (unreadCount() > 0) {

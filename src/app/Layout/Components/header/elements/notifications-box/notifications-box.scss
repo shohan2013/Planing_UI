@@ -17,7 +17,7 @@
   cursor: pointer;
 
   > i {
-    font-size: 25px;
+    font-size: 18px;
   }
 
   &::after {
@@ -33,18 +33,18 @@
 
 .bell-count {
   position: absolute;
-  top: -4px;
-  right: -7px;
-  min-width: 19px;
-  height: 19px;
+  top: 0px;
+  right: 0px;
+  min-width: 16px;
+  height: 16px;
   display: grid;
   place-items: center;
-  padding: 0 5px;
+  padding: 0 4px;
   border: 1px solid #171a20;
   border-radius: 10px;
   background: var(--notification-yellow);
   color: #101114;
-  font: 800 11px/1 Arial, sans-serif;
+  font: 800 10px/1 Arial, sans-serif;
 }
 
 .requisition-notification-menu {

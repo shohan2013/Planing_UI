@@ -135,7 +135,7 @@ export class RequisitionEditModalComponent implements OnInit {
   readonly itemSearchHasResults = signal(true);
   readonly itemSearchFailed = signal(false);
   private itemSubscription?: Subscription;
-
+  appliedBulkFilters = { ProductTypeId: 0, SizeId: 0, SubCategoryId: 0, GradeId: 0 };
   bulkProductTypeId = 0;
   bulkSizeId = 0;
   bulkSubCategoryId = 0;
@@ -266,10 +266,10 @@ export class RequisitionEditModalComponent implements OnInit {
 
   get canAddBulk(): boolean {
     const selected = this.bulkSelection;
-    return this.canAdd && this.bulkViewed() && this.bulkProductTypeId > 0 && !this.loadingBulk() && !this.bulkError() && selected.length > 0 &&
+      return this.canAdd && this.bulkViewed() && this.appliedBulkFilters.ProductTypeId > 0 && !this.loadingBulk() && !this.bulkError() && selected.length > 0 &&
       selected.every(draft =>
         this.validQuantity(draft.quantity, true) && this.validUom(draft.uomId) && this.validPriority(draft.priority) &&
-        !this.savedLine(draft.row.itemId, this.bulkProductTypeId));
+        !this.savedLine(draft.row.itemId, this.appliedBulkFilters.ProductTypeId));
   }
 
   close(): void {
@@ -624,7 +624,7 @@ export class RequisitionEditModalComponent implements OnInit {
     });
     if (this.bulkNeedsReload) {
       this.bulkNeedsReload = false;
-      this.onBulkFilterChange();
+      this.bulkViewed.set(false);
     }
 
     const { UnitId, BusinessId } = this.header;
@@ -659,31 +659,25 @@ export class RequisitionEditModalComponent implements OnInit {
   }
 
   onBulkTypeChange(productTypeId: number, productTypeModel: NgModel): void {
-    if (productTypeId === this.bulkProductTypeId) return;
-
-    if (this.bulkDrafts.size > 0 &&
-        !window.confirm('Your saved draft will be lost upon changing this filter. Continue?')) {
-      productTypeModel.control.setValue(this.bulkProductTypeId, {
-        emitViewToModelChange: false,
-      });
-      return;
-    }
-
     this.bulkProductTypeId = productTypeId;
-    this.bulkDrafts.clear();
-    this.bulkRows.set([]);
-    this.bulkTotal.set(0);
-    this.onBulkFilterChange();
   }
 
-  onBulkFilterChange(): void {
-    this.bulkSearchPending = false;
-    this.bulkViewed.set(false);
-  }
+  onBulkFilterChange(): void {}
 
   viewBulk(): void {
     if (!this.bulkRef || !this.canViewBulk) return;
+    if (this.bulkDrafts.size > 0 &&
+      !window.confirm('Your saved draft will be lost upon loading new results. Continue?')) return;
     this.bulkSearchPending = false;
+    this.appliedBulkFilters = {
+      ProductTypeId: this.bulkProductTypeId,
+      SizeId: this.bulkSizeId,
+      SubCategoryId: this.bulkSubCategoryId,
+      GradeId: this.bulkGradeId,
+    };
+    this.bulkDrafts.clear();
+    this.bulkRows.set([]);
+    this.bulkTotal.set(0);
     this.bulkPage.set(1);
     this.bulkViewed.set(true);
     this.loadBulkPage();
@@ -708,7 +702,7 @@ export class RequisitionEditModalComponent implements OnInit {
   }
 
   onBulkSearch(value: string): void {
-    if (!this.bulkRef || !this.bulkViewed() || !this.bulkProductTypeId) return;
+    if (!this.bulkRef || !this.bulkViewed() || !this.appliedBulkFilters.ProductTypeId) return;
 
     const previous = this.bulkSearch.trim();
     const next = value.trim();
@@ -746,7 +740,7 @@ export class RequisitionEditModalComponent implements OnInit {
     this.bulkSubscription?.unsubscribe();
     this.loadingBulk.set(false);
     this.bulkTable?.nativeElement.scrollTo(0, 0);
-    if (!this.bulkRef || !this.bulkViewed() || !this.bulkProductTypeId) return;
+    if (!this.bulkRef || !this.bulkViewed() || !this.appliedBulkFilters.ProductTypeId) return;
 
     this.bulkError.set('');
     this.loadingBulk.set(true);
@@ -755,8 +749,8 @@ export class RequisitionEditModalComponent implements OnInit {
     const search = this.bulkSearch.trim();
     this.bulkSubscription = this.requisitionService.GetBulkItems({
       UnitID: UnitId, BusinessID: BusinessId, FromDate: this.fromDate, ToDate: this.toDate,
-      ProductTypeId: this.bulkProductTypeId, ExcludeReqId: ReqID,
-      SizeID: this.bulkSizeId, SubCategoryID: this.bulkSubCategoryId, GradeID: this.bulkGradeId,
+      ProductTypeId: this.appliedBulkFilters.ProductTypeId, ExcludeReqId: ReqID,
+      SizeID: this.appliedBulkFilters.SizeId, SubCategoryID: this.appliedBulkFilters.SubCategoryId, GradeID: this.appliedBulkFilters.GradeId,
     }, {
       page: this.bulkPage(), pageSize: this.bulkPageSize(), globalSearch: search.length >= 2 ? search : '',
     }).pipe(
@@ -799,7 +793,7 @@ export class RequisitionEditModalComponent implements OnInit {
   }
 
   updateBulkDraft(row: BulkRow, patch: Partial<Pick<BulkDraft, 'quantity' | 'quantityText' | 'priority' | 'uomId' | 'remarks'>>): void {
-    if (this.savedLine(row.itemId, this.bulkProductTypeId)) return;
+    if (this.savedLine(row.itemId, this.appliedBulkFilters.ProductTypeId)) return;
 
     const draft = this.bulkDrafts.get(row.itemId) ?? {
       row, quantity: null, priority: 0, uomId: this.defaultUomId, remarks: '',
@@ -811,7 +805,7 @@ export class RequisitionEditModalComponent implements OnInit {
     if (!this.canAddBulk) return;
 
     const lines = this.bulkSelection.map(draft => ({
-      ProductTypeId: this.bulkProductTypeId, ItemId: draft.row.itemId,
+      ProductTypeId: this.appliedBulkFilters.ProductTypeId, ItemId: draft.row.itemId,
       SizeID: draft.row.sizeId ?? null,
       Size: draft.row.size ?? null,
       Priority: draft.priority ?? 0,
