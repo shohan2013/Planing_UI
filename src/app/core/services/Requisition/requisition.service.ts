@@ -21,6 +21,7 @@ import {
   IUpdateRequisitionLineRequest,
 } from 'src/app/core/model/Requisition/RequisitionEdit';
 import { IApiResponse } from 'src/app/core/model/Response/ApiResponse';
+import { IItem } from '../../model/Common/Items/Item';
 // import { IACRLBulkFilters } from '../../model/Requisition/ACRLBulkFilters';
 
 @Injectable({
@@ -29,6 +30,28 @@ import { IApiResponse } from 'src/app/core/model/Response/ApiResponse';
 export class RequisitionService {
 
   constructor(private http: HttpClient) {}
+
+
+    GetItemList(unitId: number, searchText: string, businessId: number, fromDate: string, toDate: string, productTypeId: number, reqId: number | null = null): Observable<IItem[]> {
+    return this.http.get<IItem[]>(
+      `${environment.API_URL}${GlobalConstant.API_END_POINTS.Item}`,
+      {
+        params: {
+          unitId,
+          searchText,
+          businessId,
+          fromDate,
+          toDate,
+          productTypeId,
+          ...(reqId == null ? {} : { reqId }),
+        },
+      },
+    );
+  }
+
+
+
+
 
 
 GetRequisition(request: ServerQueryRequest, unitId: number = 0, businessId: number = 0): Observable<ServerQueryResponse<IViewRequisitionHeader>> {

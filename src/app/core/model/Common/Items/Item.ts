@@ -6,5 +6,10 @@ export interface IItem {
   SizeId: number | null;
   Size: string | null;
 
-  LevelOneId: number;
+  Count: number | null;
+  TotalRequestedQuantity: number | null;
+  TotalRemainingQuantity: number | null;
+  RemainingQuantity: number | null;
+
+  CountedRequisitions: Record<string, string>;
 }

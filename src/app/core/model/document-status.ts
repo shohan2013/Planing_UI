@@ -12,6 +12,7 @@ export enum DocumentStatusId {
 export function getDocumentStatusClass(statusId: number): string {
   switch (Number(statusId)) {
     case DocumentStatusId.Pending: return 'pending';
+    case 3:
     case DocumentStatusId.Approved: return 'approve';
     case DocumentStatusId.Rejected: return 'reject';
     case DocumentStatusId.Completed: return 'complete';

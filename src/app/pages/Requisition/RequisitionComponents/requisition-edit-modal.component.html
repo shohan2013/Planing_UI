@@ -72,7 +72,7 @@
           </div>
         }
 
-        <div class="table-responsive">
+        <div class="table-responsive main-lines-table-wrap">
           <table class="custom-table">
             <thead>
               <tr>
@@ -80,11 +80,14 @@
                 <th>ITEM</th>
                 <th>SIZE</th>
                 <th>UOM</th>
-                <th>QUANTITY</th>
+                <th style="width: 110px;">QUANTITY</th>
                 <th>STOCK QUANTITY</th>
                 <th>SALES QUANTITY</th>
-                <th>PRIORITY</th>
+                <th>REMAINING QUANTITY</th>
+                <th style="width: 105px;">PRIORITY</th>
                 <th class="text-center">COUNT</th>
+                <th>TOTAL QUANTITY</th>
+                <th>TOTAL REMAINING QUANTITY</th>
                 <th>REMARKS</th>
                 <th>ADD</th>
               </tr>
@@ -140,16 +143,19 @@
                 </td>
                 <td>{{ stock ?? '–' }}</td>
                 <td>{{ sales ?? '–' }}</td>
-                <td>
+                <td>{{ (remainingQuantity | number:'1.0-4') ?? '–' }}</td>
+                <td style="width: 105px;">
                   <app-priority-input [priorities]="priorities()" [(ngModel)]="priority" [disabled]="!canAdd" />
                 </td>
                 <td>
                   @if (loadingItem()) {
                     <span class="spinner-border spinner-border-sm text-success" role="status" aria-label="Loading Count"></span>
                   } @else {
-                    {{ count ?? '–' }}
+                                        <button type="button" class="requisition-count border-0" [disabled]="!(count ?? 0)" [ngbPopover]="countedRequisitionsPopover" [popoverContext]="{ requisitions: countedRequisitions }" popoverTitle="Counted requisitions" triggers="click" [autoClose]="'outside'" container="body" placement="auto" aria-label="Show counted requisitions">{{ count ?? '–' }}</button>
                   }
                 </td>
+                <td>{{ (totalRequestedQuantity | number:'1.0-4') ?? '–' }}</td>
+                <td>{{ (totalRemainingQuantity | number:'1.0-4') ?? '–' }}</td>
                 <td>
                   <input type="text" class="form-control" maxlength="500" placeholder="Remarks" aria-label="Remarks" [(ngModel)]="remarks" [disabled]="!canAdd" />
                 </td>
@@ -200,12 +206,14 @@
             <th>ITEM</th>
             <th>SIZE</th>
             <th>UOM</th>
-            <th>QUANTITY</th>
-            <th>REMAINING QUANTITY</th>
+            <th style="width: 110px;">QUANTITY</th>
             <th>STOCK QUANTITY</th>
             <th>SALES QUANTITY</th>
-            <th>PRIORITY</th>
+            <th>REMAINING QUANTITY</th>
+            <th style="width: 105px;">PRIORITY</th>
             <th class="text-center">COUNT</th>
+            <th>TOTAL QUANTITY</th>
+            <th>TOTAL REMAINING QUANTITY</th>
             <th>REMARKS</th>
             @if (isRequestMode) {
               <th class="text-center">UNRESOLVED</th>
@@ -231,6 +239,8 @@
                     {{ line.Quantity }}
                   }
                 </td>
+                <td>{{ line.StockQuantity }}</td>
+                <td>{{ line.SalesQuantity }}</td>
                 <td>
                   @if (line.RemainingQuantity != null) {
                     <span class="remaining-quantity-badge" [class.remaining-quantity-green]="line.RemainingQuantity <= 0" [class.remaining-quantity-yellow]="line.RemainingQuantity > 0">
@@ -240,9 +250,7 @@
                     –
                   }
                 </td>
-                <td>{{ line.StockQuantity }}</td>
-                <td>{{ line.SalesQuantity }}</td>
-                <td [class.priority-highlight]="((!isRequestMode && isOpen ? draft.priority : line.Priority) ?? 0) > 0">
+                <td style="width: 105px;" [class.priority-highlight]="((!isRequestMode && isOpen ? draft.priority : line.Priority) ?? 0) > 0">
                   @if (!isRequestMode && isOpen) {
                     <app-priority-input *menuPermission="PermissionAction.Update" [priorities]="priorities()" [small]="true" [(ngModel)]="draft.priority" [disabled]="!canWrite" />
                   } @else {
@@ -250,8 +258,10 @@
                   }
                 </td>
                 <td class="text-center">
-                  <span class="requisition-count">{{ line.Count ?? '-' }}</span>
+                    <button type="button" class="requisition-count border-0" [disabled]="!(line.Count ?? 0)" [ngbPopover]="countedRequisitionsPopover" [popoverContext]="{ requisitions: line.CountedRequisitions }" popoverTitle="Counted requisitions" triggers="click" [autoClose]="'outside'" container="body" placement="auto" aria-label="Show counted requisitions">{{ line.Count ?? '–' }}</button>
                 </td>
+                <td>{{ (line.TotalRequestedQuantity | number:'1.0-4') ?? '–' }}</td>
+                <td>{{ (line.TotalRemainingQuantity | number:'1.0-4') ?? '–' }}</td>
                 <td>
                   @if (!isRequestMode && isOpen) {
                     <input *menuPermission="PermissionAction.Update" type="text" maxlength="500" class="form-control form-control-sm" aria-label="Line remarks" [(ngModel)]="draft.remarks" [disabled]="!canWrite" />
@@ -296,7 +306,7 @@
           } @empty {
             @if (linesReady() && !loadingLines()) {
               <tr>
-                <td [attr.colspan]="isRequestMode ? 16 : 14" class="text-muted">
+                <td [attr.colspan]="isRequestMode ? 18 : 16" class="text-muted">
                   {{ lines().length ? 'No matching products.' : 'No active lines.' }}
                 </td>
               </tr>
@@ -366,10 +376,13 @@
           }
         </select>
       </div>
-      <div class="col-12 col-md-6 col-lg-4 col-xl-3 ms-auto">
-        <div class="input-group">
-          <span class="input-group-text"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></span>
-          <input type="search" class="form-control" aria-label="Search items" placeholder="Search items by ID or name" [value]="bulkSearch" [disabled]="!bulkProductTypeId || saving()" (input)="onBulkSearch($any($event.target).value)" />
+      <div class="col-12 col-md-6 col-lg-4 ms-auto">
+        <div class="d-flex gap-2 align-items-center">
+          <button type="button" class="btn btn-success text-nowrap" [disabled]="!canViewBulk" (click)="viewBulk()"><i class="fa-solid fa-eye me-1" aria-hidden="true"></i> View</button>
+          <div class="input-group">
+            <span class="input-group-text"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></span>
+            <input type="search" class="form-control" aria-label="Search items" placeholder="Search items by ID or name" [value]="bulkSearch" [disabled]="!bulkViewed() || saving()" (input)="onBulkSearch($any($event.target).value)" />
+          </div>
         </div>
       </div>
     </div>
@@ -390,18 +403,20 @@
               <th>ITEM NAME</th>
               <th>SIZE</th>
               <th>UOM</th>
-              <th>QUANTITY</th>
+              <th style="width: 110px;">QUANTITY</th>
               <th>STOCK QUANTITY</th>
               <th>SALES QUANTITY</th>
-              <th>PRIORITY</th>
+              <th style="width: 105px;">PRIORITY</th>
               <th class="text-center">COUNT</th>
+              <th>TOTAL QUANTITY</th>
+              <th>TOTAL REMAINING QUANTITY</th>
               <th>REMARKS</th>
             </tr>
           </thead>
           <tbody>
             @if (loadingBulk()) {
               <tr>
-                <td colspan="10" class="text-center py-5">
+                <td colspan="12" class="text-center py-5">
                   <span class="spinner-border text-success" role="status" aria-label="Loading items"></span>
                 </td>
               </tr>
@@ -438,7 +453,7 @@
                   </td>
                   <td>{{ addedLine ? addedLine.StockQuantity : row.stock }}</td>
                   <td>{{ addedLine ? addedLine.SalesQuantity : row.sales }}</td>
-                  <td [class.bg-warning-subtle]="(addedLine?.Priority ?? draft?.priority ?? 0) > 0">
+                                    <td style="width: 105px;" [class.bg-warning-subtle]="(addedLine?.Priority ?? draft?.priority ?? 0) > 0">
                     @if (addedLine) {
                       {{ priorityName(addedLine.Priority) }}
                     } @else {
@@ -446,8 +461,10 @@
                     }
                   </td>
                   <td class="text-center">
-                    <span class="requisition-count" [attr.aria-label]="'Matching requisitions: ' + row.count">{{ row.count }}</span>
+                    <button type="button" class="requisition-count border-0" [disabled]="!(row.count ?? 0)" [ngbPopover]="countedRequisitionsPopover" [popoverContext]="{ requisitions: row.countedRequisitions }" popoverTitle="Counted requisitions" triggers="click" [autoClose]="'outside'" container="body" placement="auto" aria-label="Show counted requisitions">{{ row.count ?? '–' }}</button>
                   </td>
+                  <td>{{ (row.totalRequestedQuantity | number:'1.0-4') ?? '–' }}</td>
+                  <td>{{ (row.totalRemainingQuantity | number:'1.0-4') ?? '–' }}</td>
                   <td>
                     @if (addedLine) {
                       <div class="g-scrollable-text sm" [title]="addedLine.Remarks || ''">{{ addedLine.Remarks || '-' }}</div>
@@ -457,8 +474,8 @@
                   </td>
                 </tr>
               } @empty {
-                @if (bulkProductTypeId > 0) {
-                  <tr><td colspan="10" class="text-center text-muted py-4">No matching items.</td></tr>
+                @if (bulkViewed()) {
+                  <tr><td colspan="12" class="text-center text-muted py-4">No matching items.</td></tr>
                 }
               }
             }
@@ -466,7 +483,7 @@
         </table>
       </div>
 
-      @if (bulkProductTypeId > 0) {
+      @if (bulkViewed()) {
         <app-pagination [currentPage]="bulkPage()" [pageSize]="bulkPageSize()" [totalItems]="bulkTotal()" (pageChanged)="onBulkPageChange($event)" (pageSizeChanged)="onBulkPageSizeChange($event)"></app-pagination>
       }
       @if (bulkError()) {
@@ -627,4 +644,17 @@
       <button type="button" class="btn btn-success" [disabled]="saving()" (click)="confirmRequest()">Confirm</button>
     </div>
   }
+</ng-template>
+
+
+
+
+<ng-template #countedRequisitionsPopover let-requisitions="requisitions">
+  <div style="max-height: 260px; overflow-y: auto;">
+    @for (req of requisitions | keyvalue; track req.key) {
+      <div class="py-1 text-nowrap" [attr.data-req-id]="req.key">{{ req.value }}</div>
+    } @empty {
+      <div class="text-muted">No counted requisitions.</div>
+    }
+  </div>
 </ng-template>

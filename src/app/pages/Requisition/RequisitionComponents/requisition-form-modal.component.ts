@@ -3,7 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, Input, OnInit, TemplateRef, ViewChild, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormArray, FormControl, FormGroup, FormsModule, NgModel, ReactiveFormsModule, Validators } from '@angular/forms';
-import { NgbActiveModal, NgbModal, NgbModalRef, NgbTypeaheadModule, NgbTypeaheadSelectItemEvent } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbModal, NgbModalRef, NgbPopoverModule, NgbTypeaheadModule, NgbTypeaheadSelectItemEvent } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, debounceTime, distinctUntilChanged, finalize, forkJoin, map, merge, Observable, of, startWith, Subject, Subscription, switchMap, tap } from 'rxjs';
 import { MenuPermissionDirective } from 'src/app/core/directives/menu-permission.directive';
@@ -32,7 +32,10 @@ type BulkRow = {
   uomId: number | null;
   stockQuantity: number;
   salesQuantity: number;
-  count: number;
+  count: number | null;
+  countedRequisitions: Record<string, string>;
+  totalRequestedQuantity: number | null;
+  totalRemainingQuantity: number | null;
   quantity: number | null;
   remarks: string;
 };
@@ -40,7 +43,7 @@ type BulkRow = {
 @Component({
   selector: 'app-requisition-form-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, NgbTypeaheadModule, MenuPermissionDirective, PaginationComponent, PriorityInputComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, NgbTypeaheadModule, NgbPopoverModule, MenuPermissionDirective, PaginationComponent, PriorityInputComponent],
   templateUrl: './requisition-form-modal.component.html',
   styleUrl: './requisition-form-modal.component.scss',
 })
@@ -145,6 +148,10 @@ export class RequisitionFormModalComponent implements OnInit {
     StockQuantity: new FormControl(0),
     SalesQuantity: new FormControl(0),
     Count: new FormControl<number | null>(null),
+    CountedRequisitions: new FormControl<Record<string, string>>({}, { nonNullable: true }),
+    TotalRequestedQuantity: new FormControl<number | null>(null),
+    TotalRemainingQuantity: new FormControl<number | null>(null),
+    RemainingQuantity: new FormControl<number | null>(null),
     Remarks: new FormControl('', Validators.maxLength(500)),
   });
 
@@ -161,10 +168,12 @@ export class RequisitionFormModalComponent implements OnInit {
   private itemQuantitiesSubscription?: Subscription;
   private itemCountSubscription?: Subscription;
   readonly itemCountLoading = signal(false);
+  private appliedBulkFilters = { ProductTypeId: 0, SizeId: 0, SubCategoryId: 0, GradeId: 0 };
   private bulkResultContext = '';
   private bulkNeedsReload = false;
   private readonly bulkDrafts = new Map<number, BulkRow>();
   private readonly bulkReload$ = new Subject<void>();
+  private bulkSearchPending = false;
 
   constructor(
     public readonly activeModal: NgbActiveModal,
@@ -177,7 +186,10 @@ export class RequisitionFormModalComponent implements OnInit {
   ngOnInit(): void {
 
     this.bulkReload$.pipe(debounceTime(800), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-      if (this.bulkModalRef && this.bulkViewed()) this.loadBulkPage();
+      if (this.bulkSearchPending && this.bulkModalRef && this.bulkViewed()) {
+        this.bulkSearchPending = false;
+        this.loadBulkPage();
+      }
     });
     merge(
       this.bulkFilters.controls.SubCategoryId.valueChanges,
@@ -217,7 +229,7 @@ export class RequisitionFormModalComponent implements OnInit {
   get canViewBulk(): boolean {
     return this.isACRL && this.canShowAddProduct && this.hasSelectedBulkProductType &&
       this.bulkFiltersReady() && !this.bulkFiltersLoading() &&
-      !this.bulkSubCategoriesLoading() && !this.bulkItemsLoading();
+      !this.bulkSubCategoriesLoading();
   }
   get bulkSelectedCount(): number {
     return Array.from(this.bulkDrafts.values()).filter(row =>
@@ -247,6 +259,7 @@ export class RequisitionFormModalComponent implements OnInit {
   }
 
   private invalidateBulkResults(): void {
+    this.bulkSearchPending = false;
     ++this.bulkRequestId;
     this.bulkItemsSubscription?.unsubscribe();
     this.bulkItemsSubscription = undefined;
@@ -259,6 +272,14 @@ export class RequisitionFormModalComponent implements OnInit {
     this.bulkCurrentPage.set(1);
     this.bulkError.set('');
     this.bulkResultContext = '';
+    this.bulkNeedsReload = false;
+    this.bulkFilters.reset({
+      ProductTypeId: 0,
+      SizeId: 0,
+      SubCategoryId: 0,
+      GradeId: 0,
+    }, { emitEvent: false });
+    this.bulkSubCategories.set([]);
   }
 
   private currentBulkContext(): string {
@@ -353,10 +374,13 @@ export class RequisitionFormModalComponent implements OnInit {
       UOMId: new FormControl(selectedUoM.UoMId),
       UOMName: new FormControl(selectedUoM.UoMName ?? ''),
       Quantity: new FormControl(Number(value.Quantity), [Validators.required, Validators.min(0.0001)]),
-      RemainingQuantity: new FormControl<number | null>(null),
+      RemainingQuantity: new FormControl<number | null>(value.RemainingQuantity),
+      TotalRequestedQuantity: new FormControl<number | null>(value.TotalRequestedQuantity),
+      TotalRemainingQuantity: new FormControl<number | null>(value.TotalRemainingQuantity),
       StockQuantity: new FormControl(Number(value.StockQuantity) || 0),
       SalesQuantity: new FormControl(Number(value.SalesQuantity) || 0),
       Count: new FormControl<number | null>(value.Count),
+      CountedRequisitions: new FormControl<Record<string, string>>(value.CountedRequisitions, { nonNullable: true }),
       Remarks: new FormControl(value.Remarks ?? ''),
       DocStatusId: new FormControl(DocumentStatusId.Pending),
       IsActive: new FormControl(true),
@@ -396,8 +420,15 @@ export class RequisitionFormModalComponent implements OnInit {
       StockQuantity: 0,
       SalesQuantity: 0,
     }, { emitEvent: false });
+    this.clearItemCount();
+    this.lineFormGroup.patchValue({
+      Count: item.Count,
+      CountedRequisitions: item.CountedRequisitions ?? {},
+      TotalRequestedQuantity: item.TotalRequestedQuantity,
+      TotalRemainingQuantity: item.TotalRemainingQuantity,
+      RemainingQuantity: item.RemainingQuantity,
+    }, { emitEvent: false });
     this.loadItemQuantities(itemId);
-    this.loadItemCount();
     this.resetItemSearchState();
     if (this.isAlreadyAdded(itemId, this.selectedLineProductTypeId)) {
       this.toastr.warning('Item already exists for this Product Type.');
@@ -418,7 +449,8 @@ export class RequisitionFormModalComponent implements OnInit {
           return of([]);
         }
         this.isItemSearching.set(true);
-        return this.commonService.GetItemList(this.selectedUnitId, text).pipe(
+        return this.requisitionService.GetItemList( this.selectedUnitId, text, Number(this.formGroup.controls.BusinessId.value), this.formGroup.controls.StartDate.value!, this.formGroup.controls.EndDate.value!, this.selectedLineProductTypeId,)
+        .pipe(
           tap(items => {
             this.itemSearchCompleted.set(true);
             this.itemSearchHasResults.set(items.length > 0);
@@ -475,7 +507,7 @@ export class RequisitionFormModalComponent implements OnInit {
     });
     if (this.bulkNeedsReload) {
       this.bulkNeedsReload = false;
-      this.reloadBulkResults();
+      this.onBulkFilterChange();
     }
     const unitId = this.selectedUnitId;
     const businessId = Number(this.formGroup.controls.BusinessId.value);
@@ -483,11 +515,9 @@ export class RequisitionFormModalComponent implements OnInit {
     let firstSizeEmission = true;
     this.bulkSizeSubscription = this.bulkFilters.controls.SizeId.valueChanges.pipe(
       startWith(this.bulkFilters.controls.SizeId.value),
-      tap(() => {
-        if (!firstSizeEmission) {
-          this.bulkFilters.controls.SubCategoryId.setValue(0, { emitEvent: false });
-          this.bulkSubCategories.set([]);
-        }
+      distinctUntilChanged(),
+      tap(sizeId => {
+        this.bulkSubCategoriesLoading.set(sizeId > 0);
         if (!firstSizeEmission) {
           this.bulkFilters.controls.SubCategoryId.setValue(0, { emitEvent: false });
           this.bulkSubCategories.set([]);
@@ -496,12 +526,7 @@ export class RequisitionFormModalComponent implements OnInit {
         firstSizeEmission = false;
       }),
       switchMap(sizeId => {
-        if (sizeId <= 0) {
-          this.bulkSubCategories.set([]);
-          this.bulkSubCategoriesLoading.set(false);
-          return of([]);
-        }
-        this.bulkSubCategoriesLoading.set(true);
+        if (sizeId <= 0) return of([]);
         return this.requisitionService.GetACRLtilesSubCategory(unitId, businessId, sizeId).pipe(
           catchError((error: HttpErrorResponse) => {
             this.toastr.error(this.getErrorMessage(error, 'Unable to load ACRL Subcategories.'));
@@ -537,6 +562,7 @@ export class RequisitionFormModalComponent implements OnInit {
   }
 
   private cleanupBulkModal(): void {
+    this.bulkSearchPending = false;
     this.bulkNeedsReload ||= this.bulkItemsLoading();
     ++this.filterRequestId;
     this.bulkSizeSubscription?.unsubscribe();
@@ -574,29 +600,33 @@ export class RequisitionFormModalComponent implements OnInit {
   }
 
   private onBulkFilterChange(): void {
-    this.bulkCurrentPage.set(1);
-    this.reloadBulkResults();
+    this.bulkSearchPending = false;
+    this.bulkViewed.set(false);
   }
 
-  private reloadBulkResults(): void {
-    if (!this.bulkModalRef || !this.hasSelectedBulkProductType) return;
-
+  viewBulk(): void {
+    if (!this.bulkModalRef || !this.canViewBulk) return;
+    this.bulkSearchPending = false;
+    this.bulkCurrentPage.set(1);
     this.bulkResultContext = this.currentBulkContext();
     this.bulkViewed.set(true);
-    this.queueBulkPage();
+    this.loadBulkPage();
   }
 
   retryBulkLoad(): void {
     this.queueBulkPage();
   }
 
-  private queueBulkPage(): void {
-    if (!this.bulkViewed()) return;
+  private queueBulkPage(debounceSearch = false): void {
+    if (!this.bulkModalRef || !this.bulkViewed()) return;
     ++this.bulkRequestId;
-
+    this.bulkItemsSubscription?.unsubscribe();
+    this.bulkItemsSubscription = undefined;
+    this.bulkSearchPending = debounceSearch;
     this.bulkItemsLoading.set(true);
     this.bulkError.set('');
-    this.bulkReload$.next();
+    if (debounceSearch) this.bulkReload$.next();
+    else this.loadBulkPage();
   }
 
   private loadBulkPage(): void {
@@ -636,7 +666,10 @@ export class RequisitionFormModalComponent implements OnInit {
             priority: draft?.priority ?? null,
             uomId: draft?.uomId ?? (this.plannerUoMs().length === 1 ? this.plannerUoMs()[0].UoMId : null),
             stockQuantity: Number(item.StockQuantity), salesQuantity: Number(item.SalesQuantity),
-            count: Number(item.Count) || 0,
+            count: item.Count,
+            countedRequisitions: item.CountedRequisitions ?? {},
+            totalRequestedQuantity: item.TotalRequestedQuantity,
+            totalRemainingQuantity: item.TotalRemainingQuantity,
             quantity: draft?.quantity ?? null, remarks: draft?.remarks ?? '',
           };
           if (draft) this.bulkDrafts.set(itemId, row);
@@ -661,7 +694,7 @@ export class RequisitionFormModalComponent implements OnInit {
     if ((previous.length >= 2 ? previous : '') === (next.length >= 2 ? next : '')) return;
 
     this.bulkCurrentPage.set(1);
-    this.queueBulkPage();
+    this.queueBulkPage(true);
   }
 
   onBulkPageChange(page: number): void {
@@ -756,9 +789,12 @@ export class RequisitionFormModalComponent implements OnInit {
         UOMName: new FormControl(selectedUoM.UoMName ?? ''),
         Quantity: new FormControl(row.quantity, [Validators.required, Validators.min(0.0001)]),
         RemainingQuantity: new FormControl<number | null>(null),
+        TotalRequestedQuantity: new FormControl<number | null>(row.totalRequestedQuantity),
+        TotalRemainingQuantity: new FormControl<number | null>(row.totalRemainingQuantity),
         StockQuantity: new FormControl(row.stockQuantity),
         SalesQuantity: new FormControl(row.salesQuantity),
         Count: new FormControl(row.count),
+        CountedRequisitions: new FormControl<Record<string, string>>(row.countedRequisitions, { nonNullable: true }),
         Remarks: new FormControl(row.remarks.trim()),
         DocStatusId: new FormControl(DocumentStatusId.Pending),
         IsActive: new FormControl(true),
@@ -881,42 +917,49 @@ export class RequisitionFormModalComponent implements OnInit {
   }
 
 
-    private clearItemCount(): void {
+  private clearItemCount(): void {
     this.itemCountSubscription?.unsubscribe();
     this.itemCountSubscription = undefined;
     this.itemCountLoading.set(false);
-    this.lineFormGroup.controls.Count.setValue(null, { emitEvent: false });
+    this.lineFormGroup.patchValue({
+      Count: null,
+      CountedRequisitions: {},
+      TotalRequestedQuantity: null,
+      TotalRemainingQuantity: null,
+      RemainingQuantity: null,
+    }, { emitEvent: false });
   }
 
   private loadItemCount(): void {
     this.clearItemCount();
-
     const itemId = Number(this.lineFormGroup.controls.ItemId.value);
     const fromDate = this.formGroup.controls.StartDate.value;
     const toDate = this.formGroup.controls.EndDate.value;
-
-    if (!this.canShowAddProduct || !this.hasSelectedLineProductType ||
-        itemId <= 0 || !fromDate || !toDate) return;
+    if (!this.canShowAddProduct || !this.hasSelectedLineProductType || itemId <= 0 || !fromDate || !toDate) return;
 
     this.itemCountLoading.set(true);
-    this.itemCountSubscription = this.requisitionService.GetRequisitionCount(
+    this.itemCountSubscription = this.requisitionService.GetItemList(
+      this.selectedUnitId,
+      String(itemId),
+      Number(this.formGroup.controls.BusinessId.value),
       fromDate,
       toDate,
-      this.selectedUnitId,
-      Number(this.formGroup.controls.BusinessId.value),
-      itemId,
       this.selectedLineProductTypeId,
-      0,
     ).pipe(
       takeUntilDestroyed(this.destroyRef),
       finalize(() => this.itemCountLoading.set(false)),
     ).subscribe({
-      next: count => {
-        this.lineFormGroup.controls.Count.setValue(Number(count), { emitEvent: false });
+      next: items => {
+        const item = items.find(row => Number(row.Id) === itemId);
+        this.lineFormGroup.patchValue({
+          Count: item?.Count ?? null,
+          CountedRequisitions: item?.CountedRequisitions ?? {},
+          TotalRequestedQuantity: item?.TotalRequestedQuantity ?? null,
+          TotalRemainingQuantity: item?.TotalRemainingQuantity ?? null,
+          RemainingQuantity: item?.RemainingQuantity ?? null,
+        }, { emitEvent: false });
       },
-      error: () => {
-        this.toastr.error('Unable to load Requisition Count.');
-      },
+      error: () => this.toastr.error('Unable to load requisition metrics.'),
     });
   }
 

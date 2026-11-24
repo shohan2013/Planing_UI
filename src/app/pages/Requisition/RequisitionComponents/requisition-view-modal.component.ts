@@ -10,7 +10,7 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbPopoverModule } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 
 import {
@@ -27,7 +27,7 @@ type ViewModalState = 'loading' | 'ready' | 'failed';
 @Component({
   selector: 'app-requisition-view-modal',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, NgbPopoverModule],
   templateUrl: './requisition-view-modal.component.html',
   styleUrl: './requisition-view-modal.component.scss',
 

@@ -1,5 +1,6 @@
 /* Modal Body */
 .requisition-modal-body {
+  zoom: 80%;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -111,6 +112,9 @@
 
 /* Product Table */
 .product-table-wrapper {
+  max-height: 55vh;
+  overflow: auto;
+  flex-shrink: 0;
   min-width: 0;
   border: 1px solid #e2e7ec;
   border-radius: 7px;
@@ -122,11 +126,14 @@
   margin: 0;
   border: 0;
   border-collapse: collapse;
-  table-layout: fixed;
+  table-layout: auto;
   background: #fff;
 }
 
 .product-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
   padding: 10px 12px;
   border: 0;
   border-bottom: 1px solid #e2e7ec;
@@ -187,6 +194,16 @@
   font-weight: 600;
 }
 
+
+
+.product-table th.quantity-column {
+  width: 85px;
+}
+
+.product-table th.priority-column {
+  width: 70px;
+}
+
 /* Responsive Layout */
 @media (max-width: 1199.98px) {
   .summary-grid {
@@ -196,6 +213,7 @@
 
 @media (max-width: 767.98px) {
   .requisition-modal-body {
+    zoom: 100%;
     padding: 10px;
   }
 
