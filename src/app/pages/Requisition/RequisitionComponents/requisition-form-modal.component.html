@@ -154,9 +154,14 @@
                     </td>
                     <td>{{ lineFormGroup.controls.StockQuantity.value ?? '–' }}</td>
                     <td>{{ lineFormGroup.controls.SalesQuantity.value ?? '–' }}</td>
-                    <td>{{ (lineFormGroup.controls.RemainingQuantity.value | number:'1.0-4') ?? '–' }}</td>
+                    <td [class.remaining-quantity-negative]="(lineFormGroup.controls.RemainingQuantity.value ?? 0) < 0">{{ (lineFormGroup.controls.RemainingQuantity.value | number:'1.0-4') ?? '–' }}</td>
                     <td style="width: 105px;" [class.bg-warning-subtle]="(lineFormGroup.controls.Priority.value ?? 0) > 0">
-                      <app-priority-input formControlName="Priority" [priorities]="priorities()" [readonly]="isSubmitting" />
+                      <!-- <app-priority-input formControlName="Priority" [priorities]="priorities()" [readonly]="isSubmitting" /> -->
+                        <select class="form-select" formControlName="Priority" aria-label="Priority">
+                          @for (p of priorities(); track p.Id) {
+                            <option [ngValue]="p.Id">{{ p.PriorityName }}</option>
+                          }
+                        </select>
                     </td>
                     <td class="text-center">
                       @if (itemCountLoading()) {
@@ -166,7 +171,7 @@
                       }
                     </td>
                     <td>{{ (lineFormGroup.controls.TotalRequestedQuantity.value | number:'1.0-4') ?? '–' }}</td>
-                    <td>{{ (lineFormGroup.controls.TotalRemainingQuantity.value | number:'1.0-4') ?? '–' }}</td>
+                    <td [class.remaining-quantity-negative]="(lineFormGroup.controls.TotalRemainingQuantity.value ?? 0) < 0">{{ (lineFormGroup.controls.TotalRemainingQuantity.value | number:'1.0-4') ?? '–' }}</td>
                     <td>
                       <input type="text" class="form-control" formControlName="Remarks" maxlength="500" placeholder="Remarks" />
                     </td>
@@ -244,15 +249,20 @@
                   </td>
                   <td>{{ line.get('StockQuantity')?.value }}</td>
                   <td>{{ line.get('SalesQuantity')?.value }}</td>
-                  <td>{{ (line.get('RemainingQuantity')?.value | number:'1.0-4') ?? '–' }}</td>
+                  <td [class.remaining-quantity-negative]="(line.get('RemainingQuantity')?.value ?? 0) < 0">{{ (line.get('RemainingQuantity')?.value | number:'1.0-4') ?? '–' }}</td>
                   <td style="width: 105px;" [class.priority-highlight]="(line.get('Priority')?.value ?? 0) > 0">
-                    <app-priority-input [formControl]="$any(line.get('Priority'))" [priorities]="priorities()" [small]="true" [readonly]="isSubmitting" [ariaLabel]="'Priority for line ' + (index + 1)" />
+                    <!-- <app-priority-input [formControl]="$any(line.get('Priority'))" [priorities]="priorities()" [small]="true" [readonly]="isSubmitting" [ariaLabel]="'Priority for line ' + (index + 1)" /> -->
+                    <select class="form-select form-select-sm" [formControl]="$any(line.get('Priority'))" [attr.aria-label]="'Priority for line ' + (index + 1)">
+                      @for (p of priorities(); track p.Id) {
+                        <option [ngValue]="p.Id">{{ p.PriorityName }}</option>
+                      }
+                    </select>
                   </td>
                   <td class="text-center">
                     <button type="button" class="requisition-count border-0" [disabled]="!(line.get('Count')?.value ?? 0)" [ngbPopover]="countedRequisitionsPopover" [popoverContext]="{ requisitions: line.get('CountedRequisitions')?.value }" popoverTitle="Counted requisitions" triggers="click" [autoClose]="'outside'" container="body" placement="auto" aria-label="Show counted requisitions">{{ line.get('Count')?.value ?? '–' }}</button>
                   </td>
                   <td>{{ (line.get('TotalRequestedQuantity')?.value | number:'1.0-4') ?? '–' }}</td>
-                  <td>{{ (line.get('TotalRemainingQuantity')?.value | number:'1.0-4') ?? '–' }}</td>
+                  <td [class.remaining-quantity-negative]="(line.get('TotalRemainingQuantity')?.value ?? 0) < 0">{{ (line.get('TotalRemainingQuantity')?.value | number:'1.0-4') ?? '–' }}</td>
                   <td>
                     <input type="text" maxlength="500" class="form-control form-control-sm" [attr.aria-label]="'Remarks for line ' + (index + 1)" [formControl]="$any(line.get('Remarks'))" [title]="line.get('Remarks')?.value || ''" [readonly]="isSubmitting" />
                   </td>
@@ -419,14 +429,19 @@
                     @if (addedLine) {
                       {{ priorityName(addedLine.get('Priority')?.value) }}
                     } @else {
-                      <app-priority-input [priorities]="priorities()" [small]="true" [ngModel]="row.priority ?? 0" [ngModelOptions]="{ standalone: true }" (ngModelChange)="setBulkPriority(row, $event)" [ariaLabel]="'Priority for item ' + row.itemId" />
+                      <!-- <app-priority-input [priorities]="priorities()" [small]="true" [ngModel]="row.priority ?? 0" [ngModelOptions]="{ standalone: true }" (ngModelChange)="setBulkPriority(row, $event)" [ariaLabel]="'Priority for item ' + row.itemId" /> -->
+                      <select class="form-select form-select-sm" [ngModel]="row.priority ?? 0" [ngModelOptions]="{ standalone: true }" (ngModelChange)="setBulkPriority(row, $event)" [attr.aria-label]="'Priority for item ' + row.itemId">
+                        @for (p of priorities(); track p.Id) {
+                          <option [ngValue]="p.Id">{{ p.PriorityName }}</option>
+                        }
+                      </select>
                     }
                   </td>
                   <td class="text-center">
                     <button type="button" class="requisition-count border-0" [disabled]="!(row.count ?? 0)" [ngbPopover]="countedRequisitionsPopover" [popoverContext]="{ requisitions: row.countedRequisitions }" popoverTitle="Counted requisitions" triggers="click" [autoClose]="'outside'" container="body" placement="auto" aria-label="Show counted requisitions">{{ row.count ?? '–' }}</button>
                   </td>
                   <td>{{ (row.totalRequestedQuantity | number:'1.0-4') ?? '–' }}</td>
-                  <td>{{ (row.totalRemainingQuantity | number:'1.0-4') ?? '–' }}</td>
+                  <td [class.remaining-quantity-negative]="(row.totalRemainingQuantity ?? 0) < 0">{{ (row.totalRemainingQuantity | number:'1.0-4') ?? '–' }}</td>
                   <td>
                     @if (addedLine) {
                       <div class="g-scrollable-text sm" [title]="addedLine.get('Remarks')?.value || ''">{{ addedLine.get('Remarks')?.value || '-' }}</div>

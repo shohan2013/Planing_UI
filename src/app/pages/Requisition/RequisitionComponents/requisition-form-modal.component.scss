@@ -125,6 +125,9 @@ fieldset legend {
 }
 
 
+.remaining-quantity-negative {
+  color: #b91c1c;
+}
 
 
 
@@ -229,7 +232,7 @@ td.priority-highlight > .form-control {
   .modal-body {
     padding-right: var(--bs-modal-padding);
   }
-  
+
   .modal-body:not(.bulk-body) {
     zoom: 100%;
   }

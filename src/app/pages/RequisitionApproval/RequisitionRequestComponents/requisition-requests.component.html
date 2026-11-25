@@ -104,7 +104,7 @@
               <td>{{ line.Quantity }}</td>
               <td>
                 @if (line.RemainingQuantity != null) {
-                  <span class="remaining-quantity-badge" [class.remaining-quantity-green]="line.RemainingQuantity <= 0" [class.remaining-quantity-yellow]="line.RemainingQuantity > 0">
+                  <span class="remaining-quantity-badge" [class.remaining-quantity-green]="line.RemainingQuantity === 0" [class.remaining-quantity-red]="line.RemainingQuantity < 0" [class.remaining-quantity-yellow]="line.RemainingQuantity > 0">
                     {{ line.RemainingQuantity < 0 ? -line.RemainingQuantity : line.RemainingQuantity }}
                   </span>
                 } @else {

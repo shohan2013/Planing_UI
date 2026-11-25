@@ -1,5 +1,5 @@
 :host {
-  --notification-neon: #72edff;
+  --notification-green: #29ad81;
   --notification-yellow: #ffe234;
   --notification-row-height: 92px;
 }
@@ -25,7 +25,7 @@
   }
 
   &:focus-visible {
-    outline: 2px solid var(--notification-neon);
+    outline: 2px solid var(--notification-green);
     outline-offset: 4px;
     border-radius: 6px;
   }
@@ -39,7 +39,7 @@
   height: 16px;
   display: grid;
   place-items: center;
-  padding: 0 4px;
+  padding: 0 2px;
   border: 1px solid #171a20;
   border-radius: 10px;
   background: var(--notification-yellow);
@@ -51,35 +51,50 @@
   width: min(390px, calc(100vw - 24px));
   padding: 0;
   overflow: visible;
-  border: 1px solid #30343a;
-  border-radius: 10px;
-  background: #08090b;
-  color: #fff;
-  box-shadow: 0 14px 36px rgb(0 0 0 / 28%);
+  border: 1px solid rgb(255 255 255 / 90%);
+  border-radius: 14px;
+  background: #eeefec;
+  color: #252b28;
+  box-shadow:
+    0 16px 40px rgb(34 49 41 / 16%),
+    inset 0 1px 0 rgb(255 255 255 / 85%);
+  font-family: inherit;
+}
+
+@supports ((backdrop-filter: blur(18px)) or (-webkit-backdrop-filter: blur(18px))) {
+  .requisition-notification-menu {
+    background: rgb(238 239 236 / 88%);
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+  }
 }
 
 .notification-heading {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 13px 16px;
-  border-bottom: 1px solid #272a30;
-  font: 700 11px/1.3 Arial, sans-serif;
-  letter-spacing: 1.8px;
-  color: #e5e7eb;
+  flex-direction: column;
+  gap: 5px;
+  padding: 17px 17px 13px;
+  border-bottom: 1px solid rgb(102 114 104 / 12%);
+}
+
+.notification-title {
+  color: #242b27;
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -.3px;
 }
 
 .heading-total {
-  color: #9ba1aa;
-  font-size: 10px;
+  color: #626b65;
+  font-size: 11px;
   font-weight: 400;
-  letter-spacing: .2px;
+  line-height: 1.4;
 }
 
 .notification-body {
   position: relative;
-  padding: 5px 13px 5px 7px;
+  padding: 7px 15px 7px 9px;
 }
 
 .notification-viewport {
@@ -88,50 +103,50 @@
 }
 
 .request-row {
+  box-sizing: border-box;
   height: var(--notification-row-height);
   padding: 4px 3px;
 }
 
 .request-tile {
   position: relative;
+  box-sizing: border-box;
   display: grid;
-  grid-template-columns: 5px minmax(0, 1fr) 41px;
+  grid-template-columns: 4px minmax(0, 1fr) 36px;
   align-items: center;
-  gap: 11px;
+  gap: 10px;
   width: 100%;
   height: 100%;
-  padding: 9px 12px 9px 8px;
-  border: 1px solid #24272d;
-  border-radius: 5px;
-  background: #101215;
-  color: #fff;
+  padding: 10px 11px;
+  border: 1px solid rgb(255 255 255 / 95%);
+  border-radius: 9px;
+  background: linear-gradient(135deg, #fafaf7, #f0f0eb);
+  color: #252b28;
+  box-shadow:
+    0 2px 5px rgb(46 54 47 / 4%),
+    inset 0 1px 0 rgb(255 255 255 / 85%);
+  font-family: inherit;
   text-align: left;
   cursor: pointer;
   transition:
-    transform 140ms ease,
+    background 140ms ease,
     border-color 140ms ease,
     box-shadow 140ms ease;
 
   &:hover,
   &:focus-visible {
-    z-index: 2;
-    transform: translateY(-2px);
     outline: none;
-    border-color: rgb(114 237 255 / 60%);
-    box-shadow:
-      0 6px 9px -6px var(--notification-neon),
-      inset 0 -5px 10px -9px var(--notification-neon);
+    border-color: var(--notification-green);
+    background: linear-gradient(135deg, #f4faf5, #e8f2eb);
+    box-shadow: 0 3px 9px rgb(33 115 78 / 10%);
   }
 }
 
 .request-pointer {
-  width: 3px;
-  height: 32px;
-  border-radius: 2px;
+  width: 4px;
+  height: 29px;
+  border-radius: 3px;
   background: var(--notification-yellow);
-  box-shadow:
-    0 0 5px rgb(255 226 52 / 65%),
-    0 0 11px rgb(255 226 52 / 18%);
 }
 
 .request-content {
@@ -144,31 +159,25 @@
 
 .request-number {
   overflow: hidden;
-  color: var(--notification-neon);
-  font-family: "Bahnschrift", "Arial Narrow", sans-serif;
-  font-size: 16px;
+  color: #28312b;
+  font-size: 14px;
   font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: .65px;
+  line-height: 1.2;
+  letter-spacing: .1px;
   text-overflow: ellipsis;
   white-space: nowrap;
-  text-shadow:
-    0 0 2px rgb(255 255 255 / 70%),
-    0 0 7px rgb(114 237 255 / 45%);
 }
 
 .request-creator {
   display: block;
   min-width: 0;
   overflow: hidden;
-  font-family: "Bahnschrift", "Agency FB", "Arial Narrow", sans-serif;
-  font-size: 14px;
-  font-weight: 700;
+  color: #535e56;
+  font-size: 12px;
+  font-weight: 400;
   line-height: 1.2;
-  letter-spacing: .35px;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: #f4f5f7;
 }
 
 .request-meta {
@@ -184,8 +193,8 @@
   align-items: center;
   gap: 6px;
   min-width: 0;
-  color: #c0c5cd;
-  font-size: 11px;
+  color: #727b74;
+  font-size: 10px;
   line-height: 1.2;
 
   > span:not(.organization-diamond) {
@@ -197,35 +206,33 @@
 
 .organization-diamond {
   flex: 0 0 auto;
-  color: var(--notification-yellow);
-  font-size: 6px;
+  color: #99a29a;
+  font-size: 4px;
 }
 
 .request-time {
   flex: 0 0 auto;
-  color: #fff;
-  font: 400 10px/1.2 Arial, sans-serif;
+  color: #727b74;
+  font-size: 10px;
+  line-height: 1.2;
   white-space: nowrap;
 }
 
 .request-count {
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
+  width: 33px;
+  height: 33px;
   justify-self: center;
-  border: 1px solid var(--notification-yellow);
-  border-radius: 2px;
-  background: #0b0d10;
-  transform: rotate(45deg);
+  border: 1px solid rgb(41 173 129 / 8%);
+  border-radius: 9px;
+  background: #d4ebdb;
 
   > span {
-    transform: rotate(-45deg);
-    font-family: "Bahnschrift", "Arial Narrow", sans-serif;
-    font-size: 21px;
+    color: #158252;
+    font-size: 19px;
     font-weight: 700;
     line-height: 1;
-    color: #fff;
   }
 
   > .count-double {
@@ -233,33 +240,42 @@
   }
 
   > .count-many {
-    font-size: 11px;
+    font-size: 12px;
   }
 }
 
 .notification-scrollbar {
   position: absolute;
-  inset: 10px 2px 10px auto;
+  inset: 12px 2px 12px auto;
   width: 9px;
-  height: calc(100% - 20px);
+  height: calc(100% - 24px);
   margin: 0;
   writing-mode: vertical-lr;
   direction: rtl;
-  accent-color: var(--notification-yellow);
+  accent-color: #8ba996;
   cursor: pointer;
+}
+
+.notification-footer {
+  margin: 0 15px;
+  padding: 11px 1px 13px;
+  border-top: 1px solid rgb(102 114 104 / 14%);
+  color: #737b75;
+  font-size: 10px;
+  line-height: 1.4;
 }
 
 .notification-empty {
   padding: 30px 18px;
-  color: #a7adb6;
+  color: #69736c;
   text-align: center;
   font-size: 12px;
 }
 
 .notification-error {
-  padding: 9px 14px;
-  border-top: 1px solid #292c32;
-  color: #ffcf8a;
+  padding: 9px 15px;
+  border-top: 1px solid rgb(102 114 104 / 14%);
+  color: #925b12;
   font-size: 11px;
 }
 

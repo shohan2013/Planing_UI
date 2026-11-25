@@ -11,5 +11,7 @@ export interface IItem {
   TotalRemainingQuantity: number | null;
   RemainingQuantity: number | null;
 
+  SalesQuantity: number;
+
   CountedRequisitions: Record<string, string>;
 }

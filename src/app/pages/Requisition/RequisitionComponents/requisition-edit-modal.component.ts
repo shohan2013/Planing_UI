@@ -19,7 +19,7 @@ import { IApiResponse } from 'src/app/core/model/Response/ApiResponse';
 import { PermissionAction } from 'src/app/core/services/Authorization/authorization.service';
 import { CommonService } from 'src/app/core/services/Common/CommonService';
 import { RequisitionService } from 'src/app/core/services/Requisition/requisition.service';
-import { PriorityInputComponent } from 'src/app/shared/priority-input/priority-input.component';
+// import { PriorityInputComponent } from 'src/app/shared/priority-input/priority-input.component';
 import { PaginationComponent } from 'src/app/shared/pagination/pagination.component';
 
 
@@ -62,7 +62,7 @@ type RequestConfirmation = {
 @Component({
   selector: 'app-requisition-edit-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgbTypeaheadModule, NgbPopoverModule, MenuPermissionDirective, PaginationComponent, PriorityInputComponent],
+  imports: [CommonModule, FormsModule, NgbTypeaheadModule, NgbPopoverModule, MenuPermissionDirective, PaginationComponent],
   templateUrl: './requisition-edit-modal.component.html',
   styleUrl: './requisition-edit-modal.component.scss',
 })
@@ -564,7 +564,6 @@ export class RequisitionEditModalComponent implements OnInit {
     this.loadingItem.set(true);
     this.itemSubscription = forkJoin({
       stock: this.commonService.GetLatestStockQty(this.toDate, UnitId, BusinessId, null, item.Id),
-      sales: this.commonService.GetSalesQty(this.fromDate, this.toDate, UnitId, item.Id, null, null),
       metrics: searchResult
         ? of([searchResult])
         : this.requisitionService.GetItemList(UnitId, String(item.Id), BusinessId, this.fromDate, this.toDate, this.productTypeId, ReqID),
@@ -572,10 +571,10 @@ export class RequisitionEditModalComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef),
       finalize(() => this.loadingItem.set(false)),
     ).subscribe({
-      next: ({ stock, sales, metrics }) => {
+      next: ({ stock, metrics }) => {
         const result = metrics.find(row => Number(row.Id) === Number(item.Id));
         this.stock = Number(stock);
-        this.sales = Number(sales);
+        this.sales = result?.SalesQuantity ?? 0;
         this.count = result?.Count ?? null;
         this.countedRequisitions = result?.CountedRequisitions ?? {};
         this.totalRequestedQuantity = result?.TotalRequestedQuantity ?? null;
@@ -650,12 +649,8 @@ export class RequisitionEditModalComponent implements OnInit {
   }
 
   private cleanupBulk(): void {
-    this.bulkNeedsReload ||= this.loadingBulk();
     this.bulkRef = undefined;
-    this.bulkOptionsSubscription?.unsubscribe();
     this.bulkSearchPending = false;
-    this.bulkSubscription?.unsubscribe();
-    this.loadingBulk.set(false);
   }
 
   onBulkTypeChange(productTypeId: number, productTypeModel: NgModel): void {

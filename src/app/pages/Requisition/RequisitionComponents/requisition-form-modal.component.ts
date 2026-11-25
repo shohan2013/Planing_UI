@@ -20,7 +20,7 @@ import { PermissionAction } from 'src/app/core/services/Authorization/authorizat
 import { CommonService } from 'src/app/core/services/Common/CommonService';
 import { RequisitionService } from 'src/app/core/services/Requisition/requisition.service';
 import { PaginationComponent } from 'src/app/shared/pagination/pagination.component';
-import { PriorityInputComponent } from 'src/app/shared/priority-input/priority-input.component';
+// import { PriorityInputComponent } from 'src/app/shared/priority-input/priority-input.component';
 
 type FormModalState = 'initializing' | 'ready' | 'submitting' | 'failed';
 type BulkRow = {
@@ -43,7 +43,7 @@ type BulkRow = {
 @Component({
   selector: 'app-requisition-form-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, NgbTypeaheadModule, NgbPopoverModule, MenuPermissionDirective, PaginationComponent, PriorityInputComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, NgbTypeaheadModule, NgbPopoverModule, MenuPermissionDirective, PaginationComponent],
   templateUrl: './requisition-form-modal.component.html',
   styleUrl: './requisition-form-modal.component.scss',
 })
@@ -418,10 +418,11 @@ export class RequisitionFormModalComponent implements OnInit {
       SizeID: item.SizeId ?? null,
       Size: item.Size ?? null,
       StockQuantity: 0,
-      SalesQuantity: 0,
+      SalesQuantity: item.SalesQuantity,
     }, { emitEvent: false });
     this.clearItemCount();
     this.lineFormGroup.patchValue({
+      
       Count: item.Count,
       CountedRequisitions: item.CountedRequisitions ?? {},
       TotalRequestedQuantity: item.TotalRequestedQuantity,
@@ -563,16 +564,11 @@ export class RequisitionFormModalComponent implements OnInit {
 
   private cleanupBulkModal(): void {
     this.bulkSearchPending = false;
-    this.bulkNeedsReload ||= this.bulkItemsLoading();
     ++this.filterRequestId;
     this.bulkSizeSubscription?.unsubscribe();
     this.bulkSizeSubscription = undefined;
     this.bulkSubCategoriesLoading.set(false);
     this.bulkFiltersLoading.set(false);
-    ++this.bulkRequestId;
-    this.bulkItemsSubscription?.unsubscribe();
-    this.bulkItemsSubscription = undefined;
-    this.bulkItemsLoading.set(false);
     this.bulkModalRef = undefined;
   }
 
@@ -942,6 +938,7 @@ export class RequisitionFormModalComponent implements OnInit {
       next: items => {
         const item = items.find(row => Number(row.Id) === itemId);
         this.lineFormGroup.patchValue({
+          SalesQuantity: item?.SalesQuantity ?? 0,
           Count: item?.Count ?? null,
           CountedRequisitions: item?.CountedRequisitions ?? {},
           TotalRequestedQuantity: item?.TotalRequestedQuantity ?? null,
@@ -961,30 +958,20 @@ export class RequisitionFormModalComponent implements OnInit {
 
   private loadItemQuantities(itemId: number): void {
     this.cancelItemQuantities();
-    const startDate = this.formGroup.controls.StartDate.value;
     const endDate = this.formGroup.controls.EndDate.value;
     const unitId = this.selectedUnitId;
     const businessId = Number(this.formGroup.controls.BusinessId.value);
     this.itemQuantitiesLoading.set(true);
-    this.itemQuantitiesSubscription = forkJoin({
-      stock: this.commonService.GetLatestStockQty(endDate, unitId, businessId, null, itemId).pipe(
-        catchError(() => {
-          this.toastr.error('Unable to load Stock Quantity.');
-          return of(0);
-        }),
-      ),
-      sales: this.commonService.GetSalesQty(startDate, endDate, unitId, itemId, null, null).pipe(
-        catchError(() => {
-          this.toastr.error('Unable to load Sales Quantity.');
-          return of(0);
-        }),
-      ),
-    }).pipe(
+    this.itemQuantitiesSubscription = this.commonService.GetLatestStockQty(endDate, unitId, businessId, null, itemId).pipe(
+      catchError(() => {
+        this.toastr.error('Unable to load Stock Quantity.');
+        return of(0);
+      }),
       takeUntilDestroyed(this.destroyRef),
       finalize(() => this.itemQuantitiesLoading.set(false)),
-    ).subscribe(({ stock, sales }) => {
+    ).subscribe(stock => {
       this.lineFormGroup.patchValue({
-        StockQuantity: Number(stock) || 0, SalesQuantity: Number(sales) || 0,
+        StockQuantity: Number(stock) || 0,
       }, { emitEvent: false });
     });
   }
