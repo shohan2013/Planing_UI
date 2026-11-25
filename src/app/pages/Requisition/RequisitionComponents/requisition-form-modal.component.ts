@@ -233,11 +233,7 @@ export class RequisitionFormModalComponent implements OnInit {
               !this.itemQuantitiesLoading() && !this.itemCountLoading();
   }
   get isACRL(): boolean { return this.selectedUnitId === 6; }
-  get canViewBulk(): boolean {
-    return this.isACRL && this.canShowAddProduct && this.hasSelectedBulkProductType &&
-      this.bulkFiltersReady() && !this.bulkFiltersLoading() &&
-      !this.bulkSubCategoriesLoading();
-  }
+
   get bulkSelectedCount(): number {
     return Array.from(this.bulkDrafts.values()).filter(row =>
       row.quantity !== null && Number.isFinite(row.quantity) && row.quantity > 0).length;
@@ -567,9 +563,16 @@ export class RequisitionFormModalComponent implements OnInit {
         this.toastr.error(this.getErrorMessage(error, 'Unable to load ACRL Size or Grade.'));
       },
     });
+
+    if (!this.bulkViewed()) this.onBulkFilterChange();
   }
 
   private cleanupBulkModal(): void {
+
+    if (this.bulkSearchPending) {
+      this.bulkNeedsReload = true;
+      this.bulkItemsLoading.set(false);
+    }
     this.bulkSearchPending = false;
     ++this.filterRequestId;
     this.bulkSizeSubscription?.unsubscribe();
@@ -586,47 +589,50 @@ export class RequisitionFormModalComponent implements OnInit {
   }
 
   onBulkTypeChange(productTypeId: number, productTypeModel: NgModel): void {
-    this.bulkFilters.controls.ProductTypeId.setValue(productTypeId);
-  }
+    const control = this.bulkFilters.controls.ProductTypeId;
+    const nextType = Number(productTypeId);
+    if (nextType === control.value) return;
 
-  private onBulkFilterChange(): void {}
+    if (this.bulkSelectedCount > 0 &&
+        !window.confirm('Your saved draft will be lost upon changing Product Type. Continue?')) {
+      productTypeModel.control.setValue(control.value, { emitViewToModelChange: false });
+      return;
+    }
 
-  viewBulk(): void {
-    if (!this.bulkModalRef || !this.canViewBulk) return;
-    if (this.bulkDrafts.size > 0 &&
-      !window.confirm('Your saved draft will be lost upon loading new results. Continue?')) return;
-    this.bulkSearchPending = false;
-    this.appliedBulkFilters = this.bulkFilters.getRawValue();
+    control.setValue(nextType);
     this.bulkDrafts.clear();
     this.bulkRows.set([]);
     this.bulkTotalItems.set(0);
-    this.bulkCurrentPage.set(1);
+    this.onBulkFilterChange();
+  }
+
+  private onBulkFilterChange(): void {
+    if (!this.bulkModalRef || !this.canShowAddProduct || !this.hasSelectedBulkProductType) return;
+    this.appliedBulkFilters = this.bulkFilters.getRawValue();
     this.bulkResultContext = this.currentBulkContext();
+    this.bulkCurrentPage.set(1);
     this.bulkViewed.set(true);
-    this.loadBulkPage();
+    this.queueBulkPage();
   }
 
   retryBulkLoad(): void {
     this.queueBulkPage();
   }
 
-  private queueBulkPage(debounceSearch = false): void {
-    if (!this.bulkModalRef || !this.bulkViewed()) return;
+  private queueBulkPage(): void {
+    if (!this.bulkModalRef || !this.bulkViewed() || !this.hasSelectedBulkProductType) return;
     ++this.bulkRequestId;
-    this.bulkItemsSubscription?.unsubscribe();
-    this.bulkItemsSubscription = undefined;
-    this.bulkSearchPending = debounceSearch;
+    this.bulkSearchPending = true;
     this.bulkItemsLoading.set(true);
     this.bulkError.set('');
-    if (debounceSearch) this.bulkReload$.next();
-    else this.loadBulkPage();
+    this.bulkReload$.next();
   }
 
   private loadBulkPage(): void {
       if (!this.canShowAddProduct || !this.isValidProductType(this.appliedBulkFilters.ProductTypeId) ||
         this.bulkResultContext !== this.currentBulkContext()) {
       this.bulkItemsLoading.set(false);
-      this.bulkError.set('Header or filters changed. View the items again before continuing.');
+      this.bulkError.set('The requisition context changed. Reopen bulk items to continue.');
       return;
     }
     const requestId = ++this.bulkRequestId;
@@ -687,7 +693,7 @@ export class RequisitionFormModalComponent implements OnInit {
     if ((previous.length >= 2 ? previous : '') === (next.length >= 2 ? next : '')) return;
 
     this.bulkCurrentPage.set(1);
-    this.queueBulkPage(true);
+    this.queueBulkPage();
   }
 
   onBulkPageChange(page: number): void {
@@ -741,7 +747,7 @@ export class RequisitionFormModalComponent implements OnInit {
       return;
     }
     if (!this.bulkViewed() || this.bulkResultContext !== this.currentBulkContext()) {
-      this.toastr.warning('Header or filters changed. View the items again before adding.');
+      this.toastr.warning('The requisition context changed. Reopen bulk items before adding.');
       return;
     }
     const selected = Array.from(this.bulkDrafts.values()).filter(row =>

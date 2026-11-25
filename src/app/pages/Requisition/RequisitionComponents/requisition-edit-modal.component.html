@@ -390,7 +390,6 @@
       </div>
       <div class="col-12 col-md-6 col-lg-4 ms-auto">
         <div class="d-flex gap-2 align-items-center">
-          <button type="button" class="btn btn-success text-nowrap" [disabled]="!canViewBulk" (click)="viewBulk()"><img src="assets/icons/BulkGet.svg" width="22" height="22" alt="" class="me-1" /> View</button>
           <div class="input-group">
             <span class="input-group-text"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></span>
             <input type="search" class="form-control" aria-label="Search items" placeholder="Search items by ID or name" [value]="bulkSearch" [disabled]="!bulkViewed() || saving()" (input)="onBulkSearch($any($event.target).value)" />
