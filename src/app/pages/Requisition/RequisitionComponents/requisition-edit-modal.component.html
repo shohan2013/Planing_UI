@@ -531,8 +531,9 @@
   </div>
 
   @if (historyLine; as line) {
-    <p class="mb-2">
-      <strong>{{ line.ItemId }} · {{ line.ItemName }}</strong>
+    <p class="mb-2 text-center">
+      <strong>{{ line.ItemName }}</strong>
+      <!-- <strong>{{ line.ItemId }} · {{ line.ItemName }}</strong> -->
     </p>
     <div class="d-flex justify-content-center align-items-center flex-wrap gap-2 small mb-3">
       <span>Current Acknowledged Quantity <strong class="text-black">{{ line.Quantity }}</strong></span>
@@ -624,7 +625,7 @@
                 <tr>
                   <td colspan="11">
                     <strong>Assigned action takers</strong>
-                    <ul class="mb-0 mt-1">
+                    <ul class="list-unstyled mb-0 mt-1">
                       @for (assignment of historyActionTakers().get(request.RequestBatchId) ?? []; track assignment.ID) {
                         <li>{{ assignment.ActionTakerName ? assignment.ActionTakerName + ' (' + assignment.ActionTaker + ')' : assignment.ActionTaker }}</li>
                       }

@@ -150,8 +150,9 @@
 
   <div class="modal-body">
     @if (selectedLine(); as line) {
-      <p class="mb-2">
-        <strong>{{ line.ItemId }} · {{ line.ItemName }}</strong>
+      <p class="mb-2 text-center">
+        <strong>{{ line.ItemName }}</strong>
+        <!-- <strong>{{ line.ItemId }} · {{ line.ItemName }}</strong> -->
       </p>
 
       @let remaining = line.RemainingQuantity;
