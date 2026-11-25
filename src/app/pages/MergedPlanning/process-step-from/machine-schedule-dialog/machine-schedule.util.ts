@@ -70,7 +70,9 @@ export function formatDuration(ms: number): string {
 
 /** Sorted, non-overlapping union of the intervals. */
 export function mergeIntervals(intervals: IInterval[]): IInterval[] {
-  const sorted = intervals.filter((i) => i.end > i.start).sort((a, b) => a.start - b.start);
+  const sorted = intervals
+    .filter((i) => i.end > i.start)
+    .sort((a, b) => a.start - b.start);
   const merged: IInterval[] = [];
   for (const i of sorted) {
     const last = merged[merged.length - 1];
@@ -81,13 +83,18 @@ export function mergeIntervals(intervals: IInterval[]): IInterval[] {
 }
 
 /** Free gaps inside [from, to] around the (merged) busy intervals. */
-export function freeGaps(busy: IInterval[], from: number, to: number): IInterval[] {
+export function freeGaps(
+  busy: IInterval[],
+  from: number,
+  to: number,
+): IInterval[] {
   const gaps: IInterval[] = [];
   let cursor = ceilMinute(from);
   for (const b of busy) {
     if (b.end <= cursor) continue;
     if (b.start >= to) break;
-    if (b.start > cursor) gaps.push({ start: cursor, end: Math.min(b.start - SLOT_GAP_MS, to) });
+    if (b.start > cursor)
+      gaps.push({ start: cursor, end: Math.min(b.start - SLOT_GAP_MS, to) });
     cursor = Math.max(cursor, ceilMinute(b.end) + SLOT_GAP_MS);
   }
   if (cursor < to) gaps.push({ start: cursor, end: to });
@@ -98,7 +105,11 @@ export function freeGaps(busy: IInterval[], from: number, to: number): IInterval
  * Earliest slot of `durationMs` starting at/after `from` that touches no busy interval;
  * falls back to right after the last busy interval (the machine is open from then on).
  */
-export function earliestFit(busy: IInterval[], from: number, durationMs: number): IInterval {
+export function earliestFit(
+  busy: IInterval[],
+  from: number,
+  durationMs: number,
+): IInterval {
   let cursor = ceilMinute(from);
   for (const b of busy) {
     if (b.end <= cursor) continue;
@@ -122,10 +133,11 @@ export interface IScheduledJobView {
   multiDay: boolean;
 }
 
-
 export interface IScheduleSummary {
   now: number;
-  /** End of the last planned job (or `now` when nothing is planned). */
+  /** Start of the schedule window: the requested start date/time, or `now` when none is set. */
+  from: number;
+  /** End of the last planned job (or `from` when nothing is planned). */
   lastEnd: number;
   /** First minute a slot can start after the last planned job (one minute after it). */
   openFrom: number;
@@ -133,9 +145,9 @@ export interface IScheduleSummary {
   busy: IInterval[];
   bookedMs: number;
   freeMs: number;
-  /** 0..100, booked share of now -> last planned job. */
+  /** 0..100, booked share of from -> last planned job. */
   loadPct: number;
-  /** Free gaps between now and the last planned job. */
+  /** Free gaps between from and the last planned job. */
   freeSlots: IInterval[];
   slot: IInterval | null;
   /** Jobs the user's slot overlaps. */
@@ -149,15 +161,22 @@ export function buildSummary(
   now: number,
   slotStart: string | null,
   slotEnd: string | null,
+  /** Window start (requested start date/time); defaults to `now`. */
+  from: number = now,
 ): IScheduleSummary {
   const s = parseLocal(slotStart);
   const e = parseLocal(slotEnd);
   const slot = s !== null && e !== null && e > s ? { start: s, end: e } : null;
 
   const jobs: IScheduledJobView[] = rawJobs
-    .map((job) => ({ job, start: parseLocal(job.StartDate), end: parseLocal(job.EndDate) }))
-    .filter((j): j is { job: IMachineJob; start: number; end: number } =>
-      j.start !== null && j.end !== null && j.end > j.start && j.end > now,
+    .map((job) => ({
+      job,
+      start: parseLocal(job.StartDate),
+      end: parseLocal(job.EndDate),
+    }))
+    .filter(
+      (j): j is { job: IMachineJob; start: number; end: number } =>
+        j.start !== null && j.end !== null && j.end > j.start && j.end > from,
     )
     .sort((a, b) => a.start - b.start)
     .map(({ job, start, end }) => ({
@@ -170,31 +189,46 @@ export function buildSummary(
       multiDay: startOfDay(start) !== startOfDay(end - 1),
     }));
 
-  const busy = mergeIntervals(jobs.map((j) => ({ start: j.start, end: j.end })));
-  const lastEnd = busy.length ? Math.max(now, busy[busy.length - 1].end) : now;
-  const windowMs = lastEnd - now;
-  const bookedMs = busy.reduce((sum, b) => sum + overlapMs(b, { start: now, end: lastEnd }), 0);
+  const busy = mergeIntervals(
+    jobs.map((j) => ({ start: j.start, end: j.end })),
+  );
+  const lastEnd = busy.length ? Math.max(from, busy[busy.length - 1].end) : from;
+  const windowMs = lastEnd - from;
+  const bookedMs = busy.reduce(
+    (sum, b) => sum + overlapMs(b, { start: from, end: lastEnd }),
+    0,
+  );
   const conflicts = jobs.filter((j) => j.conflictMs > 0);
 
   return {
     now,
+    from,
     lastEnd,
-    openFrom: busy.length ? ceilMinute(lastEnd) + SLOT_GAP_MS : ceilMinute(now),
+    openFrom: busy.length ? ceilMinute(lastEnd) + SLOT_GAP_MS : ceilMinute(from),
     jobs,
     busy,
     bookedMs,
     freeMs: Math.max(0, windowMs - bookedMs),
     loadPct: windowMs > 0 ? Math.round((bookedMs / windowMs) * 100) : 0,
-    freeSlots: freeGaps(busy, now, lastEnd),
+    freeSlots: freeGaps(busy, from, lastEnd),
     slot,
     conflicts,
-    suggestion: slot && conflicts.length ? earliestFit(busy, now, slot.end - slot.start) : null,
+    suggestion:
+      slot && conflicts.length
+        ? earliestFit(busy, from, slot.end - slot.start)
+        : null,
   };
 }
 
 /* -------------------------------- timeline -------------------------------- */
 
-export type SegmentKind = 'past' | 'open' | 'job' | 'conflict' | 'suggested' | 'slot';
+export type SegmentKind =
+  | 'past'
+  | 'open'
+  | 'job'
+  | 'conflict'
+  | 'suggested'
+  | 'slot';
 
 export interface ITimelineSegment {
   kind: SegmentKind;
@@ -216,7 +250,11 @@ export interface ITimelineRow {
 }
 
 /** Splits an interval into the part that falls inside one day, as % of that day. */
-function clipToDay(i: IInterval, dayStart: number, dayEnd: number): { left: number; width: number } | null {
+function clipToDay(
+  i: IInterval,
+  dayStart: number,
+  dayEnd: number,
+): { left: number; width: number } | null {
   const s = Math.max(i.start, dayStart);
   const e = Math.min(i.end, dayEnd);
   if (e <= s) return null;
@@ -224,11 +262,18 @@ function clipToDay(i: IInterval, dayStart: number, dayEnd: number): { left: numb
   return { left: ((s - dayStart) / span) * 100, width: ((e - s) / span) * 100 };
 }
 
-export function buildTimeline(summary: IScheduleSummary): { rows: ITimelineRow[]; truncated: boolean } {
-  const { now, lastEnd, jobs, slot, suggestion } = summary;
-  const first = startOfDay(now);
+/** `showMachine`: prefix each job with its machine (combined view of several machines). */
+export function buildTimeline(
+  summary: IScheduleSummary,
+  showMachine = false,
+): { rows: ITimelineRow[]; truncated: boolean } {
+  const { now, from, lastEnd, jobs, slot, suggestion } = summary;
+  // Full days from the requested start's day through today (and on to the
+  // last planned job / slot).
+  const first = startOfDay(from);
+  const today = startOfDay(now);
   const lastPoint = Math.max(lastEnd, slot?.end ?? 0, suggestion?.end ?? 0);
-  const lastDay = startOfDay(Math.max(now, lastPoint - 1));
+  const lastDay = startOfDay(Math.max(now, from, lastPoint - 1));
   const lastPlanDay = jobs.length ? startOfDay(lastEnd - 1) : null;
 
   const rows: ITimelineRow[] = [];
@@ -239,27 +284,60 @@ export function buildTimeline(summary: IScheduleSummary): { rows: ITimelineRow[]
       break;
     }
     const dayEnd = addDays(day, 1);
-    const isToday = day === first;
+    const isToday = day === today;
     const segments: ITimelineSegment[] = [];
-    const push = (kind: SegmentKind, i: IInterval, label?: string, title?: string) => {
+    const push = (
+      kind: SegmentKind,
+      i: IInterval,
+      label?: string,
+      title?: string,
+    ) => {
       const pos = clipToDay(i, day, dayEnd);
       if (pos) segments.push({ kind, ...pos, label, title });
     };
 
-    if (isToday) push('past', { start: day, end: now });
-    if (lastPlanDay !== null && day === lastPlanDay) push('open', { start: lastEnd, end: dayEnd }, undefined, 'Open after last plan');
+    // Shade time already gone (whole earlier days, and today up to now).
+    if (day <= today) push('past', { start: day, end: now });
+    if (lastPlanDay !== null && day === lastPlanDay)
+      push(
+        'open',
+        { start: lastEnd, end: dayEnd },
+        undefined,
+        'Open after last plan',
+      );
 
     let jobsToday = 0;
     for (const j of jobs) {
       if (j.end <= day || j.start >= dayEnd) continue;
       jobsToday++;
       const qty = `${(j.job.PlannedQty ?? 0).toLocaleString()}${j.job.UOM ? ' ' + j.job.UOM : ''}`;
-      push('job', j, `${j.job.JobNo} · ${j.job.ItemName} (${qty})`, `${j.job.JobNo} · ${j.job.ItemName} · Qty ${qty}`);
+      const machine =
+        showMachine && j.job.MachineName ? `${j.job.MachineName} · ` : '';
+      push(
+        'job',
+        j,
+        `${machine}${j.job.JobNo} · ${j.job.ProductName} (${qty})`,
+        `${machine}${j.job.JobNo} · ${j.job.ProductName} · Qty ${qty}`,
+      );
       if (slot && j.conflictMs > 0) {
-        push('conflict', { start: Math.max(slot.start, j.start), end: Math.min(slot.end, j.end) }, undefined, 'Conflict with your slot');
+        push(
+          'conflict',
+          {
+            start: Math.max(slot.start, j.start),
+            end: Math.min(slot.end, j.end),
+          },
+          undefined,
+          'Conflict with your slot',
+        );
       }
     }
-    if (suggestion) push('suggested', suggestion, 'Suggested', 'Earliest free slot that fits');
+    if (suggestion)
+      push(
+        'suggested',
+        suggestion,
+        'Suggested',
+        'Earliest free slot that fits',
+      );
     if (slot) push('slot', slot, undefined, 'Your slot');
 
     rows.push({

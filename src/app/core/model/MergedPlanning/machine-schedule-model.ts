@@ -1,18 +1,19 @@
+/** A machine as the planning dialogs show it. */
+export interface IMachineRef {
+  Id: number;
+  Name: string;
+}
+
 /**
- * Query for GET MergedPlanning/GetMachineJobs: jobs on `MachineId` that overlap
+ * Query for GET MergedPlanning/GetMachineJobs: jobs on any of `MachineIds` that overlap
  * [StartDate, EndDate]. Dates are local date-times as the datetime-local input gives
  * them (yyyy-MM-ddTHH:mm).
  */
 export interface IMachineJobsRequest {
-  /** The planning step (IBusinessFlowForPlanning.Id), same id Common/GetMachine takes. */
   BusinessFlowConfigureId: number;
-  MachineId: number;
+  MachineIds: number[];
   StartDate: string;
   EndDate: string;
-  /**
-   * The plan's own job (saved ProductionPlanConfigure Id) when editing a saved plan,
-   * so it isn't reported as clashing with itself. Omitted for new plans.
-   */
   ExcludeJobId?: number | null;
 }
 
@@ -24,18 +25,18 @@ export interface IMachineJobsRequest {
 export interface IMachineJob {
   JobId: number;
   JobNo: string;
-  ItemName: string;
+  MachineId: number;
+  MachineName?: string | null;
+  ProductName: string;
   UOM: string;
   PlannedQty: number;
-  /** ISO date-time (yyyy-MM-ddTHH:mm). */
   StartDate: string;
-  /** ISO date-time (yyyy-MM-ddTHH:mm). */
   EndDate: string;
 }
 
 /** What the busy-machine dialog shows. */
 export interface IMachineBusyInfo {
-  machineName: string;
+  machines: IMachineRef[];
   startDate: string;
   endDate: string;
   jobs: IMachineJob[];
@@ -49,27 +50,18 @@ export type MachineBusyAction =
 
 /* ------------------------------ schedule view ------------------------------ */
 
-/**
- * Query for GET MergedPlanning/GetMachineSchedule: every job on `MachineId` (for the
- * planning step) that ends after `FromDate` (now), up to its last planned job.
- */
 export interface IMachineScheduleRequest {
   BusinessFlowConfigureId: number;
-  MachineId: number;
-  /** Local date-time, yyyy-MM-ddTHH:mm. */
+  MachineIds: number[];
   FromDate: string;
-  /**
-   * The plan's own job (saved ProductionPlanConfigure Id) when editing a saved plan,
-   * so it isn't reported as clashing with itself. Omitted for new plans.
-   */
   ExcludeJobId?: number | null;
 }
 
 /** What the schedule dialog needs from the step card that opens it. */
 export interface IMachineScheduleContext {
   businessFlowConfigureId: number;
-  machineId: number;
-  machineName: string;
+  machines: IMachineRef[];
+  focusMachineId?: number | null;
   stepName: string | null;
   /** The card's current slot, if complete; checked against the schedule. */
   slotStart: string | null;
@@ -78,7 +70,7 @@ export interface IMachineScheduleContext {
   excludeJobId: number | null;
   /** Saved jobs whose current version is on the Planning Desk; left out of the API's jobs. */
   hiddenJobIds?: number[];
-  /** Unsaved Planning Desk jobs on this machine, shown alongside the API's jobs. */
+  /** Unsaved Planning Desk jobs on these machines, shown alongside the API's jobs. */
   deskJobs?: IMachineJob[];
 }
 

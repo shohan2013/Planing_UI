@@ -18,41 +18,38 @@ export class MachineScheduleService {
   constructor(private readonly http: HttpClient) {}
 
   /**
-   * GET MergedPlanning/GetMachineJobs?businessFlowConfigureId=&machineId=&startDate=&endDate=
-   * Jobs on the machine (for that planning step) that overlap [startDate, endDate].
-   * An empty list means the machine is free in that slot.
+   * POST MergedPlanning/GetMachineJobs
+   * Body: { BusinessFlowConfigureId, MachineIds: number[], StartDate, EndDate, ExcludeJobId }
+   * Jobs on any of the machines (for that planning step) that overlap [StartDate, EndDate].
+   * An empty list means every machine is free in that slot.
    */
   GetMachineJobs(request: IMachineJobsRequest): Observable<IMachineJob[]> {
-    let params = new HttpParams()
-      .set('businessFlowConfigureId', request.BusinessFlowConfigureId)
-      .set('machineId', request.MachineId)
-      .set('startDate', request.StartDate)
-      .set('endDate', request.EndDate);
-    if (request.ExcludeJobId) params = params.set('excludeJobId', request.ExcludeJobId);
+    const body: IMachineJobsRequest = {
+      BusinessFlowConfigureId: request.BusinessFlowConfigureId,
+      MachineIds: [...request.MachineIds],
+      StartDate: request.StartDate,
+      EndDate: request.EndDate,
+      ExcludeJobId: request.ExcludeJobId || null,
+    };
     return this.http
-      .get<IMachineJob[] | null>(
-        `${environment.API_URL}${GlobalConstant.API_END_POINTS.MachineJobs}`,
-        { params },
-      )
+      .post<
+        IMachineJob[] | null
+      >(`${environment.API_URL}${GlobalConstant.API_END_POINTS.MachineJobs}`, body)
       .pipe(map((jobs) => jobs ?? []));
   }
 
   /**
-   * GET MergedPlanning/GetMachineSchedule?businessFlowConfigureId=&machineId=&fromDate=
-   * Every job on the machine (for that planning step) that ends after `fromDate`
-   * (now), up to its last planned job. Used by the "View schedule" dialog.
+   * GET MergedPlanning/GetMachineSchedule?businessFlowConfigureId=&machineIds=1&machineIds=2&fromDate=
+   * Every job on any of the machines (for that planning step) that ends after `fromDate`
+   * (now), up to each machine's last planned job. Used by the "View schedule" dialog.
    */
-  GetMachineSchedule(request: IMachineScheduleRequest): Observable<IMachineJob[]> {
-    let params = new HttpParams()
-      .set('businessFlowConfigureId', request.BusinessFlowConfigureId)
-      .set('machineId', request.MachineId)
-      .set('fromDate', request.FromDate);
-    if (request.ExcludeJobId) params = params.set('excludeJobId', request.ExcludeJobId);
+  GetMachineSchedule(
+    request: IMachineScheduleRequest,
+  ): Observable<IMachineJob[]> {
     return this.http
-      .get<IMachineJob[] | null>(
-        `${environment.API_URL}${GlobalConstant.API_END_POINTS.MachineSchedule}`,
-        { params },
-      )
+      .post<
+        IMachineJob[] | null
+      >(`${environment.API_URL}${GlobalConstant.API_END_POINTS.MachineSchedule}`, request)
       .pipe(map((jobs) => jobs ?? []));
   }
 }

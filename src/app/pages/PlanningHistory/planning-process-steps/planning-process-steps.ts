@@ -12,13 +12,18 @@ import {
   ViewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
+import {
+  CdkDragDrop,
+  DragDropModule,
+  moveItemInArray,
+} from '@angular/cdk/drag-drop';
 import { IBusinessFlowForPlanning } from 'src/app/core/model/Common/BusinessFlow/production-steps-model';
 import { IMachine } from 'src/app/core/model/Common/Machine/machine';
 import { IProcessStepInput } from 'src/app/core/model/MergedPlanning/planning-processes-model';
 import { IPlanningHistoryStep } from 'src/app/core/model/PlanningHistory/planning-history-model';
 import { ProcessStepStateService } from 'src/app/core/services/MergedPlanning/process-step-state-service';
 import { ProcessStepFrom } from '../../MergedPlanning/process-step-from/process-step-from';
+import { MachineAvailabilityState } from '../../MergedPlanning/process-step-from/machine-availability';
 
 /**
  * Renders the process steps already saved for one plan line as editable
@@ -47,6 +52,11 @@ export class PlanningProcessSteps implements OnChanges {
   @Output() GetSteps = new EventEmitter<void>();
   /** Emits a newly added step's Id so its machines can be loaded. */
   @Output() stepAdded = new EventEmitter<number>();
+  /** A step card's machine availability changed ('idle' once the card is removed). */
+  @Output() stepAvailabilityChange = new EventEmitter<{
+    stepId: number;
+    state: MachineAvailabilityState;
+  }>();
 
   @ViewChild('cardsContainer') cardsContainer?: ElementRef<HTMLDivElement>;
 
@@ -65,42 +75,51 @@ export class PlanningProcessSteps implements OnChanges {
           lineId: this.lineId,
           stepId: saved.StepId,
           stepName: saved.StepName,
-          machineId: saved.MachineId,
+          machineIds: [...(saved.MachineIds ?? [])],
           startDate: saved.StartDate,
           endDate: saved.EndDate,
           orderNo: saved.OrderNo ?? index + 1,
         });
       });
 
-      this.activeStepIds.set(this.savedSteps.map((s) => s.StepId));
+      this.activeStepIds.set(
+        this.savedSteps
+          .map((saved, index) => ({ id: saved.StepId, order: saved.OrderNo ?? index + 1 }))
+          .sort((a, b) => a.order - b.order)
+          .map((x) => x.id),
+      );
+      this.syncOrder();
     }
   }
 
+  /**
+   * Cards render in activeStepIds order. That list (not the state service) is
+   * the source of truth for position, because a card leaves the state service
+   * whenever it's not ready (busy machine, availability check running, date
+   * cleared). Ordering by state orderNo used to push such a card to the end.
+   */
   get activeSteps(): IBusinessFlowForPlanning[] {
-    const ids = new Set(this.activeStepIds());
-    const orderNoFor = new Map(
-      this.processStepStateService
-        .getStepsForLine(this.lineId)
-        .map((x) => [x.stepId, x.orderNo]),
-    );
-
-    return this.steps
-      .filter((s) => ids.has(s.Id))
-      .sort(
-        (a, b) =>
-          (orderNoFor.get(a.Id) ?? Number.MAX_SAFE_INTEGER) -
-          (orderNoFor.get(b.Id) ?? Number.MAX_SAFE_INTEGER),
-      );
+    const byId = new Map(this.steps.map((s) => [s.Id, s]));
+    return this.activeStepIds()
+      .map((id) => byId.get(id))
+      .filter((s): s is IBusinessFlowForPlanning => !!s);
   }
 
   onDrop(event: CdkDragDrop<IBusinessFlowForPlanning[]>): void {
     if (event.previousIndex === event.currentIndex) return;
 
-    this.processStepStateService.reorderWithinLine(
-      this.lineId,
-      event.previousIndex,
-      event.currentIndex,
-    );
+    // CDK indexes refer to the rendered cards (activeSteps), so move within
+    // that list, then renumber the stored steps to match.
+    const ids = this.activeSteps.map((s) => s.Id);
+    moveItemInArray(ids, event.previousIndex, event.currentIndex);
+    const notRendered = this.activeStepIds().filter((id) => !ids.includes(id));
+    this.activeStepIds.set([...ids, ...notRendered]);
+    this.syncOrder();
+  }
+
+  /** Renumbers stored steps (orderNo, sent on save) to follow the card order. */
+  private syncOrder(): void {
+    this.processStepStateService.setLineOrder(this.lineId, this.activeStepIds());
   }
 
   get availableStepsToAdd(): IBusinessFlowForPlanning[] {
@@ -156,6 +175,9 @@ export class PlanningProcessSteps implements OnChanges {
   removeStep(stepId: number): void {
     this.activeStepIds.update((ids) => ids.filter((id) => id !== stepId));
     this.processStepStateService.removeProcessStep(this.lineId, stepId);
+    this.syncOrder();
+    // A removed card no longer blocks saving.
+    this.stepAvailabilityChange.emit({ stepId, state: 'idle' });
   }
 
   onFormChange(value: IProcessStepInput | null, stepId: number): void {
@@ -167,5 +189,8 @@ export class PlanningProcessSteps implements OnChanges {
       // payload until it's valid again.
       this.processStepStateService.removeProcessStep(this.lineId, stepId);
     }
+    // Re-added steps are appended with the last orderNo; put every stored
+    // step back at its card's position.
+    this.syncOrder();
   }
 }

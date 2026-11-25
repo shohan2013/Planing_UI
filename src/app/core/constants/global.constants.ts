@@ -142,8 +142,11 @@ export const GlobalConstant = {
 
   /*==============================PLANNING====================================*/
     DeliveryOrders: 'SalesOrderLanding/GetDOData',
+    DeliveryOrderHeader: 'SalesOrderLanding/GetDOHeaderData',
     DeliveryOrderLine: 'SalesOrderLanding/GetDOLineData',
     MergeDOs: 'MergeDeliveryOrder/MergeDOs',
+    MergePolicies: 'MergeDeliveryOrder/GetMergePolicies',
+    MergePreview: 'MergeDeliveryOrder/PreviewMerge',
     MergedPlanning: 'MergedPlanning/GetAllData',
     MergedPlanningDetails: 'MergedPlanning/GetDataById',
     SavePlans: 'MergedPlanning/AddProductionPlan',

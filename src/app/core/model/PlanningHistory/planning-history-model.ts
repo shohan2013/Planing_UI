@@ -1,35 +1,33 @@
+// used for viewing
+
+export interface IPlanningHistoryDetails {
+  Header: IPlanningHistory;
+  Lines: IPlanningHistoryLine[];
+}
+
 export interface IPlanningHistory {
   Id: number;
   PPNO: string;
-  DOCode: string;
-  CreatedBy: string;
+  MergeCode: string;
   DocumentStatus: string;
+  CreatedBy: string;
   CreatedDate: Date;
   Unit: string;
   Business: string;
   UnitId?: number;
   BusinessId?: number;
   IsCombineDO?: boolean;
-}
-
-export interface IPlanningHistoryStep {
-  Id: number;
-  StepId: number;
-  StepName: string;
-  StartDate: string | null;
-  EndDate: string | null;
-  MachineId: number;
-  ProductionPlanLineId?: number;
-  OrderNo?: number;
+  MergePolicy: string;
+  WorkType: string;
 }
 
 export interface IPlanningHistoryLine {
   Id: number;
   ProductId: number;
   ProductName: string | null;
-  /** UOM id; same line shape as IMergedPlanningLine (shared item-planning fields). */
   UOMId: number;
   UOM: string | null;
+  Size: string | null;
   Quantity: number;
   PlannedQuantity: number;
   Rate: number;
@@ -41,20 +39,27 @@ export interface IPlanningHistoryLine {
   Steps?: IPlanningHistoryStep[];
 }
 
-export interface IPlanningHistoryDetails {
-  Header: IPlanningHistory;
-  Lines: IPlanningHistoryLine[];
-}
-
-export interface IPlanningHistoryUpdateConfigure {
+export interface IPlanningHistoryStep {
   Id: number;
-  BusinessConfigureId: number;
-  ProductId: number;
+  StepId: number;
+  StepName: string;
   StartDate: string | null;
   EndDate: string | null;
-  MachineId: number | null;
-  OrderNo: number;
-  IsActive: boolean;
+  MachineIds: number[];
+  ProductionPlanLineId?: number;
+  OrderNo?: number;
+}
+
+// used for update save changes
+
+export interface IPlanningHistoryUpdateRequest {
+  Header: {
+    DocUpdatedBy: number;
+    BusinessId: number;
+    UnitId: number;
+    Remarks?: string | null;
+  };
+  Lines: IPlanningHistoryUpdateLine[];
 }
 
 export interface IPlanningHistoryUpdateLine {
@@ -68,12 +73,14 @@ export interface IPlanningHistoryUpdateLine {
   ProductionPlanConfigures: IPlanningHistoryUpdateConfigure[] | null;
 }
 
-export interface IPlanningHistoryUpdateRequest {
-  Header: {
-    DocUpdatedBy: number;
-    BusinessId: number;
-    UnitId: number;
-    Remarks?: string | null;
-  };
-  Lines: IPlanningHistoryUpdateLine[];
+export interface IPlanningHistoryUpdateConfigure {
+  Id: number;
+  BusinessConfigureId: number;
+  ProductId: number;
+  StartDate: string | null;
+  EndDate: string | null;
+  /** Machines the step runs on in this slot (one or more). */
+  MachineIds: number[];
+  OrderNo: number;
+  IsActive: boolean;
 }

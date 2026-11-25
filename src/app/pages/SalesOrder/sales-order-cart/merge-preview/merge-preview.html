@@ -1,0 +1,266 @@
+@if (request) {
+
+<div class="mp-backdrop" (click)="close()"></div>
+
+<div
+  class="mp-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="mp-title"
+>
+  <!-- Header -->
+  <div class="mp-header">
+    <div class="mp-title">
+      <div class="mp-title-icon">
+        <i class="fa-solid fa-code-merge"></i>
+      </div>
+      <div>
+        <h5 id="mp-title">Merge Preview</h5>
+        <small>Review the result before merging. Nothing is saved yet.</small>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      class="mp-close-btn"
+      (click)="close()"
+      [disabled]="isMerging"
+      title="Close"
+      aria-label="Close"
+    >
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+
+  <!-- Body -->
+  <div class="mp-body">
+    <!-- Summary -->
+    <section class="mp-summary">
+      <div class="mp-summary-item mp-policy">
+        <span>Merge Policy</span>
+        <strong>{{ displayPolicyName }}</strong>
+      </div>
+      <div class="mp-summary-item">
+        <span>{{ orderLabel }}</span>
+        <strong>{{ orders.length }}</strong>
+      </div>
+      <div class="mp-summary-item">
+        <span>Unit / Business</span>
+        <strong>{{ request.Unit }} · {{ request.Business || '-' }}</strong>
+      </div>
+      <div class="mp-summary-item">
+        <span>Original Lines</span>
+        @if (isLoading()) {
+        <div class="mp-skel mp-skel-value"></div>
+        } @else {
+        <strong>{{ preview() ? totalOriginalLines() : '-' }}</strong>
+        }
+      </div>
+      <div class="mp-summary-item mp-summary-result">
+        <span>After Merge</span>
+        @if (isLoading()) {
+        <div class="mp-skel mp-skel-value"></div>
+        } @else {
+        <strong>{{ preview() ? totalProducts() + ' product(s)' : '-' }}</strong>
+        }
+      </div>
+    </section>
+
+    <!-- Source orders -->
+    <section class="mp-section">
+      <h6>Selected {{ orderLabel }}</h6>
+      <div class="mp-chips">
+        @for (order of orders; track order.SOID) {
+        <span class="mp-chip">
+          <i class="fa-solid fa-file-lines"></i>
+          {{ order.Code }}
+        </span>
+        }
+      </div>
+    </section>
+
+    <!-- Result -->
+    <section class="mp-section">
+      <div class="mp-section-head">
+        <h6>Merge Result</h6>
+        @if (preview() && totalProducts() > 0) {
+        <small>
+          {{ totalOriginalLines() }} original line(s) →
+          <strong>{{ totalProducts() }} merged product(s)</strong>
+        </small>
+        }
+      </div>
+
+      @if (isLoading()) {
+      <!-- Loading skeleton -->
+      <div class="mp-loading" aria-busy="true" aria-live="polite">
+        @for (row of skeletonRows; track row) {
+        <div class="mp-product-card mp-skel-card">
+          <div class="mp-product-head">
+            <div class="mp-skel mp-skel-index"></div>
+            <div class="mp-skel-text">
+              <div class="mp-skel mp-skel-title"></div>
+              <div class="mp-skel mp-skel-sub"></div>
+            </div>
+            <div class="mp-skel mp-skel-total"></div>
+            <div class="mp-skel mp-skel-prio"></div>
+          </div>
+          <div class="mp-skel-lines">
+            <div class="mp-skel mp-skel-line"></div>
+            <div class="mp-skel mp-skel-line"></div>
+          </div>
+        </div>
+        }
+        <div class="mp-loading-text">
+          <span class="spinner-border spinner-border-sm"></span>
+          Applying <strong>{{ displayPolicyName }}</strong> to your
+          {{ orderLabel.toLowerCase() }}...
+        </div>
+      </div>
+      } @else if (error()) {
+      <div class="mp-state mp-state-error">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>{{ error() }}</span>
+        <button type="button" class="mp-retry-btn" (click)="loadPreview()">
+          Retry
+        </button>
+      </div>
+      } @else if (preview()) {
+      @if (totalProducts() === 0) {
+      <div class="mp-state">
+        <i class="fa-solid fa-box-open"></i>
+        <span>This policy produces no products for the selected orders.</span>
+      </div>
+      } @else {
+      <div class="mp-products">
+        @for (product of products(); track $index; let i = $index) {
+        <div class="mp-product-card">
+          <div class="table-responsive">
+            <table class="mp-lines">
+              <colgroup>
+                <col class="mp-col-code" />
+                <col />
+                <col class="mp-col-size" />
+                <col class="mp-col-qty" />
+                <col class="mp-col-uom" />
+                <col class="mp-col-prio" />
+              </colgroup>
+
+              <!-- Merged product (aligned with the item columns below) -->
+              <tbody class="mp-merged">
+                <tr>
+                  <td colspan="3">
+                    <div class="mp-merged-product">
+                      <div class="mp-index">{{ i + 1 }}</div>
+                      <div class="mp-product-info">
+                        <div class="mp-product-name">
+                          {{ product.ProductName }}
+                        </div>
+                        <small>
+                          <span class="mp-product-id">ID: {{ product.ProductId }}</span>
+                          · Merged from {{ product.OriginalLines?.length ?? 0 }} line(s)
+                        </small>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="mp-col-qty">
+                    <span class="mp-cell-label">Total</span>
+                    <strong class="mp-total-qty">
+                      {{ product.TotalQuantity | number: '1.0-2' }}
+                    </strong>
+                  </td>
+                  <td class="mp-col-uom">
+                    <span class="mp-cell-label">UoM</span>
+                    <strong>{{ product.UoM || '-' }}</strong>
+                  </td>
+                  <td class="mp-col-prio">
+                    <span class="mp-cell-label">Priority</span>
+                    <span [class]="'mp-prio ' + priorityClass(product.PriorityName)">
+                      {{ product.PriorityName || 'Not set' }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+
+              <!-- Original lines -->
+              @if (product.OriginalLines?.length > 0) {
+              <tbody>
+                @for (line of product.OriginalLines; track line.LineId) {
+                <tr>
+                  <td>
+                    <span class="mp-code">{{ line.Code }}</span>
+                  </td>
+                  <td>{{ line.ProductName }}</td>
+                  <td class="mp-col-size">{{ line.Size || '-' }}</td>
+                  <td class="mp-col-qty">
+                    {{ line.Quantity | number: '1.0-2' }}
+                  </td>
+                  <td class="mp-col-uom">{{ line.UoM || '-' }}</td>
+                  <td class="mp-col-prio">
+                    @if (line.PriorityName) {
+                    <span [class]="'mp-prio mp-prio-sm ' + priorityClass(line.PriorityName)">
+                      {{ line.PriorityName }}
+                    </span>
+                    } @else {
+                    <span class="text-muted">-</span>
+                    }
+                  </td>
+                </tr>
+                }
+              </tbody>
+              }
+            </table>
+          </div>
+        </div>
+        }
+      </div>
+      } }
+    </section>
+
+    <!-- Remarks -->
+    <section class="mp-section">
+      <label class="mp-remarks-label" for="mp-remarks">
+        Remarks <small>(optional)</small>
+      </label>
+      <textarea
+        id="mp-remarks"
+        class="form-control mp-remarks"
+        rows="2"
+        maxlength="500"
+        placeholder="Add a note for this merge"
+        [value]="remarks()"
+        [disabled]="isMerging"
+        (input)="onRemarksInput($event)"
+      ></textarea>
+    </section>
+  </div>
+
+  <!-- Footer -->
+  <div class="mp-footer">
+    <button
+      type="button"
+      class="btn btn-light"
+      (click)="close()"
+      [disabled]="isMerging"
+    >
+      <i class="fa-solid fa-arrow-left me-1"></i>
+      Back to Cart
+    </button>
+
+    <button
+      type="button"
+      class="btn btn-success mp-confirm-btn"
+      [disabled]="!canConfirm"
+      (click)="onConfirm()"
+    >
+      @if (isMerging) {
+      <span class="spinner-border spinner-border-sm me-2"></span>
+      Merging...
+      } @else {
+      <i class="fa-solid fa-check me-1"></i>
+      Confirm Merge
+      }
+    </button>
+  </div>
+</div>
+}

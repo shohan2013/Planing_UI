@@ -22,36 +22,36 @@
     </div>
 
     <div class="card-body p-2 step-fields-grid">
-      <div>
+      <div class="field-start">
         <label class="form-label">Start Date &amp; Time</label>
 
         <input
           #startDateInput
           type="datetime-local"
           class="form-control form-control-sm"
-          [class.is-invalid]="(submitted || !!machineNumber) && !startDate"
+          [class.is-invalid]="(submitted || hasMachines) && !startDate"
           formControlName="startDate"
           name="startDate-{{ step.Name }}"
         />
 
-        @if ((submitted || !!machineNumber) && !startDate) {
+        @if ((submitted || hasMachines) && !startDate) {
         <div class="invalid-feedback">Required.</div>
         }
       </div>
 
-      <div>
+      <div class="field-end">
         <label class="form-label">End Date &amp; Time</label>
 
         <input
           type="datetime-local"
           class="form-control form-control-sm"
-          [class.is-invalid]="((submitted || !!machineNumber) && !endDate) || (submitted && isDateRangeInvalid)"
+          [class.is-invalid]="((submitted || hasMachines) && !endDate) || (submitted && isDateRangeInvalid)"
           formControlName="endDate"
           name="endDate-{{ step.Name }}"
           [min]="startDate || null"
         />
 
-        @if ((submitted || !!machineNumber) && !endDate) {
+        @if ((submitted || hasMachines) && !endDate) {
         <div class="invalid-feedback">Required.</div>
         } @else if (submitted && isDateRangeInvalid) {
         <div class="invalid-feedback">
@@ -60,14 +60,14 @@
         }
       </div>
 
-      <div>
+      <div class="field-machine">
         <div class="label-row">
           <label class="form-label">Machine No</label>
           <button
             type="button"
             class="btn btn-link p-0 schedule-link"
-            [disabled]="!machineNumber"
-            [title]="machineNumber ? 'View ' + selectedMachineName + ' schedule' : 'Select a machine first'"
+            [disabled]="!hasMachines"
+            [title]="hasMachines ? 'View schedule of ' + selectedMachineNames : 'Select a machine first'"
             (click)="openScheduleDialog()"
           >
             <i class="fa-regular fa-calendar-days"></i>
@@ -75,23 +75,24 @@
           </button>
         </div>
 
-        <select
+        <ng-select
           #machineSelect
-          class="form-select form-select-sm"
-          [class.is-invalid]="(submitted && !machineNumber) || isMachineBusy"
-          formControlName="machineId"
-          name="machineNumber-{{ step.Name }}"
-        >
-          <option [ngValue]="0">Select machine</option>
+          class="machine-multi-select"
+          [class.is-invalid]="(submitted && !hasMachines) || isMachineBusy"
+          [items]="machineOptions"
+          bindLabel="Name"
+          bindValue="Id"
+          formControlName="machineIds"
+          [multiple]="true"
+          [closeOnSelect]="false"
+          [searchable]="true"
+          [clearable]="true"
+          placeholder="Select machine(s)"
+          notFoundText="No machines available"
+          appendTo="body"
+        ></ng-select>
 
-          @if (machineOptions.length === 0) {
-          <option disabled>No machines available</option>
-          } @for (machine of machineOptions; track machine.Id) {
-          <option [ngValue]="machine.Id">{{ machine.Name }}</option>
-          }
-        </select>
-
-        @if (submitted && !machineNumber) {
+        @if (submitted && !hasMachines) {
         <div class="invalid-feedback">Required.</div>
         } @else if (needsDatesForMachine) {
         <div class="availability-status muted">
@@ -131,7 +132,7 @@
         }
       </div>
 
-      <div>
+      <div class="field-time">
         <label class="form-label">Allocated Time</label>
 
         @if (allocatedTimeBreakdown; as t) {

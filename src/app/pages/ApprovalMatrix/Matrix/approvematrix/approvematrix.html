@@ -66,7 +66,7 @@
             <th>GROUP</th>
             <th>ALLOWED APPROVAL</th>
             <th>SEQUENCE</th>
-            <th>UNIT</th>
+            <th class="g-fit-column" style="--g-col-min: 110px">UNIT</th>
             <th>STATUS</th>
             <th>CREATED BY</th>
             <th>CREATED DATE</th>
@@ -101,7 +101,7 @@
               </div>
             </td>
             <td>{{ item.Sequence }}</td>
-            <td>{{ item.Unit }}</td>
+            <td><div class="g-truncate" [title]="item.Unit">{{ item.Unit }}</div></td>
             <td>
               <div
                 class="form-check form-switch d-flex justify-content-center align-items-center"

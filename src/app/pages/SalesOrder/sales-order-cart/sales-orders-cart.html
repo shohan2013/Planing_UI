@@ -64,8 +64,8 @@
         </div>
 
         <div>
-          <span>Amount</span>
-          {{ order.TotalAmount | number:'1.2-2' }}
+          <span>Total Quantity</span>
+          {{ order.TotalQuantity | number: '1.0-4' }}
         </div>
       </div>
     </div>
@@ -79,20 +79,97 @@
       <strong>{{ selectedOrders.length }}</strong>
     </div>
 
+    <!-- Merge Policy -->
+    <div class="merge-policy">
+      <div class="merge-policy-label">
+        <span>Merge Policy</span>
+        @if (!policiesLoading && !policiesError && policies.length > 1) {
+        <small>{{ policies.length }} available</small>
+        }
+      </div>
+
+      @if (policiesLoading) {
+      <div class="policy-skeleton"></div>
+      <div class="policy-skeleton"></div>
+      } @else if (policiesError) {
+      <div class="policy-state policy-state-error">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>{{ policiesError }}</span>
+        <button
+          type="button"
+          class="policy-retry-btn"
+          (click)="reloadPolicies.emit()"
+        >
+          Retry
+        </button>
+      </div>
+      } @else if (policies.length === 0) {
+      <div class="policy-state">
+        <i class="fa-solid fa-circle-info"></i>
+        <span>No merge policy is configured for this Unit / Business.</span>
+      </div>
+      } @else {
+      <div class="policy-list" role="radiogroup" aria-label="Merge policy">
+        @for (policy of policies; track policy.Id) {
+        <label
+          class="policy-option"
+          [class.selected]="selectedPolicyId() === policy.Id"
+          [class.disabled]="isMerging"
+        >
+          <input
+            type="radio"
+            name="mergePolicy"
+            [value]="policy.Id"
+            [checked]="selectedPolicyId() === policy.Id"
+            [disabled]="isMerging"
+            (change)="selectPolicy(policy.Id)"
+          />
+          <span class="policy-radio"></span>
+          <span class="policy-text">
+            <span class="policy-name">
+              {{ policy.Name }} @if (policy.IsDefault) {
+              <span class="policy-badge">Default</span>
+              }
+            </span>
+            @if (policy.Description) {
+            <span class="policy-desc">{{ policy.Description }}</span>
+            }
+          </span>
+        </label>
+        }
+      </div>
+      }
+    </div>
+
     <button
       type="button"
-      class="btn btn-success w-100"
+      class="btn btn-success w-100 merge-btn"
+      [disabled]="!canMerge"
       (click)="MergeOrSplit()"
     >
-      Merge DO
-      <i class="fa-solid fa-arrow-right ms-2"></i>
+      @if (isMerging) {
+      <span
+        class="spinner-border spinner-border-sm me-2"
+        role="status"
+        aria-hidden="true"
+      ></span>
+      Merging... } @else {
+      <i class="fa-solid fa-eye me-2"></i>
+      Preview Merge @if (selectedPolicy) {
+      <span class="merge-btn-policy">· {{ selectedPolicy.Name }}</span>
+      } }
     </button>
+
+    @if (mergeBlockedReason) {
+    <div class="merge-hint">{{ mergeBlockedReason }}</div>
+    }
   </div>
 
   @if(viewOpen() && OrderForView()){
   <app-delivery-order-view
     [isOpen]="viewOpen()"
-    [order]="OrderForView()"
+    [soid]="OrderForView()?.SOID"
+    [workTypeCode]="workTypeCode"
     (closeView)="closeView()"
   ></app-delivery-order-view>
   }

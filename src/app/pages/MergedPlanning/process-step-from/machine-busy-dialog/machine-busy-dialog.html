@@ -4,10 +4,21 @@
     <i class="fa-solid fa-triangle-exclamation"></i>
   </div>
   <div class="mbd-title-wrap">
-    <h5 class="modal-title mbd-title" id="machineBusyTitle">Machine is busy</h5>
+    <h5 class="modal-title mbd-title" id="machineBusyTitle">
+      @if (isMulti()) {
+      {{ groups().length }} of {{ i.machines.length }} machines are busy
+      } @else {
+      Machine is busy
+      }
+    </h5>
     <p class="mbd-subtitle">
-      <strong>{{ i.machineName }}</strong> already has {{ i.jobs.length }} {{
+      @if (isMulti()) {
+      {{ i.jobs.length }} {{ i.jobs.length === 1 ? 'job' : 'jobs' }} already planned in this
+      time slot on the selected machines.
+      } @else {
+      <strong>{{ groups()[0]?.machine?.Name }}</strong> already has {{ i.jobs.length }} {{
       i.jobs.length === 1 ? 'job' : 'jobs' }} in this time slot.
+      }
       <button
         type="button"
         class="mbd-schedule-link"
@@ -36,31 +47,49 @@
   </div>
 
   <p class="mbd-section-title">Allocated jobs in this slot</p>
-  <ul class="mbd-jobs">
-    @for (job of i.jobs; track job.JobId) {
-    <li class="mbd-job">
-      <div class="mbd-job-main">
-        <span class="mbd-job-no">{{ job.JobNo }}</span>
-        <span class="mbd-job-item" [title]="job.ItemName + ' · Qty ' + (job.PlannedQty | number) + ' ' + (job.UOM ?? '')"
-          >{{ job.ItemName }}</span
-        >
-        <span class="mbd-job-qty">Qty {{ job.PlannedQty | number }} {{ job.UOM }}</span>
+  <div class="mbd-groups">
+    @for (g of groups(); track g.machine.Id) {
+    <div class="mbd-group">
+      @if (isMulti()) {
+      <div class="mbd-group-head">
+        <i class="fa-solid fa-gears"></i>
+        <span class="mbd-group-name">{{ g.machine.Name }}</span>
+        <span class="mbd-group-count">{{ g.jobs.length }} {{ g.jobs.length === 1 ? 'job' : 'jobs' }}</span>
       </div>
-      <div class="mbd-job-meta">
-        <span>
-          <i class="fa-regular fa-clock"></i>
-          {{ job.StartDate | date: 'dd MMM, hh:mm a' }} – {{ job.EndDate | date:
-          'dd MMM, hh:mm a' }}
-        </span>
-      </div>
-    </li>
+      }
+      <ul class="mbd-jobs">
+        @for (job of g.jobs; track job.JobId) {
+        <li class="mbd-job">
+          <div class="mbd-job-main">
+            <span class="mbd-job-no">{{ job.JobNo }}</span>
+            <span class="mbd-job-item" [title]="job.ProductName + ' · Qty ' + (job.PlannedQty | number) + ' ' + (job.UOM ?? '')"
+              >{{ job.ProductName }}</span
+            >
+            <span class="mbd-job-qty">Qty {{ job.PlannedQty | number }} {{ job.UOM }}</span>
+          </div>
+          <div class="mbd-job-meta">
+            <span>
+              <i class="fa-regular fa-clock"></i>
+              {{ job.StartDate | date: 'dd MMM, hh:mm a' }} – {{ job.EndDate | date:
+              'dd MMM, hh:mm a' }}
+            </span>
+          </div>
+        </li>
+        }
+      </ul>
+    </div>
     }
-  </ul>
+  </div>
 
   <div class="mbd-hint">
     <i class="fa-regular fa-lightbulb"></i>
     <span>
+      @if (isMulti()) {
+      <strong>Hint:</strong> all selected machines share one slot. Change the time slot or
+      remove the busy machine(s).
+      } @else {
       <strong>Hint:</strong> please change the time slot or try another machine.
+      }
     </span>
   </div>
 </div>
@@ -72,7 +101,7 @@
     (click)="close('change-machine')"
   >
     <i class="fa-solid fa-gears"></i>
-    Try another machine
+    {{ isMulti() ? 'Remove busy machines' : 'Try another machine' }}
   </button>
   <button
     type="button"

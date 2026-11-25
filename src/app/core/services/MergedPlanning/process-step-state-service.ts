@@ -99,6 +99,31 @@ export class ProcessStepStateService {
     });
   }
 
+  /**
+   * Renumbers a line's stored steps (orderNo 1..n) to follow `stepIds`, the
+   * line's display order. Ids not in state yet are skipped; stored steps not
+   * in `stepIds` go last, keeping their relative order.
+   */
+  setLineOrder(lineId: number, stepIds: number[]): void {
+    this._processSteps.update((steps) => {
+      const position = new Map(stepIds.map((id, i) => [id, i]));
+      const lineSteps = steps
+        .filter((x) => x.lineId === lineId)
+        .sort(
+          (a, b) =>
+            (position.get(a.stepId) ?? Number.MAX_SAFE_INTEGER) -
+              (position.get(b.stepId) ?? Number.MAX_SAFE_INTEGER) ||
+            a.orderNo - b.orderNo,
+        );
+      const otherSteps = steps.filter((x) => x.lineId !== lineId);
+
+      return [
+        ...otherSteps,
+        ...lineSteps.map((step, i) => ({ ...step, orderNo: i + 1 })),
+      ];
+    });
+  }
+
   clear(): void {
     this._processSteps.set([]);
   }

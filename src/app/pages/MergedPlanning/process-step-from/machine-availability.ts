@@ -5,6 +5,7 @@ import { Subject, catchError, debounceTime, map, of, switchMap } from 'rxjs';
 
 import {
   IMachineJob,
+  IMachineRef,
   IMachineSlotPick,
   MachineBusyAction,
 } from 'src/app/core/model/MergedPlanning/machine-schedule-model';
@@ -17,9 +18,9 @@ import {
 import { MachineBusyDialog } from './machine-busy-dialog/machine-busy-dialog';
 import { MachineScheduleDialog } from './machine-schedule-dialog/machine-schedule-dialog';
 
-/** Machine + slot whose availability is checked. */
+/** Machines + slot whose availability is checked (all machines share the slot). */
 export interface IMachineSlot {
-  machineId: number;
+  machineIds: number[];
   startDate: string;
   endDate: string;
 }
@@ -36,7 +37,8 @@ export interface IMachineAvailabilityHost {
   readonly stepName: string | null;
   /** The plan's own saved job when editing a saved plan; never counts as a clash. */
   readonly excludeJobId: number | null;
-  readonly machineName: string;
+  /** Display name of one machine, for the busy and schedule dialogs. */
+  machineNameOf(machineId: number): string;
   /** User left the busy dialog with an action (runs once the dialog is fully hidden). */
   onBusyAction(action: MachineBusyAction): void;
   /** User picked a slot in the schedule dialog. */
@@ -88,7 +90,7 @@ export class MachineAvailability {
             : this.machineSchedule
                 .GetMachineJobs({
                   BusinessFlowConfigureId: this.host.stepId,
-                  MachineId: slot.machineId,
+                  MachineIds: slot.machineIds,
                   StartDate: slot.startDate,
                   EndDate: slot.endDate,
                   ExcludeJobId: this.host.excludeJobId,
@@ -106,12 +108,12 @@ export class MachineAvailability {
         if (!result) return;
         // Unsaved desk steps are known locally, so they are checked even if the API failed.
         const deskClashes = this.deskJobs?.overlappingJobs(
-          result.slot.machineId,
+          result.slot.machineIds,
           result.slot.startDate,
           result.slot.endDate,
           this.selfRef,
         ) ?? [];
-        const clashes = [...(result.jobs ?? []), ...deskClashes];
+        const clashes = this.withMachine([...(result.jobs ?? []), ...deskClashes], result.slot.machineIds);
 
         if (clashes.length > 0) {
           this.availability.set('busy');
@@ -163,7 +165,7 @@ export class MachineAvailability {
       ariaLabelledBy: 'machineBusyTitle',
     });
     (this.busyModal.componentInstance as MachineBusyDialog).info.set({
-      machineName: this.host.machineName,
+      machines: this.machineRefs(this.slot.machineIds),
       startDate: this.slot.startDate,
       endDate: this.slot.endDate,
       jobs: this.busyJobs(),
@@ -179,7 +181,7 @@ export class MachineAvailability {
     this.busyModal.hidden.subscribe(() => {
       this.busyModal = null;
       if (action === 'view-schedule') {
-        this.openScheduleDialog(this.slot?.machineId ?? 0, this.slot);
+        this.openScheduleDialog(this.slot?.machineIds ?? [], this.slot, this.busyMachineId());
       } else if (action) {
         this.host.onBusyAction(action);
       }
@@ -187,11 +189,13 @@ export class MachineAvailability {
   }
 
   /**
-   * "View schedule": the machine's jobs from now to its last planned job. `slot` (if
-   * complete) is checked against it; a picked slot is handed to the host.
+   * "View schedule": the machines' jobs from now to their last planned job, fetched in one
+   * request. `slot` (if complete) is checked against them; a picked slot is handed to the
+   * host. `focusMachineId` opens on that machine instead of the combined view.
    */
-  openScheduleDialog(machineId: number, slot: IMachineSlot | null): void {
-    if (!machineId || this.scheduleModal) return;
+  openScheduleDialog(machineIds: number[], slot: IMachineSlot | null, focusMachineId: number | null = null): void {
+    machineIds = [...new Set((machineIds ?? []).filter((id) => !!id))];
+    if (!machineIds.length || this.scheduleModal) return;
     (document.activeElement as HTMLElement | null)?.blur(); // close a native date picker
 
     this.scheduleModal = this.modalService.open(MachineScheduleDialog, {
@@ -202,14 +206,14 @@ export class MachineAvailability {
     });
     (this.scheduleModal.componentInstance as MachineScheduleDialog).init({
       businessFlowConfigureId: this.host.stepId,
-      machineId,
-      machineName: this.host.machineName,
+      machines: this.machineRefs(machineIds),
+      focusMachineId,
       stepName: this.host.stepName,
       slotStart: slot?.startDate ?? null,
       slotEnd: slot?.endDate ?? null,
       excludeJobId: this.host.excludeJobId,
       hiddenJobIds: [...(this.deskJobs?.savedJobIds() ?? [])],
-      deskJobs: this.deskJobs?.jobsOnMachine(machineId, this.selfRef) ?? [],
+      deskJobs: machineIds.flatMap((id) => this.deskJobs?.jobsOnMachine(id, this.selfRef) ?? []),
     });
 
     let pick: IMachineSlotPick | null = null;
@@ -220,6 +224,33 @@ export class MachineAvailability {
     this.scheduleModal.hidden.subscribe(() => {
       this.scheduleModal = null;
       if (pick) this.host.onSlotPicked(pick);
+    });
+  }
+
+  /** The machine to open the schedule on after a clash: the only clashing one, else the combined view. */
+  private busyMachineId(): number | null {
+    const machineIds = this.slot?.machineIds ?? [];
+    if (machineIds.length === 1) return machineIds[0];
+    const clashing = new Set(this.busyJobs().map((j) => j.MachineId).filter((id) => machineIds.includes(id)));
+    return clashing.size === 1 ? [...clashing][0] : null;
+  }
+
+  private machineRefs(machineIds: number[]): IMachineRef[] {
+    return machineIds.map((id) => ({ Id: id, Name: this.host.machineNameOf(id) }));
+  }
+
+  /**
+   * Fills each job's machine: a job without MachineId (an API that doesn't send it yet)
+   * belongs to the only machine when just one was asked for.
+   */
+  private withMachine(jobs: IMachineJob[], machineIds: number[]): IMachineJob[] {
+    return jobs.map((job) => {
+      const machineId = job.MachineId || (machineIds.length === 1 ? machineIds[0] : 0);
+      return {
+        ...job,
+        MachineId: machineId,
+        MachineName: job.MachineName || (machineId ? this.host.machineNameOf(machineId) : null),
+      };
     });
   }
 
@@ -238,6 +269,8 @@ export class MachineAvailability {
   }
 
   private slotKey(slot: IMachineSlot | null): string {
-    return slot ? `${slot.machineId}|${slot.startDate}|${slot.endDate}` : '';
+    return slot
+      ? `${[...slot.machineIds].sort((a, b) => a - b).join(',')}|${slot.startDate}|${slot.endDate}`
+      : '';
   }
 }

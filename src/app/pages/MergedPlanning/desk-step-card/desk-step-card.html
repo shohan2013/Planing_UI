@@ -34,28 +34,31 @@
       <button
         type="button"
         class="btn btn-link p-0 schedule-link"
-        [disabled]="!step.machineId"
-        [title]="step.machineId ? 'View ' + machineName + ' schedule' : 'Select a machine first'"
+        [disabled]="!hasMachines"
+        [title]="hasMachines ? 'View schedule of ' + machineNames : 'Select a machine first'"
         (click)="openScheduleDialog()"
       >
         <i class="fa-regular fa-calendar-days"></i>
         Schedule
       </button>
     </div>
-    <select
+    <ng-select
       #machineSelect
-      class="form-select form-select-sm"
+      class="machine-multi-select"
       [class.is-invalid]="isMachineBusy"
-      [ngModel]="step.machineId"
-      (ngModelChange)="setMachine($event)"
-      name="deskMachine-{{ step.stepId }}"
-    >
-      <option [ngValue]="0">Select machine</option>
-
-      @for (machine of machineOptions; track machine.Id) {
-      <option [ngValue]="machine.Id">{{ machine.Name }}</option>
-      }
-    </select>
+      [items]="machineOptions"
+      bindLabel="Name"
+      bindValue="Id"
+      [ngModel]="step.machineIds"
+      (ngModelChange)="setMachines($event)"
+      [multiple]="true"
+      [closeOnSelect]="false"
+      [searchable]="true"
+      [clearable]="true"
+      placeholder="Select machine(s)"
+      notFoundText="No machines available"
+      appendTo="body"
+    ></ng-select>
   </div>
 
   <div class="desk-card-field">

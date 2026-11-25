@@ -50,6 +50,7 @@
       </div>
     </div>
 
+    <!-- TEMP: Pre-Planned Route disabled; Planning Process takes the full width.
     <div class="flex-fill">
       <label class="form-label">Pre-Planned Route</label>
 
@@ -66,6 +67,7 @@
         }
       </select>
     </div>
+    -->
   </div>
 
   @if (isLineReadyForPlanning && availableSteps.length === 0 && droppedSteps.length > 0) {
@@ -116,7 +118,7 @@
       [class.fa-check-circle]="isStepValid(step)"
       [class.fa-triangle-exclamation]="!isStepValid(step)"
     ></i>
-    {{ step.stepName }} · {{ getMachineName(step.stepId, step.machineId) }} ·
+    {{ step.stepName }} · {{ getMachineNames(step.stepId, step.machineIds) }} ·
     {{ getAllocatedTimeLabel(step) }}
   </span>
   }

@@ -9,7 +9,6 @@ import {
   signal,
   SimpleChanges,
 } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { DateTimePipe } from 'src/app/shared/pipes/date-time-pipe';
@@ -29,6 +28,7 @@ import {
 } from 'src/app/core/model/PlanningHistory/planning-history-model';
 import { ItemPlanningFields } from '../../MergedPlanning/item-planning-fields/item-planning-fields';
 import { PlanningProcessSteps } from '../planning-process-steps/planning-process-steps';
+import { MachineAvailabilityState } from '../../MergedPlanning/process-step-from/machine-availability';
 import { ItemPlanningStateService } from 'src/app/core/services/MergedPlanning/item-planning-state-service';
 import { ProcessStepStateService } from 'src/app/core/services/MergedPlanning/process-step-state-service';
 import { DeskMachineJobsService } from 'src/app/core/services/MergedPlanning/desk-machine-jobs-service';
@@ -45,7 +45,6 @@ import { IApiResponse } from 'src/app/core/model/Response/ApiResponse';
   standalone: true,
   imports: [
     DateTimePipe,
-    DecimalPipe,
     ItemPlanningFields,
     PlanningProcessSteps,
   ],
@@ -251,7 +250,7 @@ export class PlanningEditView implements OnInit, OnChanges, OnDestroy {
               ProductId: line.ProductId,
               StartDate: s.StartDate,
               EndDate: s.EndDate,
-              MachineId: s.MachineId,
+              MachineIds: [...(s.MachineIds ?? [])],
               OrderNo: s.OrderNo ?? 0,
               IsActive: false,
             }));
@@ -268,7 +267,7 @@ export class PlanningEditView implements OnInit, OnChanges, OnDestroy {
               ProductId: line.ProductId,
               StartDate: step.startDate,
               EndDate: step.endDate,
-              MachineId: step.machineId,
+              MachineIds: [...step.machineIds],
               OrderNo: step.orderNo,
               IsActive: true,
             };
@@ -289,8 +288,38 @@ export class PlanningEditView implements OnInit, OnChanges, OnDestroy {
       .filter((line): line is IPlanningHistoryUpdateLine => line !== null);
   }
 
+  /** Machine availability of each step card, keyed `${lineId}|${stepId}`. */
+  private stepAvailability = signal<Record<string, MachineAvailabilityState>>({});
+
+  onStepAvailability(
+    lineId: number,
+    stepId: number,
+    state: MachineAvailabilityState,
+  ): void {
+    this.stepAvailability.update((map) => ({
+      ...map,
+      [`${lineId}|${stepId}`]: state,
+    }));
+  }
+
   onSaveAll(): void {
     if (!this.headerId) return;
+
+    // A busy step isn't in the stored plan, so saving now would send an
+    // already-saved step as IsActive: false and drop it from the plan.
+    const states = Object.values(this.stepAvailability());
+    if (states.includes('busy')) {
+      this.toastr.error(
+        'A machine is busy in a planned slot. Change its time or machine before saving.',
+      );
+      return;
+    }
+    if (states.includes('checking')) {
+      this.toastr.info(
+        'Still checking machine availability. Please try again in a moment.',
+      );
+      return;
+    }
 
     const header = this.header();
     const lines = this.buildUpdateLines();
