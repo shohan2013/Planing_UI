@@ -27,6 +27,10 @@ export const GlobalConstant = {
     ApproveMatrixGroup: 'ApprovalMatrixGroup',
 
   /*===========================REQUISITION===================================== */
+
+   Item: 'Requisition/ItemList',
+
+
     addRequisition: 'Requisition/save',
     getRequisition: 'Requisition',
     getRequisitionLines: 'Requisition/GetLinesByReqId',
@@ -80,7 +84,7 @@ export const GlobalConstant = {
     warehousesList: 'Common/WarehouseList',
     ProductType: 'Common/ProductTypeList',
     getFGTypes: 'Common/FGTypes',
-    Item: 'Common/ItemList',
+   
     LatestStockQty: 'Common/LatestStockQty',
     StockQuantity: 'Common/StockQty',
     SalesQuantity: 'Common/GetSalesQty',

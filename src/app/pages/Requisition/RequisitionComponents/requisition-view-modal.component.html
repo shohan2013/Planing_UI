@@ -86,12 +86,14 @@
               <th>Item</th>
               <th>Size</th>
               <th>UOM</th>
-              <th class="number-column">Quantity</th>
-              <th class="number-column">Remaining Stock Quantity</th>
+              <th class="number-column quantity-column">Quantity</th>
               <th class="number-column">Stock Quantity</th>
               <th class="number-column">Sales Quantity</th>
-              <th class="number-column">Priority</th>
+              <th class="number-column">Remaining Quantity</th>
+              <th class="number-column priority-column">Priority</th>
               <th class="text-center">Count</th>
+              <th class="number-column">Total Quantity</th>
+              <th class="number-column">Total Remaining Quantity</th>
               <th>Remarks</th>
             </tr>
           </thead>
@@ -103,30 +105,30 @@
                 <td>{{ line.Size?.trim() || '–' }}</td>
                 <td>{{ line.UOMName || '-' }}</td>
                 <td class="number-column">{{ line.Quantity }}</td>
+                <td class="number-column">{{ line.StockQuantity ?? 0 }}</td>
+                <td class="number-column">{{ line.SalesQuantity ?? 0 }}</td>
                 <td class="number-column">
                   @if (line.RemainingQuantity != null) {
-                    <span class="remaining-quantity-badge" [class.remaining-quantity-green]="line.RemainingQuantity <= 0" [class.remaining-quantity-yellow]="line.RemainingQuantity > 0">
+                    <span [ngStyle]="requisitionRemainingBadgeStyle(line.RemainingQuantity)">
                       {{ line.RemainingQuantity < 0 ? -line.RemainingQuantity : line.RemainingQuantity }}
                     </span>
                   } @else {
                     –
                   }
                 </td>
-                <td class="number-column">{{ line.StockQuantity ?? 0 }}</td>
-                <td class="number-column">{{ line.SalesQuantity ?? 0 }}</td>
                 <td class="number-column" [class.bg-warning-subtle]="(line.Priority ?? 0) > 0">{{ line.Priority ?? '–' }}</td>
                 <td class="text-center">
-                  <span class="requisition-count" [attr.aria-label]="'Matching requisitions: ' + (line.Count ?? 0)">
-                    {{ line.Count ?? 0 }}
-                  </span>
+                  <button type="button" class="requisition-count border-0" [disabled]="!(line.Count ?? 0)" [ngbPopover]="countedRequisitionsPopover" [popoverContext]="{ requisitions: line.CountedRequisitions }" popoverTitle="Counted requisitions" triggers="click" [autoClose]="'outside'" container="body" placement="auto" aria-label="Show counted requisitions">{{ line.Count ?? 0 }}</button>
                 </td>
+                <td class="number-column">{{ (line.TotalRequestedQuantity | number:'1.0-4') ?? '–' }}</td>
+                <td class="number-column"><span [ngStyle]="requisitionTotalRemainingBadgeStyle(line.TotalRemainingQuantity)">{{ (line.TotalRemainingQuantity | number:'1.0-4') ?? '–' }}</span></td>
                 <td>
                   <div class="g-scrollable-text sm" [title]="line.Remarks || ''">{{ line.Remarks || '-' }}</div>
                 </td>
               </tr>
             } @empty {
               <tr>
-                <td colspan="11" class="empty-table-message">
+                <td colspan="13" class="empty-table-message">
                   {{ lines.length ? 'No matching products.' : 'No active Requisition Lines found.' }}
                 </td>
               </tr>
@@ -143,3 +145,15 @@
     <i class="fa-solid fa-fw fa-xmark"></i> Close
   </button>
 </div>
+
+
+
+<ng-template #countedRequisitionsPopover let-requisitions="requisitions">
+  <div style="max-height: 260px; overflow-y: auto;">
+    @for (req of requisitions | keyvalue; track req.key) {
+      <div class="py-1 text-nowrap" [attr.data-req-id]="req.key">{{ req.value }}</div>
+    } @empty {
+      <div class="text-muted">No counted requisitions.</div>
+    }
+  </div>
+</ng-template>

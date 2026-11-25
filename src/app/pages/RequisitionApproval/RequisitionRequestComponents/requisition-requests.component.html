@@ -158,6 +158,8 @@
                         ? -line.RemainingQuantity
                         : line.RemainingQuantity
                     }}
+                  <span [ngStyle]="requisitionRemainingBadgeStyle(line.RemainingQuantity)">
+                    {{ line.RemainingQuantity < 0 ? -line.RemainingQuantity : line.RemainingQuantity }}
                   </span>
                 } @else {
                   –

@@ -10,6 +10,8 @@ import { IDropdownBind } from 'src/app/core/model/Common/dropdown-bind';
 import { CommonService } from 'src/app/core/services/Common/CommonService';
 import { RequisitionApprovalService } from 'src/app/core/services/RequisitionApproval/requisition-approval.service';
 
+import { requisitionRemainingBadgeStyle, requisitionTotalRemainingBadgeStyle } from 'src/app/shared/utils/requisition-quantity-badge.styles';
+
 type ViewModalState = 'loading' | 'ready' | 'failed';
 
 @Component({
@@ -24,6 +26,9 @@ export class RequisitionApprovalViewModalComponent implements OnInit {
   @Input({ required: true }) docStatus!: string;
   readonly state = signal<ViewModalState>('loading');
   readonly lines = signal<IViewRequisitionLine[]>([]);
+
+    readonly requisitionRemainingBadgeStyle = requisitionRemainingBadgeStyle;
+    readonly requisitionTotalRemainingBadgeStyle = requisitionTotalRemainingBadgeStyle;
 
   readonly lineSearch = signal('');
 

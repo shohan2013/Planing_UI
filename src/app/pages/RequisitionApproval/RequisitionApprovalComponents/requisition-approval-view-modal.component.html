@@ -102,7 +102,7 @@
                 <td class="number-column">{{ line.Quantity }}</td>
                 <td class="number-column">
                   @if (line.RemainingQuantity != null) {
-                    <span [class.negative-quantity]="line.RemainingQuantity < 0">
+                    <span [ngStyle]="requisitionRemainingBadgeStyle(line.RemainingQuantity)">
                       {{ line.RemainingQuantity < 0 ? -line.RemainingQuantity : line.RemainingQuantity }}
                     </span>
                   } @else {

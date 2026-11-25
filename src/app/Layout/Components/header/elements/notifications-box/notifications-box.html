@@ -1,18 +1,6 @@
 <div class="header-btn-lg">
-  <div
-    ngbDropdown
-    #dropdown="ngbDropdown"
-    placement="bottom-end"
-    [autoClose]="true"
-    (openChange)="onDropdownChange($event)"
-  >
-    <button
-      #bellButton
-      type="button"
-      class="notification-bell"
-      ngbDropdownToggle
-      [attr.aria-label]="'Requisition requests: ' + unreadCount() + ' unresolved'"
-    >
+  <div ngbDropdown #dropdown="ngbDropdown" placement="bottom-end" [autoClose]="true" (openChange)="onDropdownChange($event)" >
+    <button #bellButton type="button" class="notification-bell" ngbDropdownToggle [attr.aria-label]="'Requisition requests: ' + unreadCount() + ' unresolved'">
       <i class="pe-7s-bell" aria-hidden="true"></i>
 
       @if (unreadCount() > 0) {
@@ -22,8 +10,8 @@
 
     <div ngbDropdownMenu class="requisition-notification-menu">
       <div class="notification-heading">
-        <span>REQUESTS</span>
-        <span class="heading-total">{{ unreadCount() }} unresolved</span>
+        <span class="notification-title">Requests</span>
+        <span class="heading-total">{{ unreadCount() }} unresolved across {{ notifications().length }} requisitions</span>
       </div>
 
       @if (notifications().length > 0) {
@@ -111,6 +99,10 @@
             No pending requests.
           }
         </div>
+      }
+
+      @if (notifications().length > 0) {
+        <div class="notification-footer">Select a requisition to review requests</div>
       }
 
       @if (error()) {
