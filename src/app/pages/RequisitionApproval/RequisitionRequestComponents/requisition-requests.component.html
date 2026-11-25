@@ -143,14 +143,10 @@
               <td>{{ line.UOMName }}</td>
               <td>{{ line.Quantity }}</td>
               <td>
-                @if (line.RemainingQuantity != null) {
+                @if (line.RemainingQuantity !== null) {
                   <span
-                    class="remaining-quantity-badge"
-                    [class.remaining-quantity-green]="
-                      line.RemainingQuantity <= 0
-                    "
-                    [class.remaining-quantity-yellow]="
-                      line.RemainingQuantity > 0
+                    [ngStyle]="
+                      requisitionRemainingBadgeStyle(line.RemainingQuantity)
                     "
                   >
                     {{
@@ -158,8 +154,6 @@
                         ? -line.RemainingQuantity
                         : line.RemainingQuantity
                     }}
-                  <span [ngStyle]="requisitionRemainingBadgeStyle(line.RemainingQuantity)">
-                    {{ line.RemainingQuantity < 0 ? -line.RemainingQuantity : line.RemainingQuantity }}
                   </span>
                 } @else {
                   –
@@ -254,7 +248,7 @@
         <span>
           <strong
             [style.color]="
-              remaining == null || remaining === 0
+              remaining === null || remaining === 0
                 ? null
                 : remaining < 0.5
                   ? '#047857'
@@ -262,7 +256,7 @@
             "
           >
             {{
-              remaining == null ? "–" : remaining < 0 ? -remaining : remaining
+              remaining === null ? "–" : remaining < 0 ? -remaining : remaining
             }}
           </strong>
           Production Remaining (Packing Stock)
@@ -321,7 +315,7 @@
                   @if (
                     request.StatusCode === "PEND" &&
                     request.IsActive === false &&
-                    request.ActionTakenBy != null &&
+                    request.ActionTakenBy !== null &&
                     request.ActionTakenBy === request.RequestBy
                   ) {
                     <span class="badge bg-secondary">Withdrawn</span>
@@ -344,7 +338,7 @@
                   </div>
                 </td>
                 <td>
-                  @if (request.ActionTakenBy != null) {
+                  @if (request.ActionTakenBy !== null) {
                     @if (request.ActionTakenByName) {
                       {{ request.ActionTakenByName }} ({{
                         request.ActionTakenBy
@@ -391,7 +385,7 @@
                     @if (
                       request.StatusCode === "PEND" &&
                       request.IsActive &&
-                      request.ActionTakenBy == null
+                      request.ActionTakenBy === null
                     ) {
                       <button
                         type="button"
