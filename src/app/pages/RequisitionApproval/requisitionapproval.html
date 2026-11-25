@@ -33,7 +33,7 @@
               (ngModelChange)="onUnitFilterChange($event)"
               aria-label="Unit filter"
             >
-              <option [ngValue]="null">My Unit</option>
+              <!-- <option [ngValue]="null">My Unit</option> -->
               <option [ngValue]="0">All Units</option>
               @for (unit of units(); track unit.Id) {
               <option [ngValue]="unit.Id">{{ unit.Name }}</option>
