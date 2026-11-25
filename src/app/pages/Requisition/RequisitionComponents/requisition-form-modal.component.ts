@@ -21,6 +21,7 @@ import { CommonService } from 'src/app/core/services/Common/CommonService';
 import { RequisitionService } from 'src/app/core/services/Requisition/requisition.service';
 import { PaginationComponent } from 'src/app/shared/pagination/pagination.component';
 // import { PriorityInputComponent } from 'src/app/shared/priority-input/priority-input.component';
+import { requisitionRemainingBadgeStyle, requisitionTotalRemainingBadgeStyle } from 'src/app/shared/utils/requisition-quantity-badge.styles';
 
 type FormModalState = 'initializing' | 'ready' | 'submitting' | 'failed';
 type BulkRow = {
@@ -48,10 +49,16 @@ type BulkRow = {
   styleUrl: './requisition-form-modal.component.scss',
 })
 export class RequisitionFormModalComponent implements OnInit {
+
+
+
   readonly PermissionAction = PermissionAction;
   readonly DocumentStatusId = DocumentStatusId;
 
   @ViewChild('bulkModal') bulkModal!: TemplateRef<unknown>;
+
+      readonly requisitionRemainingBadgeStyle = requisitionRemainingBadgeStyle;
+      readonly requisitionTotalRemainingBadgeStyle = requisitionTotalRemainingBadgeStyle;
 
   readonly state = signal<FormModalState>('initializing');
   readonly units = signal<IUnit[]>([]);

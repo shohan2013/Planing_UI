@@ -104,7 +104,7 @@
               <td>{{ line.Quantity }}</td>
               <td>
                 @if (line.RemainingQuantity != null) {
-                  <span class="remaining-quantity-badge" [class.remaining-quantity-green]="line.RemainingQuantity === 0" [class.remaining-quantity-red]="line.RemainingQuantity < 0" [class.remaining-quantity-yellow]="line.RemainingQuantity > 0">
+                  <span [ngStyle]="requisitionRemainingBadgeStyle(line.RemainingQuantity)">
                     {{ line.RemainingQuantity < 0 ? -line.RemainingQuantity : line.RemainingQuantity }}
                   </span>
                 } @else {
@@ -163,7 +163,7 @@
         <span>Current Acknowledged Quantity <strong class="text-black">{{ line.Quantity }}</strong></span>
         <span class="text-muted" aria-hidden="true">|</span>
         <span>
-          <strong [style.color]="remaining == null || remaining === 0 ? null : (remaining < 0.5 ? '#047857' : '#856404')">
+          <strong [ngStyle]="requisitionRemainingBadgeStyle(remaining)">
             {{ remaining == null ? '–' : (remaining < 0 ? -remaining : remaining) }}
           </strong>
           Production Remaining (Packing Stock)

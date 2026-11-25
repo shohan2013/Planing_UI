@@ -109,7 +109,7 @@
                 <td class="number-column">{{ line.SalesQuantity ?? 0 }}</td>
                 <td class="number-column">
                   @if (line.RemainingQuantity != null) {
-                    <span class="remaining-quantity-badge" [class.remaining-quantity-green]="line.RemainingQuantity === 0" [class.remaining-quantity-red]="line.RemainingQuantity < 0" [class.remaining-quantity-yellow]="line.RemainingQuantity > 0">
+                    <span [ngStyle]="requisitionRemainingBadgeStyle(line.RemainingQuantity)">
                       {{ line.RemainingQuantity < 0 ? -line.RemainingQuantity : line.RemainingQuantity }}
                     </span>
                   } @else {
@@ -121,7 +121,7 @@
                   <button type="button" class="requisition-count border-0" [disabled]="!(line.Count ?? 0)" [ngbPopover]="countedRequisitionsPopover" [popoverContext]="{ requisitions: line.CountedRequisitions }" popoverTitle="Counted requisitions" triggers="click" [autoClose]="'outside'" container="body" placement="auto" aria-label="Show counted requisitions">{{ line.Count ?? 0 }}</button>
                 </td>
                 <td class="number-column">{{ (line.TotalRequestedQuantity | number:'1.0-4') ?? '–' }}</td>
-                <td class="number-column" [class.remaining-quantity-negative]="(line.TotalRemainingQuantity ?? 0) < 0">{{ (line.TotalRemainingQuantity | number:'1.0-4') ?? '–' }}</td>
+                <td class="number-column"><span [ngStyle]="requisitionTotalRemainingBadgeStyle(line.TotalRemainingQuantity)">{{ (line.TotalRemainingQuantity | number:'1.0-4') ?? '–' }}</span></td>
                 <td>
                   <div class="g-scrollable-text sm" [title]="line.Remarks || ''">{{ line.Remarks || '-' }}</div>
                 </td>

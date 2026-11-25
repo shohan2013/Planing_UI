@@ -154,7 +154,7 @@
                     </td>
                     <td>{{ lineFormGroup.controls.StockQuantity.value ?? '–' }}</td>
                     <td>{{ lineFormGroup.controls.SalesQuantity.value ?? '–' }}</td>
-                    <td [class.remaining-quantity-negative]="(lineFormGroup.controls.RemainingQuantity.value ?? 0) < 0">{{ (lineFormGroup.controls.RemainingQuantity.value | number:'1.0-4') ?? '–' }}</td>
+                    <td><span [ngStyle]="requisitionRemainingBadgeStyle(lineFormGroup.controls.RemainingQuantity.value)">{{ (lineFormGroup.controls.RemainingQuantity.value | number:'1.0-4') ?? '–' }}</span></td>
                     <td style="width: 105px;" [class.bg-warning-subtle]="(lineFormGroup.controls.Priority.value ?? 0) > 0">
                       <!-- <app-priority-input formControlName="Priority" [priorities]="priorities()" [readonly]="isSubmitting" /> -->
                         <select class="form-select" formControlName="Priority" aria-label="Priority">
@@ -171,7 +171,7 @@
                       }
                     </td>
                     <td>{{ (lineFormGroup.controls.TotalRequestedQuantity.value | number:'1.0-4') ?? '–' }}</td>
-                    <td [class.remaining-quantity-negative]="(lineFormGroup.controls.TotalRemainingQuantity.value ?? 0) < 0">{{ (lineFormGroup.controls.TotalRemainingQuantity.value | number:'1.0-4') ?? '–' }}</td>
+                    <td><span [ngStyle]="requisitionTotalRemainingBadgeStyle(lineFormGroup.controls.TotalRemainingQuantity.value)">{{ (lineFormGroup.controls.TotalRemainingQuantity.value | number:'1.0-4') ?? '–' }}</span></td>
                     <td>
                       <input type="text" class="form-control" formControlName="Remarks" maxlength="500" placeholder="Remarks" />
                     </td>
@@ -249,7 +249,7 @@
                   </td>
                   <td>{{ line.get('StockQuantity')?.value }}</td>
                   <td>{{ line.get('SalesQuantity')?.value }}</td>
-                  <td [class.remaining-quantity-negative]="(line.get('RemainingQuantity')?.value ?? 0) < 0">{{ (line.get('RemainingQuantity')?.value | number:'1.0-4') ?? '–' }}</td>
+                  <td><span [ngStyle]="requisitionRemainingBadgeStyle(line.get('RemainingQuantity')?.value)">{{ (line.get('RemainingQuantity')?.value | number:'1.0-4') ?? '–' }}</span></td>
                   <td style="width: 105px;" [class.priority-highlight]="(line.get('Priority')?.value ?? 0) > 0">
                     <!-- <app-priority-input [formControl]="$any(line.get('Priority'))" [priorities]="priorities()" [small]="true" [readonly]="isSubmitting" [ariaLabel]="'Priority for line ' + (index + 1)" /> -->
                     <select class="form-select form-select-sm" [formControl]="$any(line.get('Priority'))" [attr.aria-label]="'Priority for line ' + (index + 1)">
@@ -262,7 +262,7 @@
                     <button type="button" class="requisition-count border-0" [disabled]="!(line.get('Count')?.value ?? 0)" [ngbPopover]="countedRequisitionsPopover" [popoverContext]="{ requisitions: line.get('CountedRequisitions')?.value }" popoverTitle="Counted requisitions" triggers="click" [autoClose]="'outside'" container="body" placement="auto" aria-label="Show counted requisitions">{{ line.get('Count')?.value ?? '–' }}</button>
                   </td>
                   <td>{{ (line.get('TotalRequestedQuantity')?.value | number:'1.0-4') ?? '–' }}</td>
-                  <td [class.remaining-quantity-negative]="(line.get('TotalRemainingQuantity')?.value ?? 0) < 0">{{ (line.get('TotalRemainingQuantity')?.value | number:'1.0-4') ?? '–' }}</td>
+                  <td><span [ngStyle]="requisitionTotalRemainingBadgeStyle(line.get('TotalRemainingQuantity')?.value)">{{ (line.get('TotalRemainingQuantity')?.value | number:'1.0-4') ?? '–' }}</span></td>
                   <td>
                     <input type="text" maxlength="500" class="form-control form-control-sm" [attr.aria-label]="'Remarks for line ' + (index + 1)" [formControl]="$any(line.get('Remarks'))" [title]="line.get('Remarks')?.value || ''" [readonly]="isSubmitting" />
                   </td>
@@ -441,7 +441,7 @@
                     <button type="button" class="requisition-count border-0" [disabled]="!(row.count ?? 0)" [ngbPopover]="countedRequisitionsPopover" [popoverContext]="{ requisitions: row.countedRequisitions }" popoverTitle="Counted requisitions" triggers="click" [autoClose]="'outside'" container="body" placement="auto" aria-label="Show counted requisitions">{{ row.count ?? '–' }}</button>
                   </td>
                   <td>{{ (row.totalRequestedQuantity | number:'1.0-4') ?? '–' }}</td>
-                  <td [class.remaining-quantity-negative]="(row.totalRemainingQuantity ?? 0) < 0">{{ (row.totalRemainingQuantity | number:'1.0-4') ?? '–' }}</td>
+                  <td><span [ngStyle]="requisitionTotalRemainingBadgeStyle(row.totalRemainingQuantity)">{{ (row.totalRemainingQuantity | number:'1.0-4') ?? '–' }}</span></td>
                   <td>
                     @if (addedLine) {
                       <div class="g-scrollable-text sm" [title]="addedLine.get('Remarks')?.value || ''">{{ addedLine.get('Remarks')?.value || '-' }}</div>

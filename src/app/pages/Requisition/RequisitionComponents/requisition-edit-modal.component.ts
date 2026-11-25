@@ -22,6 +22,8 @@ import { RequisitionService } from 'src/app/core/services/Requisition/requisitio
 // import { PriorityInputComponent } from 'src/app/shared/priority-input/priority-input.component';
 import { PaginationComponent } from 'src/app/shared/pagination/pagination.component';
 
+import { requisitionRemainingBadgeStyle, requisitionTotalRemainingBadgeStyle } from 'src/app/shared/utils/requisition-quantity-badge.styles';
+
 
 type LineDraft = {
   quantity: number | null;
@@ -67,12 +69,22 @@ type RequestConfirmation = {
   styleUrl: './requisition-edit-modal.component.scss',
 })
 export class RequisitionEditModalComponent implements OnInit {
+
+
+  
+
+
+
   @Input({ required: true }) header!: IViewRequisitionHeader;
   @ViewChild('bulkModal') bulkModal!: TemplateRef<unknown>;
   @ViewChild('bulkTable') private bulkTable?: ElementRef<HTMLElement>;
   @ViewChild('historyModal') historyModal!: TemplateRef<unknown>;
   private historyModalRef?: NgbModalRef;
   @ViewChild('requestModal') requestModal!: TemplateRef<unknown>;
+
+
+      readonly requisitionRemainingBadgeStyle = requisitionRemainingBadgeStyle;
+      readonly requisitionTotalRemainingBadgeStyle = requisitionTotalRemainingBadgeStyle;
 
   readonly PermissionAction = PermissionAction;
   readonly lines = signal<IViewRequisitionLine[]>([]);

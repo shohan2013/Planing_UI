@@ -145,7 +145,7 @@
                 </td>
                 <td>{{ stock ?? '–' }}</td>
                 <td>{{ sales ?? '–' }}</td>
-                <td [class.remaining-quantity-negative]="(remainingQuantity ?? 0) < 0">{{ (remainingQuantity | number:'1.0-4') ?? '–' }}</td>
+                <td><span [ngStyle]="requisitionRemainingBadgeStyle(remainingQuantity)">{{ (remainingQuantity | number:'1.0-4') ?? '–' }}</span></td>
                 <td style="width: 105px;">
                   <!-- <app-priority-input [priorities]="priorities()" [(ngModel)]="priority" [disabled]="!canAdd" /> -->
                   <select class="form-select" [(ngModel)]="priority" [disabled]="!canAdd" aria-label="Priority">
@@ -162,7 +162,7 @@
                   }
                 </td>
                 <td>{{ (totalRequestedQuantity | number:'1.0-4') ?? '–' }}</td>
-                <td [class.remaining-quantity-negative]="(totalRemainingQuantity ?? 0) < 0">{{ (totalRemainingQuantity | number:'1.0-4') ?? '–' }}</td>
+                <td><span [ngStyle]="requisitionTotalRemainingBadgeStyle(totalRemainingQuantity)">{{ (totalRemainingQuantity | number:'1.0-4') ?? '–' }}</span></td>
                 <td>
                   <input type="text" class="form-control" maxlength="500" placeholder="Remarks" aria-label="Remarks" [(ngModel)]="remarks" [disabled]="!canAdd" />
                 </td>
@@ -250,7 +250,7 @@
                 <td>{{ line.SalesQuantity }}</td>
                 <td>
                   @if (line.RemainingQuantity != null) {
-                    <span class="remaining-quantity-badge" [class.remaining-quantity-green]="line.RemainingQuantity === 0" [class.remaining-quantity-red]="line.RemainingQuantity < 0" [class.remaining-quantity-yellow]="line.RemainingQuantity > 0">
+                    <span [ngStyle]="requisitionRemainingBadgeStyle(line.RemainingQuantity)">
                       {{ line.RemainingQuantity < 0 ? -line.RemainingQuantity : line.RemainingQuantity }}
                     </span>
                   } @else {
@@ -273,7 +273,7 @@
                     <button type="button" class="requisition-count border-0" [disabled]="!(line.Count ?? 0)" [ngbPopover]="countedRequisitionsPopover" [popoverContext]="{ requisitions: line.CountedRequisitions }" popoverTitle="Counted requisitions" triggers="click" [autoClose]="'outside'" container="body" placement="auto" aria-label="Show counted requisitions">{{ line.Count ?? '–' }}</button>
                 </td>
                 <td>{{ (line.TotalRequestedQuantity | number:'1.0-4') ?? '–' }}</td>
-                <td [class.remaining-quantity-negative]="(line.TotalRemainingQuantity ?? 0) < 0">{{ (line.TotalRemainingQuantity | number:'1.0-4') ?? '–' }}</td>
+                <td><span [ngStyle]="requisitionTotalRemainingBadgeStyle(line.TotalRemainingQuantity)">{{ (line.TotalRemainingQuantity | number:'1.0-4') ?? '–' }}</span></td>
                 <td>
                   @if (!isRequestMode && isOpen) {
                     <input *menuPermission="PermissionAction.Update" type="text" maxlength="500" class="form-control form-control-sm" aria-label="Line remarks" [(ngModel)]="draft.remarks" [disabled]="!canWrite" />
@@ -481,7 +481,7 @@
                     <button type="button" class="requisition-count border-0" [disabled]="!(row.count ?? 0)" [ngbPopover]="countedRequisitionsPopover" [popoverContext]="{ requisitions: row.countedRequisitions }" popoverTitle="Counted requisitions" triggers="click" [autoClose]="'outside'" container="body" placement="auto" aria-label="Show counted requisitions">{{ row.count ?? '–' }}</button>
                   </td>
                   <td>{{ (row.totalRequestedQuantity | number:'1.0-4') ?? '–' }}</td>
-                  <td [class.remaining-quantity-negative]="(row.totalRemainingQuantity ?? 0) < 0">{{ (row.totalRemainingQuantity | number:'1.0-4') ?? '–' }}</td>
+                  <td><span [ngStyle]="requisitionTotalRemainingBadgeStyle(row.totalRemainingQuantity)">{{ (row.totalRemainingQuantity | number:'1.0-4') ?? '–' }}</span></td>
                   <td>
                     @if (addedLine) {
                       <div class="g-scrollable-text sm" [title]="addedLine.Remarks || ''">{{ addedLine.Remarks || '-' }}</div>
@@ -539,7 +539,7 @@
       <span>Current Acknowledged Quantity <strong class="text-black">{{ line.Quantity }}</strong></span>
       <span class="text-muted" aria-hidden="true">|</span>
       <span>
-        <strong [style.color]="line.RemainingQuantity == null || line.RemainingQuantity === 0 ? null : (line.RemainingQuantity < 0 ? '#b91c1c' : (line.RemainingQuantity < 0.5 ? '#047857' : '#856404'))">
+        <strong [ngStyle]="requisitionRemainingBadgeStyle(line.RemainingQuantity)">
           {{ line.RemainingQuantity == null ? '–' : (line.RemainingQuantity < 0 ? -line.RemainingQuantity : line.RemainingQuantity) }}
         </strong>
         Production Remaining (Packing Stock)

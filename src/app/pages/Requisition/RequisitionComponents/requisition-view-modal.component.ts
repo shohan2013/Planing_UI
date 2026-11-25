@@ -22,6 +22,8 @@ import { CommonService } from 'src/app/core/services/Common/CommonService';
 import { RequisitionService } from 'src/app/core/services/Requisition/requisition.service';
 import { getDocumentStatusClass } from 'src/app/core/model/document-status';
 
+import { requisitionRemainingBadgeStyle, requisitionTotalRemainingBadgeStyle } from 'src/app/shared/utils/requisition-quantity-badge.styles';
+
 type ViewModalState = 'loading' | 'ready' | 'failed';
 
 @Component({
@@ -35,6 +37,8 @@ type ViewModalState = 'loading' | 'ready' | 'failed';
 
 })
 export class RequisitionViewModalComponent implements OnInit {
+
+
   
   @Input({ required: true })
   header!: IViewRequisitionHeader;
@@ -42,6 +46,10 @@ export class RequisitionViewModalComponent implements OnInit {
   private readonly stateSignal = signal<ViewModalState>('loading');
 
   private readonly linesSignal = signal<IViewRequisitionLine[]>([]);
+
+  
+      readonly requisitionRemainingBadgeStyle = requisitionRemainingBadgeStyle;
+      readonly requisitionTotalRemainingBadgeStyle = requisitionTotalRemainingBadgeStyle;
 
 
   readonly lineSearch = signal('');

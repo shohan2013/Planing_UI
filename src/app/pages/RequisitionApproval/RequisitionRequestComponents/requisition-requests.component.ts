@@ -13,6 +13,8 @@ import { IRequisitionRequestNotification } from 'src/app/core/model/RequisitionA
 import { RequisitionService } from 'src/app/core/services/Requisition/requisition.service';
 import { RequisitionApprovalService } from 'src/app/core/services/RequisitionApproval/requisition-approval.service';
 
+import { requisitionRemainingBadgeStyle, requisitionTotalRemainingBadgeStyle } from 'src/app/shared/utils/requisition-quantity-badge.styles';
+
 interface HistoryBatch {
   request: IRequisitionLineHistory;
   actionTakers: IRequisitionLineHistory[];
@@ -26,10 +28,16 @@ interface HistoryBatch {
   styleUrl: './requisition-requests.component.scss',
 })
 export class RequisitionRequestsComponent implements OnInit {
+
+
   @Input({ required: true }) header!: IRequisitionApprovalHeader | IRequisitionRequestNotification;
   @Input() documentStatuses: IDropdownBind[] = [];
 
   readonly getDocStatusClass = getDocumentStatusClass;
+
+    readonly requisitionRemainingBadgeStyle = requisitionRemainingBadgeStyle;
+    readonly requisitionTotalRemainingBadgeStyle = requisitionTotalRemainingBadgeStyle;
+    
   readonly lines = signal<IViewRequisitionLine[]>([]);
   readonly lineSearch = signal('');
   readonly loadingLines = signal(false);
