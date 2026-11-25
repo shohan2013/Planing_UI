@@ -84,7 +84,7 @@ export class MachineScheduleDialog {
   /** One pill per machine, with its upcoming jobs and clashes with the card's slot. */
   readonly pills = computed<IMachinePill[]>(() => {
     const ctx = this.context();
-    const now = this.now();
+    const from = this.from();
     const s = parseLocal(ctx?.slotStart);
     const e = parseLocal(ctx?.slotEnd);
     const slot = s !== null && e !== null && e > s ? { start: s, end: e } : null;
@@ -92,7 +92,7 @@ export class MachineScheduleDialog {
       const jobs = this.allJobs()
         .filter((j) => j.MachineId === machine.Id)
         .map((j) => ({ start: parseLocal(j.StartDate), end: parseLocal(j.EndDate) }))
-        .filter((j) => j.start !== null && j.end !== null && j.end > now);
+        .filter((j) => j.start !== null && j.end !== null && j.end > from);
       return {
         machine,
         jobCount: jobs.length,
@@ -102,6 +102,11 @@ export class MachineScheduleDialog {
   });
   /** "Now" is fixed when the schedule loads, so every figure uses the same instant. */
   readonly now = signal(Date.now());
+  /**
+   * Start of the schedule window: the card's requested start date/time (jobs
+   * are fetched and shown from there), or `now` when no start is set.
+   */
+  readonly from = computed(() => parseLocal(this.context()?.slotStart) ?? this.now());
   readonly tab = signal<ScheduleTab>('jobs');
 
   readonly hourTicks = ['00:00', '06:00', '12:00', '18:00', '24:00'];
@@ -109,7 +114,13 @@ export class MachineScheduleDialog {
 
   readonly summary = computed(() => {
     const ctx = this.context();
-    return buildSummary(this.jobs(), this.now(), ctx?.slotStart ?? null, ctx?.slotEnd ?? null);
+    return buildSummary(
+      this.jobs(),
+      this.now(),
+      ctx?.slotStart ?? null,
+      ctx?.slotEnd ?? null,
+      this.from(),
+    );
   });
   readonly timeline = computed(() => buildTimeline(this.summary(), this.isMulti() && this.isAllView()));
 
@@ -143,11 +154,13 @@ export class MachineScheduleDialog {
     this.now.set(now);
     this.loading.set(true);
     this.error.set(false);
+    // Fetch from the card's requested start date/time (`from`); the current
+    // time is only the fallback when no start is set yet.
     this.service
       .GetMachineSchedule({
         BusinessFlowConfigureId: ctx.businessFlowConfigureId,
         MachineIds: ctx.machines.map((m) => m.Id),
-        FromDate: toLocalInput(now),
+        FromDate: toLocalInput(this.from()),
         ExcludeJobId: ctx.excludeJobId,
       })
       .pipe(

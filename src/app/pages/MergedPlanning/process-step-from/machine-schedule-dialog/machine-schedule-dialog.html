@@ -12,7 +12,11 @@
       <span class="msd-title-sep">·</span> Schedule
     </h5>
     <p class="msd-subtitle">
+      @if (s.from !== s.now) {
+      From <strong>{{ s.from | date: 'dd MMM yyyy, hh:mm a' }}</strong>
+      } @else {
       Now <strong>{{ s.now | date: 'dd MMM yyyy, hh:mm a' }}</strong>
+      }
       @if (s.jobs.length) {
       <i class="fa-solid fa-arrow-right-long"></i>
       last planned job ends
@@ -321,7 +325,7 @@
   <div class="msd-empty">
     <i class="fa-regular fa-calendar-check"></i>
     No jobs planned on {{ isMulti() && isAllView() ? 'the selected machines' :
-    'this machine' }} from now on — {{ isMulti() && isAllView() ? 'they are' :
+    'this machine' }} from {{ s.from !== s.now ? (s.from | date: 'dd MMM, hh:mm a') : 'now' }} on — {{ isMulti() && isAllView() ? 'they are' :
     "it's" }} free.
   </div>
   } } @else {

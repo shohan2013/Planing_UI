@@ -264,6 +264,15 @@ export class MergedPlanningView implements OnInit, OnDestroy {
     };
   }
 
+  /** Item label for warnings, e.g. "Product A (Size 10) - Taken Qty: 50 KG". */
+  private describeLine(planLine: IProductionPlanLine): string {
+    const line = this.lines().find((l) => l.Id === planLine.DoStatusLineId);
+    const name = line?.ProductName || `Item #${planLine.DoStatusLineId}`;
+    const size = planLine.Size ? ` (${planLine.Size})` : '';
+    const uom = planLine.UOM ? ` ${planLine.UOM}` : '';
+    return `${name}${size} - Taken Qty: ${planLine.TakenQuantity}${uom}`;
+  }
+
   /** Count of desk steps still missing Start/End Date, a valid range, or a Machine. */
   private countIncompleteSteps(): number {
     return this.processStepState
@@ -285,22 +294,40 @@ export class MergedPlanningView implements OnInit, OnDestroy {
     }
 
     const header = this.buildProductionPlanHeaderToSave();
-    const lines = this.buildProductionPlanLinesToSave();
+    const takenLines = this.buildProductionPlanLinesToSave();
 
-    if (lines.length === 0) {
+    if (takenLines.length === 0) {
       this.toastr.error(
         'Enter a valid Taken Qty for at least one item before saving.',
       );
       return;
     }
 
-    const hasAnyValidStep = lines.some(
+    // Items with a Taken Qty but no valid step on the Planning Desk are not
+    // sent to the API; the user is warned about them below.
+    const lines = takenLines.filter(
       (line) => (line.ProductionPlanConfigures?.length ?? 0) > 0,
     );
+    const unplannedLines = takenLines.filter(
+      (line) => (line.ProductionPlanConfigures?.length ?? 0) === 0,
+    );
 
-    if (!hasAnyValidStep) {
-      this.toastr.error('Plan at least one valid process step before saving.');
+    if (lines.length === 0) {
+      this.toastr.error(
+        'You have taken quantity but not planned any valid process step on the Planning Desk. Plan at least one item before saving.',
+      );
       return;
+    }
+
+    if (unplannedLines.length > 0) {
+      const itemList = unplannedLines
+        .map((line) => `• ${this.describeLine(line)}`)
+        .join('\n');
+      const proceed = confirm(
+        `${unplannedLines.length} item(s) have Taken Qty but no process step planned on the Planning Desk:\n\n${itemList}\n\nThese items will NOT be saved. Do you want to continue and save only the planned items?`,
+      );
+
+      if (!proceed) return;
     }
 
     const incompleteCount = this.countIncompleteSteps();

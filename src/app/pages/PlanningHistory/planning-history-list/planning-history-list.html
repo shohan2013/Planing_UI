@@ -76,14 +76,16 @@
 
           <tr>
             <!-- Serial -->
-            <td class="g-sl-column">{{ (currentPage() - 1) * pageSize() + i + 1 }}</td>
+            <td class="g-sl-column">
+              {{ (currentPage() - 1) * pageSize() + i + 1 }}
+            </td>
 
             <!-- PP No -->
             <td>{{ item.PPNO }}</td>
 
             <!-- DO Code -->
             <td>
-              <strong class="do-code"> {{ item.DOCode }} </strong>
+              <strong class="do-code"> {{ item.MergeCode }} </strong>
             </td>
 
             <!-- Created Date -->
@@ -93,10 +95,16 @@
             <td>{{ item.CreatedBy }}</td>
 
             <!-- Unit -->
-            <td><div class="g-truncate" [title]="item.Unit">{{ item.Unit }}</div></td>
+            <td>
+              <div class="g-truncate" [title]="item.Unit">{{ item.Unit }}</div>
+            </td>
 
             <!-- Business -->
-            <td><div class="g-truncate" [title]="item.Business">{{ item.Business }}</div></td>
+            <td>
+              <div class="g-truncate" [title]="item.Business">
+                {{ item.Business }}
+              </div>
+            </td>
 
             <!-- Document Status -->
             <td>

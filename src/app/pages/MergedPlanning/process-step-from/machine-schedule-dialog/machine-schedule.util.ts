@@ -135,7 +135,9 @@ export interface IScheduledJobView {
 
 export interface IScheduleSummary {
   now: number;
-  /** End of the last planned job (or `now` when nothing is planned). */
+  /** Start of the schedule window: the requested start date/time, or `now` when none is set. */
+  from: number;
+  /** End of the last planned job (or `from` when nothing is planned). */
   lastEnd: number;
   /** First minute a slot can start after the last planned job (one minute after it). */
   openFrom: number;
@@ -143,9 +145,9 @@ export interface IScheduleSummary {
   busy: IInterval[];
   bookedMs: number;
   freeMs: number;
-  /** 0..100, booked share of now -> last planned job. */
+  /** 0..100, booked share of from -> last planned job. */
   loadPct: number;
-  /** Free gaps between now and the last planned job. */
+  /** Free gaps between from and the last planned job. */
   freeSlots: IInterval[];
   slot: IInterval | null;
   /** Jobs the user's slot overlaps. */
@@ -159,6 +161,8 @@ export function buildSummary(
   now: number,
   slotStart: string | null,
   slotEnd: string | null,
+  /** Window start (requested start date/time); defaults to `now`. */
+  from: number = now,
 ): IScheduleSummary {
   const s = parseLocal(slotStart);
   const e = parseLocal(slotEnd);
@@ -172,7 +176,7 @@ export function buildSummary(
     }))
     .filter(
       (j): j is { job: IMachineJob; start: number; end: number } =>
-        j.start !== null && j.end !== null && j.end > j.start && j.end > now,
+        j.start !== null && j.end !== null && j.end > j.start && j.end > from,
     )
     .sort((a, b) => a.start - b.start)
     .map(({ job, start, end }) => ({
@@ -188,29 +192,30 @@ export function buildSummary(
   const busy = mergeIntervals(
     jobs.map((j) => ({ start: j.start, end: j.end })),
   );
-  const lastEnd = busy.length ? Math.max(now, busy[busy.length - 1].end) : now;
-  const windowMs = lastEnd - now;
+  const lastEnd = busy.length ? Math.max(from, busy[busy.length - 1].end) : from;
+  const windowMs = lastEnd - from;
   const bookedMs = busy.reduce(
-    (sum, b) => sum + overlapMs(b, { start: now, end: lastEnd }),
+    (sum, b) => sum + overlapMs(b, { start: from, end: lastEnd }),
     0,
   );
   const conflicts = jobs.filter((j) => j.conflictMs > 0);
 
   return {
     now,
+    from,
     lastEnd,
-    openFrom: busy.length ? ceilMinute(lastEnd) + SLOT_GAP_MS : ceilMinute(now),
+    openFrom: busy.length ? ceilMinute(lastEnd) + SLOT_GAP_MS : ceilMinute(from),
     jobs,
     busy,
     bookedMs,
     freeMs: Math.max(0, windowMs - bookedMs),
     loadPct: windowMs > 0 ? Math.round((bookedMs / windowMs) * 100) : 0,
-    freeSlots: freeGaps(busy, now, lastEnd),
+    freeSlots: freeGaps(busy, from, lastEnd),
     slot,
     conflicts,
     suggestion:
       slot && conflicts.length
-        ? earliestFit(busy, now, slot.end - slot.start)
+        ? earliestFit(busy, from, slot.end - slot.start)
         : null,
   };
 }
@@ -262,10 +267,13 @@ export function buildTimeline(
   summary: IScheduleSummary,
   showMachine = false,
 ): { rows: ITimelineRow[]; truncated: boolean } {
-  const { now, lastEnd, jobs, slot, suggestion } = summary;
-  const first = startOfDay(now);
+  const { now, from, lastEnd, jobs, slot, suggestion } = summary;
+  // Full days from the requested start's day through today (and on to the
+  // last planned job / slot).
+  const first = startOfDay(from);
+  const today = startOfDay(now);
   const lastPoint = Math.max(lastEnd, slot?.end ?? 0, suggestion?.end ?? 0);
-  const lastDay = startOfDay(Math.max(now, lastPoint - 1));
+  const lastDay = startOfDay(Math.max(now, from, lastPoint - 1));
   const lastPlanDay = jobs.length ? startOfDay(lastEnd - 1) : null;
 
   const rows: ITimelineRow[] = [];
@@ -276,7 +284,7 @@ export function buildTimeline(
       break;
     }
     const dayEnd = addDays(day, 1);
-    const isToday = day === first;
+    const isToday = day === today;
     const segments: ITimelineSegment[] = [];
     const push = (
       kind: SegmentKind,
@@ -288,7 +296,8 @@ export function buildTimeline(
       if (pos) segments.push({ kind, ...pos, label, title });
     };
 
-    if (isToday) push('past', { start: day, end: now });
+    // Shade time already gone (whole earlier days, and today up to now).
+    if (day <= today) push('past', { start: day, end: now });
     if (lastPlanDay !== null && day === lastPlanDay)
       push(
         'open',

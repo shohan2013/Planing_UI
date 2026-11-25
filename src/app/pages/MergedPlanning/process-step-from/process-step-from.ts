@@ -9,6 +9,7 @@ import {
   Output,
   SimpleChanges,
   ViewChild,
+  effect,
   inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -24,7 +25,12 @@ import {
   MachineBusyAction,
 } from 'src/app/core/model/MergedPlanning/machine-schedule-model';
 
-import { IMachineAvailabilityHost, IMachineSlot, MachineAvailability } from './machine-availability';
+import {
+  IMachineAvailabilityHost,
+  IMachineSlot,
+  MachineAvailability,
+  MachineAvailabilityState,
+} from './machine-availability';
 
 @Component({
   selector: 'app-process-step-from',
@@ -54,6 +60,12 @@ export class ProcessStepFrom implements OnInit, OnChanges, IMachineAvailabilityH
   @Input() excludeJobId: number | null = null;
 
   @Output() formValueChange = new EventEmitter<IProcessStepInput | null>();
+  /** Machine availability of this card's slot, so the parent can block saving while busy. */
+  @Output() availabilityChange = new EventEmitter<MachineAvailabilityState>();
+
+  constructor() {
+    effect(() => this.availabilityChange.emit(this.availability()));
+  }
 
   form = new FormGroup({
     machineIds: new FormControl<number[]>([], { nonNullable: true }),

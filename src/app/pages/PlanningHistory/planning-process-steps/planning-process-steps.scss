@@ -97,6 +97,35 @@
   color: #6c757d;
 }
 
+/* Allocated Time slightly narrower than half, so Machine (long names) gets
+   the extra width. Dates stay 50/50: End spans the last two columns. */
+.pps-card-wrap ::ng-deep {
+  .step-fields-grid {
+    grid-template-columns: calc(50% - 5px) calc(50% - 5px - 128px - 10px) 128px;
+  }
+
+  .field-start {
+    grid-column: 1;
+  }
+
+  .field-end {
+    grid-column: 2 / 4;
+  }
+
+  .field-machine {
+    grid-column: 1 / 3;
+  }
+
+  .field-time {
+    grid-column: 3;
+  }
+
+  .allocated-time-breakdown {
+    gap: 6px;
+    padding: 5px 6px;
+  }
+}
+
 .pps-card-not-ready ::ng-deep .step-card-header {
   cursor: default;
 }

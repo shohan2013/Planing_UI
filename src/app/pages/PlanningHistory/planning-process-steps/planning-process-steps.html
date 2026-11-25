@@ -45,6 +45,7 @@
         [initialValue]="initialValueFor(step.Id)"
         [excludeJobId]="savedJobIdFor(step.Id)"
         (formValueChange)="onFormChange($event, step.Id)"
+        (availabilityChange)="stepAvailabilityChange.emit({ stepId: step.Id, state: $event })"
       ></app-process-step-from>
 
       <button

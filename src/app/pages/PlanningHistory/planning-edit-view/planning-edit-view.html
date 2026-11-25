@@ -18,7 +18,7 @@
       <path d="M8 12h3l-1 2 3-3-1-2h3"></path>
     </svg>
     Edit Production Plan for @if (header()) {
-    <span class="do-code ms-2">{{ header()!.DOCode }}</span>
+    <span class="do-code ms-2">{{ header()!.PPNO }}</span>
     }
   </h5>
 
@@ -69,9 +69,33 @@
         </span>
       </div>
 
-      <div class="mpv-detail-item">
+      <!-- <div class="mpv-detail-item">
         <span class="mpv-detail-label">PP No</span>
         <span class="mpv-detail-value">{{ header()!.PPNO }}</span>
+      </div> -->
+
+      <div class="mpv-detail-item">
+        <span class="mpv-detail-label">Merge Code</span>
+        <span class="mpv-detail-value">{{ header()!.MergeCode || '-' }}</span>
+      </div>
+
+      <div class="mpv-detail-item">
+        <span class="mpv-detail-label">Work Type</span>
+        <span class="mpv-detail-value">{{ header()!.WorkType || '-' }}</span>
+      </div>
+
+      <div class="mpv-detail-item">
+        <span class="mpv-detail-label">Merge Policy</span>
+        <span class="mpv-detail-value">
+          @if (header()!.MergePolicy) {
+          <span class="policy-badge">
+            <i class="fa-solid fa-sliders"></i>
+            {{ header()!.MergePolicy }}
+          </span>
+          } @else {
+          <span class="text-muted">-</span>
+          }
+        </span>
       </div>
 
       <div class="mpv-detail-item">
@@ -136,10 +160,7 @@
               <div class="mpv-item-caption">
                 <div class="mpv-product-name">{{ line.ProductName }}</div>
                 <div class="mpv-product-meta">
-                  Product ID: {{ line.ProductId }} &nbsp;•&nbsp; {{ line.UOM }}
-                  &nbsp;•&nbsp; Qty: {{ line.Quantity | number:
-                  '1.2-2' }} &nbsp;•&nbsp; Rate: {{ line.Rate | number: '1.2-2'
-                  }}
+                  UOM: {{ line.UOM ?? '-' }}
                 </div>
               </div>
 
@@ -147,6 +168,7 @@
                 [line]="line"
                 [priorities]="priorities()"
                 [recipeVersions]="recipeVersions()"
+                [subtractPlannedQty]="false"
               ></app-item-planning-fields>
             </td>
             <td class="text-start align-top mpv-process-cell">
@@ -161,6 +183,7 @@
                 [savedSteps]="line.Steps ?? []"
                 (GetSteps)="loadProductionSteps()"
                 (stepAdded)="loadMachine($event)"
+                (stepAvailabilityChange)="onStepAvailability(line.Id, $event.stepId, $event.state)"
               ></app-planning-process-steps>
             </td>
           </tr>
