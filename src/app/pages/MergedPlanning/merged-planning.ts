@@ -15,7 +15,11 @@ import {
   ServerQueryResponse,
 } from 'src/app/core/model/Common/Pagination/ServerQueryRequest';
 import { IUnit } from 'src/app/core/model/Common/Unit/Unit';
-import { IMergedPlanning } from 'src/app/core/model/MergedPlanning/merged-planning-model';
+import {
+  IMergedPlanningLanding,
+  IOriginalDOInformation,
+} from 'src/app/core/model/MergedPlanning/merged-planning-landing-model';
+import { DeliveryOrderView } from '../SalesOrder/sales-order-view/sales-order-view';
 import { ServerSideFilteredPaginatedComponent } from 'src/app/core/server-side-filtered-paginated/server-side-filtered-paginated.component';
 import { CommonService } from 'src/app/core/services/Common/CommonService';
 import { MergedPlanningServices } from 'src/app/core/services/MergedPlanning/merged-planning-services';
@@ -27,12 +31,18 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 @Component({
   selector: 'app-merged-planning',
   standalone: true,
-  imports: [FormsModule, DateTimePipe, PaginationComponent, MergedPlanningView],
+  imports: [
+    FormsModule,
+    DateTimePipe,
+    PaginationComponent,
+    MergedPlanningView,
+    DeliveryOrderView,
+  ],
   templateUrl: './merged-planning.html',
   styleUrl: './merged-planning.scss',
 })
 export class MergedPlanning
-  extends ServerSideFilteredPaginatedComponent<IMergedPlanning>
+  extends ServerSideFilteredPaginatedComponent<IMergedPlanningLanding>
   implements OnInit, OnDestroy
 {
   private destroy$ = new Subject<void>();
@@ -63,7 +73,7 @@ export class MergedPlanning
 
   protected override fetchData(
     request: ServerQueryRequest,
-  ): Observable<ServerQueryResponse<IMergedPlanning>> {
+  ): Observable<ServerQueryResponse<IMergedPlanningLanding>> {
     return this.mergedPlanningService
       .GetMergedPlanning(request, this.selectedUnitId, this.selectedBusinessId)
       .pipe(
@@ -104,7 +114,40 @@ export class MergedPlanning
       });
   }
 
-  openPlanning(item: IMergedPlanning): void {
+  /* ---------- Original DO / Requisition codes ---------- */
+
+  /** How many original codes are shown before the "+N" toggle. */
+  readonly originalCodeLimit = 2;
+  /** Row ids whose original-code list is expanded. */
+  expandedOriginalRows = signal<Set<number>>(new Set());
+
+  isOriginalExpanded(id: number): boolean {
+    return this.expandedOriginalRows().has(id);
+  }
+
+  toggleOriginalCodes(id: number): void {
+    this.expandedOriginalRows.update((set) => {
+      const next = new Set(set);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
+  /* ---------- Original DO / Requisition view (reuses DeliveryOrderView) ---------- */
+
+  originalSoid = signal<number | null>(null);
+  originalWorkTypeCode = signal('DO');
+
+  openOriginalOrder(original: IOriginalDOInformation, item: IMergedPlanningLanding): void {
+    this.originalWorkTypeCode.set(item.WorkTypeCode || 'DO');
+    this.originalSoid.set(original.ID);
+  }
+
+  closeOriginalOrder(): void {
+    this.originalSoid.set(null);
+  }
+
+  openPlanning(item: IMergedPlanningLanding): void {
     this.selectedHeaderId.set(item.Id);
     this.modalService.open(this.mergedPlanningViewModal, {
       scrollable: true,

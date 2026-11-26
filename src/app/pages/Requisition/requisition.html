@@ -1,7 +1,14 @@
 <div class="user-card">
   <div class="page-header">
     <h5>
-      <i class= "fa-brands fa-instalod" style="color: rgb(79, 171, 89); font-size: 17px;  transform: translateY(0px);"></i>
+      <i
+        class="fa-brands fa-instalod"
+        style="
+          color: rgb(79, 171, 89);
+          font-size: 17px;
+          transform: translateY(0px);
+        "
+      ></i>
       <b>REQUISITION</b>
     </h5>
   </div>
@@ -106,7 +113,7 @@
             <th>REQUISITION NUMBER</th>
             <th>UNIT</th>
             <th>BUSINESS</th>
-            
+
             <th>REMARKS</th>
             <th>CREATED BY</th>
             <th>CREATED DATE</th>
@@ -141,14 +148,24 @@
           <tr>
             <td>{{ item.RequisitionNumber || '-' }}</td>
 
-            <td>{{ item.UnitName || '-' }}</td>
+            <td>
+              <div class="g-truncate" [title]="item.UnitName || '-'">
+                {{ item.UnitName || '-' }}
+              </div>
+            </td>
 
-            <td>{{ item.BusinessName || '-' }}</td>
+            <td>
+              <div class="g-truncate" [title]="item.BusinessName || '-'">
+                {{ item.BusinessName || '-' }}
+              </div>
+            </td>
 
-           
+            <td>
+              <div class="g-scrollable-text md" [title]="item.Remarks || ''">
+                {{ item.Remarks || '-' }}
+              </div>
+            </td>
 
-            <td><div class="g-scrollable-text md" [title]="item.Remarks || ''">{{ item.Remarks || '-' }}</div></td>
-            
             <td>{{ item.CreatedByName ?? '-' }}</td>
 
             <td>
@@ -156,7 +173,11 @@
             </td>
 
             <td>
-              <span class="g-status" [ngClass]="getDocStatusClass(item.DocStatusId)">{{ getDocStatusName(item.DocStatusId) }}</span>
+              <span
+                class="g-status"
+                [ngClass]="getDocStatusClass(item.DocStatusId)"
+                >{{ getDocStatusName(item.DocStatusId) }}</span
+              >
             </td>
 
             <td class="g-action-column">
@@ -185,17 +206,22 @@
                   [disabled]="deletingReqId() !== null || isClosedForEditing(item)"
                   (click)="openEditModal(item)"
                 >
-
                   @if (item.IsEditable) {
-                    <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
+                  <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
                   } @else {
-                    <span class="d-inline-block align-middle" aria-hidden="true"
-                      style="width: 16px; height: 16px; background-color: currentColor;
-                            mask: url('assets/icons/requisition-pencil-clock.svg') center / contain no-repeat;">
-                    </span>
+                  <span
+                    class="d-inline-block align-middle"
+                    aria-hidden="true"
+                    style="
+                      width: 16px;
+                      height: 16px;
+                      background-color: currentColor;
+                      mask: url(&quot;assets/icons/requisition-pencil-clock.svg&quot;)
+                        center / contain no-repeat;
+                    "
+                  >
+                  </span>
                   }
-
-
                 </button>
 
                 <button
@@ -221,13 +247,10 @@
                   <i class="fa-solid fa-trash-can"></i>
                   }
                 </button>
-
-                
               </div>
             </td>
           </tr>
-          }
-        }
+          } }
         </tbody>
       </table>
     </div>

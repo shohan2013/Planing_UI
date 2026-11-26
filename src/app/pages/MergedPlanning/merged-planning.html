@@ -26,17 +26,21 @@
       <table class="custom-table">
         <thead>
           <tr>
-            <th style="width: 50px">#</th>
+            <th class="g-sl-column">#</th>
 
-            <th>DO CODE</th>
+            <th>CODE</th>
+
+            <th>ORIGINAL DO / REQ</th>
+
+            <th>MERGE POLICY</th>
 
             <th>CREATED DATE</th>
 
             <th>CREATED BY</th>
 
-            <th>UNIT</th>
+            <th class="g-fit-column" style="--g-col-min: 110px">UNIT</th>
 
-            <th>BUSINESS</th>
+            <th class="g-fit-column" style="--g-col-min: 110px">BUSINESS</th>
 
             <th>TYPE</th>
 
@@ -52,7 +56,7 @@
           @if (isLoading()) {
 
           <tr>
-            <td colspan="10" class="text-center py-4">
+            <td colspan="12" class="text-center py-4">
               <span
                 class="spinner-border spinner-border-sm me-2"
                 aria-hidden="true"
@@ -65,7 +69,7 @@
           } @else if (paginatedItems().length === 0) {
 
           <tr>
-            <td colspan="10" class="text-center py-4">
+            <td colspan="12" class="text-center py-4">
               <i class="fas fa-folder-open fa-4x text-secondary mb-3"></i>
 
               <br />
@@ -79,11 +83,60 @@
 
           <tr>
             <!-- Serial -->
-            <td>{{ (currentPage() - 1) * pageSize() + i + 1 }}</td>
+            <td class="g-sl-column">
+              {{ (currentPage() - 1) * pageSize() + i + 1 }}
+            </td>
 
             <!-- DO Code -->
             <td>
               <strong class="do-code"> {{ item.DOCode }} </strong>
+            </td>
+
+            <!-- Original DO / REQ codes -->
+            <td>
+              @let originals = item.OriginalDOInformation ?? [];
+              @if (originals.length === 0) {
+              <span class="text-muted">-</span>
+              } @else {
+              <div class="original-codes">
+                @for (original of originals; track original.ID; let o = $index) {
+                @if (o < originalCodeLimit || isOriginalExpanded(item.Id)) {
+                <button
+                  type="button"
+                  class="original-code"
+                  [title]="'View ' + original.Code"
+                  (click)="openOriginalOrder(original, item)"
+                >
+                  {{ original.Code }}
+                </button>
+                } }
+                @if (originals.length > originalCodeLimit) {
+                <button
+                  type="button"
+                  class="original-code-more"
+                  (click)="toggleOriginalCodes(item.Id)"
+                >
+                  {{
+                    isOriginalExpanded(item.Id)
+                      ? 'Show less'
+                      : '+' + (originals.length - originalCodeLimit) + ' more'
+                  }}
+                </button>
+                }
+              </div>
+              }
+            </td>
+
+            <!-- Merge Policy -->
+            <td>
+              @if (item.MergePolicy) {
+              <span class="policy-badge">
+                <i class="fa-solid fa-sliders"></i>
+                {{ item.MergePolicy }}
+              </span>
+              } @else {
+              <span class="text-muted">-</span>
+              }
             </td>
 
             <!-- Created Date -->
@@ -93,10 +146,16 @@
             <td>{{ item.DocumentCreatedBy }}</td>
 
             <!-- Unit -->
-            <td>{{ item.Unit }}</td>
+            <td>
+              <div class="g-truncate" [title]="item.Unit">{{ item.Unit }}</div>
+            </td>
 
             <!-- Business -->
-            <td>{{ item.Business }}</td>
+            <td>
+              <div class="g-truncate" [title]="item.Business">
+                {{ item.Business }}
+              </div>
+            </td>
 
             <!-- Type -->
             <td>
@@ -176,6 +235,14 @@
     </div>
   </div>
 </div>
+
+<!-- Original DO / Requisition view (shared component) -->
+<app-delivery-order-view
+  [isOpen]="!!originalSoid()"
+  [soid]="originalSoid()"
+  [workTypeCode]="originalWorkTypeCode()"
+  (closeView)="closeOriginalOrder()"
+></app-delivery-order-view>
 
 <!-- NEW: Merged Planning View, opened as an NgbModal via openPlanning() -
      same ng-template + modalService.open() pattern as viewRequisitionModal -->

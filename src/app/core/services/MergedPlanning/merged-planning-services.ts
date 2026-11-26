@@ -7,10 +7,8 @@ import {
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { GlobalConstant } from '../../constants/global.constants';
-import {
-  IMergedPlanning,
-  IMergedPlanningDetails,
-} from '../../model/MergedPlanning/merged-planning-model';
+import { IMergedPlanningDetails } from '../../model/MergedPlanning/merged-planning-model';
+import { IMergedPlanningLanding } from '../../model/MergedPlanning/merged-planning-landing-model';
 import {
   IProductionPlanHeader,
   IProductionPlanLine,
@@ -28,8 +26,8 @@ export class MergedPlanningServices {
     request: ServerQueryRequest,
     unitId: Number,
     BusinessesId: Number,
-  ): Observable<ServerQueryResponse<IMergedPlanning>> {
-    return this.http.get<ServerQueryResponse<IMergedPlanning>>(
+  ): Observable<ServerQueryResponse<IMergedPlanningLanding>> {
+    return this.http.get<ServerQueryResponse<IMergedPlanningLanding>>(
       `${environment.API_URL}${GlobalConstant.API_END_POINTS.MergedPlanning}?GlobalSearch=${request.globalSearch}&PageIndex=${request.page}&PageSize=${request.pageSize}&UnitId=${unitId}&BusinessId=${BusinessesId}`,
     );
   }

@@ -26,6 +26,12 @@ export class ItemPlanningFields implements OnInit, OnChanges {
   @Input({ required: true }) line!: IMergedPlanningLine;
   @Input() priorities: IPriority[] = [];
   @Input() recipeVersions: IRecipe[] = [];
+  /**
+   * Subtract Planned Qty from Merged Qty before comparing with Taken Qty.
+   * On for merged planning (other plans already used that qty); off for the
+   * planning edit view, where PlannedQuantity includes the plan being edited.
+   */
+  @Input() subtractPlannedQty = true;
 
   form = new FormGroup({
     takenQty: new FormControl<number | null>(null),
@@ -77,27 +83,52 @@ export class ItemPlanningFields implements OnInit, OnChanges {
       },
     );
 
-    this.syncAdvanceQtyWithOverage();
+    this.syncAdvanceQtyOnLoad();
     this.updateState();
   }
 
-  /** Qty already covered by other saved plans for this DO line. */
+  /**
+   * On load, an Advance Qty that came with the line (a saved plan) is shown
+   * as-is; otherwise it's calculated from Taken Qty. After load, every Taken
+   * Qty change recalculates it (see syncAdvanceQtyWithOverage).
+   */
+  private syncAdvanceQtyOnLoad(): void {
+    const saved = this.line.AdvanceProductionQty ?? null;
+    if (saved === null) {
+      this.syncAdvanceQtyWithOverage();
+      return;
+    }
+
+    const advanceControl = this.form.controls.advanceProductionQty;
+    if (saved > 0) {
+      advanceControl.enable({ emitEvent: false });
+    } else {
+      advanceControl.disable({ emitEvent: false });
+    }
+    advanceControl.setValue(saved, { emitEvent: false });
+  }
+
+  /** Qty already covered by saved plans for this DO line. */
   get plannedQty(): number {
     return this.line.PlannedQuantity ?? 0;
   }
 
-  /** Qty on this DO line that is not yet committed to any plan. */
+  /**
+   * Qty Taken Qty can use before the rest becomes Advance Qty:
+   * Merged Qty - Planned Qty, or just Merged Qty when subtractPlannedQty is off.
+   */
   get availableQty(): number {
-    return Math.max(0, this.line.Quantity - this.plannedQty);
+    const planned = this.subtractPlannedQty ? this.plannedQty : 0;
+    return Math.max(0, this.line.Quantity - planned);
   }
 
-  /** Live "what's left" as the user types Taken Qty — floored at 0 for display. */
+  /** Remaining Qty = available Qty - Taken Qty, floored at 0 for display. */
   get remainingQty(): number {
     const takenQty = this.form.controls.takenQty.value ?? 0;
     return Math.max(0, this.availableQty - takenQty);
   }
 
-  /** Portion of Taken Qty that overshoots what's actually remaining. */
+  /** Advance Qty: how far Taken Qty goes over the available Qty (0 when it doesn't). */
   get overageQty(): number {
     if (this.isTakenQtyInvalid) return 0;
 

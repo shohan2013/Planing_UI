@@ -7,7 +7,6 @@ import {
   Output,
   signal,
 } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { DateTimePipe } from 'src/app/shared/pipes/date-time-pipe';
@@ -47,7 +46,6 @@ import { IApiResponse } from 'src/app/core/model/Response/ApiResponse';
   standalone: true,
   imports: [
     DateTimePipe,
-    DecimalPipe,
     DragDropModule,
     ProductionSteps,
     ItemPlanningFields,
@@ -225,12 +223,14 @@ export class MergedPlanningView implements OnInit, OnDestroy {
           .sort((a, b) => a.orderNo - b.orderNo);
 
         return {
+          DoStatusLineId: line.Id,
           ProductId: line.ProductId,
           Quantity: line.Quantity,
-          UOM: line.UOMId,
+          UOMId: line.UOMId,
+          UOM: line.UOM ?? null,
+          Size: line.Size ?? null,
           TakenQuantity: item.TakenQty,
           AdvanceProductionQuantity: item.AdvanceProductionQty ?? 0,
-          Rate: line.Rate,
           RecipeVersionId: item.RecipeVersionId ?? 0,
           PriorityId: item.PriorityId ?? 0,
           //Remarks: null,
@@ -239,10 +239,9 @@ export class MergedPlanningView implements OnInit, OnDestroy {
             steps.length > 0
               ? steps.map((step) => ({
                   BusinessConfigureId: step.stepId,
-                  ProductId: line.ProductId,
                   StartDate: step.startDate,
                   EndDate: step.endDate,
-                  MachineId: step.machineId,
+                  MachineIds: [...step.machineIds],
                   OrderNo: step.orderNo,
                 }))
               : null,
@@ -259,8 +258,19 @@ export class MergedPlanningView implements OnInit, OnDestroy {
       DocCreatedBy: this.UserEnroll, // whatever your user ID source is
       BusinessId: header?.BusinessId ?? 0,
       UnitId: header?.UnitId ?? 0,
+      MergePolicyId: header?.MergePolicyId ?? 0,
+      WorkTypeId: header?.WorkTypeId ?? 0,
       //Remarks: null,
     };
+  }
+
+  /** Item label for warnings, e.g. "Product A (Size 10) - Taken Qty: 50 KG". */
+  private describeLine(planLine: IProductionPlanLine): string {
+    const line = this.lines().find((l) => l.Id === planLine.DoStatusLineId);
+    const name = line?.ProductName || `Item #${planLine.DoStatusLineId}`;
+    const size = planLine.Size ? ` (${planLine.Size})` : '';
+    const uom = planLine.UOM ? ` ${planLine.UOM}` : '';
+    return `${name}${size} - Taken Qty: ${planLine.TakenQuantity}${uom}`;
   }
 
   /** Count of desk steps still missing Start/End Date, a valid range, or a Machine. */
@@ -284,22 +294,40 @@ export class MergedPlanningView implements OnInit, OnDestroy {
     }
 
     const header = this.buildProductionPlanHeaderToSave();
-    const lines = this.buildProductionPlanLinesToSave();
+    const takenLines = this.buildProductionPlanLinesToSave();
 
-    if (lines.length === 0) {
+    if (takenLines.length === 0) {
       this.toastr.error(
         'Enter a valid Taken Qty for at least one item before saving.',
       );
       return;
     }
 
-    const hasAnyValidStep = lines.some(
+    // Items with a Taken Qty but no valid step on the Planning Desk are not
+    // sent to the API; the user is warned about them below.
+    const lines = takenLines.filter(
       (line) => (line.ProductionPlanConfigures?.length ?? 0) > 0,
     );
+    const unplannedLines = takenLines.filter(
+      (line) => (line.ProductionPlanConfigures?.length ?? 0) === 0,
+    );
 
-    if (!hasAnyValidStep) {
-      this.toastr.error('Plan at least one valid process step before saving.');
+    if (lines.length === 0) {
+      this.toastr.error(
+        'You have taken quantity but not planned any valid process step on the Planning Desk. Plan at least one item before saving.',
+      );
       return;
+    }
+
+    if (unplannedLines.length > 0) {
+      const itemList = unplannedLines
+        .map((line) => `• ${this.describeLine(line)}`)
+        .join('\n');
+      const proceed = confirm(
+        `${unplannedLines.length} item(s) have Taken Qty but no process step planned on the Planning Desk:\n\n${itemList}\n\nThese items will NOT be saved. Do you want to continue and save only the planned items?`,
+      );
+
+      if (!proceed) return;
     }
 
     const incompleteCount = this.countIncompleteSteps();
@@ -415,14 +443,14 @@ export class MergedPlanningView implements OnInit, OnDestroy {
       !!step.startDate &&
       !!step.endDate &&
       !this.isDeskStepDateRangeInvalid(step) &&
-      !!step.machineId
+      step.machineIds?.length > 0
     );
   }
 
-  getMachineName(stepId: number, machineId: number): string {
-    return (
-      this.machinesForStep(stepId).find((m) => m.Id === machineId)?.Name ??
-      `#${machineId}`
-    );
+  /** Names of a step's machines, comma separated. */
+  getMachineNames(stepId: number, machineIds: number[]): string {
+    return (machineIds ?? [])
+      .map((id) => this.machinesForStep(stepId).find((m) => m.Id === id)?.Name ?? `#${id}`)
+      .join(', ');
   }
 }

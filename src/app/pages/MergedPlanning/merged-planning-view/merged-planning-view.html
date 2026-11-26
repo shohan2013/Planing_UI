@@ -70,6 +70,25 @@
       </div>
 
       <div class="mpv-detail-item">
+        <span class="mpv-detail-label">Work Type</span>
+        <span class="mpv-detail-value">{{ header()!.WorkTypeCode || '-' }}</span>
+      </div>
+
+      <div class="mpv-detail-item">
+        <span class="mpv-detail-label">Merge Policy</span>
+        <span class="mpv-detail-value">
+          @if (header()!.MergePolicy) {
+          <span class="policy-badge">
+            <i class="fa-solid fa-sliders"></i>
+            {{ header()!.MergePolicy }}
+          </span>
+          } @else {
+          <span class="text-muted">-</span>
+          }
+        </span>
+      </div>
+
+      <div class="mpv-detail-item">
         <span class="mpv-detail-label">Unit</span>
         <span class="mpv-detail-value">{{ header()!.Unit }}</span>
       </div>
@@ -118,8 +137,7 @@
             <div>
               <div class="mpv-product-name">{{ line.ProductName }}</div>
               <div class="mpv-product-meta">
-                Product ID: {{ line.ProductId }} &nbsp;•&nbsp; UOM : {{ line.UOM }} &nbsp;•&nbsp; Rate: {{
-                line.Rate | number: '1.2-2' }}
+                UOM: {{ line.UOM ?? '-' }}
               </div>
             </div>
           </div>

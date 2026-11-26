@@ -34,6 +34,8 @@ export interface IViewRequisitionLine {
   UOMName: string;
   Quantity: number;
   RemainingQuantity: number | null;
+  TotalRequestedQuantity: number | null;
+  TotalRemainingQuantity: number | null;
   StockQuantity: number | null;
   SalesQuantity: number | null;
   Count: number;
@@ -42,6 +44,8 @@ export interface IViewRequisitionLine {
   Remarks: string | null;
   DocStatusId: number;
   IsActive: boolean;
+
+  CountedRequisitions: Record<string, string>;
 }
 
 

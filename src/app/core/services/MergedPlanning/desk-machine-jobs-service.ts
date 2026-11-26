@@ -54,31 +54,35 @@ export class DeskMachineJobsService {
       .processSteps()
       .filter(
         (step) =>
-          step.machineId === machineId &&
+          (step.machineIds ?? []).includes(machineId) &&
           !!step.startDate &&
           !!step.endDate &&
           !(step.lineId === self.lineId && step.stepId === self.stepId),
       )
-      .map((step) => this.toJob(step));
+      .map((step) => this.toJob(step, machineId));
   }
 
-  /** Desk steps on `machineId` that overlap [startDate, endDate]. */
-  overlappingJobs(machineId: number, startDate: string, endDate: string, self: IDeskStepRef): IMachineJob[] {
+  /** Desk steps on any of `machineIds` that overlap [startDate, endDate]. */
+  overlappingJobs(machineIds: number[], startDate: string, endDate: string, self: IDeskStepRef): IMachineJob[] {
     const start = new Date(startDate).getTime();
     const end = new Date(endDate).getTime();
-    return this.jobsOnMachine(machineId, self).filter(
-      (job) => new Date(job.StartDate).getTime() < end && new Date(job.EndDate).getTime() > start,
+    return machineIds.flatMap((machineId) =>
+      this.jobsOnMachine(machineId, self).filter(
+        (job) => new Date(job.StartDate).getTime() < end && new Date(job.EndDate).getTime() > start,
+      ),
     );
   }
 
-  private toJob(step: IProcessStepInput): IMachineJob {
+  private toJob(step: IProcessStepInput, machineId: number): IMachineJob {
     const line = this.lines().find((l) => l.Id === step.lineId);
     const item = this.itemPlanningState.items().find((x) => x.LineId === step.lineId);
     return {
       // Negative, so it never collides with a saved job id.
-      JobId: -(step.lineId * 10000 + step.stepId),
+      // Machine is part of the id: one desk step can run on several machines.
+      JobId: -(step.lineId * 100000000 + step.stepId * 10000 + machineId),
       JobNo: 'Unsaved',
-      ItemName: `${line?.ProductName ?? 'This plan'} · ${step.stepName}`,
+      MachineId: machineId,
+      ProductName: `${line?.ProductName ?? 'This plan'} · ${step.stepName}`,
       UOM: line?.UOM ?? '',
       PlannedQty: item?.TakenQty ?? line?.Quantity ?? 0,
       StartDate: step.startDate!,

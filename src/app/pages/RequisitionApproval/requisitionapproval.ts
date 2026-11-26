@@ -30,7 +30,7 @@ import { RequisitionRequestsComponent } from './RequisitionRequestComponents/req
 export class RequisitionApproval extends ServerSideFilteredPaginatedComponent<IRequisitionApprovalHeader> implements OnInit, OnDestroy {
   readonly PermissionAction = PermissionAction;
   selectedStatusId = 0;
-  selectedUnitFilterId: number | null = null;
+  selectedUnitFilterId: number | null = 0;
   selectedBusinessFilterId = 0;
   readonly units = signal<IUnit[]>([]);
   readonly businesses = signal<IBusiness[]>([]);

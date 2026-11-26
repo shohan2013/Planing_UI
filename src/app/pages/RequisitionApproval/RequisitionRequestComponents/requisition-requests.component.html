@@ -2,50 +2,76 @@
   <h5 id="resolve-requisition-title" class="modal-title">
     Requisition Request History · {{ header.RequisitionNumber }}
   </h5>
-  <button type="button" class="btn-close" aria-label="Close" [disabled]="deciding()" (click)="close()"></button>
+  <button
+    type="button"
+    class="btn-close"
+    aria-label="Close"
+    [disabled]="deciding()"
+    (click)="close()"
+  ></button>
 </div>
 
 <div class="modal-body">
   <div class="border rounded-3 p-3 mb-3 mt-2">
     <div class="d-flex justify-content-end align-items-center mb-2">
       <span class="fw-semibold me-2">Requisition Date</span>
-      <span>{{ (header.ReqDate | date: 'dd-MMM-yyyy') ?? '–' }}</span>
+      <span>{{ (header.ReqDate | date: "dd-MMM-yyyy") ?? "–" }}</span>
     </div>
 
     <div class="row g-3">
       <div class="col-md-4">
         <label class="form-label" for="resolve-unit">Unit</label>
         <select id="resolve-unit" class="form-select" disabled>
-          <option>{{ header.UnitName || '–' }}</option>
+          <option>{{ header.UnitName || "–" }}</option>
         </select>
       </div>
       <div class="col-md-4">
         <label class="form-label" for="resolve-business">Business</label>
         <select id="resolve-business" class="form-select" disabled>
-          <option>{{ header.BusinessName || '–' }}</option>
+          <option>{{ header.BusinessName || "–" }}</option>
         </select>
       </div>
       <div class="col-md-4">
         <label class="form-label" for="resolve-creator">Created By</label>
-        <input id="resolve-creator" class="form-control" [value]="header.CreatedByName || header.CREATEDBY || '–'" readonly />
+        <input
+          id="resolve-creator"
+          class="form-control"
+          [value]="header.CreatedByName || header.CREATEDBY || '–'"
+          readonly
+        />
       </div>
       <div class="col-md-4">
         <label class="form-label" for="resolve-start-date">Start Date</label>
-        <input id="resolve-start-date" class="form-control" [value]="(header.StartDate | date: 'dd-MMM-yyyy') ?? '–'" readonly />
+        <input
+          id="resolve-start-date"
+          class="form-control"
+          [value]="(header.StartDate | date: 'dd-MMM-yyyy') ?? '–'"
+          readonly
+        />
       </div>
       <div class="col-md-4">
         <label class="form-label" for="resolve-end-date">End Date</label>
-        <input id="resolve-end-date" class="form-control" [value]="(header.EndDate | date: 'dd-MMM-yyyy') ?? '–'" readonly />
+        <input
+          id="resolve-end-date"
+          class="form-control"
+          [value]="(header.EndDate | date: 'dd-MMM-yyyy') ?? '–'"
+          readonly
+        />
       </div>
       <div class="col-md-4">
         <span class="form-label d-block">Requisition Status</span>
-        <span class="g-status" [ngClass]="getDocStatusClass(header.DocStatusId)">
+        <span
+          class="g-status"
+          [ngClass]="getDocStatusClass(header.DocStatusId)"
+        >
           {{ getDocStatusName(header.DocStatusId) }}
         </span>
       </div>
       <div class="col-12">
         <span class="form-label d-block">Remarks</span>
-        <div class="g-scrollable-text full" [title]="header.Remarks || ''">{{ header.Remarks || '–' }}</div>
+        <div class="g-scrollable-text full" [title]="header.Remarks || ''">
+          {{ header.Remarks || "–" }}
+        </div>
       </div>
     </div>
   </div>
@@ -53,20 +79,34 @@
   @if (loadingLines()) {
     <p role="status" class="text-center py-4">Loading requisition lines…</p>
   } @else if (linesError()) {
-    <div class="alert alert-danger d-flex justify-content-between align-items-center" role="alert">
+    <div
+      class="alert alert-danger d-flex justify-content-between align-items-center"
+      role="alert"
+    >
       {{ linesError() }}
-      <button type="button" class="btn btn-danger btn-sm" (click)="loadLines()">Retry</button>
+      <button type="button" class="btn btn-danger btn-sm" (click)="loadLines()">
+        Retry
+      </button>
     </div>
   } @else {
     <div class="row g-2 align-items-center justify-content-between mx-0 mb-3">
       <div class="col-auto">
         <strong>Total Quantity</strong>
-        <span class="ms-2">{{ totalQuantity() | number:'1.0-4' }}</span>
+        <span class="ms-2">{{ totalQuantity() | number: "1.0-4" }}</span>
       </div>
       <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
         <div class="input-group">
-          <span class="input-group-text"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></span>
-          <input type="search" class="form-control" placeholder="Search product name or ID..." aria-label="Search requisition lines by product name or ID" [value]="lineSearch()" (input)="lineSearch.set($any($event.target).value)" />
+          <span class="input-group-text"
+            ><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i
+          ></span>
+          <input
+            type="search"
+            class="form-control"
+            placeholder="Search product name or ID..."
+            aria-label="Search requisition lines by product name or ID"
+            [value]="lineSearch()"
+            (input)="lineSearch.set($any($event.target).value)"
+          />
         </div>
       </div>
     </div>
@@ -99,28 +139,47 @@
               <td>{{ line.ProductTypeName }}</td>
               <td>{{ line.ItemId }}</td>
               <td>{{ line.ItemName }}</td>
-              <td>{{ line.Size?.trim() || '–' }}</td>
+              <td>{{ line.Size?.trim() || "–" }}</td>
               <td>{{ line.UOMName }}</td>
               <td>{{ line.Quantity }}</td>
               <td>
-                @if (line.RemainingQuantity != null) {
-                  <span class="remaining-quantity-badge" [class.remaining-quantity-green]="line.RemainingQuantity <= 0" [class.remaining-quantity-yellow]="line.RemainingQuantity > 0">
-                    {{ line.RemainingQuantity < 0 ? -line.RemainingQuantity : line.RemainingQuantity }}
+                @if (line.RemainingQuantity !== null) {
+                  <span
+                    [ngStyle]="
+                      requisitionRemainingBadgeStyle(line.RemainingQuantity)
+                    "
+                  >
+                    {{
+                      line.RemainingQuantity < 0
+                        ? -line.RemainingQuantity
+                        : line.RemainingQuantity
+                    }}
                   </span>
                 } @else {
                   –
                 }
               </td>
-              <td>{{ line.StockQuantity ?? '–' }}</td>
-              <td>{{ line.SalesQuantity ?? '–' }}</td>
-              <td [class.bg-warning-subtle]="(line.Priority ?? 0) > 0">{{ line.Priority ?? '–' }}</td>
+              <td>{{ line.StockQuantity ?? "–" }}</td>
+              <td>{{ line.SalesQuantity ?? "–" }}</td>
+              <td [class.bg-warning-subtle]="(line.Priority ?? 0) > 0">
+                {{ line.Priority ?? "–" }}
+              </td>
               <td>{{ line.Count }}</td>
               <td>
-                <div class="g-scrollable-text sm" [title]="line.Remarks || ''">{{ line.Remarks || '–' }}</div>
+                <div class="g-scrollable-text sm" [title]="line.Remarks || ''">
+                  {{ line.Remarks || "–" }}
+                </div>
               </td>
-              <td class="text-center">{{ line.UnresolvedRequestCount ?? 0 }}</td>
+              <td class="text-center">
+                {{ line.UnresolvedRequestCount ?? 0 }}
+              </td>
               <td class="g-action-column">
-                <button type="button" class="btn btn-outline-secondary btn-sm text-nowrap" aria-haspopup="dialog" (click)="openHistory(line, historyModal)">
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary btn-sm text-nowrap"
+                  aria-haspopup="dialog"
+                  (click)="openHistory(line, historyModal)"
+                >
                   History ({{ line.RequestCount ?? 0 }})
                 </button>
               </td>
@@ -128,7 +187,9 @@
           } @empty {
             <tr>
               <td colspan="15" class="text-center py-4">
-                {{ lines().length ? 'No matching products.' : 'No active lines.' }}
+                {{
+                  lines().length ? "No matching products." : "No active lines."
+                }}
               </td>
             </tr>
           }
@@ -139,32 +200,65 @@
 </div>
 
 <div class="modal-footer">
-  <button type="button" class="btn btn-secondary" [disabled]="deciding()" (click)="close()">Close</button>
+  <button
+    type="button"
+    class="btn btn-secondary"
+    [disabled]="deciding()"
+    (click)="close()"
+  >
+    Close
+  </button>
 </div>
 
 <ng-template #historyModal let-modal>
   <div class="modal-header">
     <h5 id="resolver-history-title" class="modal-title">Request History</h5>
-    <button type="button" class="btn-close" aria-label="Close" [disabled]="deciding()" (click)="modal.close()"></button>
+    <button
+      type="button"
+      class="btn-close"
+      aria-label="Close"
+      [disabled]="deciding()"
+      (click)="modal.close()"
+    ></button>
   </div>
 
   <div class="modal-body">
     @if (selectedLine(); as line) {
-      <p class="mb-2">
-        <strong>{{ line.ItemId }} · {{ line.ItemName }}</strong>
+      <p class="mb-2 text-center">
+        <strong>{{ line.ItemName }}</strong>
+        <!-- <strong>{{ line.ItemId }} · {{ line.ItemName }}</strong> -->
       </p>
 
       @let remaining = line.RemainingQuantity;
-      <div class="d-flex justify-content-center align-items-center flex-wrap gap-2 small mb-3">
-        <span>Size <strong>{{ line.Size?.trim() || '–' }}</strong></span>
+      <div
+        class="d-flex justify-content-center align-items-center flex-wrap gap-2 small mb-3"
+      >
+        <span
+          >Size <strong>{{ line.Size?.trim() || "–" }}</strong></span
+        >
         <span class="text-muted" aria-hidden="true">|</span>
-        <span>Priority <strong>{{ line.Priority ?? '–' }}</strong></span>
+        <span
+          >Priority <strong>{{ line.Priority ?? "–" }}</strong></span
+        >
         <span class="text-muted" aria-hidden="true">|</span>
-        <span>Current Acknowledged Quantity <strong class="text-black">{{ line.Quantity }}</strong></span>
+        <span
+          >Current Acknowledged Quantity
+          <strong class="text-black">{{ line.Quantity }}</strong></span
+        >
         <span class="text-muted" aria-hidden="true">|</span>
         <span>
-          <strong [style.color]="remaining == null || remaining === 0 ? null : (remaining < 0.5 ? '#047857' : '#856404')">
-            {{ remaining == null ? '–' : (remaining < 0 ? -remaining : remaining) }}
+          <strong
+            [style.color]="
+              remaining === null || remaining === 0
+                ? null
+                : remaining < 0.5
+                  ? '#047857'
+                  : '#856404'
+            "
+          >
+            {{
+              remaining === null ? "–" : remaining < 0 ? -remaining : remaining
+            }}
           </strong>
           Production Remaining (Packing Stock)
         </span>
@@ -174,9 +268,18 @@
     @if (loadingHistory()) {
       <p role="status">Loading history…</p>
     } @else if (historyError()) {
-      <div class="alert alert-danger d-flex justify-content-between align-items-center" role="alert">
+      <div
+        class="alert alert-danger d-flex justify-content-between align-items-center"
+        role="alert"
+      >
         {{ historyError() }}
-        <button type="button" class="btn btn-danger btn-sm" (click)="loadHistory()">Retry</button>
+        <button
+          type="button"
+          class="btn btn-danger btn-sm"
+          (click)="loadHistory()"
+        >
+          Retry
+        </button>
       </div>
     } @else if (!history().length) {
       <p class="text-muted mb-0">No requests for this line.</p>
@@ -202,31 +305,45 @@
             @for (batch of history(); track batch.request.RequestBatchId) {
               @let request = batch.request;
               <tr>
-                <td class="text-nowrap">{{ request.RequestDate | date: 'dd-MMM-yyyy HH:mm' }}</td>
+                <td class="text-nowrap">
+                  {{ request.RequestDate | date: "dd-MMM-yyyy HH:mm" }}
+                </td>
                 <td>{{ request.RequestByName || request.RequestBy }}</td>
                 <td>{{ request.QuantityAtRequest }}</td>
                 <td>{{ request.AdditionalRequestedQuantity }}</td>
-                <td>{{ request.QtyAfterAction ?? '–' }}</td>
+                <td>{{ request.QtyAfterAction ?? "–" }}</td>
                 <td>
-                  @if (request.StatusCode === 'PEND' && request.IsActive === false && request.ActionTakenBy != null && request.ActionTakenBy === request.RequestBy) {
+                  @if (
+                    request.StatusCode === "PEND" &&
+                    request.IsActive === false &&
+                    request.ActionTakenBy !== null &&
+                    request.ActionTakenBy === request.RequestBy
+                  ) {
                     <span class="badge bg-secondary">Withdrawn</span>
-                  } @else if (request.StatusCode === 'ACKDLG') {
+                  } @else if (request.StatusCode === "ACKDLG") {
                     <span class="g-status approve">Acknowledged</span>
-                  } @else if (request.StatusCode === 'REJC') {
+                  } @else if (request.StatusCode === "REJC") {
                     <span class="g-status reject">Rejected</span>
-                  } @else if (request.StatusCode === 'PEND') {
+                  } @else if (request.StatusCode === "PEND") {
                     <span class="g-status pending">Pending</span>
                   } @else {
                     {{ request.StatusName || request.StatusCode }}
                   }
                 </td>
                 <td>
-                  <div class="g-scrollable-text sm" [title]="request.RequesterMessage || ''">{{ request.RequesterMessage || '–' }}</div>
+                  <div
+                    class="g-scrollable-text sm"
+                    [title]="request.RequesterMessage || ''"
+                  >
+                    {{ request.RequesterMessage || "–" }}
+                  </div>
                 </td>
                 <td>
-                  @if (request.ActionTakenBy != null) {
+                  @if (request.ActionTakenBy !== null) {
                     @if (request.ActionTakenByName) {
-                      {{ request.ActionTakenByName }} ({{ request.ActionTakenBy }})
+                      {{ request.ActionTakenByName }} ({{
+                        request.ActionTakenBy
+                      }})
                     } @else {
                       {{ request.ActionTakenBy }}
                     }
@@ -235,22 +352,67 @@
                   }
                 </td>
                 <td class="text-nowrap">
-                  {{ request.ActionDate ? (request.ActionDate | date: 'dd-MMM-yyyy HH:mm') : '–' }}
+                  {{
+                    request.ActionDate
+                      ? (request.ActionDate | date: "dd-MMM-yyyy HH:mm")
+                      : "–"
+                  }}
                 </td>
                 <td>
-                  <div class="g-scrollable-text sm" [title]="request.ActionTakerRemarks || ''">{{ request.ActionTakerRemarks || '–' }}</div>
+                  <div
+                    class="g-scrollable-text sm"
+                    [title]="request.ActionTakerRemarks || ''"
+                  >
+                    {{ request.ActionTakerRemarks || "–" }}
+                  </div>
                 </td>
                 <td class="g-action-column">
                   <div class="action-buttons">
-                    <button type="button" class="action-btn btn-view" title="View action takers" aria-label="View action takers" [attr.aria-expanded]="viewedActionTakersBatchId() === request.RequestBatchId" (click)="toggleActionTakers(request.RequestBatchId)">
-                      <i class="fa-solid fa-magnifying-glass-plus" aria-hidden="true"></i>
+                    <button
+                      type="button"
+                      class="action-btn btn-view"
+                      title="View action takers"
+                      aria-label="View action takers"
+                      [attr.aria-expanded]="
+                        viewedActionTakersBatchId() === request.RequestBatchId
+                      "
+                      (click)="toggleActionTakers(request.RequestBatchId)"
+                    >
+                      <i
+                        class="fa-solid fa-magnifying-glass-plus"
+                        aria-hidden="true"
+                      ></i>
                     </button>
-                    @if (request.StatusCode === 'PEND' && request.IsActive && request.ActionTakenBy == null) {
-                      <button type="button" class="action-btn btn-approve" title="Accept request" aria-label="Accept request" [disabled]="!canDecide(batch)" (click)="decide(batch, true)">
-                        <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                    @if (
+                      request.StatusCode === "PEND" &&
+                      request.IsActive &&
+                      request.ActionTakenBy === null
+                    ) {
+                      <button
+                        type="button"
+                        class="action-btn btn-approve"
+                        title="Accept request"
+                        aria-label="Accept request"
+                        [disabled]="!canDecide(batch)"
+                        (click)="decide(batch, true)"
+                      >
+                        <i
+                          class="fa-solid fa-circle-check"
+                          aria-hidden="true"
+                        ></i>
                       </button>
-                      <button type="button" class="action-btn btn-reject" title="Reject request" aria-label="Reject request" [disabled]="!canDecide(batch)" (click)="decide(batch, false)">
-                        <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
+                      <button
+                        type="button"
+                        class="action-btn btn-reject"
+                        title="Reject request"
+                        aria-label="Reject request"
+                        [disabled]="!canDecide(batch)"
+                        (click)="decide(batch, false)"
+                      >
+                        <i
+                          class="fa-solid fa-circle-xmark"
+                          aria-hidden="true"
+                        ></i>
                       </button>
                     }
                   </div>
@@ -265,7 +427,9 @@
                       @for (assignee of batch.actionTakers; track assignee.ID) {
                         <li>
                           @if (assignee.ActionTakerName) {
-                            {{ assignee.ActionTakerName }} ({{ assignee.ActionTaker }})
+                            {{ assignee.ActionTakerName }} ({{
+                              assignee.ActionTaker
+                            }})
                           } @else {
                             {{ assignee.ActionTaker }}
                           }
@@ -283,6 +447,13 @@
   </div>
 
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" [disabled]="deciding()" (click)="modal.close()">Close</button>
+    <button
+      type="button"
+      class="btn btn-secondary"
+      [disabled]="deciding()"
+      (click)="modal.close()"
+    >
+      Close
+    </button>
   </div>
 </ng-template>

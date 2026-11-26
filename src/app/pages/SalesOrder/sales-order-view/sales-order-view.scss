@@ -473,22 +473,50 @@ Order Lines
   color: #9299a0 !important;
 }
 
-.presentStock-column,
-.quantity-column,
-.price-column,
-.amount-column {
+.type-column,
+.size-column,
+.uom-column,
+.priority-column {
+  white-space: nowrap;
+
+  color: #4b5563;
+}
+
+.uom-column,
+.priority-column {
+  text-align: center;
+}
+
+.quantity-column {
   text-align: right;
 
   white-space: nowrap;
 }
 
-.amount-column strong {
+.quantity-column strong {
   font-weight: 600;
 
   color: #198754;
 }
 
 /* Product */
+
+.product-text {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  line-height: 1.3;
+}
+
+.product-id {
+  font-size: 9.5px;
+
+  line-height: 1.2;
+
+  color: #9aa1a8;
+}
 
 .product-info {
   display: flex;

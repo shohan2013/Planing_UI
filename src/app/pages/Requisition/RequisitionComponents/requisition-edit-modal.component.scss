@@ -6,6 +6,24 @@
   padding-right: 30px;
   background-color: #fff;
 }
+.modal-body:not(.bulk-body) {
+  zoom: 80%;
+}
+.main-lines-table-wrap {
+  max-height: 55vh;
+  overflow: auto;
+}
+.main-lines-table-wrap > .custom-table {
+  margin-bottom: 0;
+
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: #e3e1e1;
+    box-shadow: inset 0 -1px 0 #fff;
+  }
+}
 
 .modal-body .form-label,
 .modal-body h6 {
@@ -210,29 +228,15 @@ fieldset legend {
   .modal-body {
     padding-right: var(--bs-modal-padding);
   }
+.modal-body:not(.bulk-body) {
+    zoom: 100%;
+  }
 
   .date-input {
     width: 100%;
   }
 }
 
-
-.remaining-quantity-badge {
-  display: inline-block;
-  padding: 2px 6px;
-  border-radius: 5px;
-  font-weight: 600;
-}
-
-.remaining-quantity-green {
-  color: #047857;
-  background-color: rgba(34, 197, 94, 0.12);
-}
-
-.remaining-quantity-yellow {
-  color: #856404;
-  background-color: rgba(245, 158, 11, 0.14);
-}
 
 td.priority-highlight {
   background-color: #fff3cd;

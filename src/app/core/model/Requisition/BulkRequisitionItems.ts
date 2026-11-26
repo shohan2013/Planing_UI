@@ -16,7 +16,11 @@ export interface IBulkRequisitionItem {
   UOMID: number;
   StockQuantity: number;
   SalesQuantity: number;
-  Count: number;
+  Count: number | null;
+  TotalRequestedQuantity: number | null;
+  TotalRemainingQuantity: number | null;
   SizeId: number | null;
   Size: string | null;
+
+  CountedRequisitions: Record<string, string>;
 }
